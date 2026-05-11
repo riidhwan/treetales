@@ -28,7 +28,7 @@ function createServices(
   let stories = [...initialStories]
 
   return {
-    createStory: vi.fn(async (input: CreateStoryInput) => {
+    createStory: vi.fn((input: CreateStoryInput) => {
       const story = createStory({
         id: `story-${stories.length + 1}`,
         title: input.title,
@@ -39,17 +39,17 @@ function createServices(
 
       stories = [...stories, story]
 
-      return story
+      return Promise.resolve(story)
     }),
-    deleteStory: vi.fn(async (id: string) => {
+    deleteStory: vi.fn((id: string) => {
       stories = stories.filter((story) => story.id !== id)
 
-      return true
+      return Promise.resolve(true)
     }),
-    getChaptersByStoryId: vi.fn(async (storyId: string) =>
-      Array.from({ length: chapterCounts[storyId] ?? 0 }),
+    getChaptersByStoryId: vi.fn((storyId: string) =>
+      Promise.resolve(Array.from({ length: chapterCounts[storyId] ?? 0 })),
     ),
-    getStories: vi.fn(async () => stories),
+    getStories: vi.fn(() => Promise.resolve(stories)),
   }
 }
 

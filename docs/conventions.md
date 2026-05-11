@@ -217,7 +217,7 @@ Treat the workflow itself as improvable. If a task reveals unclear issue criteri
 
 ## Linting
 
-**Always run `npm run lint` before considering a task complete.** Fix any errors it surfaces; warnings from genuinely unused-but-kept props (`_prefixed`) are acceptable.
+**Always run `npm run lint` before considering a task complete.** It runs TypeScript checks and ESLint/SonarJS analysis. Fix any errors it surfaces; warnings from genuinely unused-but-kept props (`_prefixed`) are acceptable.
 
 ## Testing
 

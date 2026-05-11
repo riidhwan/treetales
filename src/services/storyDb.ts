@@ -4,6 +4,7 @@ import {
   STORIES_STORE,
   openDb,
   requestToPromise,
+  typedRequest,
   transactionDone,
 } from '@/services/db'
 import type {
@@ -43,7 +44,9 @@ export async function getStories(): Promise<Story[]> {
   try {
     const transaction = db.transaction(STORIES_STORE, 'readonly')
     const store = transaction.objectStore(STORIES_STORE)
-    const stories = await requestToPromise<Story[]>(store.getAll())
+    const stories = await requestToPromise(
+      typedRequest<Story[]>(store.getAll()),
+    )
 
     await transactionDone(transaction)
 
@@ -71,7 +74,9 @@ export async function getStoryById(id: string): Promise<Story | undefined> {
   try {
     const transaction = db.transaction(STORIES_STORE, 'readonly')
     const store = transaction.objectStore(STORIES_STORE)
-    const story = await requestToPromise<Story | undefined>(store.get(id))
+    const story = await requestToPromise(
+      typedRequest<Story | undefined>(store.get(id)),
+    )
 
     await transactionDone(transaction)
 
@@ -90,7 +95,9 @@ export async function updateStory(
   try {
     const transaction = db.transaction(STORIES_STORE, 'readwrite')
     const store = transaction.objectStore(STORIES_STORE)
-    const story = await requestToPromise<Story | undefined>(store.get(id))
+    const story = await requestToPromise(
+      typedRequest<Story | undefined>(store.get(id)),
+    )
 
     if (!story) {
       await transactionDone(transaction)
@@ -123,15 +130,17 @@ export async function deleteStory(id: string): Promise<boolean> {
     const storiesStore = transaction.objectStore(STORIES_STORE)
     const chaptersStore = transaction.objectStore(CHAPTERS_STORE)
     const chapterStoryIndex = chaptersStore.index(CHAPTER_STORY_ID_INDEX)
-    const story = await requestToPromise<Story | undefined>(storiesStore.get(id))
+    const story = await requestToPromise(
+      typedRequest<Story | undefined>(storiesStore.get(id)),
+    )
 
     if (!story) {
       await transactionDone(transaction)
       return false
     }
 
-    const chapters = await requestToPromise<Chapter[]>(
-      chapterStoryIndex.getAll(id),
+    const chapters = await requestToPromise(
+      typedRequest<Chapter[]>(chapterStoryIndex.getAll(id)),
     )
 
     for (const chapter of chapters) {
@@ -147,7 +156,7 @@ export async function deleteStory(id: string): Promise<boolean> {
       throw error
     }
 
-    throw new Error('Failed to delete story.')
+    throw new Error('Failed to delete story.', { cause: error })
   } finally {
     db.close()
   }
