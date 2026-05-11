@@ -7,8 +7,12 @@ import {
   CHAPTER_STORY_ID_INDEX,
   DB_NAME,
   STORIES_STORE,
+  getStore,
   openDb,
+  requestToPromise,
+  transactionDone,
 } from '@/services/db'
+import type { Story } from '@/services/types'
 
 describe('openDb', () => {
   beforeEach(() => {
@@ -39,7 +43,60 @@ describe('openDb', () => {
 
     db.close()
   })
+
+  it('opens stores with their transactions', async () => {
+    const db = await openDb()
+    const { store, transaction } = getStore(db, STORIES_STORE, 'readonly')
+
+    expect(store.name).toBe(STORIES_STORE)
+    expect(transaction.mode).toBe('readonly')
+
+    db.close()
+  })
+
+  it('resolves requests and completed transactions', async () => {
+    const db = await openDb()
+    const { store, transaction } = getStore(db, STORIES_STORE, 'readwrite')
+    const story = createStory('story-1')
+
+    await expect(requestToPromise(store.add(story))).resolves.toBe('story-1')
+    await expect(transactionDone(transaction)).resolves.toBeUndefined()
+
+    const readTransaction = db.transaction(STORIES_STORE, 'readonly')
+    const readStore = readTransaction.objectStore(STORIES_STORE)
+
+    await expect(
+      requestToPromise<Story | undefined>(readStore.get(story.id)),
+    ).resolves.toEqual(story)
+    await expect(transactionDone(readTransaction)).resolves.toBeUndefined()
+
+    db.close()
+  })
+
+  it('rejects failed requests and aborted transactions', async () => {
+    const db = await openDb()
+    const { store, transaction } = getStore(db, STORIES_STORE, 'readwrite')
+    const story = createStory('story-1')
+
+    await requestToPromise(store.add(story))
+    const donePromise = transactionDone(transaction)
+
+    await expect(requestToPromise(store.add(story))).rejects.toBeTruthy()
+    await expect(donePromise).rejects.toBeTruthy()
+
+    db.close()
+  })
 })
+
+function createStory(id: string): Story {
+  return {
+    id,
+    title: 'Story',
+    description: 'Description',
+    createdAt: 10,
+    updatedAt: 10,
+  }
+}
 
 function deleteDatabase(): Promise<void> {
   return new Promise((resolve, reject) => {
