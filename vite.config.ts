@@ -6,9 +6,15 @@ import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vitest/config'
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
-  plugins: [devtools(), tailwindcss(), tanstackStart(), viteReact()],
+  plugins: [devtools(), tailwindcss(), tanstackStart(), viteReact(), cloudflare({
+    viteEnvironment: {
+      name: "ssr"
+    }
+  })],
   test: {
     coverage: {
       provider: 'v8',
