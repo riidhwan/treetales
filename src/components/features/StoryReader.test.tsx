@@ -126,6 +126,24 @@ describe('StoryReader', () => {
     ).toBeTruthy()
   })
 
+  it('does not show Back for a direct load with one chapter in the path', async () => {
+    const services = createServices({
+      chapters: [
+        createChapter({
+          id: 'chapter-first',
+          title: 'First Chapter',
+          content: 'The first page.',
+        }),
+      ],
+    })
+
+    renderReader({ services })
+
+    expect(await screen.findByRole('heading', { name: 'First Chapter' }))
+      .toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Back' })).toBeNull()
+  })
+
   it('loads the first chapter when no chapter id is supplied', async () => {
     const chapters = [
       createChapter({
@@ -184,14 +202,13 @@ describe('StoryReader', () => {
 
   it('renders Continue for a single next chapter and navigates to it', async () => {
     const onSelectChapter = vi.fn()
+    const nextChapter = createChapter({
+      id: 'chapter-next',
+      title: 'Across the Bridge',
+      parentChapterIds: ['chapter-1'],
+    })
     const services = createServices({
-      nextChapters: [
-        createChapter({
-          id: 'chapter-next',
-          title: 'Across the Bridge',
-          parentChapterIds: ['chapter-1'],
-        }),
-      ],
+      nextChapters: [nextChapter],
     })
 
     renderReader({ onSelectChapter, services })
@@ -199,23 +216,23 @@ describe('StoryReader', () => {
     fireEvent.click(await screen.findByRole('button', { name: /continue/i }))
 
     expect(onSelectChapter).toHaveBeenCalledWith('chapter-next')
+    expect(screen.getByRole('button', { name: 'Back' })).toBeTruthy()
   })
 
   it('renders branch choices and navigates to the selected chapter', async () => {
     const onSelectChapter = vi.fn()
+    const bridgeChapter = createChapter({
+      id: 'chapter-bridge',
+      title: 'Cross the bridge',
+      parentChapterIds: ['chapter-1'],
+    })
+    const riverChapter = createChapter({
+      id: 'chapter-river',
+      title: 'Follow the river',
+      parentChapterIds: ['chapter-1'],
+    })
     const services = createServices({
-      nextChapters: [
-        createChapter({
-          id: 'chapter-bridge',
-          title: 'Cross the bridge',
-          parentChapterIds: ['chapter-1'],
-        }),
-        createChapter({
-          id: 'chapter-river',
-          title: 'Follow the river',
-          parentChapterIds: ['chapter-1'],
-        }),
-      ],
+      nextChapters: [bridgeChapter, riverChapter],
     })
 
     renderReader({ onSelectChapter, services })
@@ -226,6 +243,65 @@ describe('StoryReader', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Follow the river' }))
 
     expect(onSelectChapter).toHaveBeenCalledWith('chapter-river')
+    expect(screen.getByRole('button', { name: 'Back' })).toBeTruthy()
+  })
+
+  it('navigates back to the previous chapter and trims the session path', async () => {
+    const onSelectChapter = vi.fn()
+    const firstChapter = createChapter({
+      id: 'chapter-first',
+      title: 'First Chapter',
+    })
+    const nextChapter = createChapter({
+      id: 'chapter-next',
+      title: 'Next Chapter',
+      parentChapterIds: ['chapter-first'],
+    })
+    const chapters = [firstChapter, nextChapter]
+    const services = {
+      getChaptersByStoryId: vi.fn(() => Promise.resolve(chapters)),
+      getNextChapters: vi.fn((selectedChapterId: string) =>
+        Promise.resolve(
+          selectedChapterId === 'chapter-first' ? [nextChapter] : [],
+        ),
+      ),
+      getStoryById: vi.fn(() => Promise.resolve(createStory())),
+    }
+    const view = render(
+      <StoryReader
+        onEditStory={vi.fn()}
+        onOpenDashboard={vi.fn()}
+        onSelectChapter={onSelectChapter}
+        services={services}
+        storyId="story-1"
+      />,
+    )
+
+    fireEvent.click(await screen.findByRole('button', { name: /continue/i }))
+
+    expect(onSelectChapter).toHaveBeenLastCalledWith('chapter-next')
+
+    view.rerender(
+      <StoryReader
+        chapterId="chapter-next"
+        onEditStory={vi.fn()}
+        onOpenDashboard={vi.fn()}
+        onSelectChapter={onSelectChapter}
+        services={services}
+        storyId="story-1"
+      />,
+    )
+
+    expect(await screen.findByRole('heading', { name: 'Next Chapter' }))
+      .toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Back' })).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+
+    expect(onSelectChapter).toHaveBeenLastCalledWith('chapter-first')
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: 'Back' })).toBeNull()
+    })
   })
 
   it('renders The End for a terminal chapter', async () => {

@@ -28,6 +28,22 @@ function createServices(
   let stories = [...initialStories]
 
   return {
+    createExampleStory: vi.fn(() => {
+      const story = createStory({
+        id: 'example-story',
+        title: 'The Lantern Road',
+        description: 'An example branching tale',
+        createdAt: 400,
+        updatedAt: 400,
+      })
+
+      stories = [...stories, story]
+
+      return Promise.resolve({
+        chapters: [{ id: 'chapter-1' }, { id: 'chapter-2' }],
+        story,
+      })
+    }),
     createStory: vi.fn((input: CreateStoryInput) => {
       const story = createStory({
         id: `story-${stories.length + 1}`,
@@ -236,6 +252,55 @@ describe('StoryDashboard', () => {
     })
     expect(onEditStory).toHaveBeenCalledWith('story-1')
     expect(await screen.findByText('River Fork')).toBeTruthy()
+  })
+
+  it('creates the example story and opens the reader', async () => {
+    const onReadStory = vi.fn()
+    const services = createServices([], {})
+
+    render(
+      <StoryDashboard
+        onEditStory={vi.fn()}
+        onReadStory={onReadStory}
+        services={services}
+      />,
+    )
+
+    await screen.findByText('No stories yet')
+    fireEvent.click(
+      screen.getByRole('button', { name: /add example story/i }),
+    )
+
+    await waitFor(() => {
+      expect(services.createExampleStory).toHaveBeenCalled()
+    })
+    expect(onReadStory).toHaveBeenCalledWith('example-story')
+    expect(await screen.findByText('The Lantern Road')).toBeTruthy()
+    expect(screen.getByText('2 chapters')).toBeTruthy()
+  })
+
+  it('shows an example story creation failure message', async () => {
+    const services = createServices([], {})
+    services.createExampleStory.mockRejectedValue(
+      new Error('Could not add example story.'),
+    )
+
+    render(
+      <StoryDashboard
+        onEditStory={vi.fn()}
+        onReadStory={vi.fn()}
+        services={services}
+      />,
+    )
+
+    await screen.findByText('No stories yet')
+    fireEvent.click(
+      screen.getByRole('button', { name: /add example story/i }),
+    )
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Could not add example story.',
+    )
   })
 
   it('disables story creation when the title is blank', async () => {
