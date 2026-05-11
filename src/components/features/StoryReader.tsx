@@ -1,4 +1,4 @@
-import { BookOpen, Edit3, Home } from 'lucide-react'
+import { ArrowLeft, BookOpen, Edit3, Home } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import {
@@ -53,6 +53,7 @@ export function StoryReader({
     nextChapters: [],
     status: 'loading',
   })
+  const [visitedChapters, setVisitedChapters] = useState<Chapter[]>([])
 
   useEffect(() => {
     let isCurrent = true
@@ -135,6 +136,68 @@ export function StoryReader({
   }, [chapterId, services, storyId])
 
   const { currentChapter, nextChapters, status, story } = readerState
+  const previousChapter =
+    visitedChapters.length > 1
+      ? visitedChapters[visitedChapters.length - 2]
+      : undefined
+
+  useEffect(() => {
+    if (status !== 'ready' || !currentChapter) {
+      return
+    }
+
+    setVisitedChapters((currentPath) => {
+      if (currentPath.length === 0) {
+        return [currentChapter]
+      }
+
+      const currentPathIndex = currentPath.findIndex(
+        (visitedChapter) => visitedChapter.id === currentChapter.id,
+      )
+
+      if (currentPathIndex === currentPath.length - 1) {
+        return currentPath.map((visitedChapter, index) =>
+          index === currentPathIndex ? currentChapter : visitedChapter,
+        )
+      }
+
+      if (currentPathIndex >= 0) {
+        return currentPath.slice(0, currentPathIndex + 1)
+      }
+
+      return [currentChapter]
+    })
+  }, [currentChapter, status])
+
+  function handleBack() {
+    if (!previousChapter) {
+      return
+    }
+
+    setVisitedChapters((currentPath) => currentPath.slice(0, -1))
+    onSelectChapter(previousChapter.id)
+  }
+
+  function handleSelectNextChapter(nextChapter: Chapter) {
+    setVisitedChapters((currentPath) => {
+      const pathWithCurrent =
+        currentChapter &&
+        currentPath.every(
+          (visitedChapter) => visitedChapter.id !== currentChapter.id,
+        )
+          ? [currentChapter]
+          : currentPath
+
+      if (
+        pathWithCurrent[pathWithCurrent.length - 1]?.id === nextChapter.id
+      ) {
+        return pathWithCurrent
+      }
+
+      return [...pathWithCurrent, nextChapter]
+    })
+    onSelectChapter(nextChapter.id)
+  }
 
   let readerContent: React.ReactNode
 
@@ -184,6 +247,18 @@ export function StoryReader({
     readerContent = (
       <article className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
         <header className="border-b border-stone-200 pb-5">
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            {previousChapter ? (
+              <button
+                className="inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-stone-300 px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
+                onClick={handleBack}
+                type="button"
+              >
+                <ArrowLeft aria-hidden="true" size={16} />
+                Back
+              </button>
+            ) : null}
+          </div>
           <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
             {story.title}
           </p>
@@ -197,7 +272,7 @@ export function StoryReader({
         <footer className="border-t border-stone-200 pt-5">
           <NextChapterControls
             nextChapters={nextChapters}
-            onSelectChapter={onSelectChapter}
+            onSelectChapter={handleSelectNextChapter}
           />
         </footer>
       </article>
@@ -239,7 +314,7 @@ export function StoryReader({
 
 interface NextChapterControlsProps {
   readonly nextChapters: Chapter[]
-  readonly onSelectChapter: (chapterId: string) => void
+  readonly onSelectChapter: (chapter: Chapter) => void
 }
 
 function NextChapterControls({
@@ -260,7 +335,7 @@ function NextChapterControls({
     return (
       <button
         className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800"
-        onClick={() => onSelectChapter(nextChapter.id)}
+        onClick={() => onSelectChapter(nextChapter)}
         type="button"
       >
         <BookOpen aria-hidden="true" size={16} />
@@ -279,7 +354,7 @@ function NextChapterControls({
           <button
             className="min-h-11 rounded-md border border-stone-300 px-4 text-left text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
             key={nextChapter.id}
-            onClick={() => onSelectChapter(nextChapter.id)}
+            onClick={() => onSelectChapter(nextChapter)}
             type="button"
           >
             {nextChapter.title}

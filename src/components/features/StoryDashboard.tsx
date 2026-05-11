@@ -1,7 +1,8 @@
-import { BookOpen, Edit3, Plus, Trash2 } from 'lucide-react'
+import { BookOpen, Edit3, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { getChaptersByStoryId } from '@/services/chapterDb'
+import { createExampleStory } from '@/services/exampleStory'
 import {
   createStory,
   deleteStory,
@@ -14,6 +15,10 @@ interface StorySummary extends Story {
 }
 
 interface StoryDashboardServices {
+  readonly createExampleStory: () => Promise<{
+    readonly chapters: unknown[]
+    readonly story: Story
+  }>
   readonly createStory: (input: CreateStoryInput) => Promise<Story>
   readonly deleteStory: (id: string) => Promise<boolean>
   readonly getChaptersByStoryId: (storyId: string) => Promise<unknown[]>
@@ -21,6 +26,7 @@ interface StoryDashboardServices {
 }
 
 const DEFAULT_SERVICES: StoryDashboardServices = {
+  createExampleStory,
   createStory,
   deleteStory,
   getChaptersByStoryId,
@@ -43,6 +49,7 @@ export function StoryDashboard({
   const [description, setDescription] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
+  const [isCreatingExample, setIsCreatingExample] = useState(false)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [deletingStoryId, setDeletingStoryId] = useState<string | undefined>()
   const [errorMessage, setErrorMessage] = useState<string | undefined>()
@@ -138,6 +145,28 @@ export function StoryDashboard({
     }
   }
 
+  async function handleCreateExampleStory() {
+    setIsCreatingExample(true)
+    setErrorMessage(undefined)
+
+    try {
+      const exampleStory = await services.createExampleStory()
+
+      setStories((currentStories) => [
+        ...currentStories.filter((story) => story.id !== exampleStory.story.id),
+        {
+          ...exampleStory.story,
+          chapterCount: exampleStory.chapters.length,
+        },
+      ])
+      onReadStory(exampleStory.story.id)
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error))
+    } finally {
+      setIsCreatingExample(false)
+    }
+  }
+
   async function handleDeleteStory(story: StorySummary) {
     if (!window.confirm(`Delete "${story.title}"? This cannot be undone.`)) {
       return
@@ -177,14 +206,25 @@ export function StoryDashboard({
           Create a story with a title and description to start building a
           branching tale.
         </p>
-        <button
-          className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
-          onClick={() => setIsFormOpen(true)}
-          type="button"
-        >
-          <Plus aria-hidden="true" size={18} />
-          New Story
-        </button>
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
+          <button
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-stone-300"
+            disabled={isCreatingExample}
+            onClick={() => void handleCreateExampleStory()}
+            type="button"
+          >
+            <Sparkles aria-hidden="true" size={18} />
+            Add Example Story
+          </button>
+          <button
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
+            onClick={() => setIsFormOpen(true)}
+            type="button"
+          >
+            <Plus aria-hidden="true" size={18} />
+            New Story
+          </button>
+        </div>
       </section>
     )
   } else {

@@ -65,6 +65,7 @@ Thin wrappers around IndexedDB transactions. No state, no caching — components
 |---|---|
 | `storyDb.ts` | Story CRUD: create, getAll, getById, update, delete |
 | `chapterDb.ts` | Chapter CRUD: create, getById, getByStoryId, update, delete; + getNextChapters(chapterId) |
+| `exampleStory.ts` | Creates or returns the built-in example story and its chapters |
 
 Story and chapter records are created with `crypto.randomUUID()` ids and
 `Date.now()` timestamps. Updates preserve `createdAt` and refresh `updatedAt`.
