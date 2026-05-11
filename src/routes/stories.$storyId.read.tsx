@@ -1,23 +1,42 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+
+import { StoryReader } from '@/components/features/StoryReader'
 
 export const Route = createFileRoute('/stories/$storyId/read')({
   component: StoryReaderRoute,
+  validateSearch: (search: Record<string, unknown>) => ({
+    chapterId:
+      typeof search.chapterId === 'string' && search.chapterId.length > 0
+        ? search.chapterId
+        : undefined,
+  }),
 })
 
 function StoryReaderRoute() {
   const { storyId } = Route.useParams()
+  const { chapterId } = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
 
   return (
-    <main className="min-h-screen bg-stone-50 px-5 py-8 text-stone-950">
-      <section className="mx-auto max-w-3xl rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
-          Story reader
-        </p>
-        <h1 className="mt-2 text-3xl font-bold">Reader workspace</h1>
-        <p className="mt-4 text-sm leading-6 text-stone-600">
-          Story {storyId} is ready for the reader flow.
-        </p>
-      </section>
-    </main>
+    <StoryReader
+      chapterId={chapterId}
+      onEditStory={(selectedStoryId) =>
+        void navigate({
+          to: '/stories/$storyId/edit',
+          params: { storyId: selectedStoryId },
+        })
+      }
+      onOpenDashboard={() =>
+        void navigate({
+          to: '/',
+        })
+      }
+      onSelectChapter={(nextChapterId) =>
+        void navigate({
+          search: () => ({ chapterId: nextChapterId }),
+        })
+      }
+      storyId={storyId}
+    />
   )
 }

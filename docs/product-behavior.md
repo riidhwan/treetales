@@ -16,7 +16,8 @@
   - Single next chapter → "Continue" button
   - Multiple next chapters → list of clickable choices
   - No next chapters → "The End" indicator
-- Breadcrumb trail shows reading path; user can go back to previous chapters.
+- Forward navigation uses the selected next chapter; breadcrumb trail and
+  previous-chapter navigation are tracked as follow-up reader behaviour.
 - Reader is read-only — no editing in this view.
 
 ### Story Editor
@@ -29,7 +30,7 @@
 
 ### Branching Rules
 - The first chapter created in a story is the introductory chapter (no parents).
-- A chapter can have zero, one, or multiple parent chapters.
+- A chapter can only have one parent chapters.
 - A chapter can be the parent of zero, one, or multiple other chapters.
 - Cycles are rejected: a chapter cannot be its own ancestor.
 

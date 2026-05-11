@@ -19,6 +19,7 @@ function HomeRoute() {
         void navigate({
           to: '/stories/$storyId/read',
           params: { storyId },
+          search: { chapterId: undefined },
         })
       }
     />
