@@ -33,7 +33,7 @@ Treat those docs as authoritative repository instructions. Keep code and docs sy
 
 ## Working Tree Safety
 
-Before editing existing files, check `git status --short`. Never revert, overwrite, or clean up user changes unless explicitly asked. If dirty files overlap the task, inspect them and work with the existing changes.
+Before editing existing files, check `git status --short`. Before starting issue-backed work or creating a new branch, fetch the latest `origin/master` and base the work on that current remote state. If network access or GitHub access is unavailable, report that clearly before branching or implementing. Never revert, overwrite, or clean up user changes unless explicitly asked. If dirty files overlap the task, inspect them and work with the existing changes.
 
 ## Commit & Pull Request Guidelines
 
