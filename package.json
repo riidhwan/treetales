@@ -9,7 +9,9 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "build": "vite build",
-    "lint": "tsc --noEmit",
+    "lint": "npm run lint:types && npm run lint:eslint",
+    "lint:eslint": "eslint . --max-warnings=0",
+    "lint:types": "tsc --noEmit",
     "preview": "vite preview",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"
@@ -28,6 +30,7 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/devtools-vite": "latest",
     "@testing-library/dom": "^10.4.1",
@@ -37,9 +40,13 @@
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "^4.1.5",
+    "eslint": "^10.3.0",
+    "eslint-plugin-sonarjs": "^4.0.3",
     "fake-indexeddb": "^6.2.5",
+    "globals": "^17.6.0",
     "jsdom": "^28.1.0",
     "typescript": "^6.0.2",
+    "typescript-eslint": "^8.59.2",
     "vite": "^8.0.0",
     "vitest": "^4.1.5"
   },

@@ -1,6 +1,5 @@
 import { BookOpen, Edit3, Plus, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import type { FormEvent } from 'react'
 
 import { getChaptersByStoryId } from '@/services/chapterDb'
 import {
@@ -15,10 +14,10 @@ interface StorySummary extends Story {
 }
 
 interface StoryDashboardServices {
-  createStory: (input: CreateStoryInput) => Promise<Story>
-  deleteStory: (id: string) => Promise<boolean>
-  getChaptersByStoryId: (storyId: string) => Promise<unknown[]>
-  getStories: () => Promise<Story[]>
+  readonly createStory: (input: CreateStoryInput) => Promise<Story>
+  readonly deleteStory: (id: string) => Promise<boolean>
+  readonly getChaptersByStoryId: (storyId: string) => Promise<unknown[]>
+  readonly getStories: () => Promise<Story[]>
 }
 
 const DEFAULT_SERVICES: StoryDashboardServices = {
@@ -29,9 +28,9 @@ const DEFAULT_SERVICES: StoryDashboardServices = {
 }
 
 interface Props {
-  onEditStory: (storyId: string) => void
-  onReadStory: (storyId: string) => void
-  services?: StoryDashboardServices
+  readonly onEditStory: (storyId: string) => void
+  readonly onReadStory: (storyId: string) => void
+  readonly services?: StoryDashboardServices
 }
 
 export function StoryDashboard({
@@ -105,7 +104,7 @@ export function StoryDashboard({
     }
   }, [services])
 
-  async function handleCreateStory(event: FormEvent<HTMLFormElement>) {
+  async function handleCreateStory(event: React.SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
 
     if (!canCreate) {
@@ -162,6 +161,86 @@ export function StoryDashboard({
     }
   }
 
+  let storiesContent: React.ReactNode
+
+  if (isLoading) {
+    storiesContent = (
+      <p className="rounded-lg border border-stone-200 bg-white p-6 text-sm text-stone-600">
+        Loading stories...
+      </p>
+    )
+  } else if (sortedStories.length === 0) {
+    storiesContent = (
+      <section className="rounded-lg border border-dashed border-stone-300 bg-white p-8 text-center">
+        <h2 className="text-xl font-semibold">No stories yet</h2>
+        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-stone-600">
+          Create a story with a title and description to start building a
+          branching tale.
+        </p>
+        <button
+          className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
+          onClick={() => setIsFormOpen(true)}
+          type="button"
+        >
+          <Plus aria-hidden="true" size={18} />
+          New Story
+        </button>
+      </section>
+    )
+  } else {
+    storiesContent = (
+      <section aria-label="Saved stories" className="grid gap-4 md:grid-cols-2">
+        {sortedStories.map((story) => (
+          <article
+            className="flex min-h-56 flex-col justify-between rounded-lg border border-stone-200 bg-white p-5 shadow-sm"
+            key={story.id}
+          >
+            <div>
+              <div className="flex items-start justify-between gap-4">
+                <h2 className="text-xl font-semibold">{story.title}</h2>
+                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
+                  {story.chapterCount}{' '}
+                  {story.chapterCount === 1 ? 'chapter' : 'chapters'}
+                </span>
+              </div>
+              <p className="mt-3 line-clamp-3 text-sm leading-6 text-stone-600">
+                {story.description || 'No description yet.'}
+              </p>
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-2">
+              <button
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-stone-300 px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
+                onClick={() => onReadStory(story.id)}
+                type="button"
+              >
+                <BookOpen aria-hidden="true" size={16} />
+                Read
+              </button>
+              <button
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-stone-300 px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
+                onClick={() => onEditStory(story.id)}
+                type="button"
+              >
+                <Edit3 aria-hidden="true" size={16} />
+                Edit
+              </button>
+              <button
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-red-200 px-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={deletingStoryId === story.id}
+                onClick={() => void handleDeleteStory(story)}
+                type="button"
+              >
+                <Trash2 aria-hidden="true" size={16} />
+                Delete
+              </button>
+            </div>
+          </article>
+        ))}
+      </section>
+    )
+  }
+
   return (
     <main className="min-h-screen bg-stone-50 text-stone-950">
       <section className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-8 sm:px-8 lg:px-10">
@@ -192,7 +271,9 @@ export function StoryDashboard({
         {isFormOpen ? (
           <form
             className="grid gap-4 rounded-lg border border-stone-200 bg-white p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto] sm:items-end"
-            onSubmit={handleCreateStory}
+            onSubmit={(event) => {
+              void handleCreateStory(event)
+            }}
           >
             <label className="grid gap-2 text-sm font-medium text-stone-800">
               Title
@@ -236,80 +317,7 @@ export function StoryDashboard({
           </p>
         ) : null}
 
-        {isLoading ? (
-          <p className="rounded-lg border border-stone-200 bg-white p-6 text-sm text-stone-600">
-            Loading stories...
-          </p>
-        ) : sortedStories.length === 0 ? (
-          <section className="rounded-lg border border-dashed border-stone-300 bg-white p-8 text-center">
-            <h2 className="text-xl font-semibold">No stories yet</h2>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-stone-600">
-              Create a story with a title and description to start building a
-              branching tale.
-            </p>
-            <button
-              className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
-              onClick={() => setIsFormOpen(true)}
-              type="button"
-            >
-              <Plus aria-hidden="true" size={18} />
-              New Story
-            </button>
-          </section>
-        ) : (
-          <section
-            aria-label="Saved stories"
-            className="grid gap-4 md:grid-cols-2"
-          >
-            {sortedStories.map((story) => (
-              <article
-                className="flex min-h-56 flex-col justify-between rounded-lg border border-stone-200 bg-white p-5 shadow-sm"
-                key={story.id}
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-4">
-                    <h2 className="text-xl font-semibold">{story.title}</h2>
-                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
-                      {story.chapterCount}{' '}
-                      {story.chapterCount === 1 ? 'chapter' : 'chapters'}
-                    </span>
-                  </div>
-                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-stone-600">
-                    {story.description || 'No description yet.'}
-                  </p>
-                </div>
-
-                <div className="mt-6 flex flex-wrap gap-2">
-                  <button
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-stone-300 px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
-                    onClick={() => onReadStory(story.id)}
-                    type="button"
-                  >
-                    <BookOpen aria-hidden="true" size={16} />
-                    Read
-                  </button>
-                  <button
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-stone-300 px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
-                    onClick={() => onEditStory(story.id)}
-                    type="button"
-                  >
-                    <Edit3 aria-hidden="true" size={16} />
-                    Edit
-                  </button>
-                  <button
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-red-200 px-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                    disabled={deletingStoryId === story.id}
-                    onClick={() => void handleDeleteStory(story)}
-                    type="button"
-                  >
-                    <Trash2 aria-hidden="true" size={16} />
-                    Delete
-                  </button>
-                </div>
-              </article>
-            ))}
-          </section>
-        )}
+        {storiesContent}
       </section>
     </main>
   )

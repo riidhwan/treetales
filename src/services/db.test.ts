@@ -10,6 +10,7 @@ import {
   getStore,
   openDb,
   requestToPromise,
+  typedRequest,
   transactionDone,
 } from '@/services/db'
 import type { Story } from '@/services/types'
@@ -66,7 +67,7 @@ describe('openDb', () => {
     const readStore = readTransaction.objectStore(STORIES_STORE)
 
     await expect(
-      requestToPromise<Story | undefined>(readStore.get(story.id)),
+      requestToPromise(typedRequest<Story | undefined>(readStore.get(story.id))),
     ).resolves.toEqual(story)
     await expect(transactionDone(readTransaction)).resolves.toBeUndefined()
 

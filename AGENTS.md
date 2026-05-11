@@ -9,7 +9,7 @@ TreeTales is a TanStack Start React app using TypeScript, Vite, TanStack Router,
 - `npm install`: install dependencies from `package-lock.json`.
 - `npm run dev`: start the local Vite dev server on port `3000`.
 - `npm run build`: create a production build in `dist/`.
-- `npm run lint`: run TypeScript checks with `tsc --noEmit`.
+- `npm run lint`: run TypeScript checks and ESLint/SonarJS analysis.
 - `npm run preview`: serve the production build locally.
 - `npm run test`: run Vitest once.
 

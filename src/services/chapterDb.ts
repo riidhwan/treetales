@@ -6,6 +6,7 @@ import {
   abortTransaction,
   openDb,
   requestToPromise,
+  typedRequest,
   transactionDone,
 } from '@/services/db'
 import type {
@@ -55,7 +56,9 @@ export async function getChapterById(
   try {
     const transaction = db.transaction(CHAPTERS_STORE, 'readonly')
     const store = transaction.objectStore(CHAPTERS_STORE)
-    const chapter = await requestToPromise<Chapter | undefined>(store.get(id))
+    const chapter = await requestToPromise(
+      typedRequest<Chapter | undefined>(store.get(id)),
+    )
 
     await transactionDone(transaction)
 
@@ -72,7 +75,9 @@ export async function getChaptersByStoryId(storyId: string): Promise<Chapter[]> 
     const transaction = db.transaction(CHAPTERS_STORE, 'readonly')
     const store = transaction.objectStore(CHAPTERS_STORE)
     const index = store.index(CHAPTER_STORY_ID_INDEX)
-    const chapters = await requestToPromise<Chapter[]>(index.getAll(storyId))
+    const chapters = await requestToPromise(
+      typedRequest<Chapter[]>(index.getAll(storyId)),
+    )
 
     await transactionDone(transaction)
 
@@ -89,7 +94,9 @@ export async function getNextChapters(chapterId: string): Promise<Chapter[]> {
     const transaction = db.transaction(CHAPTERS_STORE, 'readonly')
     const store = transaction.objectStore(CHAPTERS_STORE)
     const index = store.index(CHAPTER_PARENT_IDS_INDEX)
-    const chapters = await requestToPromise<Chapter[]>(index.getAll(chapterId))
+    const chapters = await requestToPromise(
+      typedRequest<Chapter[]>(index.getAll(chapterId)),
+    )
 
     await transactionDone(transaction)
 
@@ -123,8 +130,8 @@ export async function updateChapter(
       'readwrite',
     )
     const chaptersStore = transaction.objectStore(CHAPTERS_STORE)
-    const chapter = await requestToPromise<Chapter | undefined>(
-      chaptersStore.get(id),
+    const chapter = await requestToPromise(
+      typedRequest<Chapter | undefined>(chaptersStore.get(id)),
     )
 
     if (!chapter) {
@@ -157,8 +164,8 @@ export async function deleteChapter(id: string): Promise<boolean> {
   try {
     const transaction = db.transaction(CHAPTERS_STORE, 'readwrite')
     const chaptersStore = transaction.objectStore(CHAPTERS_STORE)
-    const chapter = await requestToPromise<Chapter | undefined>(
-      chaptersStore.get(id),
+    const chapter = await requestToPromise(
+      typedRequest<Chapter | undefined>(chaptersStore.get(id)),
     )
 
     if (!chapter) {
@@ -166,8 +173,10 @@ export async function deleteChapter(id: string): Promise<boolean> {
       return false
     }
 
-    const storyChapters = await requestToPromise<Chapter[]>(
-      chaptersStore.index(CHAPTER_STORY_ID_INDEX).getAll(chapter.storyId),
+    const storyChapters = await requestToPromise(
+      typedRequest<Chapter[]>(
+        chaptersStore.index(CHAPTER_STORY_ID_INDEX).getAll(chapter.storyId),
+      ),
     )
 
     for (const storyChapter of storyChapters) {
@@ -199,8 +208,8 @@ async function validateChapterWrite(
 ): Promise<void> {
   const storiesStore = transaction.objectStore(STORIES_STORE)
   const chaptersStore = transaction.objectStore(CHAPTERS_STORE)
-  const story = await requestToPromise<Story | undefined>(
-    storiesStore.get(chapter.storyId),
+  const story = await requestToPromise(
+    typedRequest<Story | undefined>(storiesStore.get(chapter.storyId)),
   )
 
   if (!story) {
@@ -223,8 +232,10 @@ async function validateChapterWrite(
     abortTransaction(transaction, new Error('A chapter cannot parent itself.'))
   }
 
-  const storyChapters = await requestToPromise<Chapter[]>(
-    chaptersStore.index(CHAPTER_STORY_ID_INDEX).getAll(chapter.storyId),
+  const storyChapters = await requestToPromise(
+    typedRequest<Chapter[]>(
+      chaptersStore.index(CHAPTER_STORY_ID_INDEX).getAll(chapter.storyId),
+    ),
   )
   const chapterById = new Map(
     storyChapters.map((storyChapter) => [storyChapter.id, storyChapter]),

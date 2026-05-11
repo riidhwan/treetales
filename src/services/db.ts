@@ -59,6 +59,10 @@ export function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
   })
 }
 
+export function typedRequest<T>(request: IDBRequest): IDBRequest<T> {
+  return request as IDBRequest<T>
+}
+
 export function transactionDone(transaction: IDBTransaction): Promise<void> {
   return new Promise((resolve, reject) => {
     transaction.oncomplete = () => {
