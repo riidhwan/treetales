@@ -1,14 +1,26 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/')({ component: Home })
+import { StoryDashboard } from '@/components/features/StoryDashboard'
 
-function Home() {
+export const Route = createFileRoute('/')({ component: HomeRoute })
+
+function HomeRoute() {
+  const navigate = useNavigate({ from: Route.fullPath })
+
   return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold">Welcome to TanStack Start</h1>
-      <p className="mt-4 text-lg">
-        Edit <code>src/routes/index.tsx</code> to get started.
-      </p>
-    </div>
+    <StoryDashboard
+      onEditStory={(storyId) =>
+        void navigate({
+          to: '/stories/$storyId/edit',
+          params: { storyId },
+        })
+      }
+      onReadStory={(storyId) =>
+        void navigate({
+          to: '/stories/$storyId/read',
+          params: { storyId },
+        })
+      }
+    />
   )
 }
