@@ -223,6 +223,142 @@ describe('chapterDb', () => {
       updateChapter(root.id, { parentChapterIds: [ending.id] }),
     ).rejects.toThrow('cycles')
   })
+
+  it('rejects duplicate parent chapter ids', async () => {
+    const story = await createStory({
+      title: 'Story',
+      description: 'Description',
+    })
+    const root = await createChapter({
+      storyId: story.id,
+      title: 'Root',
+      content: 'Start',
+      parentChapterIds: [],
+    })
+
+    await expect(
+      createChapter({
+        storyId: story.id,
+        title: 'Duplicate',
+        content: 'Invalid',
+        parentChapterIds: [root.id, root.id],
+      }),
+    ).rejects.toThrow('same parent more than once')
+  })
+
+  it('returns undefined when updating a missing chapter', async () => {
+    await expect(
+      updateChapter('missing-chapter', { title: 'No chapter' }),
+    ).resolves.toBeUndefined()
+  })
+
+  it('sorts chapters by creation time and then id', async () => {
+    let now = 100
+    vi.spyOn(Date, 'now').mockImplementation(() => now)
+    vi.spyOn(crypto, 'randomUUID')
+      .mockReturnValueOnce('00000000-0000-4000-8000-0000000000ff')
+      .mockReturnValueOnce('00000000-0000-4000-8000-00000000000b')
+      .mockReturnValueOnce('00000000-0000-4000-8000-00000000000a')
+      .mockReturnValueOnce('00000000-0000-4000-8000-00000000000c')
+
+    const story = await createStory({
+      title: 'Story',
+      description: 'Description',
+    })
+    const secondById = await createChapter({
+      storyId: story.id,
+      title: 'Second',
+      content: 'Same time',
+      parentChapterIds: [],
+    })
+    const firstById = await createChapter({
+      storyId: story.id,
+      title: 'First',
+      content: 'Same time',
+      parentChapterIds: [],
+    })
+
+    now = 50
+    const firstByDate = await createChapter({
+      storyId: story.id,
+      title: 'Earlier',
+      content: 'Earlier time',
+      parentChapterIds: [],
+    })
+
+    await expect(getChaptersByStoryId(story.id)).resolves.toEqual([
+      firstByDate,
+      firstById,
+      secondById,
+    ])
+  })
+
+  it('clones parent chapter ids when updating a chapter', async () => {
+    const story = await createStory({
+      title: 'Story',
+      description: 'Description',
+    })
+    const root = await createChapter({
+      storyId: story.id,
+      title: 'Root',
+      content: 'Start',
+      parentChapterIds: [],
+    })
+    const child = await createChapter({
+      storyId: story.id,
+      title: 'Child',
+      content: 'Continue',
+      parentChapterIds: [],
+    })
+    const parentChapterIds = [root.id]
+
+    const updatedChapter = await updateChapter(child.id, { parentChapterIds })
+    parentChapterIds.push(child.id)
+
+    await expect(getChapterById(child.id)).resolves.toMatchObject({
+      parentChapterIds: [root.id],
+    })
+    expect(updatedChapter?.parentChapterIds).toEqual([root.id])
+  })
+
+  it('updates timestamps for chapters unlinked during delete', async () => {
+    let now = 10
+    vi.spyOn(Date, 'now').mockImplementation(() => now)
+    const story = await createStory({
+      title: 'Story',
+      description: 'Description',
+    })
+    const root = await createChapter({
+      storyId: story.id,
+      title: 'Root',
+      content: 'Start',
+      parentChapterIds: [],
+    })
+    const linked = await createChapter({
+      storyId: story.id,
+      title: 'Linked',
+      content: 'Continue',
+      parentChapterIds: [root.id],
+    })
+    const unlinked = await createChapter({
+      storyId: story.id,
+      title: 'Unlinked',
+      content: 'Elsewhere',
+      parentChapterIds: [],
+    })
+
+    now = 90
+    await expect(deleteChapter(root.id)).resolves.toBe(true)
+
+    await expect(getChapterById(linked.id)).resolves.toMatchObject({
+      parentChapterIds: [],
+      updatedAt: 90,
+    })
+    await expect(getChapterById(unlinked.id)).resolves.toMatchObject({
+      parentChapterIds: [],
+      updatedAt: unlinked.updatedAt,
+    })
+  })
 })
 
 function deleteDatabase(): Promise<void> {

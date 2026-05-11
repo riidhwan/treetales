@@ -88,6 +88,41 @@ describe('storyDb', () => {
     await expect(getChapterById(otherChapter.id)).resolves.toEqual(otherChapter)
     await expect(getChaptersByStoryId(story.id)).resolves.toEqual([])
   })
+
+  it('returns undefined when updating a missing story', async () => {
+    await expect(
+      updateStory('missing-story', { title: 'No story' }),
+    ).resolves.toBeUndefined()
+  })
+
+  it('sorts stories by creation time and then id', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(100)
+    vi.spyOn(crypto, 'randomUUID')
+      .mockReturnValueOnce('00000000-0000-4000-8000-00000000000b')
+      .mockReturnValueOnce('00000000-0000-4000-8000-00000000000a')
+      .mockReturnValueOnce('00000000-0000-4000-8000-00000000000c')
+
+    const secondById = await createStory({
+      title: 'Second',
+      description: 'Same time',
+    })
+    const firstById = await createStory({
+      title: 'First',
+      description: 'Same time',
+    })
+
+    vi.spyOn(Date, 'now').mockReturnValue(50)
+    const firstByDate = await createStory({
+      title: 'Earlier',
+      description: 'Earlier time',
+    })
+
+    await expect(getStories()).resolves.toEqual([
+      firstByDate,
+      firstById,
+      secondById,
+    ])
+  })
 })
 
 function deleteDatabase(): Promise<void> {
