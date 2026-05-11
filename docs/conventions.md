@@ -176,7 +176,7 @@ export function ItemPage({ item, view, onBack }: Props) {
 
 ## Git
 
-Conventional Commits — `feat:`, `fix:`, `refactor:`, `style:`, `docs:`, `chore:`. Never run `git commit` or `git push` unless explicitly asked. When the user explicitly asks Claude Code to commit and push, treat that as approval that the pre-commit review gate is satisfied unless the user says otherwise.
+Conventional Commits — `feat:`, `fix:`, `refactor:`, `style:`, `docs:`, `chore:`. Never run `git commit` or `git push` unless explicitly asked. When the user explicitly asks a coding agent to commit and push, treat that as approval that the pre-commit review gate is satisfied unless the user says otherwise.
 
 Routine development happens on topic branches and merges to `master` through pull requests. Direct pushes to `master` are reserved for emergencies. Before committing or opening a PR, check the current branch and make sure it is a fresh, purpose-specific branch for the current work, not an old branch that has already merged or belongs to another PR. When in doubt, refresh `origin/master` and create a new branch from it before committing. Pull requests must pass the required quality gate checks (lint, tests, coverage, build) before merge. GitHub-native secret scanning and push protection are the secret leak controls for this repo; do not add a third-party secret scanner unless the workflow is intentionally revised.
 
