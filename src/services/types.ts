@@ -11,7 +11,7 @@ export interface Chapter {
   storyId: string
   title: string
   content: string
-  parentChapterIds: string[]
+  parentChapterId: string | null
   createdAt: number
   updatedAt: number
 }
@@ -30,11 +30,11 @@ export interface CreateChapterInput {
   storyId: string
   title: string
   content: string
-  parentChapterIds: string[]
+  parentChapterId: string | null
 }
 
 export interface UpdateChapterInput {
   title?: string
   content?: string
-  parentChapterIds?: string[]
+  parentChapterId?: string | null
 }

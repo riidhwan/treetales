@@ -1,11 +1,16 @@
 import type { Chapter, Story } from '@/services/types'
 
 export const DB_NAME = 'TreeTales'
-export const DB_VERSION = 1
+export const DB_VERSION = 2
 export const STORIES_STORE = 'stories'
 export const CHAPTERS_STORE = 'chapters'
 export const CHAPTER_STORY_ID_INDEX = 'storyId'
-export const CHAPTER_PARENT_IDS_INDEX = 'parentChapterIds'
+export const CHAPTER_PARENT_ID_INDEX = 'parentChapterId'
+
+interface LegacyChapter extends Omit<Chapter, 'parentChapterId'> {
+  parentChapterId?: string | null
+  parentChapterIds?: string[]
+}
 
 export interface TreeTalesSchema {
   stories: Story
@@ -20,21 +25,35 @@ export function openDb(): Promise<IDBDatabase> {
 
     request.onupgradeneeded = () => {
       const db = request.result
+      const upgradeTransaction = request.transaction
+
+      if (!upgradeTransaction) {
+        throw new Error('IndexedDB upgrade transaction is unavailable.')
+      }
 
       if (!db.objectStoreNames.contains(STORIES_STORE)) {
         db.createObjectStore(STORIES_STORE, { keyPath: 'id' })
       }
 
-      if (!db.objectStoreNames.contains(CHAPTERS_STORE)) {
-        const chaptersStore = db.createObjectStore(CHAPTERS_STORE, {
-          keyPath: 'id',
-        })
+      const chaptersStore = db.objectStoreNames.contains(CHAPTERS_STORE)
+        ? upgradeTransaction.objectStore(CHAPTERS_STORE)
+        : db.createObjectStore(CHAPTERS_STORE, {
+            keyPath: 'id',
+          })
 
+      if (!chaptersStore.indexNames.contains(CHAPTER_STORY_ID_INDEX)) {
         chaptersStore.createIndex(CHAPTER_STORY_ID_INDEX, 'storyId')
-        chaptersStore.createIndex(CHAPTER_PARENT_IDS_INDEX, 'parentChapterIds', {
-          multiEntry: true,
-        })
       }
+
+      if (chaptersStore.indexNames.contains('parentChapterIds')) {
+        chaptersStore.deleteIndex('parentChapterIds')
+      }
+
+      if (!chaptersStore.indexNames.contains(CHAPTER_PARENT_ID_INDEX)) {
+        chaptersStore.createIndex(CHAPTER_PARENT_ID_INDEX, 'parentChapterId')
+      }
+
+      migrateChapterParents(chaptersStore)
     }
 
     request.onsuccess = () => {
@@ -45,6 +64,33 @@ export function openDb(): Promise<IDBDatabase> {
       reject(request.error ?? new Error('Failed to open IndexedDB database.'))
     }
   })
+}
+
+function migrateChapterParents(chaptersStore: IDBObjectStore): void {
+  const request = chaptersStore.openCursor()
+
+  request.onsuccess = () => {
+    const cursor = request.result
+
+    if (!cursor) {
+      return
+    }
+
+    const chapter = cursor.value as LegacyChapter
+
+    if ('parentChapterIds' in chapter) {
+      const [parentChapterId = null] = chapter.parentChapterIds ?? []
+      const migratedChapter: Chapter = {
+        ...chapter,
+        parentChapterId,
+      }
+
+      delete (migratedChapter as LegacyChapter).parentChapterIds
+      cursor.update(migratedChapter)
+    }
+
+    cursor.continue()
+  }
 }
 
 export function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {

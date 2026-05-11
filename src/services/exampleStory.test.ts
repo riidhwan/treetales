@@ -35,7 +35,7 @@ describe('createExampleStory', () => {
 
     expect(rootChapter).toMatchObject({
       title: 'A Light in the Pines',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
     expect(nextChapters.map((chapter) => chapter.title)).toEqual([
       'Cross the Moonlit Bridge',

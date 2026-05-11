@@ -85,7 +85,7 @@ function createExampleChapters(createdAt: number): Chapter[] {
       title: 'A Light in the Pines',
       content:
         'The path begins where the lanterns end. Ahead, two routes split beneath the old pines: a narrow bridge over dark water, and a trail marked by pale lights.',
-      parentChapterIds: [],
+      parentChapterId: null,
       createdAt,
       updatedAt: createdAt,
     },
@@ -95,7 +95,7 @@ function createExampleChapters(createdAt: number): Chapter[] {
       title: 'Cross the Moonlit Bridge',
       content:
         'The bridge sways with every careful step. Halfway across, a bell rings from a tower you could not see from the shore.',
-      parentChapterIds: [EXAMPLE_CHAPTER_IDS.root],
+      parentChapterId: EXAMPLE_CHAPTER_IDS.root,
       createdAt: createdAt + 1,
       updatedAt: createdAt + 1,
     },
@@ -105,7 +105,7 @@ function createExampleChapters(createdAt: number): Chapter[] {
       title: 'Follow the Willow Lights',
       content:
         'The pale lights drift between the trees, always just far enough ahead to keep you moving. Their glow gathers around a gate covered in ivy.',
-      parentChapterIds: [EXAMPLE_CHAPTER_IDS.root],
+      parentChapterId: EXAMPLE_CHAPTER_IDS.root,
       createdAt: createdAt + 2,
       updatedAt: createdAt + 2,
     },
@@ -115,7 +115,7 @@ function createExampleChapters(createdAt: number): Chapter[] {
       title: 'The Bell Tower',
       content:
         'At the top of the tower, the bell rope is tied around a sealed letter. The letter names you as the keeper of the road, and the lanterns outside flare to life.',
-      parentChapterIds: [EXAMPLE_CHAPTER_IDS.bridge],
+      parentChapterId: EXAMPLE_CHAPTER_IDS.bridge,
       createdAt: createdAt + 3,
       updatedAt: createdAt + 3,
     },
@@ -125,7 +125,7 @@ function createExampleChapters(createdAt: number): Chapter[] {
       title: 'The Hidden Garden',
       content:
         'Beyond the ivy gate, every path circles a quiet garden. In its center waits a lantern already lit, as though someone expected you to arrive.',
-      parentChapterIds: [EXAMPLE_CHAPTER_IDS.trail],
+      parentChapterId: EXAMPLE_CHAPTER_IDS.trail,
       createdAt: createdAt + 4,
       updatedAt: createdAt + 4,
     },

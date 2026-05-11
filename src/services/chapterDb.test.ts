@@ -35,14 +35,14 @@ describe('chapterDb', () => {
       storyId: story.id,
       title: 'Start',
       content: 'Once',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
 
     expect(chapter).toMatchObject({
       storyId: story.id,
       title: 'Start',
       content: 'Once',
-      parentChapterIds: [],
+      parentChapterId: null,
       createdAt: 20,
       updatedAt: 20,
     })
@@ -76,25 +76,25 @@ describe('chapterDb', () => {
       storyId: story.id,
       title: 'Root',
       content: 'Start',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
     const left = await createChapter({
       storyId: story.id,
       title: 'Left',
       content: 'Go left',
-      parentChapterIds: [root.id],
+      parentChapterId: root.id,
     })
     const right = await createChapter({
       storyId: story.id,
       title: 'Right',
       content: 'Go right',
-      parentChapterIds: [root.id],
+      parentChapterId: root.id,
     })
     const other = await createChapter({
       storyId: otherStory.id,
       title: 'Other root',
       content: 'Elsewhere',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
 
     const storyChapters = await getChaptersByStoryId(story.id)
@@ -116,28 +116,28 @@ describe('chapterDb', () => {
       storyId: story.id,
       title: 'Root',
       content: 'Start',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
     const middle = await createChapter({
       storyId: story.id,
       title: 'Middle',
       content: 'Continue',
-      parentChapterIds: [root.id],
+      parentChapterId: root.id,
     })
     const ending = await createChapter({
       storyId: story.id,
       title: 'Ending',
       content: 'End',
-      parentChapterIds: [root.id, middle.id],
+      parentChapterId: middle.id,
     })
 
     await expect(deleteChapter(root.id)).resolves.toBe(true)
 
     await expect(getChapterById(middle.id)).resolves.toMatchObject({
-      parentChapterIds: [],
+      parentChapterId: null,
     })
     await expect(getChapterById(ending.id)).resolves.toMatchObject({
-      parentChapterIds: [middle.id],
+      parentChapterId: middle.id,
     })
   })
 
@@ -152,7 +152,7 @@ describe('chapterDb', () => {
         storyId: 'missing-story',
         title: 'Invalid',
         content: 'No story',
-        parentChapterIds: [],
+        parentChapterId: null,
       }),
     ).rejects.toThrow('does not exist')
 
@@ -161,7 +161,7 @@ describe('chapterDb', () => {
         storyId: story.id,
         title: 'Invalid',
         content: 'No parent',
-        parentChapterIds: ['missing-parent'],
+        parentChapterId: 'missing-parent',
       }),
     ).rejects.toThrow('does not exist in story')
   })
@@ -179,7 +179,7 @@ describe('chapterDb', () => {
       storyId: otherStory.id,
       title: 'Other root',
       content: 'Elsewhere',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
 
     await expect(
@@ -187,7 +187,7 @@ describe('chapterDb', () => {
         storyId: story.id,
         title: 'Invalid',
         content: 'Wrong story',
-        parentChapterIds: [otherRoot.id],
+        parentChapterId: otherRoot.id,
       }),
     ).rejects.toThrow('does not exist in story')
   })
@@ -201,49 +201,27 @@ describe('chapterDb', () => {
       storyId: story.id,
       title: 'Root',
       content: 'Start',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
     const middle = await createChapter({
       storyId: story.id,
       title: 'Middle',
       content: 'Continue',
-      parentChapterIds: [root.id],
+      parentChapterId: root.id,
     })
     const ending = await createChapter({
       storyId: story.id,
       title: 'Ending',
       content: 'End',
-      parentChapterIds: [middle.id],
+      parentChapterId: middle.id,
     })
 
     await expect(
-      updateChapter(root.id, { parentChapterIds: [root.id] }),
+      updateChapter(root.id, { parentChapterId: root.id }),
     ).rejects.toThrow('parent itself')
     await expect(
-      updateChapter(root.id, { parentChapterIds: [ending.id] }),
+      updateChapter(root.id, { parentChapterId: ending.id }),
     ).rejects.toThrow('cycles')
-  })
-
-  it('rejects duplicate parent chapter ids', async () => {
-    const story = await createStory({
-      title: 'Story',
-      description: 'Description',
-    })
-    const root = await createChapter({
-      storyId: story.id,
-      title: 'Root',
-      content: 'Start',
-      parentChapterIds: [],
-    })
-
-    await expect(
-      createChapter({
-        storyId: story.id,
-        title: 'Duplicate',
-        content: 'Invalid',
-        parentChapterIds: [root.id, root.id],
-      }),
-    ).rejects.toThrow('same parent more than once')
   })
 
   it('returns undefined when updating a missing chapter', async () => {
@@ -269,13 +247,13 @@ describe('chapterDb', () => {
       storyId: story.id,
       title: 'Second',
       content: 'Same time',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
     const firstById = await createChapter({
       storyId: story.id,
       title: 'First',
       content: 'Same time',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
 
     now = 50
@@ -283,7 +261,7 @@ describe('chapterDb', () => {
       storyId: story.id,
       title: 'Earlier',
       content: 'Earlier time',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
 
     await expect(getChaptersByStoryId(story.id)).resolves.toEqual([
@@ -293,7 +271,7 @@ describe('chapterDb', () => {
     ])
   })
 
-  it('clones parent chapter ids when updating a chapter', async () => {
+  it('updates a chapter parent id', async () => {
     const story = await createStory({
       title: 'Story',
       description: 'Description',
@@ -302,23 +280,23 @@ describe('chapterDb', () => {
       storyId: story.id,
       title: 'Root',
       content: 'Start',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
     const child = await createChapter({
       storyId: story.id,
       title: 'Child',
       content: 'Continue',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
-    const parentChapterIds = [root.id]
 
-    const updatedChapter = await updateChapter(child.id, { parentChapterIds })
-    parentChapterIds.push(child.id)
+    const updatedChapter = await updateChapter(child.id, {
+      parentChapterId: root.id,
+    })
 
     await expect(getChapterById(child.id)).resolves.toMatchObject({
-      parentChapterIds: [root.id],
+      parentChapterId: root.id,
     })
-    expect(updatedChapter?.parentChapterIds).toEqual([root.id])
+    expect(updatedChapter?.parentChapterId).toBe(root.id)
   })
 
   it('updates timestamps for chapters unlinked during delete', async () => {
@@ -332,30 +310,30 @@ describe('chapterDb', () => {
       storyId: story.id,
       title: 'Root',
       content: 'Start',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
     const linked = await createChapter({
       storyId: story.id,
       title: 'Linked',
       content: 'Continue',
-      parentChapterIds: [root.id],
+      parentChapterId: root.id,
     })
     const unlinked = await createChapter({
       storyId: story.id,
       title: 'Unlinked',
       content: 'Elsewhere',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
 
     now = 90
     await expect(deleteChapter(root.id)).resolves.toBe(true)
 
     await expect(getChapterById(linked.id)).resolves.toMatchObject({
-      parentChapterIds: [],
+      parentChapterId: null,
       updatedAt: 90,
     })
     await expect(getChapterById(unlinked.id)).resolves.toMatchObject({
-      parentChapterIds: [],
+      parentChapterId: null,
       updatedAt: unlinked.updatedAt,
     })
   })

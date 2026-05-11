@@ -1,6 +1,6 @@
 import {
   CHAPTERS_STORE,
-  CHAPTER_PARENT_IDS_INDEX,
+  CHAPTER_PARENT_ID_INDEX,
   CHAPTER_STORY_ID_INDEX,
   STORIES_STORE,
   abortTransaction,
@@ -33,7 +33,7 @@ export async function createChapter(
       storyId: input.storyId,
       title: input.title,
       content: input.content,
-      parentChapterIds: [...input.parentChapterIds],
+      parentChapterId: input.parentChapterId,
       createdAt: now,
       updatedAt: now,
     }
@@ -93,7 +93,7 @@ export async function getNextChapters(chapterId: string): Promise<Chapter[]> {
   try {
     const transaction = db.transaction(CHAPTERS_STORE, 'readonly')
     const store = transaction.objectStore(CHAPTERS_STORE)
-    const index = store.index(CHAPTER_PARENT_IDS_INDEX)
+    const index = store.index(CHAPTER_PARENT_ID_INDEX)
     const chapters = await requestToPromise(
       typedRequest<Chapter[]>(index.getAll(chapterId)),
     )
@@ -142,9 +142,10 @@ export async function updateChapter(
     const updatedChapter: Chapter = {
       ...chapter,
       ...input,
-      parentChapterIds: input.parentChapterIds
-        ? [...input.parentChapterIds]
-        : chapter.parentChapterIds,
+      parentChapterId:
+        'parentChapterId' in input
+          ? (input.parentChapterId ?? null)
+          : chapter.parentChapterId,
       updatedAt: Date.now(),
     }
 
@@ -180,15 +181,13 @@ export async function deleteChapter(id: string): Promise<boolean> {
     )
 
     for (const storyChapter of storyChapters) {
-      if (!storyChapter.parentChapterIds.includes(id)) {
+      if (storyChapter.parentChapterId !== id) {
         continue
       }
 
       chaptersStore.put({
         ...storyChapter,
-        parentChapterIds: storyChapter.parentChapterIds.filter(
-          (parentChapterId) => parentChapterId !== id,
-        ),
+        parentChapterId: null,
         updatedAt: Date.now(),
       } satisfies Chapter)
     }
@@ -219,16 +218,7 @@ async function validateChapterWrite(
     )
   }
 
-  const uniqueParentIds = new Set(chapter.parentChapterIds)
-
-  if (uniqueParentIds.size !== chapter.parentChapterIds.length) {
-    abortTransaction(
-      transaction,
-      new Error('A chapter cannot list the same parent more than once.'),
-    )
-  }
-
-  if (uniqueParentIds.has(chapter.id)) {
+  if (chapter.parentChapterId === chapter.id) {
     abortTransaction(transaction, new Error('A chapter cannot parent itself.'))
   }
 
@@ -241,14 +231,14 @@ async function validateChapterWrite(
     storyChapters.map((storyChapter) => [storyChapter.id, storyChapter]),
   )
 
-  for (const parentChapterId of chapter.parentChapterIds) {
-    const parentChapter = chapterById.get(parentChapterId)
+  if (chapter.parentChapterId) {
+    const parentChapter = chapterById.get(chapter.parentChapterId)
 
     if (!parentChapter) {
       abortTransaction(
         transaction,
         new Error(
-          `Parent chapter ${parentChapterId} does not exist in story ${chapter.storyId}.`,
+          `Parent chapter ${chapter.parentChapterId} does not exist in story ${chapter.storyId}.`,
         ),
       )
     }
@@ -256,13 +246,14 @@ async function validateChapterWrite(
 
   chapterById.set(chapter.id, chapter)
 
-  for (const parentChapterId of chapter.parentChapterIds) {
-    if (canReachChapter(chapter.id, parentChapterId, chapterById)) {
-      abortTransaction(
-        transaction,
-        new Error('Chapter parent relationships cannot contain cycles.'),
-      )
-    }
+  if (
+    chapter.parentChapterId &&
+    canReachChapter(chapter.id, chapter.parentChapterId, chapterById)
+  ) {
+    abortTransaction(
+      transaction,
+      new Error('Chapter parent relationships cannot contain cycles.'),
+    )
   }
 }
 
@@ -284,7 +275,7 @@ function canReachChapter(
     visitedChapterIds.add(currentChapterId)
 
     for (const chapter of chapterById.values()) {
-      if (!chapter.parentChapterIds.includes(currentChapterId)) {
+      if (chapter.parentChapterId !== currentChapterId) {
         continue
       }
 
