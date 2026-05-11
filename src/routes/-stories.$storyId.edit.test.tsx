@@ -6,4 +6,8 @@ describe('story editor route', () => {
   it('registers an editor component', () => {
     expect(Route.options.component).toBeTypeOf('function')
   })
+
+  it('keeps story loading inside the editor component', () => {
+    expect(Route.options.loader).toBeUndefined()
+  })
 })

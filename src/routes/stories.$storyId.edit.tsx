@@ -1,4 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+
+import { StoryEditor } from '@/components/features/StoryEditor'
 
 export const Route = createFileRoute('/stories/$storyId/edit')({
   component: StoryEditorRoute,
@@ -6,18 +8,23 @@ export const Route = createFileRoute('/stories/$storyId/edit')({
 
 function StoryEditorRoute() {
   const { storyId } = Route.useParams()
+  const navigate = useNavigate({ from: Route.fullPath })
 
   return (
-    <main className="min-h-screen bg-stone-50 px-5 py-8 text-stone-950">
-      <section className="mx-auto max-w-3xl rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
-          Story editor
-        </p>
-        <h1 className="mt-2 text-3xl font-bold">Editor workspace</h1>
-        <p className="mt-4 text-sm leading-6 text-stone-600">
-          Story {storyId} is ready for the editor flow.
-        </p>
-      </section>
-    </main>
+    <StoryEditor
+      onOpenDashboard={() =>
+        void navigate({
+          to: '/',
+        })
+      }
+      onReadStory={(selectedStoryId) =>
+        void navigate({
+          to: '/stories/$storyId/read',
+          params: { storyId: selectedStoryId },
+          search: { chapterId: undefined },
+        })
+      }
+      storyId={storyId}
+    />
   )
 }
