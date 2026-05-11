@@ -1,6 +1,6 @@
 # Architecture
 
-> Add tech stack and deployment target once chosen.
+React 19 + TanStack Start (React Router) + Tailwind CSS v4 + TypeScript strict mode. Client-side only — no server, no backend. IndexedDB for all persistence via a thin service layer.
 
 ## Layer-First Structure
 
@@ -35,6 +35,42 @@ src/
 
 A component that needs to call hooks belongs in `features/`. A component that only receives typed props (even domain types) belongs in `domain/`.
 
-## Key Modules
+## Data Model
 
-*To be updated*
+```
+Story {
+  id: string          // crypto.randomUUID()
+  title: string
+  description: string
+  createdAt: number   // Date.now()
+  updatedAt: number
+}
+
+Chapter {
+  id: string
+  storyId: string     // FK → Story.id
+  title: string
+  content: string     // plain text (rich text is backlog)
+  parentChapterIds: string[]  // chapters that branch TO this one
+  createdAt: number
+  updatedAt: number
+}
+```
+
+## Services Layer (`src/services/`)
+
+Thin wrappers around IndexedDB transactions. No state, no caching — components call services directly and manage their own loading/error state.
+
+| File | Responsibility |
+|---|---|
+| `storyDb.ts` | Story CRUD: create, getAll, getById, update, delete |
+| `chapterDb.ts` | Chapter CRUD: create, getById, getByStoryId, update, delete; + getNextChapters(chapterId) |
+
+## IndexedDB Schema
+
+Single database `TreeTales` with two object stores:
+
+- **`stories`** — keyed by `id`
+- **`chapters`** — keyed by `id`, indexed on `storyId`
+
+Version bumps happen when adding/modifying stores. See `src/services/db.ts` for the upgrade path.

@@ -24,7 +24,7 @@ Issue expectations:
 Large-change workflow:
 - Treat work as large when it spans multiple features, broad refactors, risky behaviour changes, persistence/data-flow changes, or thousands of lines of code
 - Use one parent issue for the end goal and child issues for independently shippable slices
-- Keep every child issue safe to merge: the app must remain buildable, testable, and deployable from `main`
+- Keep every child issue safe to merge: the app must remain buildable, testable, and deployable from `master`
 - Prefer vertical slices over layer-only mega-PRs: add inactive data/model support, introduce abstractions behind current behaviour, add hidden UI/routes, wire incomplete user-facing behaviour behind a flag, enable it, then remove old paths and flags
 - Use branch-by-abstraction for deep internals so old and new implementations can coexist behind a stable interface during migration
 
@@ -59,7 +59,7 @@ When a task touches an area covered by a linked `@...` file, read that file befo
 These docs are living documentation. They are not immutable references: when related behavior, architecture, conventions, vocabulary, or design changes, update the corresponding docs in the same task.
 
 Always read:
-- `@docs/product-behaviour.md` before changing user-facing flows
+- `@docs/product-behavior.md` before changing user-facing flows
 - `@docs/architecture.md` before changing shared data flow, stores, services, or routing
 - `@docs/design-system.md` before changing UI, layout, styling, routes, or user-facing behavior
 - `@docs/conventions.md` before broad refactors, adding new patterns, adding/changing tests, or deciding what verification to run
