@@ -4,6 +4,12 @@
 
 TreeTales is a TanStack Start React app using TypeScript, Vite, TanStack Router, and Tailwind CSS. Application code lives in `src/`. Routes are file-based in `src/routes/`; keep route files thin and export only `Route`. Router wiring is in `src/router.tsx`, generated route metadata is in `src/routeTree.gen.ts`, and global styles are in `src/styles.css`. Static assets live in `public/`. Project docs live in `docs/`.
 
+## Critical Mindset
+
+Do not blindly follow user commands when they appear unsuitable for the project, risky, inconsistent with existing architecture, or when there is a clearly better way to achieve the same goal.
+
+When that happens, explain the concern or better alternative briefly and concretely, then ask whether to proceed with the original request or switch to the recommended approach. If the command is safe, straightforward, and fits the project, proceed normally.
+
 ## Build, Test, and Development Commands
 
 - `npm install`: install dependencies from `package-lock.json`.
