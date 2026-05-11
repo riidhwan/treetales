@@ -12,9 +12,11 @@
     "lint": "npm run lint:types && npm run lint:eslint",
     "lint:eslint": "eslint . --max-warnings=0",
     "lint:types": "tsc --noEmit",
-    "preview": "vite preview",
+    "preview": "npm run build && wrangler dev",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "deploy": "npm run build && wrangler deploy",
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
@@ -30,6 +32,7 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.36.3",
     "@eslint/js": "^10.0.1",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/devtools-vite": "latest",
@@ -48,7 +51,8 @@
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.0",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.5",
+    "wrangler": "^4.90.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
