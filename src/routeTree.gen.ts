@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StoriesStoryIdReadRouteImport } from './routes/stories.$storyId.read'
+import { Route as StoriesStoryIdEditRouteImport } from './routes/stories.$storyId.edit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StoriesStoryIdReadRoute = StoriesStoryIdReadRouteImport.update({
+  id: '/stories/$storyId/read',
+  path: '/stories/$storyId/read',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoriesStoryIdEditRoute = StoriesStoryIdEditRouteImport.update({
+  id: '/stories/$storyId/edit',
+  path: '/stories/$storyId/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/stories/$storyId/edit': typeof StoriesStoryIdEditRoute
+  '/stories/$storyId/read': typeof StoriesStoryIdReadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/stories/$storyId/edit': typeof StoriesStoryIdEditRoute
+  '/stories/$storyId/read': typeof StoriesStoryIdReadRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/stories/$storyId/edit': typeof StoriesStoryIdEditRoute
+  '/stories/$storyId/read': typeof StoriesStoryIdReadRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/stories/$storyId/edit' | '/stories/$storyId/read'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/stories/$storyId/edit' | '/stories/$storyId/read'
+  id: '__root__' | '/' | '/stories/$storyId/edit' | '/stories/$storyId/read'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  StoriesStoryIdEditRoute: typeof StoriesStoryIdEditRoute
+  StoriesStoryIdReadRoute: typeof StoriesStoryIdReadRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +68,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stories/$storyId/read': {
+      id: '/stories/$storyId/read'
+      path: '/stories/$storyId/read'
+      fullPath: '/stories/$storyId/read'
+      preLoaderRoute: typeof StoriesStoryIdReadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stories/$storyId/edit': {
+      id: '/stories/$storyId/edit'
+      path: '/stories/$storyId/edit'
+      fullPath: '/stories/$storyId/edit'
+      preLoaderRoute: typeof StoriesStoryIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  StoriesStoryIdEditRoute: StoriesStoryIdEditRoute,
+  StoriesStoryIdReadRoute: StoriesStoryIdReadRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
