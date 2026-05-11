@@ -66,11 +66,26 @@ Thin wrappers around IndexedDB transactions. No state, no caching — components
 | `storyDb.ts` | Story CRUD: create, getAll, getById, update, delete |
 | `chapterDb.ts` | Chapter CRUD: create, getById, getByStoryId, update, delete; + getNextChapters(chapterId) |
 
+Story and chapter records are created with `crypto.randomUUID()` ids and
+`Date.now()` timestamps. Updates preserve `createdAt` and refresh `updatedAt`.
+Deleting a story deletes all chapters for that story. Deleting a chapter unlinks
+that chapter id from the `parentChapterIds` of remaining chapters in the same
+story.
+
+Chapter writes enforce basic graph integrity before committing:
+
+- `storyId` must reference an existing story
+- every `parentChapterIds` value must reference a chapter in the same story
+- a chapter cannot parent itself
+- duplicate parent ids are rejected
+- parent relationships cannot create cycles
+
 ## IndexedDB Schema
 
 Single database `TreeTales` with two object stores:
 
 - **`stories`** — keyed by `id`
-- **`chapters`** — keyed by `id`, indexed on `storyId`
+- **`chapters`** — keyed by `id`, indexed on `storyId` and on
+  `parentChapterIds` as a `multiEntry` index for next-chapter lookups
 
 Version bumps happen when adding/modifying stores. See `src/services/db.ts` for the upgrade path.
