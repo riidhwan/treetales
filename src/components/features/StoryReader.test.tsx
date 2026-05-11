@@ -27,7 +27,7 @@ function createChapter(overrides: Partial<Chapter> = {}): Chapter {
     storyId: 'story-1',
     title: 'The Gate',
     content: 'The path begins here.',
-    parentChapterIds: [],
+    parentChapterId: null,
     createdAt: 100,
     updatedAt: 100,
     ...overrides,
@@ -205,7 +205,7 @@ describe('StoryReader', () => {
     const nextChapter = createChapter({
       id: 'chapter-next',
       title: 'Across the Bridge',
-      parentChapterIds: ['chapter-1'],
+      parentChapterId: 'chapter-1',
     })
     const services = createServices({
       nextChapters: [nextChapter],
@@ -224,12 +224,12 @@ describe('StoryReader', () => {
     const bridgeChapter = createChapter({
       id: 'chapter-bridge',
       title: 'Cross the bridge',
-      parentChapterIds: ['chapter-1'],
+      parentChapterId: 'chapter-1',
     })
     const riverChapter = createChapter({
       id: 'chapter-river',
       title: 'Follow the river',
-      parentChapterIds: ['chapter-1'],
+      parentChapterId: 'chapter-1',
     })
     const services = createServices({
       nextChapters: [bridgeChapter, riverChapter],
@@ -255,7 +255,7 @@ describe('StoryReader', () => {
     const nextChapter = createChapter({
       id: 'chapter-next',
       title: 'Next Chapter',
-      parentChapterIds: ['chapter-first'],
+      parentChapterId: 'chapter-first',
     })
     const chapters = [firstChapter, nextChapter]
     const services = {

@@ -73,13 +73,13 @@ describe('storyDb', () => {
       storyId: story.id,
       title: 'Start',
       content: 'Go',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
     const otherChapter = await createChapter({
       storyId: otherStory.id,
       title: 'Keep',
       content: 'Remain',
-      parentChapterIds: [],
+      parentChapterId: null,
     })
 
     await expect(deleteStory(story.id)).resolves.toBe(true)

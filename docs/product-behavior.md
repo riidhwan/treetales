@@ -27,15 +27,22 @@
 ### Story Editor
 - User opens a story in edit mode from the dashboard.
 - Edit story title and description at the top.
-- Chapter list below with "Add Chapter" button.
+- Chapter list below with chapter count and a clear empty state.
+- When a story has no chapters, the editor offers an "Add Intro Chapter"
+  action that creates the introductory chapter.
+- Once the introductory chapter exists, new chapters are added from an
+  existing parent chapter page, not from the top-level story editor.
 - Each chapter can be edited (title + content) in a separate form view.
-- Chapter editor includes a branch-linker: checkboxes to select which chapters lead TO this chapter.
+- Chapter editor shows the chapter's outgoing child chapters and includes an
+  "Add Child Chapter" action that creates a child linked to the current chapter.
 - A tree view shows the story's branching structure.
 
 ### Branching Rules
 - The first chapter created in a story is the introductory chapter (no parents).
-- A chapter can only have one parent chapters.
+- A chapter can only have zero or one parent chapter.
 - A chapter can be the parent of zero, one, or multiple other chapters.
+- Creating a child chapter from a parent chapter immediately links the new
+  chapter to that parent.
 - Cycles are rejected: a chapter cannot be its own ancestor.
 
 ## Backlog (Future)
