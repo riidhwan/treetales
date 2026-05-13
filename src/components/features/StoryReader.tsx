@@ -10,6 +10,7 @@ import type { Chapter } from '@/services/types'
 
 interface Props {
   readonly chapterId?: string
+  readonly onEditChapter: (storyId: string, chapterId: string) => void
   readonly onEditStory: (storyId: string) => void
   readonly onOpenDashboard: () => void
   readonly onSelectChapter: (chapterId: string) => void
@@ -19,6 +20,7 @@ interface Props {
 
 export function StoryReader({
   chapterId,
+  onEditChapter,
   onEditStory,
   onOpenDashboard,
   onSelectChapter,
@@ -95,6 +97,14 @@ export function StoryReader({
             {story.title}
           </p>
           <h1 className="mt-2 text-3xl font-bold">{currentChapter.title}</h1>
+          <Button
+            className="mt-4"
+            onClick={() => onEditChapter(storyId, currentChapter.id)}
+            size="sm"
+          >
+            <Edit3 aria-hidden="true" size={16} />
+            Edit Chapter
+          </Button>
         </header>
 
         <div className="whitespace-pre-wrap py-8 text-base leading-8 text-stone-800">
@@ -126,7 +136,7 @@ export function StoryReader({
           </Button>
           <Button onClick={() => onEditStory(storyId)} size="sm">
             <Edit3 aria-hidden="true" size={16} />
-            Edit
+            Edit Story
           </Button>
         </nav>
 

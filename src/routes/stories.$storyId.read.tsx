@@ -20,6 +20,15 @@ function StoryReaderRoute() {
   return (
     <StoryReader
       chapterId={chapterId}
+      onEditChapter={(selectedStoryId, selectedChapterId) =>
+        void navigate({
+          to: '/stories/$storyId/chapters/$chapterId/edit',
+          params: {
+            chapterId: selectedChapterId,
+            storyId: selectedStoryId,
+          },
+        })
+      }
       onEditStory={(selectedStoryId) =>
         void navigate({
           to: '/stories/$storyId/edit',
