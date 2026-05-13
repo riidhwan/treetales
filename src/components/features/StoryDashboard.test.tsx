@@ -8,13 +8,26 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { StoryDashboard } from '@/components/features/StoryDashboard'
-import type { CreateStoryInput, Story } from '@/services/types'
+import type { Chapter, CreateStoryInput, Story } from '@/services/types'
 
 function createStory(overrides: Partial<Story>): Story {
   return {
     id: 'story-1',
     title: 'The Old Road',
     description: 'A choice in the woods',
+    createdAt: 100,
+    updatedAt: 100,
+    ...overrides,
+  }
+}
+
+function createChapter(overrides: Partial<Chapter>): Chapter {
+  return {
+    id: 'chapter-1',
+    storyId: 'story-1',
+    title: 'Chapter',
+    content: 'Content',
+    parentChapterId: null,
     createdAt: 100,
     updatedAt: 100,
     ...overrides,
@@ -40,7 +53,10 @@ function createServices(
       stories = [...stories, story]
 
       return Promise.resolve({
-        chapters: [{ id: 'chapter-1' }, { id: 'chapter-2' }],
+        chapters: [
+          createChapter({ id: 'chapter-1', storyId: story.id }),
+          createChapter({ id: 'chapter-2', storyId: story.id }),
+        ],
         story,
       })
     }),
@@ -63,7 +79,14 @@ function createServices(
       return Promise.resolve(true)
     }),
     getChaptersByStoryId: vi.fn((storyId: string) =>
-      Promise.resolve(Array.from({ length: chapterCounts[storyId] ?? 0 })),
+      Promise.resolve(
+        Array.from({ length: chapterCounts[storyId] ?? 0 }, (_, index) =>
+          createChapter({
+            id: `${storyId}-chapter-${index + 1}`,
+            storyId,
+          }),
+        ),
+      ),
     ),
     getStories: vi.fn(() => Promise.resolve(stories)),
   }
