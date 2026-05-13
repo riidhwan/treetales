@@ -54,16 +54,19 @@ function createServices(options?: CreateServicesOptions) {
 
 function renderReader({
   chapterId,
+  onEditChapter = vi.fn(),
   onSelectChapter = vi.fn(),
   services = createServices(),
 }: {
   readonly chapterId?: string
+  readonly onEditChapter?: (storyId: string, chapterId: string) => void
   readonly onSelectChapter?: (chapterId: string) => void
   readonly services?: ReturnType<typeof createServices>
 } = {}) {
   return render(
     <StoryReader
       chapterId={chapterId}
+      onEditChapter={onEditChapter}
       onEditStory={vi.fn()}
       onOpenDashboard={vi.fn()}
       onSelectChapter={onSelectChapter}
@@ -188,6 +191,19 @@ describe('StoryReader', () => {
     expect(services.getNextChapters).toHaveBeenCalledWith('chapter-selected')
   })
 
+  it('opens the current chapter for editing', async () => {
+    const onEditChapter = vi.fn()
+    const services = createServices()
+
+    renderReader({ onEditChapter, services })
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Edit Chapter' }),
+    )
+
+    expect(onEditChapter).toHaveBeenCalledWith('story-1', 'chapter-1')
+  })
+
   it('shows a missing chapter state for an invalid chapter id', async () => {
     const services = createServices()
 
@@ -269,6 +285,7 @@ describe('StoryReader', () => {
     }
     const view = render(
       <StoryReader
+        onEditChapter={vi.fn()}
         onEditStory={vi.fn()}
         onOpenDashboard={vi.fn()}
         onSelectChapter={onSelectChapter}
@@ -284,6 +301,7 @@ describe('StoryReader', () => {
     view.rerender(
       <StoryReader
         chapterId="chapter-next"
+        onEditChapter={vi.fn()}
         onEditStory={vi.fn()}
         onOpenDashboard={vi.fn()}
         onSelectChapter={onSelectChapter}
@@ -343,6 +361,7 @@ describe('StoryReader', () => {
     }
     const view = render(
       <StoryReader
+        onEditChapter={vi.fn()}
         onEditStory={vi.fn()}
         onOpenDashboard={vi.fn()}
         onSelectChapter={onSelectChapter}
@@ -357,6 +376,7 @@ describe('StoryReader', () => {
 
     view.rerender(
       <StoryReader
+        onEditChapter={vi.fn()}
         onEditStory={vi.fn()}
         onOpenDashboard={vi.fn()}
         onSelectChapter={onSelectChapter}
