@@ -1,10 +1,23 @@
 import { useEffect, useState } from 'react'
 
 import { getErrorMessage } from '@/lib/errors'
+import {
+  createChapter,
+  getIntroChapterByStoryId,
+} from '@/services/chapterDb'
 import { getStoryById, updateStory } from '@/services/storyDb'
-import type { Story, UpdateStoryInput } from '@/services/types'
+import type {
+  Chapter,
+  CreateChapterInput,
+  Story,
+  UpdateStoryInput,
+} from '@/services/types'
 
 export interface StoryEditorServices {
+  readonly createChapter: (input: CreateChapterInput) => Promise<Chapter>
+  readonly getIntroChapterByStoryId: (
+    storyId: string,
+  ) => Promise<Chapter | undefined>
   readonly getStoryById: (storyId: string) => Promise<Story | undefined>
   readonly updateStory: (
     storyId: string,
@@ -13,6 +26,8 @@ export interface StoryEditorServices {
 }
 
 export const DEFAULT_STORY_EDITOR_SERVICES: StoryEditorServices = {
+  createChapter,
+  getIntroChapterByStoryId,
   getStoryById,
   updateStory,
 }
@@ -28,17 +43,25 @@ export function useStoryEditor({
   services = DEFAULT_STORY_EDITOR_SERVICES,
   storyId,
 }: UseStoryEditorOptions) {
+  const [introChapter, setIntroChapter] = useState<Chapter | undefined>()
   const [story, setStory] = useState<Story | undefined>()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [introChapterTitle, setIntroChapterTitle] = useState('Introduction')
   const [status, setStatus] = useState<EditorStatus>('loading')
+  const [isCreatingIntroChapter, setIsCreatingIntroChapter] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | undefined>()
   const [successMessage, setSuccessMessage] = useState<string | undefined>()
 
   const trimmedTitle = title.trim()
   const trimmedDescription = description.trim()
+  const trimmedIntroChapterTitle = introChapterTitle.trim()
   const canSave = trimmedTitle.length > 0 && !isSaving
+  const canCreateIntroChapter =
+    !introChapter &&
+    trimmedIntroChapterTitle.length > 0 &&
+    !isCreatingIntroChapter
 
   useEffect(() => {
     let isCurrent = true
@@ -61,7 +84,15 @@ export function useStoryEditor({
           return
         }
 
+        const loadedIntroChapter =
+          await services.getIntroChapterByStoryId(storyId)
+
+        if (!isCurrent) {
+          return
+        }
+
         setStory(loadedStory)
+        setIntroChapter(loadedIntroChapter)
         setTitle(loadedStory.title)
         setDescription(loadedStory.description)
         setStatus('ready')
@@ -112,14 +143,50 @@ export function useStoryEditor({
     }
   }
 
+  async function createIntroChapter() {
+    if (!canCreateIntroChapter) {
+      return undefined
+    }
+
+    setIsCreatingIntroChapter(true)
+    setErrorMessage(undefined)
+    setSuccessMessage(undefined)
+
+    try {
+      const chapter = await services.createChapter({
+        content: '',
+        parentChapterId: null,
+        storyId,
+        title: trimmedIntroChapterTitle,
+      })
+
+      setIntroChapter(chapter)
+      setIntroChapterTitle('Introduction')
+      setSuccessMessage('Intro chapter created.')
+
+      return chapter
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error))
+      return undefined
+    } finally {
+      setIsCreatingIntroChapter(false)
+    }
+  }
+
   return {
     canSave,
+    canCreateIntroChapter,
+    createIntroChapter,
     description,
     errorMessage,
+    introChapterTitle,
+    isCreatingIntroChapter,
     isSaving,
     saveStory,
     setDescription,
+    setIntroChapterTitle,
     setTitle,
+    introChapter,
     status,
     story,
     successMessage,

@@ -29,7 +29,7 @@
 ### Story Editor
 - User opens a story in edit mode from the dashboard.
 - Edit story title and description at the top.
-- Chapter list below with chapter count and a clear empty state.
+- Intro chapter panel below with a clear empty state when no intro exists.
 - When a story has no chapters, the editor offers an "Add Intro Chapter"
   action that creates the introductory chapter.
 - Once the introductory chapter exists, new chapters are added from an

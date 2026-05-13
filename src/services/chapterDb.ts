@@ -88,6 +88,25 @@ export async function getChaptersByStoryId(storyId: string): Promise<Chapter[]> 
   }
 }
 
+export async function getIntroChapterByStoryId(
+  storyId: string,
+): Promise<Chapter | undefined> {
+  const db = await openDb()
+
+  try {
+    const transaction = db.transaction(CHAPTERS_STORE, 'readonly')
+    const store = transaction.objectStore(CHAPTERS_STORE)
+    const index = store.index(CHAPTER_STORY_ID_INDEX)
+    const introChapter = await findIntroChapter(index, storyId)
+
+    await transactionDone(transaction)
+
+    return introChapter
+  } finally {
+    db.close()
+  }
+}
+
 export async function getNextChapters(chapterId: string): Promise<Chapter[]> {
   const db = await openDb()
 
@@ -190,6 +209,40 @@ export async function deleteChapter(id: string): Promise<boolean> {
   }
 }
 
+function findIntroChapter(
+  index: IDBIndex,
+  storyId: string,
+): Promise<Chapter | undefined> {
+  return new Promise((resolve, reject) => {
+    const request = index.openCursor(storyId)
+    let introChapter: Chapter | undefined
+
+    request.onsuccess = () => {
+      const cursor = request.result
+
+      if (!cursor) {
+        resolve(introChapter)
+        return
+      }
+
+      const chapter = cursor.value as Chapter
+
+      if (
+        chapter.parentChapterId === null &&
+        (!introChapter || compareChapterOrder(chapter, introChapter) < 0)
+      ) {
+        introChapter = chapter
+      }
+
+      cursor.continue()
+    }
+
+    request.onerror = () => {
+      reject(request.error ?? new Error('IndexedDB request failed.'))
+    }
+  })
+}
+
 async function validateChapterWrite(
   transaction: IDBTransaction,
   chapter: Chapter,
@@ -244,6 +297,14 @@ async function validateChapterWrite(
       new Error('Chapter parent relationships cannot contain cycles.'),
     )
   }
+}
+
+function compareChapterOrder(left: Chapter, right: Chapter): number {
+  if (left.createdAt !== right.createdAt) {
+    return left.createdAt - right.createdAt
+  }
+
+  return left.id.localeCompare(right.id)
 }
 
 function canReachChapter(

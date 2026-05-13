@@ -5,6 +5,7 @@ import {
   deleteChapter,
   getChapterById,
   getChaptersByStoryId,
+  getIntroChapterByStoryId,
   getNextChapters,
   updateChapter,
 } from '@/services/chapterDb'
@@ -107,6 +108,70 @@ describe('chapterDb', () => {
     expect(nextChapters).toHaveLength(2)
     expect(nextChapters).toEqual(expect.arrayContaining([left, right]))
     await expect(getNextChapters(left.id)).resolves.toEqual([])
+  })
+
+  it('gets the intro chapter for a story without returning child chapters', async () => {
+    let now = 100
+    vi.spyOn(Date, 'now').mockImplementation(() => now)
+
+    const story = await createStory({
+      title: 'Story',
+      description: 'Description',
+    })
+    const otherStory = await createStory({
+      title: 'Other',
+      description: 'Description',
+    })
+    const intro = await createChapter({
+      storyId: story.id,
+      title: 'Intro',
+      content: 'Start',
+      parentChapterId: null,
+    })
+    now = 200
+    await createChapter({
+      storyId: story.id,
+      title: 'Child',
+      content: 'Continue',
+      parentChapterId: intro.id,
+    })
+    await createChapter({
+      storyId: otherStory.id,
+      title: 'Other Intro',
+      content: 'Elsewhere',
+      parentChapterId: null,
+    })
+
+    await expect(getIntroChapterByStoryId(story.id)).resolves.toEqual(intro)
+  })
+
+  it('returns the earliest intro chapter when legacy data has multiple intros', async () => {
+    let now = 100
+    vi.spyOn(Date, 'now').mockImplementation(() => now)
+
+    const story = await createStory({
+      title: 'Story',
+      description: 'Description',
+    })
+    const laterIntro = await createChapter({
+      storyId: story.id,
+      title: 'Later Intro',
+      content: 'Later',
+      parentChapterId: null,
+    })
+
+    now = 50
+    const earliestIntro = await createChapter({
+      storyId: story.id,
+      title: 'Earliest Intro',
+      content: 'Earlier',
+      parentChapterId: null,
+    })
+
+    await expect(getIntroChapterByStoryId(story.id)).resolves.toEqual(
+      earliestIntro,
+    )
+    expect(laterIntro.createdAt).toBeGreaterThan(earliestIntro.createdAt)
   })
 
   it('removes deleted chapter ids from remaining chapter parents', async () => {

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StoriesStoryIdReadRouteImport } from './routes/stories.$storyId.read'
 import { Route as StoriesStoryIdEditRouteImport } from './routes/stories.$storyId.edit'
+import { Route as StoriesStoryIdChaptersChapterIdEditRouteImport } from './routes/stories.$storyId.chapters.$chapterId.edit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,58 @@ const StoriesStoryIdEditRoute = StoriesStoryIdEditRouteImport.update({
   path: '/stories/$storyId/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StoriesStoryIdChaptersChapterIdEditRoute =
+  StoriesStoryIdChaptersChapterIdEditRouteImport.update({
+    id: '/stories/$storyId/chapters/$chapterId/edit',
+    path: '/stories/$storyId/chapters/$chapterId/edit',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/stories/$storyId/edit': typeof StoriesStoryIdEditRoute
   '/stories/$storyId/read': typeof StoriesStoryIdReadRoute
+  '/stories/$storyId/chapters/$chapterId/edit': typeof StoriesStoryIdChaptersChapterIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/stories/$storyId/edit': typeof StoriesStoryIdEditRoute
   '/stories/$storyId/read': typeof StoriesStoryIdReadRoute
+  '/stories/$storyId/chapters/$chapterId/edit': typeof StoriesStoryIdChaptersChapterIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/stories/$storyId/edit': typeof StoriesStoryIdEditRoute
   '/stories/$storyId/read': typeof StoriesStoryIdReadRoute
+  '/stories/$storyId/chapters/$chapterId/edit': typeof StoriesStoryIdChaptersChapterIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/stories/$storyId/edit' | '/stories/$storyId/read'
+  fullPaths:
+    | '/'
+    | '/stories/$storyId/edit'
+    | '/stories/$storyId/read'
+    | '/stories/$storyId/chapters/$chapterId/edit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/stories/$storyId/edit' | '/stories/$storyId/read'
-  id: '__root__' | '/' | '/stories/$storyId/edit' | '/stories/$storyId/read'
+  to:
+    | '/'
+    | '/stories/$storyId/edit'
+    | '/stories/$storyId/read'
+    | '/stories/$storyId/chapters/$chapterId/edit'
+  id:
+    | '__root__'
+    | '/'
+    | '/stories/$storyId/edit'
+    | '/stories/$storyId/read'
+    | '/stories/$storyId/chapters/$chapterId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   StoriesStoryIdEditRoute: typeof StoriesStoryIdEditRoute
   StoriesStoryIdReadRoute: typeof StoriesStoryIdReadRoute
+  StoriesStoryIdChaptersChapterIdEditRoute: typeof StoriesStoryIdChaptersChapterIdEditRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +106,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoriesStoryIdEditRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stories/$storyId/chapters/$chapterId/edit': {
+      id: '/stories/$storyId/chapters/$chapterId/edit'
+      path: '/stories/$storyId/chapters/$chapterId/edit'
+      fullPath: '/stories/$storyId/chapters/$chapterId/edit'
+      preLoaderRoute: typeof StoriesStoryIdChaptersChapterIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +120,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   StoriesStoryIdEditRoute: StoriesStoryIdEditRoute,
   StoriesStoryIdReadRoute: StoriesStoryIdReadRoute,
+  StoriesStoryIdChaptersChapterIdEditRoute:
+    StoriesStoryIdChaptersChapterIdEditRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
