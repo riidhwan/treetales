@@ -1,4 +1,3 @@
-import { IDBFactory } from 'fake-indexeddb'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
@@ -14,14 +13,18 @@ import {
   transactionDone,
 } from '@/services/db'
 import type { Chapter, Story } from '@/services/types'
+import {
+  deleteTestDatabase,
+  installFakeIndexedDb,
+} from '@/test/indexedDb'
 
 describe('openDb', () => {
   beforeEach(() => {
-    globalThis.indexedDB = new IDBFactory()
+    installFakeIndexedDb()
   })
 
   afterEach(async () => {
-    await deleteDatabase()
+    await deleteTestDatabase()
   })
 
   it('initializes expected stores and indexes', async () => {
@@ -162,24 +165,6 @@ function openLegacyDb(): Promise<IDBDatabase> {
 
     request.onerror = () => {
       reject(request.error ?? new Error('Failed to open legacy test database.'))
-    }
-  })
-}
-
-function deleteDatabase(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.deleteDatabase(DB_NAME)
-
-    request.onsuccess = () => {
-      resolve()
-    }
-
-    request.onerror = () => {
-      reject(request.error ?? new Error('Failed to delete test database.'))
-    }
-
-    request.onblocked = () => {
-      reject(new Error('Test database deletion was blocked.'))
     }
   })
 }

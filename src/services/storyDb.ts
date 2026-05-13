@@ -1,3 +1,4 @@
+import { sortByCreatedAt } from '@/lib/sorting'
 import {
   CHAPTERS_STORE,
   CHAPTER_STORY_ID_INDEX,
@@ -54,18 +55,6 @@ export async function getStories(): Promise<Story[]> {
   } finally {
     db.close()
   }
-}
-
-function sortByCreatedAt<TItem extends { id: string; createdAt: number }>(
-  items: TItem[],
-): TItem[] {
-  return [...items].sort((firstItem, secondItem) => {
-    if (firstItem.createdAt !== secondItem.createdAt) {
-      return firstItem.createdAt - secondItem.createdAt
-    }
-
-    return firstItem.id.localeCompare(secondItem.id)
-  })
 }
 
 export async function getStoryById(id: string): Promise<Story | undefined> {

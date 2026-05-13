@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import { getErrorMessage } from '@/lib/errors'
 import { getStoryById, updateStory } from '@/services/storyDb'
 import type { Story, UpdateStoryInput } from '@/services/types'
 
@@ -124,12 +125,4 @@ export function useStoryEditor({
     successMessage,
     title,
   }
-}
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return 'Something went wrong. Please try again.'
 }
