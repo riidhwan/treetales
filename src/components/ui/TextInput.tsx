@@ -2,9 +2,16 @@ import type { InputHTMLAttributes } from 'react'
 
 import { cn } from '@/lib/utils'
 
-type Props = Readonly<InputHTMLAttributes<HTMLInputElement>>
+interface Props extends Readonly<InputHTMLAttributes<HTMLInputElement>> {
+  readonly className?: string
+  readonly type?: InputHTMLAttributes<HTMLInputElement>['type']
+}
 
-export function TextInput({ className, type = 'text', ...inputProps }: Props) {
+export function TextInput({
+  className,
+  type = 'text',
+  ...inputProps
+}: Readonly<Props>) {
   return (
     <input
       className={cn(

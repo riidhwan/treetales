@@ -2,9 +2,14 @@ import type { TextareaHTMLAttributes } from 'react'
 
 import { cn } from '@/lib/utils'
 
-type Props = Readonly<TextareaHTMLAttributes<HTMLTextAreaElement>>
+interface Props extends Readonly<TextareaHTMLAttributes<HTMLTextAreaElement>> {
+  readonly className?: string
+}
 
-export function TextArea({ className, ...textAreaProps }: Props) {
+export function TextArea({
+  className,
+  ...textAreaProps
+}: Readonly<Props>) {
   return (
     <textarea
       className={cn(

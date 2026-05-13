@@ -34,8 +34,13 @@ export function DataInput({ value, status, onChange, onSubmit }: Props) {
 - Named export (not default)
 - For HTML element wrappers, extend from React's own types:
   ```typescript
-  interface Props extends React.InputHTMLAttributes<HTMLInputElement> {}
+  interface Props extends Readonly<React.InputHTMLAttributes<HTMLInputElement>> {
+      readonly className?: string
+  }
   ```
+  Keep the interface non-empty when lint would otherwise reject an empty wrapper
+  shape; redeclare customized native props such as `className`, `type`, or
+  `children` with compatible readonly types.
 
 Use `cn()` from `@/lib/utils` for all conditional class names. Base classes first, overrides last:
 
