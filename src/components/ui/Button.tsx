@@ -5,12 +5,6 @@ import { cn } from '@/lib/utils'
 type ButtonVariant = 'danger' | 'primary' | 'secondary'
 type ButtonSize = 'md' | 'sm'
 
-interface Props extends Readonly<ButtonHTMLAttributes<HTMLButtonElement>> {
-  readonly children: ReactNode
-  readonly size?: ButtonSize
-  readonly variant?: ButtonVariant
-}
-
 const BASE_CLASSES =
   'inline-flex items-center justify-center gap-2 rounded-md text-sm font-semibold transition'
 
@@ -25,6 +19,12 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
 const SIZE_CLASSES: Record<ButtonSize, string> = {
   md: 'min-h-11 px-4',
   sm: 'min-h-10 px-3',
+}
+
+interface Props extends Readonly<ButtonHTMLAttributes<HTMLButtonElement>> {
+  readonly children: ReactNode
+  readonly size?: ButtonSize
+  readonly variant?: ButtonVariant
 }
 
 export function Button({
