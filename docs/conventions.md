@@ -92,7 +92,16 @@ export function useDataList(items: Item[]) {
 
 ## Utilities (`src/lib/`)
 
-Only pure functions, no internal state. File layout:
+Only pure functions and system-boundary helpers, no internal state. Current
+files are:
+
+| File | Responsibility |
+|---|---|
+| `errors.ts` | Unknown-error normalization for UI messages |
+| `sorting.ts` | Deterministic pure sort helpers |
+| `utils.ts` | General utilities such as `cn()` |
+
+Recommended file layout:
 
 ```
 constants → types/interfaces → exported functions → private helpers (no export)
@@ -100,7 +109,30 @@ constants → types/interfaces → exported functions → private helpers (no ex
 
 All exported functions have a one-line JSDoc comment when the behaviour is non-obvious. Use `export function`, never `export default`.
 
-## Store (e.g. Zustand)
+## Services (`src/services/`)
+
+Services are thin IndexedDB wrappers and domain data helpers. They own
+persistence transactions, schema upgrades, integrity checks, and input/output
+types. They do not own React state, UI state, or component navigation.
+
+Current service files are:
+
+| File | Responsibility |
+|---|---|
+| `db.ts` | Database constants, upgrade path, typed request helpers, transaction helpers |
+| `storyDb.ts` | Story CRUD |
+| `chapterDb.ts` | Chapter CRUD and chapter graph integrity |
+| `exampleStory.ts` | Built-in example story creation/reuse |
+| `types.ts` | Shared records and input contracts |
+
+Service tests use fake IndexedDB helpers from `src/test/` rather than
+duplicating database setup.
+
+## Optional Store (e.g. Zustand)
+
+There is currently no global store. Prefer local component state and feature
+hooks until state needs to be shared across unrelated features or routes. If a
+store is introduced, follow this shape:
 
 Split state and actions into two interfaces, then combine:
 

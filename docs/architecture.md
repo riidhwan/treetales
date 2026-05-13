@@ -6,18 +6,29 @@ React 19 + TanStack Start (React Router) + Tailwind CSS v4 + TypeScript strict m
 
 ```
 src/
-├── routes/           # Routing layer (file-based or otherwise)
+├── routes/           # Thin TanStack Router file routes
 ├── components/       # See component layers below
-├── hooks/            # Complex logic extracted into custom hooks (Logic layer)
+├── hooks/            # Feature state/effects extracted from UI components
 ├── services/         # Data access layer
-├── store/            # Global state
-├── lib/              # Shared utilities, pure helpers
-└── config.ts         # App-level tuneable constants (see below)
+├── lib/              # Shared pure utilities and boundary helpers
+├── test/             # Shared test-only helpers
+└── styles.css        # Global Tailwind CSS imports and base styles
 ```
 
-## `src/config.ts` — Tuneable Constants
+There is currently no `src/store/`. Feature components and hooks own their
+loading, form, and error state locally. Add a store only when state is genuinely
+shared across unrelated route or feature boundaries.
 
-`src/config.ts` holds named constants for values that are likely to be adjusted over time or that would otherwise be buried inside a component. When adding a new magic number or threshold, prefer defining it here over inlining it if it meets any of these criteria:
+There is currently no `src/config.ts`. Add one only when tuneable constants are
+needed. Until then, keep isolated copy, labels, and one-off layout values close
+to the component or module that owns them.
+
+## Optional `src/config.ts` — Tuneable Constants
+
+If introduced, `src/config.ts` should hold named constants for values that are
+likely to be adjusted over time or that would otherwise be buried inside a
+component. When adding a new magic number or threshold, prefer defining it there
+over inlining it if it meets any of these criteria:
 
 - It controls user-facing behaviour (timing, counts, limits)
 - It might need tuning
@@ -25,15 +36,45 @@ src/
 
 ## Component Layers
 
-`components/` has three sublayers — placement is determined by how much business knowledge a component needs:
+`components/` currently has two required sublayers:
 
 | Sublayer | Rule | Examples |
 |---|---|---|
-| `ui/` | Generic, zero business logic, reusable anywhere | `Button`, `Input` |
-| `domain/` | Business-aware but self-contained — knows domain types and concepts | |
-| `features/` | Composite — wires domain components and hooks into a full user-facing unit | |
+| `ui/` | Generic, zero business logic, reusable anywhere | `Alert`, `Button`, `TextArea`, `TextInput` |
+| `features/` | Composite feature UI that wires hooks, services, navigation callbacks, and UI primitives into a full user-facing unit | `StoryDashboard`, `StoryEditor`, `StoryReader` |
 
-A component that needs to call hooks belongs in `features/`. A component that only receives typed props (even domain types) belongs in `domain/`.
+There is currently no `components/domain/`. Add it only when a business-aware
+component is self-contained enough to be shared by more than one feature without
+owning feature state or service calls.
+
+A component that calls feature hooks, owns workflows, or coordinates services
+belongs in `features/`. Generic HTML wrappers and styling primitives belong in
+`ui/`.
+
+## Hooks Layer (`src/hooks/`)
+
+Feature hooks own async effects, form state, derived state, confirmation flows,
+and service dependency injection for testability. Current hooks are feature
+specific:
+
+| File | Responsibility |
+|---|---|
+| `useStoryDashboard.ts` | Loads story summaries, creates stories/example content, deletes stories, and exposes dashboard form state |
+| `useStoryEditor.ts` | Loads editor data and coordinates chapter create/update/delete state |
+| `useStoryReader.ts` | Loads reader data, tracks the selected chapter, and exposes navigation options |
+
+Hooks depend on the service layer through small service interfaces with default
+implementations. Tests can pass fake services without mocking IndexedDB.
+
+## Shared Utilities (`src/lib/`)
+
+`src/lib/` contains pure helpers and system-boundary normalizers:
+
+| File | Responsibility |
+|---|---|
+| `errors.ts` | Converts unknown thrown values into displayable error messages |
+| `sorting.ts` | Shared deterministic sort helpers |
+| `utils.ts` | General utility helpers, currently class-name composition via `cn()` |
 
 ## Data Model
 
@@ -66,6 +107,8 @@ Thin wrappers around IndexedDB transactions. No state, no caching — components
 | `storyDb.ts` | Story CRUD: create, getAll, getById, update, delete |
 | `chapterDb.ts` | Chapter CRUD: create, getById, getByStoryId, update, delete; + getNextChapters(chapterId) |
 | `exampleStory.ts` | Creates or returns the built-in example story and its chapters |
+| `types.ts` | Shared service data shapes and create/update input contracts |
+| `db.ts` | IndexedDB schema constants, upgrade path, typed request helpers, and transaction helpers |
 
 Story and chapter records are created with `crypto.randomUUID()` ids and
 `Date.now()` timestamps. Updates preserve `createdAt` and refresh `updatedAt`.
@@ -89,3 +132,11 @@ Single database `TreeTales` with two object stores:
   `parentChapterId` for next-chapter lookups
 
 Version bumps happen when adding/modifying stores. See `src/services/db.ts` for the upgrade path.
+
+## Test Helpers (`src/test/`)
+
+Shared test-only helpers live in `src/test/` when they remove repeated setup
+across service, hook, route, or component tests. The current helper installs and
+resets a fake IndexedDB database for service tests. Keep these helpers small and
+specific to test infrastructure; production code should not import from
+`src/test/`.
