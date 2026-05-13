@@ -1,3 +1,4 @@
+import type { ReactNode, SyntheticEvent } from 'react'
 import { ArrowLeft, Edit3, Home, PlusCircle, Save } from 'lucide-react'
 
 import {
@@ -47,13 +48,13 @@ export function ChapterEditor({
     title,
   } = useChapterEditor({ chapterId, services, storyId })
 
-  function handleSave(event: React.SyntheticEvent<HTMLFormElement>) {
+  function handleSave(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
     saveChapter().catch(() => undefined)
   }
 
   function handleCreateChildChapter(
-    event: React.SyntheticEvent<HTMLFormElement>,
+    event: SyntheticEvent<HTMLFormElement>,
   ) {
     event.preventDefault()
     createChildChapter()
@@ -65,7 +66,7 @@ export function ChapterEditor({
       .catch(() => undefined)
   }
 
-  let editorContent: React.ReactNode
+  let editorContent: ReactNode
 
   if (status === 'loading') {
     editorContent = (
@@ -212,7 +213,7 @@ interface ChildChaptersSectionProps {
   readonly isCreatingChildChapter: boolean
   readonly newChildChapterTitle: string
   readonly onCreateChildChapter: (
-    event: React.SyntheticEvent<HTMLFormElement>,
+    event: SyntheticEvent<HTMLFormElement>,
   ) => void
   readonly onEditChapter: (chapterId: string) => void
   readonly onNewChildChapterTitleChange: (title: string) => void
