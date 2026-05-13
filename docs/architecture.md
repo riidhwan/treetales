@@ -60,7 +60,7 @@ specific:
 | File | Responsibility |
 |---|---|
 | `useStoryDashboard.ts` | Loads story summaries, creates stories/example content, deletes stories, and exposes dashboard form state |
-| `useStoryEditor.ts` | Loads editor data and coordinates chapter create/update/delete state |
+| `useStoryEditor.ts` | Loads editor data, resolves the intro chapter, saves story fields, and creates the introductory chapter |
 | `useStoryReader.ts` | Loads reader data, tracks the selected chapter, and exposes navigation options |
 
 Hooks depend on the service layer through small service interfaces with default
@@ -105,7 +105,7 @@ Thin wrappers around IndexedDB transactions. No state, no caching — components
 | File | Responsibility |
 |---|---|
 | `storyDb.ts` | Story CRUD: create, getAll, getById, update, delete |
-| `chapterDb.ts` | Chapter CRUD: create, getById, getByStoryId, update, delete; + getNextChapters(chapterId) |
+| `chapterDb.ts` | Chapter CRUD: create, getById, getByStoryId, getIntroChapterByStoryId, update, delete; + getNextChapters(chapterId) |
 | `exampleStory.ts` | Creates or returns the built-in example story and its chapters |
 | `types.ts` | Shared service data shapes and create/update input contracts |
 | `db.ts` | IndexedDB schema constants, upgrade path, typed request helpers, and transaction helpers |

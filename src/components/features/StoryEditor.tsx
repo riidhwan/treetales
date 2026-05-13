@@ -1,4 +1,4 @@
-import { BookOpen, Home, Save } from 'lucide-react'
+import { BookOpen, Edit3, Home, PlusCircle, Save } from 'lucide-react'
 
 import {
   type StoryEditorServices,
@@ -8,8 +8,10 @@ import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { TextArea } from '@/components/ui/TextArea'
 import { TextInput } from '@/components/ui/TextInput'
+import type { Chapter } from '@/services/types'
 
 interface Props {
+  readonly onEditChapter: (storyId: string, chapterId: string) => void
   readonly onOpenDashboard: () => void
   readonly onReadStory: (storyId: string) => void
   readonly services?: StoryEditorServices
@@ -17,19 +19,26 @@ interface Props {
 }
 
 export function StoryEditor({
+  onEditChapter,
   onOpenDashboard,
   onReadStory,
   services,
   storyId,
 }: Props) {
   const {
+    canCreateIntroChapter,
     canSave,
+    createIntroChapter,
     description,
     errorMessage,
+    introChapterTitle,
+    isCreatingIntroChapter,
     isSaving,
     saveStory,
     setDescription,
+    setIntroChapterTitle,
     setTitle,
+    introChapter,
     status,
     story,
     successMessage,
@@ -39,6 +48,19 @@ export function StoryEditor({
   function handleSave(event: React.SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
     saveStory().catch(() => undefined)
+  }
+
+  function handleCreateIntroChapter(
+    event: React.SyntheticEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault()
+    createIntroChapter()
+      .then((chapter) => {
+        if (chapter) {
+          onEditChapter(storyId, chapter.id)
+        }
+      })
+      .catch(() => undefined)
   }
 
   let editorContent: React.ReactNode
@@ -123,13 +145,15 @@ export function StoryEditor({
           </div>
         </form>
 
-        <section className="rounded-lg border border-dashed border-stone-300 bg-white p-6">
-          <h2 className="text-xl font-semibold">Chapters</h2>
-          <p className="mt-3 text-sm leading-6 text-stone-600">
-            Chapter editing is not available yet. Story title and description
-            can be updated here while chapter tools are built.
-          </p>
-        </section>
+        <ChapterSection
+          canCreateIntroChapter={canCreateIntroChapter}
+          introChapterTitle={introChapterTitle}
+          isCreatingIntroChapter={isCreatingIntroChapter}
+          onCreateIntroChapter={handleCreateIntroChapter}
+          onEditChapter={(chapterId) => onEditChapter(storyId, chapterId)}
+          onIntroChapterTitleChange={setIntroChapterTitle}
+          introChapter={introChapter}
+        />
       </>
     )
   }
@@ -159,5 +183,132 @@ export function StoryEditor({
         {editorContent}
       </section>
     </main>
+  )
+}
+
+interface ChapterSectionProps {
+  readonly canCreateIntroChapter: boolean
+  readonly introChapterTitle: string
+  readonly isCreatingIntroChapter: boolean
+  readonly onCreateIntroChapter: (
+    event: React.SyntheticEvent<HTMLFormElement>,
+  ) => void
+  readonly onEditChapter: (chapterId: string) => void
+  readonly onIntroChapterTitleChange: (title: string) => void
+  readonly introChapter?: Chapter
+}
+
+function ChapterSection({
+  canCreateIntroChapter,
+  introChapterTitle,
+  isCreatingIntroChapter,
+  onCreateIntroChapter,
+  onEditChapter,
+  onIntroChapterTitleChange,
+  introChapter,
+}: ChapterSectionProps) {
+  return (
+    <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-stone-200 pb-5">
+        <div>
+          <h2 className="text-xl font-semibold">Intro Chapter</h2>
+          <p className="mt-1 text-sm text-stone-600">
+            The story starts here. Add branches from chapter pages.
+          </p>
+        </div>
+      </div>
+
+      {introChapter ? (
+        <IntroChapterCard
+          introChapter={introChapter}
+          onEditChapter={onEditChapter}
+        />
+      ) : (
+        <IntroChapterForm
+          canCreateIntroChapter={canCreateIntroChapter}
+          introChapterTitle={introChapterTitle}
+          isCreatingIntroChapter={isCreatingIntroChapter}
+          onCreateIntroChapter={onCreateIntroChapter}
+          onIntroChapterTitleChange={onIntroChapterTitleChange}
+        />
+      )}
+    </section>
+  )
+}
+
+interface IntroChapterFormProps {
+  readonly canCreateIntroChapter: boolean
+  readonly introChapterTitle: string
+  readonly isCreatingIntroChapter: boolean
+  readonly onCreateIntroChapter: (
+    event: React.SyntheticEvent<HTMLFormElement>,
+  ) => void
+  readonly onIntroChapterTitleChange: (title: string) => void
+}
+
+function IntroChapterForm({
+  canCreateIntroChapter,
+  introChapterTitle,
+  isCreatingIntroChapter,
+  onCreateIntroChapter,
+  onIntroChapterTitleChange,
+}: IntroChapterFormProps) {
+  return (
+    <div className="mt-6 rounded-lg border border-dashed border-stone-300 bg-stone-50 p-5">
+      <h3 className="text-base font-semibold">Start with an intro chapter</h3>
+      <p className="mt-2 text-sm leading-6 text-stone-600">
+        Every story begins with one top-level chapter. Later chapters are added
+        from the chapter they follow.
+      </p>
+      <form
+        className="mt-5 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end"
+        onSubmit={onCreateIntroChapter}
+      >
+        <label className="grid gap-2 text-sm font-medium text-stone-800">
+          Intro chapter title
+          <TextInput
+            name="introChapterTitle"
+            onChange={(event) =>
+              onIntroChapterTitleChange(event.target.value)
+            }
+            value={introChapterTitle}
+          />
+        </label>
+        <Button
+          className="sm:mb-0"
+          disabled={!canCreateIntroChapter}
+          type="submit"
+          variant="primary"
+        >
+          <PlusCircle aria-hidden="true" size={18} />
+          {isCreatingIntroChapter ? 'Creating...' : 'Add Intro Chapter'}
+        </Button>
+      </form>
+    </div>
+  )
+}
+
+interface IntroChapterCardProps {
+  readonly introChapter: Chapter
+  readonly onEditChapter: (chapterId: string) => void
+}
+
+function IntroChapterCard({
+  introChapter,
+  onEditChapter,
+}: IntroChapterCardProps) {
+  return (
+    <article className="mt-5 rounded-md border border-stone-200 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold">{introChapter.title}</h3>
+          <p className="mt-1 text-sm text-stone-600">Intro chapter</p>
+        </div>
+        <Button onClick={() => onEditChapter(introChapter.id)} size="sm">
+          <Edit3 aria-hidden="true" size={16} />
+          Edit
+        </Button>
+      </div>
+    </article>
   )
 }

@@ -32,10 +32,10 @@ describe('createExampleStory', () => {
     expect(exampleStory.chapters).toHaveLength(5)
     await expect(getStories()).resolves.toEqual([exampleStory.story])
 
-    const rootChapter = exampleStory.chapters[0]
-    const nextChapters = await getNextChapters(rootChapter.id)
+    const introChapter = exampleStory.chapters[0]
+    const nextChapters = await getNextChapters(introChapter.id)
 
-    expect(rootChapter).toMatchObject({
+    expect(introChapter).toMatchObject({
       title: 'A Light in the Pines',
       parentChapterId: null,
     })
