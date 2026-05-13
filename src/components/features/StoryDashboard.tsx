@@ -1,37 +1,10 @@
 import { BookOpen, Edit3, Plus, Sparkles, Trash2 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 
-import { getChaptersByStoryId } from '@/services/chapterDb'
-import { createExampleStory } from '@/services/exampleStory'
 import {
-  createStory,
-  deleteStory,
-  getStories,
-} from '@/services/storyDb'
-import type { CreateStoryInput, Story } from '@/services/types'
-
-interface StorySummary extends Story {
-  chapterCount: number
-}
-
-interface StoryDashboardServices {
-  readonly createExampleStory: () => Promise<{
-    readonly chapters: unknown[]
-    readonly story: Story
-  }>
-  readonly createStory: (input: CreateStoryInput) => Promise<Story>
-  readonly deleteStory: (id: string) => Promise<boolean>
-  readonly getChaptersByStoryId: (storyId: string) => Promise<unknown[]>
-  readonly getStories: () => Promise<Story[]>
-}
-
-const DEFAULT_SERVICES: StoryDashboardServices = {
-  createExampleStory,
-  createStory,
-  deleteStory,
-  getChaptersByStoryId,
-  getStories,
-}
+  type StoryDashboardServices,
+  useStoryDashboard,
+} from '@/hooks/useStoryDashboard'
 
 interface Props {
   readonly onEditStory: (storyId: string) => void
@@ -42,155 +15,31 @@ interface Props {
 export function StoryDashboard({
   onEditStory,
   onReadStory,
-  services = DEFAULT_SERVICES,
+  services,
 }: Props) {
-  const [stories, setStories] = useState<StorySummary[]>([])
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
-  const [isCreating, setIsCreating] = useState(false)
-  const [isCreatingExample, setIsCreatingExample] = useState(false)
-  const [isFormOpen, setIsFormOpen] = useState(false)
-  const [deletingStoryId, setDeletingStoryId] = useState<string | undefined>()
-  const [errorMessage, setErrorMessage] = useState<string | undefined>()
+  const {
+    canCreate,
+    createExampleStoryFromTemplate,
+    createStoryFromForm,
+    deletingStoryId,
+    description,
+    deleteStoryWithConfirmation,
+    errorMessage,
+    isCreatingExample,
+    isFormOpen,
+    isLoading,
+    setDescription,
+    setIsFormOpen,
+    setTitle,
+    sortedStories,
+    title,
+  } = useStoryDashboard({
+    onEditStory,
+    onReadStory,
+    services,
+  })
 
-  const trimmedTitle = title.trim()
-  const trimmedDescription = description.trim()
-  const canCreate = trimmedTitle.length > 0 && !isCreating
-
-  const sortedStories = useMemo(
-    () =>
-      [...stories].sort((firstStory, secondStory) => {
-        if (firstStory.updatedAt !== secondStory.updatedAt) {
-          return secondStory.updatedAt - firstStory.updatedAt
-        }
-
-        return firstStory.title.localeCompare(secondStory.title)
-      }),
-    [stories],
-  )
-
-  useEffect(() => {
-    let isCurrent = true
-
-    async function loadStories() {
-      setIsLoading(true)
-      setErrorMessage(undefined)
-
-      try {
-        const loadedStories = await services.getStories()
-        const storySummaries = await Promise.all(
-          loadedStories.map(async (story) => {
-            const chapters = await services.getChaptersByStoryId(story.id)
-
-            return {
-              ...story,
-              chapterCount: chapters.length,
-            }
-          }),
-        )
-
-        if (isCurrent) {
-          setStories(storySummaries)
-        }
-      } catch (error) {
-        if (isCurrent) {
-          setErrorMessage(getErrorMessage(error))
-        }
-      } finally {
-        if (isCurrent) {
-          setIsLoading(false)
-        }
-      }
-    }
-
-    void loadStories()
-
-    return () => {
-      isCurrent = false
-    }
-  }, [services])
-
-  async function handleCreateStory(event: React.SyntheticEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    if (!canCreate) {
-      return
-    }
-
-    setIsCreating(true)
-    setErrorMessage(undefined)
-
-    try {
-      const story = await services.createStory({
-        title: trimmedTitle,
-        description: trimmedDescription,
-      })
-
-      setStories((currentStories) => [
-        ...currentStories,
-        {
-          ...story,
-          chapterCount: 0,
-        },
-      ])
-      setTitle('')
-      setDescription('')
-      setIsFormOpen(false)
-      onEditStory(story.id)
-    } catch (error) {
-      setErrorMessage(getErrorMessage(error))
-    } finally {
-      setIsCreating(false)
-    }
-  }
-
-  async function handleCreateExampleStory() {
-    setIsCreatingExample(true)
-    setErrorMessage(undefined)
-
-    try {
-      const exampleStory = await services.createExampleStory()
-
-      setStories((currentStories) => [
-        ...currentStories.filter((story) => story.id !== exampleStory.story.id),
-        {
-          ...exampleStory.story,
-          chapterCount: exampleStory.chapters.length,
-        },
-      ])
-      onReadStory(exampleStory.story.id)
-    } catch (error) {
-      setErrorMessage(getErrorMessage(error))
-    } finally {
-      setIsCreatingExample(false)
-    }
-  }
-
-  async function handleDeleteStory(story: StorySummary) {
-    if (!window.confirm(`Delete "${story.title}"? This cannot be undone.`)) {
-      return
-    }
-
-    setDeletingStoryId(story.id)
-    setErrorMessage(undefined)
-
-    try {
-      const wasDeleted = await services.deleteStory(story.id)
-
-      if (wasDeleted) {
-        setStories((currentStories) =>
-          currentStories.filter((currentStory) => currentStory.id !== story.id),
-        )
-      }
-    } catch (error) {
-      setErrorMessage(getErrorMessage(error))
-    } finally {
-      setDeletingStoryId(undefined)
-    }
-  }
-
-  let storiesContent: React.ReactNode
+  let storiesContent: ReactNode
 
   if (isLoading) {
     storiesContent = (
@@ -210,7 +59,7 @@ export function StoryDashboard({
           <button
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-stone-300"
             disabled={isCreatingExample}
-            onClick={() => void handleCreateExampleStory()}
+            onClick={() => void createExampleStoryFromTemplate()}
             type="button"
           >
             <Sparkles aria-hidden="true" size={18} />
@@ -268,7 +117,7 @@ export function StoryDashboard({
               <button
                 className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-red-200 px-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={deletingStoryId === story.id}
-                onClick={() => void handleDeleteStory(story)}
+                onClick={() => void deleteStoryWithConfirmation(story)}
                 type="button"
               >
                 <Trash2 aria-hidden="true" size={16} />
@@ -312,7 +161,8 @@ export function StoryDashboard({
           <form
             className="grid gap-4 rounded-lg border border-stone-200 bg-white p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto] sm:items-end"
             onSubmit={(event) => {
-              void handleCreateStory(event)
+              event.preventDefault()
+              void createStoryFromForm()
             }}
           >
             <label className="grid gap-2 text-sm font-medium text-stone-800">
@@ -361,12 +211,4 @@ export function StoryDashboard({
       </section>
     </main>
   )
-}
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return 'Something went wrong. Please try again.'
 }
