@@ -304,6 +304,72 @@ describe('StoryReader', () => {
     })
   })
 
+  it('clears the back path when switching stories in the same reader', async () => {
+    const onSelectChapter = vi.fn()
+    const firstStory = createStory({ id: 'story-1', title: 'First Story' })
+    const secondStory = createStory({ id: 'story-2', title: 'Second Story' })
+    const firstIntro = createChapter({
+      id: 'story-1-intro',
+      storyId: 'story-1',
+      title: 'First Intro',
+    })
+    const firstNext = createChapter({
+      id: 'story-1-next',
+      parentChapterId: 'story-1-intro',
+      storyId: 'story-1',
+      title: 'First Next',
+    })
+    const secondIntro = createChapter({
+      id: 'story-2-intro',
+      storyId: 'story-2',
+      title: 'Second Intro',
+    })
+    const services = {
+      getChaptersByStoryId: vi.fn((selectedStoryId: string) =>
+        Promise.resolve(
+          selectedStoryId === 'story-1'
+            ? [firstIntro, firstNext]
+            : [secondIntro],
+        ),
+      ),
+      getNextChapters: vi.fn((selectedChapterId: string) =>
+        Promise.resolve(
+          selectedChapterId === 'story-1-intro' ? [firstNext] : [],
+        ),
+      ),
+      getStoryById: vi.fn((selectedStoryId: string) =>
+        Promise.resolve(selectedStoryId === 'story-1' ? firstStory : secondStory),
+      ),
+    }
+    const view = render(
+      <StoryReader
+        onEditStory={vi.fn()}
+        onOpenDashboard={vi.fn()}
+        onSelectChapter={onSelectChapter}
+        services={services}
+        storyId="story-1"
+      />,
+    )
+
+    fireEvent.click(await screen.findByRole('button', { name: /continue/i }))
+
+    expect(await screen.findByRole('button', { name: 'Back' })).toBeTruthy()
+
+    view.rerender(
+      <StoryReader
+        onEditStory={vi.fn()}
+        onOpenDashboard={vi.fn()}
+        onSelectChapter={onSelectChapter}
+        services={services}
+        storyId="story-2"
+      />,
+    )
+
+    expect(await screen.findByRole('heading', { name: 'Second Intro' }))
+      .toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Back' })).toBeNull()
+  })
+
   it('renders The End for a terminal chapter', async () => {
     const services = createServices({ nextChapters: [] })
 

@@ -1,35 +1,10 @@
 import { ArrowLeft, BookOpen, Edit3, Home } from 'lucide-react'
-import { useEffect, useState } from 'react'
 
 import {
-  getChaptersByStoryId,
-  getNextChapters,
-} from '@/services/chapterDb'
-import { getStoryById } from '@/services/storyDb'
-import type { Chapter, Story } from '@/services/types'
-
-interface StoryReaderServices {
-  readonly getChaptersByStoryId: (storyId: string) => Promise<Chapter[]>
-  readonly getNextChapters: (chapterId: string) => Promise<Chapter[]>
-  readonly getStoryById: (storyId: string) => Promise<Story | undefined>
-}
-
-const DEFAULT_SERVICES: StoryReaderServices = {
-  getChaptersByStoryId,
-  getNextChapters,
-  getStoryById,
-}
-
-type ReaderStatus = 'loading' | 'ready' | 'missing-story' | 'missing-chapter'
-
-interface ReaderState {
-  readonly chapters: Chapter[]
-  readonly currentChapter?: Chapter
-  readonly errorMessage?: string
-  readonly nextChapters: Chapter[]
-  readonly status: ReaderStatus
-  readonly story?: Story
-}
+  type StoryReaderServices,
+  useStoryReader,
+} from '@/hooks/useStoryReader'
+import type { Chapter } from '@/services/types'
 
 interface Props {
   readonly chapterId?: string
@@ -45,159 +20,19 @@ export function StoryReader({
   onEditStory,
   onOpenDashboard,
   onSelectChapter,
-  services = DEFAULT_SERVICES,
+  services,
   storyId,
 }: Props) {
-  const [readerState, setReaderState] = useState<ReaderState>({
-    chapters: [],
-    nextChapters: [],
-    status: 'loading',
-  })
-  const [visitedChapters, setVisitedChapters] = useState<Chapter[]>([])
-
-  useEffect(() => {
-    let isCurrent = true
-
-    async function loadReader() {
-      setReaderState({
-        chapters: [],
-        nextChapters: [],
-        status: 'loading',
-      })
-
-      try {
-        const story = await services.getStoryById(storyId)
-
-        if (!isCurrent) {
-          return
-        }
-
-        if (!story) {
-          setReaderState({
-            chapters: [],
-            nextChapters: [],
-            status: 'missing-story',
-          })
-          return
-        }
-
-        const chapters = await services.getChaptersByStoryId(storyId)
-
-        if (!isCurrent) {
-          return
-        }
-
-        const currentChapter = chapterId
-          ? chapters.find((chapter) => chapter.id === chapterId)
-          : chapters[0]
-
-        if (!currentChapter) {
-          setReaderState({
-            chapters,
-            nextChapters: [],
-            status: chapterId ? 'missing-chapter' : 'ready',
-            story,
-          })
-          return
-        }
-
-        const nextChapters = await services.getNextChapters(currentChapter.id)
-
-        if (!isCurrent) {
-          return
-        }
-
-        setReaderState({
-          chapters,
-          currentChapter,
-          nextChapters: nextChapters.filter(
-            (nextChapter) => nextChapter.storyId === storyId,
-          ),
-          status: 'ready',
-          story,
-        })
-      } catch (error) {
-        if (isCurrent) {
-          setReaderState({
-            chapters: [],
-            errorMessage: getErrorMessage(error),
-            nextChapters: [],
-            status: 'ready',
-          })
-        }
-      }
-    }
-
-    void loadReader()
-
-    return () => {
-      isCurrent = false
-    }
-  }, [chapterId, services, storyId])
-
-  const { currentChapter, nextChapters, status, story } = readerState
-  const previousChapter =
-    visitedChapters.length > 1
-      ? visitedChapters[visitedChapters.length - 2]
-      : undefined
-
-  useEffect(() => {
-    if (status !== 'ready' || !currentChapter) {
-      return
-    }
-
-    setVisitedChapters((currentPath) => {
-      if (currentPath.length === 0) {
-        return [currentChapter]
-      }
-
-      const currentPathIndex = currentPath.findIndex(
-        (visitedChapter) => visitedChapter.id === currentChapter.id,
-      )
-
-      if (currentPathIndex === currentPath.length - 1) {
-        return currentPath.map((visitedChapter, index) =>
-          index === currentPathIndex ? currentChapter : visitedChapter,
-        )
-      }
-
-      if (currentPathIndex >= 0) {
-        return currentPath.slice(0, currentPathIndex + 1)
-      }
-
-      return [currentChapter]
-    })
-  }, [currentChapter, status])
-
-  function handleBack() {
-    if (!previousChapter) {
-      return
-    }
-
-    setVisitedChapters((currentPath) => currentPath.slice(0, -1))
-    onSelectChapter(previousChapter.id)
-  }
-
-  function handleSelectNextChapter(nextChapter: Chapter) {
-    setVisitedChapters((currentPath) => {
-      const pathWithCurrent =
-        currentChapter &&
-        currentPath.every(
-          (visitedChapter) => visitedChapter.id !== currentChapter.id,
-        )
-          ? [currentChapter]
-          : currentPath
-
-      if (
-        pathWithCurrent[pathWithCurrent.length - 1]?.id === nextChapter.id
-      ) {
-        return pathWithCurrent
-      }
-
-      return [...pathWithCurrent, nextChapter]
-    })
-    onSelectChapter(nextChapter.id)
-  }
+  const {
+    currentChapter,
+    errorMessage,
+    nextChapters,
+    previousChapter,
+    selectNextChapter,
+    selectPreviousChapter,
+    status,
+    story,
+  } = useStoryReader({ chapterId, onSelectChapter, services, storyId })
 
   let readerContent: React.ReactNode
 
@@ -216,13 +51,13 @@ export function StoryReader({
         </p>
       </section>
     )
-  } else if (readerState.errorMessage) {
+  } else if (errorMessage) {
     readerContent = (
       <p
         className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
         role="alert"
       >
-        {readerState.errorMessage}
+        {errorMessage}
       </p>
     )
   } else if (!currentChapter && story) {
@@ -251,7 +86,7 @@ export function StoryReader({
             {previousChapter ? (
               <button
                 className="inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-stone-300 px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
-                onClick={handleBack}
+                onClick={selectPreviousChapter}
                 type="button"
               >
                 <ArrowLeft aria-hidden="true" size={16} />
@@ -272,7 +107,7 @@ export function StoryReader({
         <footer className="border-t border-stone-200 pt-5">
           <NextChapterControls
             nextChapters={nextChapters}
-            onSelectChapter={handleSelectNextChapter}
+            onSelectChapter={selectNextChapter}
           />
         </footer>
       </article>
@@ -363,12 +198,4 @@ function NextChapterControls({
       </div>
     </div>
   )
-}
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return 'Something went wrong. Please try again.'
 }
