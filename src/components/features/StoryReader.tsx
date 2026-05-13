@@ -4,6 +4,8 @@ import {
   type StoryReaderServices,
   useStoryReader,
 } from '@/hooks/useStoryReader'
+import { Alert } from '@/components/ui/Alert'
+import { Button } from '@/components/ui/Button'
 import type { Chapter } from '@/services/types'
 
 interface Props {
@@ -38,9 +40,7 @@ export function StoryReader({
 
   if (status === 'loading') {
     readerContent = (
-      <p className="rounded-lg border border-stone-200 bg-white p-6 text-sm text-stone-600 shadow-sm">
-        Loading story...
-      </p>
+      <Alert className="shadow-sm">Loading story...</Alert>
     )
   } else if (status === 'missing-story') {
     readerContent = (
@@ -53,12 +53,9 @@ export function StoryReader({
     )
   } else if (errorMessage) {
     readerContent = (
-      <p
-        className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-        role="alert"
-      >
+      <Alert role="alert" variant="error">
         {errorMessage}
-      </p>
+      </Alert>
     )
   } else if (!currentChapter && story) {
     readerContent = (
@@ -84,14 +81,14 @@ export function StoryReader({
         <header className="border-b border-stone-200 pb-5">
           <div className="mb-4 flex flex-wrap items-center gap-3">
             {previousChapter ? (
-              <button
-                className="inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-stone-300 px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
+              <Button
+                className="min-h-9"
                 onClick={selectPreviousChapter}
-                type="button"
+                size="sm"
               >
                 <ArrowLeft aria-hidden="true" size={16} />
                 Back
-              </button>
+              </Button>
             ) : null}
           </div>
           <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
@@ -123,22 +120,14 @@ export function StoryReader({
           aria-label="Reader actions"
           className="flex flex-wrap justify-between gap-3"
         >
-          <button
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-stone-300 px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
-            onClick={onOpenDashboard}
-            type="button"
-          >
+          <Button onClick={onOpenDashboard} size="sm">
             <Home aria-hidden="true" size={16} />
             Dashboard
-          </button>
-          <button
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-stone-300 px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
-            onClick={() => onEditStory(storyId)}
-            type="button"
-          >
+          </Button>
+          <Button onClick={() => onEditStory(storyId)} size="sm">
             <Edit3 aria-hidden="true" size={16} />
             Edit
-          </button>
+          </Button>
         </nav>
 
         {readerContent}
@@ -168,14 +157,13 @@ function NextChapterControls({
     const [nextChapter] = nextChapters
 
     return (
-      <button
-        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800"
+      <Button
         onClick={() => onSelectChapter(nextChapter)}
-        type="button"
+        variant="primary"
       >
         <BookOpen aria-hidden="true" size={16} />
         Continue
-      </button>
+      </Button>
     )
   }
 
@@ -186,14 +174,13 @@ function NextChapterControls({
       </h2>
       <div className="mt-3 grid gap-2">
         {nextChapters.map((nextChapter) => (
-          <button
-            className="min-h-11 rounded-md border border-stone-300 px-4 text-left text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
+          <Button
+            className="justify-start px-4 text-left"
             key={nextChapter.id}
             onClick={() => onSelectChapter(nextChapter)}
-            type="button"
           >
             {nextChapter.title}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
