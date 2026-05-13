@@ -5,6 +5,9 @@ import {
   type StoryDashboardServices,
   useStoryDashboard,
 } from '@/hooks/useStoryDashboard'
+import { Alert } from '@/components/ui/Alert'
+import { Button } from '@/components/ui/Button'
+import { TextInput } from '@/components/ui/TextInput'
 
 interface Props {
   readonly onEditStory: (storyId: string) => void
@@ -42,11 +45,7 @@ export function StoryDashboard({
   let storiesContent: ReactNode
 
   if (isLoading) {
-    storiesContent = (
-      <p className="rounded-lg border border-stone-200 bg-white p-6 text-sm text-stone-600">
-        Loading stories...
-      </p>
-    )
+    storiesContent = <Alert>Loading stories...</Alert>
   } else if (sortedStories.length === 0) {
     storiesContent = (
       <section className="rounded-lg border border-dashed border-stone-300 bg-white p-8 text-center">
@@ -56,23 +55,18 @@ export function StoryDashboard({
           branching tale.
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-2">
-          <button
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-stone-300"
+          <Button
             disabled={isCreatingExample}
             onClick={() => void createExampleStoryFromTemplate()}
-            type="button"
+            variant="primary"
           >
             <Sparkles aria-hidden="true" size={18} />
             Add Example Story
-          </button>
-          <button
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-stone-300 px-4 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
-            onClick={() => setIsFormOpen(true)}
-            type="button"
-          >
+          </Button>
+          <Button onClick={() => setIsFormOpen(true)}>
             <Plus aria-hidden="true" size={18} />
             New Story
-          </button>
+          </Button>
         </div>
       </section>
     )
@@ -98,31 +92,23 @@ export function StoryDashboard({
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
-              <button
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-stone-300 px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
-                onClick={() => onReadStory(story.id)}
-                type="button"
-              >
+              <Button onClick={() => onReadStory(story.id)} size="sm">
                 <BookOpen aria-hidden="true" size={16} />
                 Read
-              </button>
-              <button
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-stone-300 px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
-                onClick={() => onEditStory(story.id)}
-                type="button"
-              >
+              </Button>
+              <Button onClick={() => onEditStory(story.id)} size="sm">
                 <Edit3 aria-hidden="true" size={16} />
                 Edit
-              </button>
-              <button
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-red-200 px-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+              </Button>
+              <Button
                 disabled={deletingStoryId === story.id}
                 onClick={() => void deleteStoryWithConfirmation(story)}
-                type="button"
+                size="sm"
+                variant="danger"
               >
                 <Trash2 aria-hidden="true" size={16} />
                 Delete
-              </button>
+              </Button>
             </div>
           </article>
         ))}
@@ -146,14 +132,10 @@ export function StoryDashboard({
             <p className="max-w-xl text-sm leading-6 text-stone-600">
               Manage branching stories saved in this browser.
             </p>
-            <button
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800"
-              onClick={() => setIsFormOpen(true)}
-              type="button"
-            >
+            <Button onClick={() => setIsFormOpen(true)} variant="primary">
               <Plus aria-hidden="true" size={18} />
               New Story
-            </button>
+            </Button>
           </div>
         </header>
 
@@ -167,44 +149,37 @@ export function StoryDashboard({
           >
             <label className="grid gap-2 text-sm font-medium text-stone-800">
               Title
-              <input
-                className="min-h-11 rounded-md border border-stone-300 px-3 text-base outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
+              <TextInput
                 name="title"
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder="Forest Gate"
-                type="text"
                 value={title}
               />
             </label>
             <label className="grid gap-2 text-sm font-medium text-stone-800">
               Description
-              <input
-                className="min-h-11 rounded-md border border-stone-300 px-3 text-base outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
+              <TextInput
                 name="description"
                 onChange={(event) => setDescription(event.target.value)}
                 placeholder="A short premise for the story"
-                type="text"
                 value={description}
               />
             </label>
-            <button
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-stone-300"
+            <Button
               disabled={!canCreate}
               type="submit"
+              variant="primary"
             >
               <Plus aria-hidden="true" size={18} />
               Create Story
-            </button>
+            </Button>
           </form>
         ) : null}
 
         {errorMessage ? (
-          <p
-            className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-            role="alert"
-          >
+          <Alert role="alert" variant="error">
             {errorMessage}
-          </p>
+          </Alert>
         ) : null}
 
         {storiesContent}

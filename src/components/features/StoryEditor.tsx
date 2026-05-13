@@ -4,6 +4,10 @@ import {
   type StoryEditorServices,
   useStoryEditor,
 } from '@/hooks/useStoryEditor'
+import { Alert } from '@/components/ui/Alert'
+import { Button } from '@/components/ui/Button'
+import { TextArea } from '@/components/ui/TextArea'
+import { TextInput } from '@/components/ui/TextInput'
 
 interface Props {
   readonly onOpenDashboard: () => void
@@ -41,9 +45,7 @@ export function StoryEditor({
 
   if (status === 'loading') {
     editorContent = (
-      <p className="rounded-lg border border-stone-200 bg-white p-6 text-sm text-stone-600 shadow-sm">
-        Loading story...
-      </p>
+      <Alert className="shadow-sm">Loading story...</Alert>
     )
   } else if (status === 'missing-story') {
     editorContent = (
@@ -52,35 +54,29 @@ export function StoryEditor({
         <p className="mt-3 text-sm leading-6 text-stone-600">
           This story may have been deleted or is unavailable in this browser.
         </p>
-        <button
-          className="mt-5 inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-stone-300 px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
+        <Button
+          className="mt-5"
           onClick={onOpenDashboard}
-          type="button"
+          size="sm"
         >
           <Home aria-hidden="true" size={16} />
           Dashboard
-        </button>
+        </Button>
       </section>
     )
   } else {
     editorContent = (
       <>
         {errorMessage ? (
-          <p
-            className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
-            role="alert"
-          >
+          <Alert role="alert" variant="error">
             {errorMessage}
-          </p>
+          </Alert>
         ) : null}
 
         {successMessage ? (
-          <p
-            className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
-            role="status"
-          >
+          <Alert role="status" variant="success">
             {successMessage}
-          </p>
+          </Alert>
         ) : null}
 
         <form
@@ -99,18 +95,15 @@ export function StoryEditor({
           <div className="mt-6 grid gap-5">
             <label className="grid gap-2 text-sm font-medium text-stone-800">
               Title
-              <input
-                className="min-h-11 rounded-md border border-stone-300 px-3 text-base outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
+              <TextInput
                 name="title"
                 onChange={(event) => setTitle(event.target.value)}
-                type="text"
                 value={title}
               />
             </label>
             <label className="grid gap-2 text-sm font-medium text-stone-800">
               Description
-              <textarea
-                className="min-h-32 resize-y rounded-md border border-stone-300 px-3 py-2 text-base leading-6 outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
+              <TextArea
                 name="description"
                 onChange={(event) => setDescription(event.target.value)}
                 value={description}
@@ -119,14 +112,14 @@ export function StoryEditor({
           </div>
 
           <div className="mt-6 flex flex-wrap gap-2">
-            <button
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-stone-300"
+            <Button
               disabled={!canSave}
               type="submit"
+              variant="primary"
             >
               <Save aria-hidden="true" size={18} />
               {isSaving ? 'Saving...' : 'Save Story'}
-            </button>
+            </Button>
           </div>
         </form>
 
@@ -148,23 +141,19 @@ export function StoryEditor({
           aria-label="Editor actions"
           className="flex flex-wrap justify-between gap-3"
         >
-          <button
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-stone-300 px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100"
-            onClick={onOpenDashboard}
-            type="button"
-          >
+          <Button onClick={onOpenDashboard} size="sm">
             <Home aria-hidden="true" size={16} />
             Dashboard
-          </button>
-          <button
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-stone-300 px-3 text-sm font-semibold text-stone-800 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-60"
+          </Button>
+          <Button
+            className="disabled:cursor-not-allowed disabled:opacity-60"
             disabled={status === 'missing-story'}
             onClick={() => onReadStory(storyId)}
-            type="button"
+            size="sm"
           >
             <BookOpen aria-hidden="true" size={16} />
             Read
-          </button>
+          </Button>
         </nav>
 
         {editorContent}
