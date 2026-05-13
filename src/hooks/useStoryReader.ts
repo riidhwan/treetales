@@ -64,6 +64,10 @@ export function useStoryReader({
   )
 
   useEffect(() => {
+    setVisitedChapters([])
+  }, [storyId])
+
+  useEffect(() => {
     let isCurrent = true
 
     async function loadReader() {

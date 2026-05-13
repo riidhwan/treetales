@@ -22,6 +22,8 @@
   session-local reading path used for Back navigation.
 - When the session path has a previous chapter, Back returns to that chapter and
   trims the latest chapter from the path.
+- Reader path history is scoped to the current story and resets when opening a
+  different story.
 - Reader is read-only — no editing in this view.
 
 ### Story Editor
