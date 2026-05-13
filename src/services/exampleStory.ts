@@ -1,3 +1,4 @@
+import { sortByCreatedAt } from '@/lib/sorting'
 import {
   CHAPTERS_STORE,
   CHAPTER_STORY_ID_INDEX,
@@ -130,16 +131,4 @@ function createExampleChapters(createdAt: number): Chapter[] {
       updatedAt: createdAt + 4,
     },
   ]
-}
-
-function sortByCreatedAt<TItem extends { id: string; createdAt: number }>(
-  items: TItem[],
-): TItem[] {
-  return [...items].sort((firstItem, secondItem) => {
-    if (firstItem.createdAt !== secondItem.createdAt) {
-      return firstItem.createdAt - secondItem.createdAt
-    }
-
-    return firstItem.id.localeCompare(secondItem.id)
-  })
 }

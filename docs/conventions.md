@@ -232,6 +232,11 @@ Treat the workflow itself as improvable. If a task reveals unclear issue criteri
 
 Tests are co-located in `__tests__/` folders. Use `vi.useFakeTimers()` / `vi.advanceTimersByTime()` for timer-dependent logic. Use `renderHook` from RTL for hook tests.
 
+Shared test-only helpers that are reused across multiple areas live in
+`src/test/`. Keep them small and framework-specific only when the helper exists
+to remove repeated setup code, such as fake browser APIs or test database
+cleanup.
+
 ### Coverage
 
 `npm run test:coverage` enforces global Vitest thresholds of 90% lines, 90% statements, 90% functions, and 80% branches. The branch threshold is lower because UI and parser code naturally accumulates defensive and platform-specific branches, but new branch-heavy logic should still include focused tests for its meaningful paths instead of relying on the global total.

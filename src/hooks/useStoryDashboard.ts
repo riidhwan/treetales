@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
+import { getErrorMessage } from '@/lib/errors'
 import { getChaptersByStoryId } from '@/services/chapterDb'
 import {
   createExampleStory,
@@ -203,12 +204,4 @@ export function useStoryDashboard({
     sortedStories,
     title,
   }
-}
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return 'Something went wrong. Please try again.'
 }

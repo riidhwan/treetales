@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
+import { getErrorMessage } from '@/lib/errors'
 import {
   getChaptersByStoryId,
   getNextChapters,
@@ -213,12 +214,4 @@ export function useStoryReader({
     selectNextChapter,
     selectPreviousChapter,
   }
-}
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return 'Something went wrong. Please try again.'
 }

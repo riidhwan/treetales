@@ -1,19 +1,21 @@
-import { IDBFactory } from 'fake-indexeddb'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getChaptersByStoryId, getNextChapters } from '@/services/chapterDb'
-import { DB_NAME } from '@/services/db'
 import { createExampleStory } from '@/services/exampleStory'
 import { getStories } from '@/services/storyDb'
+import {
+  deleteTestDatabase,
+  installFakeIndexedDb,
+} from '@/test/indexedDb'
 
 describe('createExampleStory', () => {
   beforeEach(() => {
-    globalThis.indexedDB = new IDBFactory()
+    installFakeIndexedDb()
   })
 
   afterEach(async () => {
     vi.restoreAllMocks()
-    await deleteDatabase()
+    await deleteTestDatabase()
   })
 
   it('creates a readable branching example story', async () => {
@@ -54,21 +56,3 @@ describe('createExampleStory', () => {
     await expect(getStories()).resolves.toEqual([firstExampleStory.story])
   })
 })
-
-function deleteDatabase(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.deleteDatabase(DB_NAME)
-
-    request.onsuccess = () => {
-      resolve()
-    }
-
-    request.onerror = () => {
-      reject(request.error ?? new Error('Failed to delete test database.'))
-    }
-
-    request.onblocked = () => {
-      reject(new Error('Test database deletion was blocked.'))
-    }
-  })
-}
