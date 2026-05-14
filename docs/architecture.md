@@ -2,6 +2,12 @@
 
 React 19 + TanStack Start (React Router) + Tailwind CSS v4 + TypeScript strict mode. Client-side only — no server, no backend. IndexedDB for all persistence via a thin service layer.
 
+The app is installable as a basic PWA. `public/manifest.json` owns install
+metadata, `public/sw.js` provides the service worker, and `src/pwa.ts` registers
+it on the client. The service worker caches the app shell and static assets
+only; story persistence remains browser-local IndexedDB, with no cross-device
+offline sync.
+
 ## Layer-First Structure
 
 ```
