@@ -111,23 +111,31 @@ All exported functions have a one-line JSDoc comment when the behaviour is non-o
 
 ## Services (`src/services/`)
 
-Services are thin PGlite wrappers and domain data helpers. They own
-persistence transactions, schema upgrades, integrity checks, and input/output
-types. They do not own React state, UI state, or component navigation.
+Services are thin browser-local persistence wrappers and domain data helpers.
+They own persistence transactions, schema upgrades, integrity checks, and
+input/output types. They do not own React state, UI state, or component
+navigation.
+
+The active story and chapter services still use direct IndexedDB. PGlite
+foundation code is present but inactive until the service switch-over slice.
 
 Current service files are:
 
 | File | Responsibility |
 |---|---|
-| `db.ts` | PGlite connection, schema setup, transaction helpers, row mapping utilities |
+| `db.ts` | Active direct IndexedDB connection, upgrade, transaction helpers, legacy parent migration |
 | `storyDb.ts` | Story CRUD |
 | `chapterDb.ts` | Chapter CRUD and chapter graph integrity |
 | `exampleStory.ts` | Built-in example story creation/reuse |
 | `types.ts` | Shared records and input contracts |
+| `pgliteConfig.ts` | PGlite storage id and worker id constants |
+| `pglite.worker.ts` | PGlite multi-tab worker entry |
+| `pgliteDb.ts` | Inactive PGlite connection creation, schema setup, and forward migrations |
 
-Service tests use in-memory PGlite helpers from `src/test/` rather than
-duplicating database setup. Component and hook tests can keep using fake service
-dependencies when the persistence layer is not under test.
+Direct IndexedDB service tests use fake IndexedDB helpers from `src/test/`.
+PGlite foundation tests use the in-memory PGlite helper from `src/test/`.
+Component and hook tests can keep using fake service dependencies when the
+persistence layer is not under test.
 
 ## Optional Store (e.g. Zustand)
 
