@@ -39,6 +39,14 @@
   "Add Child Chapter" action that creates a child linked to the current chapter.
 - A tree view shows the story's branching structure.
 
+### Installable PWA
+- TreeTales can be installed from Android Chrome as a standalone app when served
+  from a secure HTTPS deployment.
+- The installed app opens at the story dashboard and uses the same browser-local
+  IndexedDB story data as the website.
+- The app shell and static assets are cached by a service worker for basic
+  repeat-load resilience. Offline data sync across devices is not supported.
+
 ### Branching Rules
 - The first chapter created in a story is the introductory chapter (no parents).
 - A chapter can only have zero or one parent chapter.
@@ -51,6 +59,6 @@
 - AI-assisted writing
 - Rich text editing
 - Story/chapter export
-- PWA / offline sync
+- Offline sync
 - Visual chapter graph
 - Reader path history view for longer sessions

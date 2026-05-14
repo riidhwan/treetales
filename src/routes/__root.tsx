@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
@@ -17,11 +18,27 @@ export const Route = createRootRoute({
       {
         title: 'TreeTales',
       },
+      {
+        name: 'description',
+        content: 'Write and read branching stories that live in your browser.',
+      },
+      {
+        name: 'theme-color',
+        content: '#166534',
+      },
     ],
     links: [
       {
         rel: 'stylesheet',
         href: appCss,
+      },
+      {
+        rel: 'manifest',
+        href: '/manifest.json',
+      },
+      {
+        rel: 'icon',
+        href: '/favicon.ico',
       },
     ],
   }),
@@ -33,6 +50,12 @@ interface RootDocumentProps {
 }
 
 function RootDocument({ children }: RootDocumentProps) {
+  useEffect(() => {
+    void import('@/pwa').then(({ registerAppServiceWorker }) => {
+      registerAppServiceWorker()
+    })
+  }, [])
+
   return (
     <html lang="en">
       <head>
