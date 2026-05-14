@@ -8,12 +8,7 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { StoryEditor } from '@/components/features/StoryEditor'
-import type {
-  Chapter,
-  CreateChapterInput,
-  Story,
-  UpdateStoryInput,
-} from '@/services/types'
+import type { Chapter, Story, UpdateStoryInput } from '@/services/types'
 
 function createStory(overrides: Partial<Story> = {}): Story {
   return {
@@ -46,20 +41,9 @@ interface CreateServicesOptions {
 
 function createServices(options?: CreateServicesOptions) {
   let story = options && 'story' in options ? options.story : createStory()
-  let chapters = options?.chapters ?? []
+  const chapters = options?.chapters ?? []
 
   return {
-    createChapter: vi.fn((input: CreateChapterInput) => {
-      const chapter = createChapter({
-        id: `chapter-${chapters.length + 1}`,
-        ...input,
-        createdAt: 200,
-        updatedAt: 200,
-      })
-      chapters = [...chapters, chapter]
-
-      return Promise.resolve(chapter)
-    }),
     getIntroChapterByStoryId: vi.fn((storyId: string) =>
       Promise.resolve(
         chapters
@@ -88,11 +72,13 @@ function createServices(options?: CreateServicesOptions) {
 }
 
 function renderEditor({
+  onCreateIntroChapter = vi.fn(),
   onEditChapter = vi.fn(),
   onOpenDashboard = vi.fn(),
   onReadStory = vi.fn(),
   services = createServices(),
 }: {
+  readonly onCreateIntroChapter?: (storyId: string) => void
   readonly onEditChapter?: (storyId: string, chapterId: string) => void
   readonly onOpenDashboard?: () => void
   readonly onReadStory?: (storyId: string) => void
@@ -100,6 +86,7 @@ function renderEditor({
 } = {}) {
   return render(
     <StoryEditor
+      onCreateIntroChapter={onCreateIntroChapter}
       onEditChapter={onEditChapter}
       onOpenDashboard={onOpenDashboard}
       onReadStory={onReadStory}
@@ -182,51 +169,18 @@ describe('StoryEditor', () => {
     ).toBeNull()
   })
 
-  it('creates one intro chapter and opens it for editing', async () => {
-    const onEditChapter = vi.fn()
+  it('opens the dedicated intro chapter creation route', async () => {
+    const onCreateIntroChapter = vi.fn()
     const services = createServices()
 
-    renderEditor({ onEditChapter, services })
+    renderEditor({ onCreateIntroChapter, services })
 
     await screen.findByText('Start with an intro chapter')
-    fireEvent.change(screen.getByLabelText('Intro chapter title'), {
-      target: { value: '  First Light  ' },
-    })
     fireEvent.click(
       screen.getByRole('button', { name: /add intro chapter/i }),
     )
 
-    await waitFor(() => {
-      expect(services.createChapter).toHaveBeenCalledWith({
-        content: '',
-        parentChapterId: null,
-        storyId: 'story-1',
-        title: 'First Light',
-      })
-    })
-    expect(await screen.findByRole('heading', { name: 'First Light' }))
-      .toBeTruthy()
-    expect(screen.queryByText('Start with an intro chapter')).toBeNull()
-    expect(onEditChapter).toHaveBeenCalledWith('story-1', 'chapter-1')
-  })
-
-  it('requires an intro chapter title before creating one', async () => {
-    const services = createServices()
-
-    renderEditor({ services })
-
-    await screen.findByText('Start with an intro chapter')
-    fireEvent.change(screen.getByLabelText('Intro chapter title'), {
-      target: { value: '   ' },
-    })
-
-    const createButton = screen.getByRole('button', {
-      name: /add intro chapter/i,
-    })
-    expect(createButton).toHaveProperty('disabled', true)
-    fireEvent.click(createButton)
-
-    expect(services.createChapter).not.toHaveBeenCalled()
+    expect(onCreateIntroChapter).toHaveBeenCalledWith('story-1')
   })
 
   it('saves trimmed title and description values', async () => {
@@ -356,24 +310,6 @@ describe('StoryEditor', () => {
 
     expect((await screen.findByRole('alert')).textContent).toBe(
       'Could not save story.',
-    )
-  })
-
-  it('shows an intro chapter creation failure message', async () => {
-    const services = createServices()
-    services.createChapter.mockRejectedValue(
-      new Error('Could not create chapter.'),
-    )
-
-    renderEditor({ services })
-
-    await screen.findByText('Start with an intro chapter')
-    fireEvent.click(
-      screen.getByRole('button', { name: /add intro chapter/i }),
-    )
-
-    expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not create chapter.',
     )
   })
 

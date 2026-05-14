@@ -54,11 +54,16 @@ function createServices(options?: CreateServicesOptions) {
 
 function renderReader({
   chapterId,
+  onCreateChildChapter = vi.fn(),
   onEditChapter = vi.fn(),
   onSelectChapter = vi.fn(),
   services = createServices(),
 }: {
   readonly chapterId?: string
+  readonly onCreateChildChapter?: (
+    storyId: string,
+    parentChapterId: string,
+  ) => void
   readonly onEditChapter?: (storyId: string, chapterId: string) => void
   readonly onSelectChapter?: (chapterId: string) => void
   readonly services?: ReturnType<typeof createServices>
@@ -66,6 +71,7 @@ function renderReader({
   return render(
     <StoryReader
       chapterId={chapterId}
+      onCreateChildChapter={onCreateChildChapter}
       onEditChapter={onEditChapter}
       onEditStory={vi.fn()}
       onOpenDashboard={vi.fn()}
@@ -204,6 +210,22 @@ describe('StoryReader', () => {
     expect(onEditChapter).toHaveBeenCalledWith('story-1', 'chapter-1')
   })
 
+  it('opens child chapter creation from the current chapter', async () => {
+    const onCreateChildChapter = vi.fn()
+    const services = createServices()
+
+    renderReader({ onCreateChildChapter, services })
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: /add child chapter/i }),
+    )
+
+    expect(onCreateChildChapter).toHaveBeenCalledWith(
+      'story-1',
+      'chapter-1',
+    )
+  })
+
   it('shows a missing chapter state for an invalid chapter id', async () => {
     const services = createServices()
 
@@ -232,7 +254,7 @@ describe('StoryReader', () => {
     fireEvent.click(await screen.findByRole('button', { name: /continue/i }))
 
     expect(onSelectChapter).toHaveBeenCalledWith('chapter-next')
-    expect(screen.getByRole('button', { name: 'Back' })).toBeTruthy()
+    expect(await screen.findByRole('button', { name: 'Back' })).toBeTruthy()
   })
 
   it('renders branch choices and navigates to the selected chapter', async () => {
@@ -259,7 +281,7 @@ describe('StoryReader', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Follow the river' }))
 
     expect(onSelectChapter).toHaveBeenCalledWith('chapter-river')
-    expect(screen.getByRole('button', { name: 'Back' })).toBeTruthy()
+    expect(await screen.findByRole('button', { name: 'Back' })).toBeTruthy()
   })
 
   it('navigates back to the previous chapter and trims the session path', async () => {
@@ -285,6 +307,7 @@ describe('StoryReader', () => {
     }
     const view = render(
       <StoryReader
+        onCreateChildChapter={vi.fn()}
         onEditChapter={vi.fn()}
         onEditStory={vi.fn()}
         onOpenDashboard={vi.fn()}
@@ -301,6 +324,7 @@ describe('StoryReader', () => {
     view.rerender(
       <StoryReader
         chapterId="chapter-next"
+        onCreateChildChapter={vi.fn()}
         onEditChapter={vi.fn()}
         onEditStory={vi.fn()}
         onOpenDashboard={vi.fn()}
@@ -361,6 +385,7 @@ describe('StoryReader', () => {
     }
     const view = render(
       <StoryReader
+        onCreateChildChapter={vi.fn()}
         onEditChapter={vi.fn()}
         onEditStory={vi.fn()}
         onOpenDashboard={vi.fn()}
@@ -376,6 +401,7 @@ describe('StoryReader', () => {
 
     view.rerender(
       <StoryReader
+        onCreateChildChapter={vi.fn()}
         onEditChapter={vi.fn()}
         onEditStory={vi.fn()}
         onOpenDashboard={vi.fn()}

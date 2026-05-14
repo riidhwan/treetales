@@ -1,24 +1,18 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 
-import { StoryEditor } from '@/components/features/StoryEditor'
+import { ChapterCreator } from '@/components/features/ChapterCreator'
 
-export const Route = createFileRoute('/stories/$storyId/edit')({
-  component: StoryEditorRoute,
+export const Route = createFileRoute('/stories/$storyId/chapters/new')({
+  component: IntroChapterCreatorRoute,
 })
 
-function StoryEditorRoute() {
+function IntroChapterCreatorRoute() {
   const { storyId } = Route.useParams()
   const navigate = useNavigate({ from: Route.fullPath })
 
   return (
-    <StoryEditor
-      onCreateIntroChapter={(selectedStoryId) =>
-        void navigate({
-          to: '/stories/$storyId/chapters/new',
-          params: { storyId: selectedStoryId },
-        })
-      }
-      onEditChapter={(selectedStoryId, selectedChapterId) =>
+    <ChapterCreator
+      onChapterCreated={(selectedStoryId, selectedChapterId) =>
         void navigate({
           to: '/stories/$storyId/chapters/$chapterId/edit',
           params: {
@@ -32,11 +26,10 @@ function StoryEditorRoute() {
           to: '/',
         })
       }
-      onReadStory={(selectedStoryId) =>
+      onOpenStoryEditor={(selectedStoryId) =>
         void navigate({
-          to: '/stories/$storyId/read',
+          to: '/stories/$storyId/edit',
           params: { storyId: selectedStoryId },
-          search: { chapterId: undefined },
         })
       }
       storyId={storyId}

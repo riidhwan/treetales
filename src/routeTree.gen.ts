@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StoriesStoryIdReadRouteImport } from './routes/stories.$storyId.read'
 import { Route as StoriesStoryIdEditRouteImport } from './routes/stories.$storyId.edit'
+import { Route as StoriesStoryIdChaptersNewRouteImport } from './routes/stories.$storyId.chapters.new'
 import { Route as StoriesStoryIdChaptersChapterIdEditRouteImport } from './routes/stories.$storyId.chapters.$chapterId.edit'
+import { Route as StoriesStoryIdChaptersChapterIdChildrenNewRouteImport } from './routes/stories.$storyId.chapters.$chapterId.children.new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,10 +31,22 @@ const StoriesStoryIdEditRoute = StoriesStoryIdEditRouteImport.update({
   path: '/stories/$storyId/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StoriesStoryIdChaptersNewRoute =
+  StoriesStoryIdChaptersNewRouteImport.update({
+    id: '/stories/$storyId/chapters/new',
+    path: '/stories/$storyId/chapters/new',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const StoriesStoryIdChaptersChapterIdEditRoute =
   StoriesStoryIdChaptersChapterIdEditRouteImport.update({
     id: '/stories/$storyId/chapters/$chapterId/edit',
     path: '/stories/$storyId/chapters/$chapterId/edit',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const StoriesStoryIdChaptersChapterIdChildrenNewRoute =
+  StoriesStoryIdChaptersChapterIdChildrenNewRouteImport.update({
+    id: '/stories/$storyId/chapters/$chapterId/children/new',
+    path: '/stories/$storyId/chapters/$chapterId/children/new',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -40,20 +54,26 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/stories/$storyId/edit': typeof StoriesStoryIdEditRoute
   '/stories/$storyId/read': typeof StoriesStoryIdReadRoute
+  '/stories/$storyId/chapters/new': typeof StoriesStoryIdChaptersNewRoute
   '/stories/$storyId/chapters/$chapterId/edit': typeof StoriesStoryIdChaptersChapterIdEditRoute
+  '/stories/$storyId/chapters/$chapterId/children/new': typeof StoriesStoryIdChaptersChapterIdChildrenNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/stories/$storyId/edit': typeof StoriesStoryIdEditRoute
   '/stories/$storyId/read': typeof StoriesStoryIdReadRoute
+  '/stories/$storyId/chapters/new': typeof StoriesStoryIdChaptersNewRoute
   '/stories/$storyId/chapters/$chapterId/edit': typeof StoriesStoryIdChaptersChapterIdEditRoute
+  '/stories/$storyId/chapters/$chapterId/children/new': typeof StoriesStoryIdChaptersChapterIdChildrenNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/stories/$storyId/edit': typeof StoriesStoryIdEditRoute
   '/stories/$storyId/read': typeof StoriesStoryIdReadRoute
+  '/stories/$storyId/chapters/new': typeof StoriesStoryIdChaptersNewRoute
   '/stories/$storyId/chapters/$chapterId/edit': typeof StoriesStoryIdChaptersChapterIdEditRoute
+  '/stories/$storyId/chapters/$chapterId/children/new': typeof StoriesStoryIdChaptersChapterIdChildrenNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -61,26 +81,34 @@ export interface FileRouteTypes {
     | '/'
     | '/stories/$storyId/edit'
     | '/stories/$storyId/read'
+    | '/stories/$storyId/chapters/new'
     | '/stories/$storyId/chapters/$chapterId/edit'
+    | '/stories/$storyId/chapters/$chapterId/children/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/stories/$storyId/edit'
     | '/stories/$storyId/read'
+    | '/stories/$storyId/chapters/new'
     | '/stories/$storyId/chapters/$chapterId/edit'
+    | '/stories/$storyId/chapters/$chapterId/children/new'
   id:
     | '__root__'
     | '/'
     | '/stories/$storyId/edit'
     | '/stories/$storyId/read'
+    | '/stories/$storyId/chapters/new'
     | '/stories/$storyId/chapters/$chapterId/edit'
+    | '/stories/$storyId/chapters/$chapterId/children/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   StoriesStoryIdEditRoute: typeof StoriesStoryIdEditRoute
   StoriesStoryIdReadRoute: typeof StoriesStoryIdReadRoute
+  StoriesStoryIdChaptersNewRoute: typeof StoriesStoryIdChaptersNewRoute
   StoriesStoryIdChaptersChapterIdEditRoute: typeof StoriesStoryIdChaptersChapterIdEditRoute
+  StoriesStoryIdChaptersChapterIdChildrenNewRoute: typeof StoriesStoryIdChaptersChapterIdChildrenNewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -106,11 +134,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoriesStoryIdEditRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stories/$storyId/chapters/new': {
+      id: '/stories/$storyId/chapters/new'
+      path: '/stories/$storyId/chapters/new'
+      fullPath: '/stories/$storyId/chapters/new'
+      preLoaderRoute: typeof StoriesStoryIdChaptersNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stories/$storyId/chapters/$chapterId/edit': {
       id: '/stories/$storyId/chapters/$chapterId/edit'
       path: '/stories/$storyId/chapters/$chapterId/edit'
       fullPath: '/stories/$storyId/chapters/$chapterId/edit'
       preLoaderRoute: typeof StoriesStoryIdChaptersChapterIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stories/$storyId/chapters/$chapterId/children/new': {
+      id: '/stories/$storyId/chapters/$chapterId/children/new'
+      path: '/stories/$storyId/chapters/$chapterId/children/new'
+      fullPath: '/stories/$storyId/chapters/$chapterId/children/new'
+      preLoaderRoute: typeof StoriesStoryIdChaptersChapterIdChildrenNewRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -120,8 +162,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   StoriesStoryIdEditRoute: StoriesStoryIdEditRoute,
   StoriesStoryIdReadRoute: StoriesStoryIdReadRoute,
+  StoriesStoryIdChaptersNewRoute: StoriesStoryIdChaptersNewRoute,
   StoriesStoryIdChaptersChapterIdEditRoute:
     StoriesStoryIdChaptersChapterIdEditRoute,
+  StoriesStoryIdChaptersChapterIdChildrenNewRoute:
+    StoriesStoryIdChaptersChapterIdChildrenNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

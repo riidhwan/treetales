@@ -4,9 +4,11 @@ React 19 + TanStack Start (React Router) + Tailwind CSS v4 + TypeScript strict m
 
 The app is installable as a basic PWA. `public/manifest.json` owns install
 metadata, `public/sw.js` provides the service worker, and `src/pwa.ts` registers
-it on the client. The service worker caches the app shell and static assets
-only; story persistence remains browser-local IndexedDB, with no cross-device
-offline sync.
+it on the production client. In development, `src/pwa.ts` unregisters local
+TreeTales service workers and clears their caches so Vite modules are never
+served from stale PWA storage. The service worker caches the app shell and
+static assets only; story persistence remains browser-local IndexedDB, with no
+cross-device offline sync.
 
 ## Layer-First Structure
 
@@ -66,7 +68,9 @@ specific:
 | File | Responsibility |
 |---|---|
 | `useStoryDashboard.ts` | Loads story summaries, creates stories/example content, deletes stories, and exposes dashboard form state |
-| `useStoryEditor.ts` | Loads editor data, resolves the intro chapter, saves story fields, and creates the introductory chapter |
+| `useStoryEditor.ts` | Loads editor data, resolves the intro chapter, and saves story fields |
+| `useChapterEditor.ts` | Loads one chapter and saves chapter fields |
+| `useChapterCreator.ts` | Loads story or parent chapter context and creates intro or child chapters from title + content |
 | `useStoryReader.ts` | Loads reader data, tracks the selected chapter, and exposes navigation options |
 
 Hooks depend on the service layer through small service interfaces with default
