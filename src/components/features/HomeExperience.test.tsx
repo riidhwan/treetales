@@ -68,6 +68,13 @@ function installMatchMedia({
   })
 }
 
+function installUserAgent(userAgent: string) {
+  Object.defineProperty(window.navigator, 'userAgent', {
+    configurable: true,
+    value: userAgent,
+  })
+}
+
 function createBeforeInstallPromptEvent(
   outcome: BeforeInstallPromptChoice['outcome'],
 ) {
@@ -94,10 +101,14 @@ describe('HomeExperience', () => {
   beforeEach(() => {
     window.localStorage.clear()
     installMatchMedia({ isMobile: true })
+    installUserAgent(
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Version/17.0 Mobile/15E148 Safari/604.1',
+    )
   })
 
   afterEach(() => {
     cleanup()
+    vi.useRealTimers()
     vi.restoreAllMocks()
   })
 
@@ -156,7 +167,30 @@ describe('HomeExperience', () => {
     ).toBeTruthy()
   })
 
-  it('shows fallback install guidance when no native prompt is available', async () => {
+  it('does not show manual guidance for Android Chrome before native prompt readiness', async () => {
+    installUserAgent(
+      'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/125.0.0.0 Mobile Safari/537.36',
+    )
+
+    renderHomeExperience()
+
+    const installButton = await screen.findByRole('button', {
+      name: /install app/i,
+    })
+    fireEvent.click(installButton)
+
+    expect(installButton).toHaveProperty('disabled', true)
+    expect(
+      screen.queryByText(
+        /open your browser menu and choose add to home screen or install app/i,
+      ),
+    ).toBe(null)
+    expect(
+      screen.getByText(/checking whether your browser can show its install prompt/i),
+    ).toBeTruthy()
+  })
+
+  it('shows fallback install guidance when unsupported browsers have no native prompt', async () => {
     renderHomeExperience()
 
     fireEvent.click(
@@ -170,7 +204,35 @@ describe('HomeExperience', () => {
     ).toBeTruthy()
   })
 
+  it('shows fallback install guidance when Android Chrome never exposes a native prompt', () => {
+    vi.useFakeTimers()
+    installUserAgent(
+      'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/125.0.0.0 Mobile Safari/537.36',
+    )
+
+    renderHomeExperience()
+
+    expect(
+      screen.getByText(
+        /checking whether your browser can show its install prompt/i,
+      ),
+    ).toBeTruthy()
+
+    act(() => {
+      vi.advanceTimersByTime(1500)
+    })
+
+    expect(
+      screen.getByText(
+        /open your browser menu and choose add to home screen or install app/i,
+      ),
+    ).toBeTruthy()
+  })
+
   it('uses the deferred native install prompt when available', async () => {
+    installUserAgent(
+      'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/125.0.0.0 Mobile Safari/537.36',
+    )
     renderHomeExperience()
     const installPromptEvent = createBeforeInstallPromptEvent('accepted')
 
@@ -189,5 +251,34 @@ describe('HomeExperience', () => {
     expect(
       await screen.findByRole('heading', { name: 'Story dashboard' }),
     ).toBeTruthy()
+  })
+
+  it('keeps the install choice visible when native installation is dismissed', async () => {
+    installUserAgent(
+      'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/125.0.0.0 Mobile Safari/537.36',
+    )
+    renderHomeExperience()
+    const installPromptEvent = createBeforeInstallPromptEvent('dismissed')
+
+    await screen.findByText(/add treetales to your home screen/i)
+    act(() => {
+      window.dispatchEvent(installPromptEvent)
+    })
+    fireEvent.click(screen.getByRole('button', { name: /install app/i }))
+
+    await waitFor(() => {
+      expect(installPromptEvent.prompt).toHaveBeenCalled()
+    })
+    expect(
+      window.localStorage.getItem(MOBILE_INSTALL_CHOICE_DISMISSED_KEY),
+    ).toBe(null)
+    expect(
+      await screen.findByText(
+        /installation was dismissed. you can try again or continue/i,
+      ),
+    ).toBeTruthy()
+    expect(screen.queryByRole('heading', { name: 'Story dashboard' })).toBe(
+      null,
+    )
   })
 })

@@ -3,7 +3,13 @@ import { useEffect, useState } from 'react'
 export const MOBILE_INSTALL_CHOICE_DISMISSED_KEY =
   'treetales.mobileInstallChoiceDismissed'
 
-type InstallStatus = 'accepted' | 'dismissed' | 'error' | 'guidance' | 'idle'
+type InstallStatus =
+  | 'accepted'
+  | 'dismissed'
+  | 'error'
+  | 'guidance'
+  | 'idle'
+  | 'pending'
 
 interface BeforeInstallPromptChoice {
   readonly outcome: 'accepted' | 'dismissed'
@@ -20,6 +26,7 @@ interface NavigatorWithStandalone extends Navigator {
 }
 
 interface MobileInstallChoiceState {
+  readonly canInstallNatively: boolean
   readonly installStatus: InstallStatus
   readonly isReady: boolean
   readonly shouldShowInstallChoice: boolean
@@ -27,6 +34,7 @@ interface MobileInstallChoiceState {
   readonly installApp: () => Promise<void>
 }
 
+const ANDROID_NATIVE_INSTALL_FALLBACK_DELAY_MS = 1500
 const INSTALL_GUIDANCE_STATUS: InstallStatus = 'guidance'
 
 export function useMobileInstallChoice(): MobileInstallChoiceState {
@@ -37,16 +45,33 @@ export function useMobileInstallChoice(): MobileInstallChoiceState {
   const [shouldShowInstallChoice, setShouldShowInstallChoice] = useState(false)
 
   useEffect(() => {
+    const isNativeInstallCandidate = isAndroidChromiumBrowser(window)
     const shouldShow =
       isMobileBrowser(window) &&
       !isRunningStandalone(window) &&
       !hasDismissedInstallChoice(window)
 
     setShouldShowInstallChoice(shouldShow)
+    setInstallStatus(
+      shouldShow && isNativeInstallCandidate ? 'pending' : INSTALL_GUIDANCE_STATUS,
+    )
     setIsReady(true)
+
+    let fallbackTimer: number | undefined
+
+    if (shouldShow && isNativeInstallCandidate) {
+      fallbackTimer = window.setTimeout(() => {
+        setInstallStatus((currentStatus) =>
+          currentStatus === 'pending' ? INSTALL_GUIDANCE_STATUS : currentStatus,
+        )
+      }, ANDROID_NATIVE_INSTALL_FALLBACK_DELAY_MS)
+    }
 
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault()
+      if (fallbackTimer !== undefined) {
+        window.clearTimeout(fallbackTimer)
+      }
       setDeferredPrompt(event as BeforeInstallPromptEvent)
       setInstallStatus('idle')
     }
@@ -66,6 +91,9 @@ export function useMobileInstallChoice(): MobileInstallChoiceState {
         handleBeforeInstallPrompt,
       )
       window.removeEventListener('appinstalled', handleAppInstalled)
+      if (fallbackTimer !== undefined) {
+        window.clearTimeout(fallbackTimer)
+      }
     }
   }, [])
 
@@ -76,6 +104,10 @@ export function useMobileInstallChoice(): MobileInstallChoiceState {
 
   const installApp = async () => {
     if (!deferredPrompt) {
+      if (installStatus === 'pending') {
+        return
+      }
+
       setInstallStatus(INSTALL_GUIDANCE_STATUS)
       return
     }
@@ -101,6 +133,7 @@ export function useMobileInstallChoice(): MobileInstallChoiceState {
   }
 
   return {
+    canInstallNatively: deferredPrompt !== null,
     continueToMobileSite,
     installApp,
     installStatus,
@@ -139,6 +172,12 @@ function isMobileBrowser(currentWindow: Window) {
   const hasCoarsePointer = matchesMedia(currentWindow, '(pointer: coarse)')
 
   return hasMobileUserAgent || (hasMobileViewport && hasCoarsePointer)
+}
+
+function isAndroidChromiumBrowser(currentWindow: Window) {
+  const userAgent = currentWindow.navigator.userAgent
+
+  return /Android/i.test(userAgent) && /Chrome|Chromium|CriOS|EdgA/i.test(userAgent)
 }
 
 function isRunningStandalone(currentWindow: Window) {

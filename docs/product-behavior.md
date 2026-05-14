@@ -46,10 +46,14 @@
   mobile visits go straight to the dashboard.
 - The install choice is skipped when TreeTales is already running in standalone
   installed-app mode.
-- Browsers that do not expose the native install prompt show concise Add to Home
-  Screen guidance from the install action.
-- TreeTales can be installed from Android Chrome as a standalone app when served
-  from a secure HTTPS deployment.
+- Android Chromium browsers use the browser's native PWA install prompt from
+  the install action once `beforeinstallprompt` is available. While that prompt
+  is not ready yet, the install action remains pending instead of showing manual
+  browser instructions.
+- Browsers that do not expose the native install prompt, including iOS browsers,
+  show concise Add to Home Screen guidance.
+- TreeTales can be installed from Android Chromium as a standalone app when
+  served from a secure HTTPS deployment.
 - The installed app opens at the story dashboard and uses the same browser-local
   IndexedDB story data as the website.
 - The app shell and static assets are cached by a service worker for basic

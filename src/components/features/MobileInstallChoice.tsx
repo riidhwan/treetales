@@ -3,19 +3,30 @@ import { Download, ExternalLink } from 'lucide-react'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 
-type InstallStatus = 'accepted' | 'dismissed' | 'error' | 'guidance' | 'idle'
+type InstallStatus =
+  | 'accepted'
+  | 'dismissed'
+  | 'error'
+  | 'guidance'
+  | 'idle'
+  | 'pending'
 
 interface Props {
+  readonly canInstallNatively: boolean
   readonly installStatus: InstallStatus
   readonly onContinue: () => void
   readonly onInstall: () => void
 }
 
 export function MobileInstallChoice({
+  canInstallNatively,
   installStatus,
   onContinue,
   onInstall,
 }: Props) {
+  const isWaitingForNativePrompt =
+    installStatus === 'pending' && !canInstallNatively
+
   return (
     <main className="flex min-h-screen bg-stone-50 px-5 py-8 text-stone-950">
       <section className="mx-auto flex w-full max-w-md flex-col justify-center gap-6">
@@ -32,6 +43,13 @@ export function MobileInstallChoice({
         {installStatus === 'guidance' ? (
           <Alert role="status">
             Open your browser menu and choose Add to Home Screen or Install App.
+          </Alert>
+        ) : null}
+
+        {isWaitingForNativePrompt ? (
+          <Alert role="status">
+            TreeTales is checking whether your browser can show its install
+            prompt.
           </Alert>
         ) : null}
 
@@ -52,6 +70,7 @@ export function MobileInstallChoice({
         <div className="grid gap-3">
           <Button
             className="w-full"
+            disabled={isWaitingForNativePrompt}
             onClick={onInstall}
             variant="primary"
           >
