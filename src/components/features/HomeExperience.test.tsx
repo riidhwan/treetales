@@ -167,28 +167,40 @@ describe('HomeExperience', () => {
     ).toBeTruthy()
   })
 
-  it('does not show manual guidance for Android Chrome before native prompt readiness', async () => {
-    installUserAgent(
+  it.each([
+    [
+      'Chrome',
       'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/125.0.0.0 Mobile Safari/537.36',
-    )
+    ],
+    [
+      'Edge',
+      'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/125.0.0.0 Mobile Safari/537.36 EdgA/125.0.0.0',
+    ],
+  ])(
+    'does not show manual guidance for Android %s before native prompt readiness',
+    async (_browserName, userAgent) => {
+      installUserAgent(userAgent)
 
-    renderHomeExperience()
+      renderHomeExperience()
 
-    const installButton = await screen.findByRole('button', {
-      name: /install app/i,
-    })
-    fireEvent.click(installButton)
+      const installButton = await screen.findByRole('button', {
+        name: /install app/i,
+      })
+      fireEvent.click(installButton)
 
-    expect(installButton).toHaveProperty('disabled', true)
-    expect(
-      screen.queryByText(
-        /open your browser menu and choose add to home screen or install app/i,
-      ),
-    ).toBe(null)
-    expect(
-      screen.getByText(/checking whether your browser can show its install prompt/i),
-    ).toBeTruthy()
-  })
+      expect(installButton).toHaveProperty('disabled', true)
+      expect(
+        screen.queryByText(
+          /open your browser menu and choose add to home screen or install app/i,
+        ),
+      ).toBe(null)
+      expect(
+        screen.getByText(
+          /checking whether your browser can show its install prompt/i,
+        ),
+      ).toBeTruthy()
+    },
+  )
 
   it('shows fallback install guidance when unsupported browsers have no native prompt', async () => {
     renderHomeExperience()
@@ -199,31 +211,6 @@ describe('HomeExperience', () => {
 
     expect(
       await screen.findByText(
-        /open your browser menu and choose add to home screen or install app/i,
-      ),
-    ).toBeTruthy()
-  })
-
-  it('shows fallback install guidance when Android Chrome never exposes a native prompt', () => {
-    vi.useFakeTimers()
-    installUserAgent(
-      'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/125.0.0.0 Mobile Safari/537.36',
-    )
-
-    renderHomeExperience()
-
-    expect(
-      screen.getByText(
-        /checking whether your browser can show its install prompt/i,
-      ),
-    ).toBeTruthy()
-
-    act(() => {
-      vi.advanceTimersByTime(1500)
-    })
-
-    expect(
-      screen.getByText(
         /open your browser menu and choose add to home screen or install app/i,
       ),
     ).toBeTruthy()

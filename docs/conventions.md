@@ -366,6 +366,11 @@ vi.mock('@/store/useAppStore', () => ({
 
 Live in `e2e/`, run with `npm run test:e2e`. Use Playwright + Chromium only. Keep E2E tests focused on user-observable browser behavior that cannot be proven as clearly or cheaply with unit/component tests.
 
+For browser-controlled platform UI such as PWA installation, keep assertions
+indirect and app-owned: assert TreeTales captures and calls
+`beforeinstallprompt` from a user action, and use manual/device smoke tests for
+the native Android install sheet itself.
+
 Every task must explicitly check whether E2E coverage is needed twice:
 
 - Before implementation: decide from the task shape whether E2E is expected, likely unnecessary, or a judgment call.
@@ -441,6 +446,7 @@ Maintenance:
 Key gotchas:
 - `reuseExistingServer: !process.env.CI` — kill the dev server before running tests after code changes, or Playwright reuses the stale one.
 - `@playwright/test` is the test runner; `playwright` is the browser library — they are separate packages.
+- If Playwright reports a missing browser executable, run `npx playwright install chromium`.
 - For tests that need deterministic order, mock `Math.random` in `page.addInitScript` and account for all random calls consumed by initial shuffling.
 - Validate carefully before using Playwright fake clocks; timer control can change input/submission behavior.
 

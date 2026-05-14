@@ -3,7 +3,9 @@ node_modules
 dist
 dist-ssr
 coverage
+playwright-report
 reports
+test-results
 *.local
 .env
 .nitro
