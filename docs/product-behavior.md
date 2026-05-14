@@ -64,7 +64,7 @@
 - TreeTales can be installed from Android Chromium as a standalone app when
   served from a secure HTTPS deployment.
 - The installed app opens at the story dashboard and uses the same browser-local
-  IndexedDB story data as the website.
+  PGlite story data as the website.
 - The app shell and static assets are cached by a service worker for basic
   repeat-load resilience. Offline data sync across devices is not supported.
 

@@ -111,7 +111,7 @@ All exported functions have a one-line JSDoc comment when the behaviour is non-o
 
 ## Services (`src/services/`)
 
-Services are thin IndexedDB wrappers and domain data helpers. They own
+Services are thin PGlite wrappers and domain data helpers. They own
 persistence transactions, schema upgrades, integrity checks, and input/output
 types. They do not own React state, UI state, or component navigation.
 
@@ -119,14 +119,15 @@ Current service files are:
 
 | File | Responsibility |
 |---|---|
-| `db.ts` | Database constants, upgrade path, typed request helpers, transaction helpers |
+| `db.ts` | PGlite connection, schema setup, transaction helpers, row mapping utilities |
 | `storyDb.ts` | Story CRUD |
 | `chapterDb.ts` | Chapter CRUD and chapter graph integrity |
 | `exampleStory.ts` | Built-in example story creation/reuse |
 | `types.ts` | Shared records and input contracts |
 
-Service tests use fake IndexedDB helpers from `src/test/` rather than
-duplicating database setup.
+Service tests use in-memory PGlite helpers from `src/test/` rather than
+duplicating database setup. Component and hook tests can keep using fake service
+dependencies when the persistence layer is not under test.
 
 ## Optional Store (e.g. Zustand)
 
@@ -219,7 +220,7 @@ Routine development happens on topic branches and merges to `master` through pul
 
 GitHub Issues are used for task tracking. Before implementation, check for an existing issue or create/draft one unless the change is truly tiny. Use `Refs #N` or `Closes #N` in commit messages when useful.
 
-Large changes are work that spans multiple features, broad refactors, risky behaviour changes, persistence/data-flow changes, or thousands of lines of code. Use one parent issue for the end goal and child issues for independently shippable slices. Each child issue must leave `master` buildable, testable, deployable, and safe for normal users.
+Large changes are work that spans multiple features, broad refactors, risky behaviour changes, persistence/data-flow changes, or thousands of lines of code. Use one parent issue for the end goal and native GitHub sub-issues for independently shippable slices. Do not rely only on textual `Refs #N` links when the sub-issue relationship is available. Each sub-issue must leave `master` buildable, testable, deployable, and safe for normal users. For tightly coupled migrations, inactive implementation slices are acceptable. For partial user-facing features that cannot safely ship yet, hide the incomplete behavior behind a feature flag that follows the feature flag rules below. Production behavior must switch in one coherent deployable sub-issue.
 
 Prefer vertical slices over layer-only mega-PRs:
 

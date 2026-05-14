@@ -1,13 +1,13 @@
 # Architecture
 
-React 19 + TanStack Start (React Router) + Tailwind CSS v4 + TypeScript strict mode. Client-side only — no server, no backend. IndexedDB for all persistence via a thin service layer.
+React 19 + TanStack Start (React Router) + Tailwind CSS v4 + TypeScript strict mode. Client-side only — no server, no backend. Browser-local PGlite persistence via a thin service layer.
 
 The app is installable as a basic PWA. `public/manifest.json` owns install
 metadata, `public/sw.js` provides the service worker, and `src/pwa.ts` registers
 it on the production client. In development, `src/pwa.ts` unregisters local
 TreeTales service workers and clears their caches so Vite modules are never
 served from stale PWA storage. The service worker caches the app shell and
-static assets only; story persistence remains browser-local IndexedDB, with no
+static assets only; story persistence remains browser-local PGlite, with no
 cross-device offline sync.
 
 ## Layer-First Structure
@@ -74,7 +74,7 @@ specific:
 | `useStoryReader.ts` | Loads reader data, tracks the selected chapter, and exposes navigation options |
 
 Hooks depend on the service layer through small service interfaces with default
-implementations. Tests can pass fake services without mocking IndexedDB.
+implementations. Tests can pass fake services without mocking PGlite.
 
 ## Shared Utilities (`src/lib/`)
 
@@ -108,14 +108,14 @@ Chapter {
 }
 ```
 
-Chapter content stays a plain `string` in IndexedDB and service contracts. The
+Chapter content stays a plain `string` in PGlite and service contracts. The
 reader and chapter authoring views interpret that string as markdown using
 common markdown, GFM extensions, and single-newline breaks; raw HTML is not
 rendered.
 
 ## Services Layer (`src/services/`)
 
-Thin wrappers around IndexedDB transactions. No state, no caching — components call services directly and manage their own loading/error state.
+Thin wrappers around PGlite transactions. No React state, no component caching — components call services directly and manage their own loading/error state.
 
 | File | Responsibility |
 |---|---|
@@ -123,7 +123,7 @@ Thin wrappers around IndexedDB transactions. No state, no caching — components
 | `chapterDb.ts` | Chapter CRUD: create, getById, getByStoryId, getIntroChapterByStoryId, update, delete; + getNextChapters(chapterId) |
 | `exampleStory.ts` | Creates or returns the built-in example story and its chapters |
 | `types.ts` | Shared service data shapes and create/update input contracts |
-| `db.ts` | IndexedDB schema constants, upgrade path, typed request helpers, and transaction helpers |
+| `db.ts` | PGlite connection, schema setup, transaction helpers, and row mapping utilities |
 
 Story and chapter records are created with `crypto.randomUUID()` ids and
 `Date.now()` timestamps. Updates preserve `createdAt` and refresh `updatedAt`.
@@ -138,20 +138,34 @@ Chapter writes enforce basic graph integrity before committing:
 - a chapter cannot parent itself
 - parent relationships cannot create cycles
 
-## IndexedDB Schema
+## PGlite Schema
 
-Single database `TreeTales` with two object stores:
+PGlite runs in the browser through the multi-tab worker and persists to a clean
+PGlite data directory, `idb://treetales-pglite`. Existing pre-production direct
+IndexedDB data does not need an automatic migration path.
+
+The schema uses plain SQL, owned by the service layer:
 
 - **`stories`** — keyed by `id`
-- **`chapters`** — keyed by `id`, indexed on `storyId` and on
-  `parentChapterId` for next-chapter lookups
+- **`chapters`** — keyed by `id`, with `story_id` referencing `stories.id`
+  and `parent_chapter_id` referencing `chapters.id`
+- Indexes on `chapters.story_id` and `chapters.parent_chapter_id`
+- A partial unique index on `chapters(story_id) where parent_chapter_id is null`
+  so each story has at most one intro chapter
 
-Version bumps happen when adding/modifying stores. See `src/services/db.ts` for the upgrade path.
+Deleting a story cascades to its chapters. Deleting a chapter clears direct
+children's parent chapter reference instead of deleting descendants. Chapter
+cycle prevention stays in application code inside the service layer.
+
+Schema setup and forward migrations live in `src/services/db.ts` or a focused
+database module under `src/services/`. Mutating service operations use explicit
+SQL transactions. Reads can use direct queries unless they are part of a write
+validation flow.
 
 ## Test Helpers (`src/test/`)
 
 Shared test-only helpers live in `src/test/` when they remove repeated setup
-across service, hook, route, or component tests. The current helper installs and
-resets a fake IndexedDB database for service tests. Keep these helpers small and
-specific to test infrastructure; production code should not import from
-`src/test/`.
+across service, hook, route, or component tests. Service tests use in-memory
+PGlite so SQL schema, constraints, transactions, and row mapping are exercised
+directly. Keep these helpers small and specific to test infrastructure;
+production code should not import from `src/test/`.
