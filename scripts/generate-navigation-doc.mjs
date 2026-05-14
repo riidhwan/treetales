@@ -1,4 +1,4 @@
-import { readdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import ts from 'typescript'
 
@@ -7,7 +7,6 @@ const ROUTES_DIR = path.join(ROOT, 'src/routes')
 const FEATURES_DIR = path.join(ROOT, 'src/components/features')
 const OUTPUT_PATH = path.join(ROOT, 'docs/navigation-flow.md')
 
-const FEATURE_COMPONENT_NAMES = new Set()
 const ROUTE_TITLE_BY_PATH = new Map([
   ['/', 'Home / Story Dashboard'],
   ['/stories/$storyId/read', 'Story Reader'],
@@ -355,7 +354,7 @@ function getRoutePaths(sourceFile) {
   return paths
 }
 
-function getRouteComponentName(sourceFile) {
+function getRouteComponentName(sourceFile, componentNames) {
   let componentName
 
   walk(sourceFile, (node) => {
@@ -365,7 +364,7 @@ function getRouteComponentName(sourceFile) {
 
     const name = getJsxTagName(node.tagName)
 
-    if (name && FEATURE_COMPONENT_NAMES.has(name)) {
+    if (name && componentNames.has(name)) {
       componentName = name
     }
   })
@@ -416,6 +415,20 @@ function getFunctionComponentName(node) {
     return node.name.text
   }
 
+  if (ts.isVariableStatement(node)) {
+    for (const declaration of node.declarationList.declarations) {
+      if (
+        ts.isIdentifier(declaration.name) &&
+        /^[A-Z]/.test(declaration.name.text) &&
+        declaration.initializer &&
+        (ts.isArrowFunction(declaration.initializer) ||
+          ts.isFunctionExpression(declaration.initializer))
+      ) {
+        return declaration.name.text
+      }
+    }
+  }
+
   return undefined
 }
 
@@ -450,27 +463,48 @@ function getButtonFallback(callbackName, type) {
 
 function getAnchorAction(openingElement, element) {
   const label = collectTextFromJsx(element)
-  const href = getAttributeText(getAttribute(openingElement, 'href'))
+  const hrefAttribute = getAttribute(openingElement, 'href')
+  const href = getStaticHref(hrefAttribute)
+  const fallback =
+    href ?? getDynamicHrefFallback(hrefAttribute) ?? 'No href detected'
 
   return {
     callbackName: undefined,
     element: 'link',
-    fallback: href ? href : 'No href detected',
+    fallback,
     label,
     target: href,
   }
 }
 
-function getChildUsage(openingElement) {
+function getStaticHref(attribute) {
+  if (!attribute || !ts.isJsxAttribute(attribute) || !attribute.initializer) {
+    return undefined
+  }
+
+  if (ts.isStringLiteral(attribute.initializer)) {
+    return attribute.initializer.text
+  }
+
+  return undefined
+}
+
+function getDynamicHrefFallback(attribute) {
+  const expression = getAttributeExpression(attribute)
+
+  return expression ? `Dynamic href \`{${expression.getText()}}\`` : undefined
+}
+
+function getChildUsage(openingElement, componentNames) {
   const childName = getJsxTagName(openingElement.tagName)
 
-  if (!childName || !FEATURE_COMPONENT_NAMES.has(childName)) {
+  if (!childName || !componentNames.has(childName)) {
     return undefined
   }
 
   const propMap = new Map()
 
-    for (const property of openingElement.attributes.properties) {
+  for (const property of openingElement.attributes.properties) {
     if (!ts.isJsxAttribute(property) || !ts.isIdentifier(property.name)) {
       continue
     }
@@ -493,24 +527,27 @@ function getChildUsage(openingElement) {
 
 async function getFeatureComponents() {
   const files = await listFiles(FEATURES_DIR, '.tsx')
+  const sourceFiles = await Promise.all(
+    files.map(async (file) => ({
+      file,
+      sourceFile: await parseSourceFile(file),
+    })),
+  )
+  const componentNames = new Set()
 
-  for (const file of files) {
-    const sourceFile = await parseSourceFile(file)
-
+  for (const { sourceFile } of sourceFiles) {
     walk(sourceFile, (node) => {
       const componentName = getFunctionComponentName(node)
 
       if (componentName) {
-        FEATURE_COMPONENT_NAMES.add(componentName)
+        componentNames.add(componentName)
       }
     })
   }
 
   const components = new Map()
 
-  for (const file of files) {
-    const sourceFile = await parseSourceFile(file)
-
+  for (const { file, sourceFile } of sourceFiles) {
     sourceFile.statements.forEach((statement) => {
       const componentName = getFunctionComponentName(statement)
 
@@ -532,13 +569,13 @@ async function getFeatureComponents() {
             actions.push(getAnchorAction(opening, node))
           }
 
-          const childUsage = getChildUsage(opening)
+          const childUsage = getChildUsage(opening, componentNames)
 
           if (childUsage && childUsage.childName !== componentName) {
             childUsages.push(childUsage)
           }
         } else if (ts.isJsxSelfClosingElement(node)) {
-          const childUsage = getChildUsage(node)
+          const childUsage = getChildUsage(node, componentNames)
 
           if (childUsage && childUsage.childName !== componentName) {
             childUsages.push(childUsage)
@@ -555,7 +592,7 @@ async function getFeatureComponents() {
     })
   }
 
-  return components
+  return { componentNames, components }
 }
 
 function collectComponentActions(
@@ -704,8 +741,16 @@ function getPageTitle(routePath, componentName) {
   return ROUTE_TITLE_BY_PATH.get(routePath) ?? componentName ?? routePath
 }
 
+function compareRoutePaths(left, right) {
+  if (left.routePath === right.routePath) {
+    return 0
+  }
+
+  return left.routePath < right.routePath ? -1 : 1
+}
+
 async function generateNavigationDoc() {
-  const components = await getFeatureComponents()
+  const { componentNames, components } = await getFeatureComponents()
   const routeFiles = await listFiles(ROUTES_DIR, '.tsx')
   const routes = []
 
@@ -716,14 +761,14 @@ async function generateNavigationDoc() {
     for (const routePath of routePaths) {
       routes.push({
         callbackTargets: getRouteCallbackTargets(sourceFile),
-        componentName: getRouteComponentName(sourceFile),
+        componentName: getRouteComponentName(sourceFile, componentNames),
         file,
         routePath,
       })
     }
   }
 
-  routes.sort((left, right) => left.routePath.localeCompare(right.routePath))
+  routes.sort(compareRoutePaths)
 
   const lines = [
     '# Navigation Flow',
@@ -819,6 +864,7 @@ async function generateNavigationDoc() {
     '',
   )
 
+  await mkdir(path.dirname(OUTPUT_PATH), { recursive: true })
   await writeFile(OUTPUT_PATH, lines.join('\n'), 'utf8')
 
   return OUTPUT_PATH
