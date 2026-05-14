@@ -18,7 +18,8 @@ or variants are useful.
 See `src/components/` structure in `@docs/architecture.md`.
 
 - `src/components/ui/` — Generic, reusable primitives currently including
-  `Alert`, `Button`, `TextArea`, and `TextInput`
+  `Alert`, `Button`, `MarkdownContent`, `MarkdownEditor`, `TextArea`, and
+  `TextInput`
 - `src/components/features/` — Full feature composites currently including
   `StoryDashboard`, `StoryEditor`, and `StoryReader`
 - `src/components/domain/` — Optional future layer for self-contained

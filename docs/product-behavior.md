@@ -13,7 +13,10 @@
 
 ### Story Reader
 - User opens a story from the dashboard and lands on the first chapter.
-- Chapter displays title and content.
+- Chapter displays title and content rendered from markdown text. Supported
+  markdown includes common markdown plus GFM tables, task lists,
+  strikethrough, autolinks, and single-newline breaks. Raw HTML in chapter
+  content is not rendered.
 - At the bottom:
   - Single next chapter → "Continue" button
   - Multiple next chapters → list of clickable choices
@@ -37,9 +40,12 @@
   existing parent chapter page, not from the top-level story editor.
 - Each chapter can be edited (title + content) in a separate form view.
 - Chapter editor is only for editing the selected chapter's title and content.
-- Chapter creation collects title and content, creates either the intro chapter
-  or a child linked to the selected parent chapter, then opens the new chapter
-  for editing.
+- Chapter creation collects title and markdown content, lets the user toggle
+  the content field between editing and markdown preview, creates either the
+  intro chapter or a child linked to the selected parent chapter, then opens the
+  new chapter for editing.
+- Chapter editing keeps the markdown textarea as the source of truth and lets
+  the user toggle to a markdown preview without converting the saved content.
 - A tree view shows the story's branching structure.
 
 ### Installable PWA
@@ -78,7 +84,6 @@
 
 ## Backlog (Future)
 - AI-assisted writing
-- Rich text editing
 - Story/chapter export
 - Offline sync
 - Visual chapter graph

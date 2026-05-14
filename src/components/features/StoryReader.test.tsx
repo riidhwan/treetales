@@ -177,6 +177,70 @@ describe('StoryReader', () => {
     expect(services.getNextChapters).toHaveBeenCalledWith('chapter-first')
   })
 
+  it('renders chapter content as markdown without rendering raw HTML', async () => {
+    const services = createServices({
+      chapters: [
+        createChapter({
+          content: [
+            '# The Warning',
+            '',
+            'A **bold** choice with [a map](https://example.com/map).',
+            '',
+            '- Pack a torch',
+            '- Close the gate',
+            '',
+            '<h2>Unsafe heading</h2>',
+          ].join('\n'),
+        }),
+      ],
+    })
+
+    renderReader({ services })
+
+    expect(await screen.findByRole('heading', { name: 'The Warning' }))
+      .toBeTruthy()
+    expect(screen.getByText('bold').tagName).toBe('STRONG')
+    expect(screen.getByRole('link', { name: 'a map' })).toHaveProperty(
+      'href',
+      'https://example.com/map',
+    )
+    expect(screen.getByText('Pack a torch').tagName).toBe('LI')
+    expect(
+      screen.queryByRole('heading', { name: 'Unsafe heading' }),
+    ).toBeNull()
+  })
+
+  it('renders single newlines in chapter content as line breaks', async () => {
+    const services = createServices({
+      chapters: [
+        createChapter({
+          content: 'First line\nSecond line',
+        }),
+      ],
+    })
+
+    const view = renderReader({ services })
+
+    await screen.findByRole('heading', { name: 'The Gate' })
+    const paragraph = Array.from(view.container.querySelectorAll('p')).find(
+      (element) =>
+        element.textContent?.includes('First line') &&
+        element.textContent.includes('Second line'),
+    )
+
+    expect(paragraph?.querySelector('br')).toBeTruthy()
+  })
+
+  it('shows the blank chapter fallback for empty content', async () => {
+    const services = createServices({
+      chapters: [createChapter({ content: '' })],
+    })
+
+    renderReader({ services })
+
+    expect(await screen.findByText('This chapter is blank.')).toBeTruthy()
+  })
+
   it('loads the current chapter from the chapter id', async () => {
     const chapters = [
       createChapter({ id: 'chapter-first', title: 'First Chapter' }),
@@ -336,7 +400,7 @@ describe('StoryReader', () => {
 
     expect(await screen.findByRole('heading', { name: 'Next Chapter' }))
       .toBeTruthy()
-    expect(screen.getByRole('button', { name: 'Back' })).toBeTruthy()
+    expect(await screen.findByRole('button', { name: 'Back' })).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
 
@@ -396,6 +460,21 @@ describe('StoryReader', () => {
     )
 
     fireEvent.click(await screen.findByRole('button', { name: /continue/i }))
+
+    expect(await screen.findByRole('button', { name: 'Back' })).toBeTruthy()
+
+    view.rerender(
+      <StoryReader
+        chapterId="story-1-next"
+        onCreateChildChapter={vi.fn()}
+        onEditChapter={vi.fn()}
+        onEditStory={vi.fn()}
+        onOpenDashboard={vi.fn()}
+        onSelectChapter={onSelectChapter}
+        services={services}
+        storyId="story-1"
+      />,
+    )
 
     expect(await screen.findByRole('button', { name: 'Back' })).toBeTruthy()
 
