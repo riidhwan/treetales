@@ -400,7 +400,7 @@ describe('StoryReader', () => {
 
     expect(await screen.findByRole('heading', { name: 'Next Chapter' }))
       .toBeTruthy()
-    expect(screen.getByRole('button', { name: 'Back' })).toBeTruthy()
+    expect(await screen.findByRole('button', { name: 'Back' })).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
 
