@@ -40,6 +40,14 @@
 - A tree view shows the story's branching structure.
 
 ### Installable PWA
+- On a first mobile browser visit, TreeTales shows an install choice before the
+  dashboard with actions to install the PWA or continue to the mobile site.
+- Choosing Continue stores that preference in the current browser so future
+  mobile visits go straight to the dashboard.
+- The install choice is skipped when TreeTales is already running in standalone
+  installed-app mode.
+- Browsers that do not expose the native install prompt show concise Add to Home
+  Screen guidance from the install action.
 - TreeTales can be installed from Android Chrome as a standalone app when served
   from a secure HTTPS deployment.
 - The installed app opens at the story dashboard and uses the same browser-local
