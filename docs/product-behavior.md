@@ -55,6 +55,12 @@
 - The app shell and static assets are cached by a service worker for basic
   repeat-load resilience. Offline data sync across devices is not supported.
 
+### Not Found
+- Unknown app paths render a TreeTales-styled not-found state instead of the
+  router's generic fallback.
+- The not-found state explains that the requested story path is unavailable and
+  provides a clear link back to the story dashboard at `/`.
+
 ### Branching Rules
 - The first chapter created in a story is the introductory chapter (no parents).
 - A chapter can only have zero or one parent chapter.
