@@ -12,16 +12,16 @@ import { TextInput } from '@/components/ui/TextInput'
 
 interface Props {
   readonly chapterId: string
+  readonly onGoBack: () => void
   readonly onOpenDashboard: () => void
-  readonly onOpenStoryEditor: (storyId: string) => void
   readonly services?: ChapterEditorServices
   readonly storyId: string
 }
 
 export function ChapterEditor({
   chapterId,
+  onGoBack,
   onOpenDashboard,
-  onOpenStoryEditor,
   services,
   storyId,
 }: Props) {
@@ -135,9 +135,9 @@ export function ChapterEditor({
           aria-label="Chapter editor actions"
           className="flex flex-wrap justify-between gap-3"
         >
-          <Button onClick={() => onOpenStoryEditor(storyId)} size="sm">
+          <Button onClick={onGoBack} size="sm">
             <ArrowLeft aria-hidden="true" size={16} />
-            Story Editor
+            Back
           </Button>
           <Button onClick={onOpenDashboard} size="sm">
             <Home aria-hidden="true" size={16} />

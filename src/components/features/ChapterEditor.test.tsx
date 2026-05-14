@@ -74,19 +74,19 @@ function createServices(options?: CreateServicesOptions) {
 }
 
 function renderChapterEditor({
+  onGoBack = vi.fn(),
   onOpenDashboard = vi.fn(),
-  onOpenStoryEditor = vi.fn(),
   services = createServices(),
 }: {
+  readonly onGoBack?: () => void
   readonly onOpenDashboard?: () => void
-  readonly onOpenStoryEditor?: (storyId: string) => void
   readonly services?: ReturnType<typeof createServices>
 } = {}) {
   return render(
     <ChapterEditor
       chapterId="chapter-1"
+      onGoBack={onGoBack}
       onOpenDashboard={onOpenDashboard}
-      onOpenStoryEditor={onOpenStoryEditor}
       services={services}
       storyId="story-1"
     />,
@@ -247,17 +247,17 @@ describe('ChapterEditor', () => {
     )
   })
 
-  it('calls dashboard and story editor navigation callbacks', async () => {
+  it('calls dashboard and back navigation callbacks', async () => {
+    const onGoBack = vi.fn()
     const onOpenDashboard = vi.fn()
-    const onOpenStoryEditor = vi.fn()
 
-    renderChapterEditor({ onOpenDashboard, onOpenStoryEditor })
+    renderChapterEditor({ onGoBack, onOpenDashboard })
 
     await screen.findByRole('heading', { name: 'The Gate' })
     fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Story Editor' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
 
     expect(onOpenDashboard).toHaveBeenCalled()
-    expect(onOpenStoryEditor).toHaveBeenCalledWith('story-1')
+    expect(onGoBack).toHaveBeenCalled()
   })
 })

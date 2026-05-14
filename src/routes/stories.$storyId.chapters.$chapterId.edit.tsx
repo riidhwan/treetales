@@ -1,4 +1,8 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  useNavigate,
+  useRouter,
+} from '@tanstack/react-router'
 
 import { ChapterEditor } from '@/components/features/ChapterEditor'
 
@@ -11,19 +15,15 @@ export const Route = createFileRoute(
 function ChapterEditorRoute() {
   const { chapterId, storyId } = Route.useParams()
   const navigate = useNavigate({ from: Route.fullPath })
+  const router = useRouter()
 
   return (
     <ChapterEditor
       chapterId={chapterId}
+      onGoBack={() => router.history.back()}
       onOpenDashboard={() =>
         void navigate({
           to: '/',
-        })
-      }
-      onOpenStoryEditor={(selectedStoryId) =>
-        void navigate({
-          to: '/stories/$storyId/edit',
-          params: { storyId: selectedStoryId },
         })
       }
       storyId={storyId}
