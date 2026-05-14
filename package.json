@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "build": "vite build",
+    "docs:navigation": "node scripts/generate-navigation-doc.mjs",
     "lint": "npm run lint:types && npm run lint:eslint",
     "lint:eslint": "eslint . --max-warnings=0",
     "lint:types": "tsc --noEmit",
