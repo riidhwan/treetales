@@ -26,6 +26,7 @@ const config = defineConfig(({ mode }) => {
         }),
     ],
     test: {
+      include: ['src/**/*.test.{ts,tsx}'],
       coverage: {
         provider: 'v8',
         include: ['src/**/*.{ts,tsx}'],

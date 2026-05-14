@@ -40,6 +40,14 @@ export default tseslint.config(
     },
   },
   {
+    files: ['e2e/**/*.{ts,tsx}'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+    },
+  },
+  {
     files: ['*.config.{js,mjs,cjs,ts}', 'eslint.config.js', 'scripts/**/*.{js,mjs,cjs}'],
     languageOptions: {
       globals: {

@@ -34,7 +34,6 @@ interface MobileInstallChoiceState {
   readonly installApp: () => Promise<void>
 }
 
-const ANDROID_NATIVE_INSTALL_FALLBACK_DELAY_MS = 1500
 const INSTALL_GUIDANCE_STATUS: InstallStatus = 'guidance'
 
 export function useMobileInstallChoice(): MobileInstallChoiceState {
@@ -57,21 +56,8 @@ export function useMobileInstallChoice(): MobileInstallChoiceState {
     )
     setIsReady(true)
 
-    let fallbackTimer: number | undefined
-
-    if (shouldShow && isNativeInstallCandidate) {
-      fallbackTimer = window.setTimeout(() => {
-        setInstallStatus((currentStatus) =>
-          currentStatus === 'pending' ? INSTALL_GUIDANCE_STATUS : currentStatus,
-        )
-      }, ANDROID_NATIVE_INSTALL_FALLBACK_DELAY_MS)
-    }
-
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault()
-      if (fallbackTimer !== undefined) {
-        window.clearTimeout(fallbackTimer)
-      }
       setDeferredPrompt(event as BeforeInstallPromptEvent)
       setInstallStatus('idle')
     }
@@ -91,9 +77,6 @@ export function useMobileInstallChoice(): MobileInstallChoiceState {
         handleBeforeInstallPrompt,
       )
       window.removeEventListener('appinstalled', handleAppInstalled)
-      if (fallbackTimer !== undefined) {
-        window.clearTimeout(fallbackTimer)
-      }
     }
   }, [])
 
