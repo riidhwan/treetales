@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 
-import { StoryDashboard } from '@/components/features/StoryDashboard'
+import { HomeExperience } from '@/components/features/HomeExperience'
 
 export const Route = createFileRoute('/')({ component: HomeRoute })
 
@@ -8,7 +8,7 @@ function HomeRoute() {
   const navigate = useNavigate({ from: Route.fullPath })
 
   return (
-    <StoryDashboard
+    <HomeExperience
       onEditStory={(storyId) =>
         void navigate({
           to: '/stories/$storyId/edit',
