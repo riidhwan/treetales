@@ -6,6 +6,7 @@ import {
 } from '@/hooks/useStoryReader'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
+import { MarkdownContent } from '@/components/ui/MarkdownContent'
 import type { Chapter } from '@/services/types'
 
 interface Props {
@@ -120,9 +121,11 @@ export function StoryReader({
           </div>
         </header>
 
-        <div className="whitespace-pre-wrap py-8 text-base leading-8 text-stone-800">
-          {currentChapter.content || 'This chapter is blank.'}
-        </div>
+        <MarkdownContent
+          className="space-y-5 py-8"
+          content={currentChapter.content}
+          emptyFallback="This chapter is blank."
+        />
 
         <footer className="border-t border-stone-200 pt-5">
           <NextChapterControls

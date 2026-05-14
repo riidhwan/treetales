@@ -4,6 +4,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -180,6 +181,59 @@ describe('ChapterCreator', () => {
     await waitFor(() => {
       expect(services.createChapter).toHaveBeenCalledWith({
         content: 'The stairs creak.',
+        parentChapterId: 'chapter-1',
+        storyId: 'story-1',
+        title: 'The Cellar',
+      })
+    })
+    expect(onChapterCreated).toHaveBeenCalledWith('story-1', 'chapter-2')
+  })
+
+  it('previews markdown while saving the raw markdown content', async () => {
+    const onChapterCreated = vi.fn()
+    const services = createServices()
+    const markdown = [
+      '## The Cellar',
+      '',
+      'Bring **matches**.',
+      '',
+      '- Listen',
+      '- Wait',
+    ].join('\n')
+
+    renderChapterCreator({ onChapterCreated, services })
+
+    await screen.findByRole('heading', { name: 'Add Child Chapter' })
+    expect(screen.queryByText('Nothing to preview yet.')).toBeNull()
+
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'The Cellar' },
+    })
+    fireEvent.change(screen.getByLabelText('Content'), {
+      target: { value: markdown },
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }))
+
+    const preview = screen.getByRole('region', { name: 'Content preview' })
+    expect(
+      within(preview).getByRole('heading', { name: 'The Cellar' }),
+    ).toBeTruthy()
+    expect(within(preview).getByText('matches').tagName).toBe('STRONG')
+    expect(within(preview).getByText('Listen').tagName).toBe('LI')
+    expect(screen.queryByLabelText('Content')).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
+
+    expect(screen.getByLabelText('Content')).toHaveProperty('value', markdown)
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /create chapter/i }),
+    )
+
+    await waitFor(() => {
+      expect(services.createChapter).toHaveBeenCalledWith({
+        content: markdown,
         parentChapterId: 'chapter-1',
         storyId: 'story-1',
         title: 'The Cellar',

@@ -7,7 +7,7 @@ import {
 } from '@/hooks/useChapterEditor'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
-import { TextArea } from '@/components/ui/TextArea'
+import { MarkdownEditor } from '@/components/ui/MarkdownEditor'
 import { TextInput } from '@/components/ui/TextInput'
 
 interface Props {
@@ -102,15 +102,12 @@ export function ChapterEditor({
                 value={title}
               />
             </label>
-            <label className="grid gap-2 text-sm font-medium text-stone-800">
-              Content
-              <TextArea
-                className="min-h-64"
-                name="content"
-                onChange={(event) => setContent(event.target.value)}
-                value={content}
-              />
-            </label>
+            <MarkdownEditor
+              label="Content"
+              name="content"
+              onChange={setContent}
+              value={content}
+            />
           </div>
 
           <div className="mt-6 flex flex-wrap gap-2">

@@ -48,7 +48,7 @@ over inlining it if it meets any of these criteria:
 
 | Sublayer | Rule | Examples |
 |---|---|---|
-| `ui/` | Generic, zero business logic, reusable anywhere | `Alert`, `Button`, `TextArea`, `TextInput` |
+| `ui/` | Generic, zero business logic, reusable anywhere | `Alert`, `Button`, `MarkdownContent`, `MarkdownEditor`, `TextArea`, `TextInput` |
 | `features/` | Composite feature UI that wires hooks, services, navigation callbacks, and UI primitives into a full user-facing unit | `StoryDashboard`, `StoryEditor`, `StoryReader` |
 
 There is currently no `components/domain/`. Add it only when a business-aware
@@ -101,12 +101,17 @@ Chapter {
   id: string
   storyId: string     // FK → Story.id
   title: string
-  content: string     // plain text (rich text is backlog)
+  content: string     // markdown text rendered by the UI
   parentChapterId: string | null  // chapter that branches TO this one, or null for the intro
   createdAt: number
   updatedAt: number
 }
 ```
+
+Chapter content stays a plain `string` in IndexedDB and service contracts. The
+reader and chapter authoring views interpret that string as markdown using
+common markdown, GFM extensions, and single-newline breaks; raw HTML is not
+rendered.
 
 ## Services Layer (`src/services/`)
 

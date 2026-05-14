@@ -4,6 +4,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -163,6 +164,56 @@ describe('ChapterEditor', () => {
     expect((await screen.findByRole('status')).textContent).toBe(
       'Chapter saved.',
     )
+  })
+
+  it('previews markdown while saving the raw markdown content', async () => {
+    const services = createServices({
+      chapters: [
+        createChapter({
+          content: 'Plain opening.',
+        }),
+      ],
+    })
+    const markdown = [
+      '## River Fork',
+      '',
+      'Choose the **left** bank.',
+      '',
+      '- Watch the stones',
+      '- Keep quiet',
+    ].join('\n')
+
+    renderChapterEditor({ services })
+
+    await screen.findByRole('heading', { name: 'The Gate' })
+    expect(screen.queryByRole('region', { name: 'Content preview' })).toBeNull()
+
+    fireEvent.change(screen.getByLabelText('Content'), {
+      target: { value: markdown },
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }))
+
+    const preview = screen.getByRole('region', { name: 'Content preview' })
+    expect(
+      within(preview).getByRole('heading', { name: 'River Fork' }),
+    ).toBeTruthy()
+    expect(within(preview).getByText('left').tagName).toBe('STRONG')
+    expect(within(preview).getByText('Watch the stones').tagName).toBe('LI')
+    expect(screen.queryByLabelText('Content')).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
+
+    expect(screen.getByLabelText('Content')).toHaveProperty('value', markdown)
+
+    fireEvent.click(screen.getByRole('button', { name: /save chapter/i }))
+
+    await waitFor(() => {
+      expect(services.updateChapter).toHaveBeenCalledWith('chapter-1', {
+        content: markdown,
+        title: 'The Gate',
+      })
+    })
   })
 
   it('disables save when the title is blank', async () => {
