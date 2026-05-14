@@ -461,6 +461,8 @@ describe('StoryReader', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: /continue/i }))
 
+    expect(await screen.findByRole('button', { name: 'Back' })).toBeTruthy()
+
     view.rerender(
       <StoryReader
         chapterId="story-1-next"
