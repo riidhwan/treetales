@@ -42,6 +42,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (request.mode === 'navigate') {
+    // Basic PWA fallback: deep offline navigations load the cached dashboard.
     event.respondWith(fetch(request).catch(() => caches.match('/')))
     return
   }
