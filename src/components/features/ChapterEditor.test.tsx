@@ -8,12 +8,7 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { ChapterEditor } from '@/components/features/ChapterEditor'
-import type {
-  Chapter,
-  CreateChapterInput,
-  Story,
-  UpdateChapterInput,
-} from '@/services/types'
+import type { Chapter, Story, UpdateChapterInput } from '@/services/types'
 
 function createStory(overrides: Partial<Story> = {}): Story {
   return {
@@ -49,24 +44,8 @@ function createServices(options?: CreateServicesOptions) {
   const story = options && 'story' in options ? options.story : createStory()
 
   return {
-    createChapter: vi.fn((input: CreateChapterInput) => {
-      const chapter = createChapter({
-        id: `chapter-${chapters.length + 1}`,
-        ...input,
-        createdAt: 200,
-        updatedAt: 200,
-      })
-      chapters = [...chapters, chapter]
-
-      return Promise.resolve(chapter)
-    }),
     getChapterById: vi.fn((chapterId: string) =>
       Promise.resolve(chapters.find((chapter) => chapter.id === chapterId)),
-    ),
-    getNextChapters: vi.fn((chapterId: string) =>
-      Promise.resolve(
-        chapters.filter((chapter) => chapter.parentChapterId === chapterId),
-      ),
     ),
     getStoryById: vi.fn((storyId: string) =>
       Promise.resolve(story?.id === storyId ? story : undefined),
@@ -95,12 +74,10 @@ function createServices(options?: CreateServicesOptions) {
 }
 
 function renderChapterEditor({
-  onEditChapter = vi.fn(),
   onOpenDashboard = vi.fn(),
   onOpenStoryEditor = vi.fn(),
   services = createServices(),
 }: {
-  readonly onEditChapter?: (storyId: string, chapterId: string) => void
   readonly onOpenDashboard?: () => void
   readonly onOpenStoryEditor?: (storyId: string) => void
   readonly services?: ReturnType<typeof createServices>
@@ -108,7 +85,6 @@ function renderChapterEditor({
   return render(
     <ChapterEditor
       chapterId="chapter-1"
-      onEditChapter={onEditChapter}
       onOpenDashboard={onOpenDashboard}
       onOpenStoryEditor={onOpenStoryEditor}
       services={services}
@@ -161,7 +137,7 @@ describe('ChapterEditor', () => {
       'value',
       'The path begins here.',
     )
-    expect(screen.getByText('No child chapters yet.')).toBeTruthy()
+    expect(screen.queryByRole('heading', { name: 'Child Chapters' })).toBeNull()
   })
 
   it('saves trimmed title and raw content values', async () => {
@@ -230,51 +206,17 @@ describe('ChapterEditor', () => {
     ).toBeTruthy()
   })
 
-  it('shows existing child chapters and opens one for editing', async () => {
-    const onEditChapter = vi.fn()
-    const services = createServices({
-      chapters: [
-        createChapter(),
-        createChapter({
-          id: 'chapter-child',
-          parentChapterId: 'chapter-1',
-          title: 'Across the Bridge',
-        }),
-      ],
-    })
-
-    renderChapterEditor({ onEditChapter, services })
-
-    expect(await screen.findByRole('heading', { name: 'Across the Bridge' }))
-      .toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
-
-    expect(onEditChapter).toHaveBeenCalledWith('story-1', 'chapter-child')
-  })
-
-  it('creates a child chapter and opens it for editing', async () => {
-    const onEditChapter = vi.fn()
+  it('does not show child chapter controls on the edit page', async () => {
     const services = createServices()
 
-    renderChapterEditor({ onEditChapter, services })
+    renderChapterEditor({ services })
 
     await screen.findByRole('heading', { name: 'The Gate' })
-    fireEvent.change(screen.getByLabelText('Child chapter title'), {
-      target: { value: '  The Cellar  ' },
-    })
-    fireEvent.click(
-      screen.getByRole('button', { name: /add child chapter/i }),
-    )
 
-    await waitFor(() => {
-      expect(services.createChapter).toHaveBeenCalledWith({
-        content: '',
-        parentChapterId: 'chapter-1',
-        storyId: 'story-1',
-        title: 'The Cellar',
-      })
-    })
-    expect(onEditChapter).toHaveBeenCalledWith('story-1', 'chapter-2')
+    expect(
+      screen.queryByRole('button', { name: /add child chapter/i }),
+    ).toBeNull()
+    expect(screen.queryByRole('heading', { name: 'Child Chapters' })).toBeNull()
   })
 
   it('shows load and save failure messages', async () => {

@@ -11,6 +11,7 @@ import { TextInput } from '@/components/ui/TextInput'
 import type { Chapter } from '@/services/types'
 
 interface Props {
+  readonly onCreateIntroChapter: (storyId: string) => void
   readonly onEditChapter: (storyId: string, chapterId: string) => void
   readonly onOpenDashboard: () => void
   readonly onReadStory: (storyId: string) => void
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function StoryEditor({
+  onCreateIntroChapter,
   onEditChapter,
   onOpenDashboard,
   onReadStory,
@@ -26,17 +28,12 @@ export function StoryEditor({
   storyId,
 }: Props) {
   const {
-    canCreateIntroChapter,
     canSave,
-    createIntroChapter,
     description,
     errorMessage,
-    introChapterTitle,
-    isCreatingIntroChapter,
     isSaving,
     saveStory,
     setDescription,
-    setIntroChapterTitle,
     setTitle,
     introChapter,
     status,
@@ -48,19 +45,6 @@ export function StoryEditor({
   function handleSave(event: React.SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
     saveStory().catch(() => undefined)
-  }
-
-  function handleCreateIntroChapter(
-    event: React.SyntheticEvent<HTMLFormElement>,
-  ) {
-    event.preventDefault()
-    createIntroChapter()
-      .then((chapter) => {
-        if (chapter) {
-          onEditChapter(storyId, chapter.id)
-        }
-      })
-      .catch(() => undefined)
   }
 
   let editorContent: React.ReactNode
@@ -146,12 +130,8 @@ export function StoryEditor({
         </form>
 
         <ChapterSection
-          canCreateIntroChapter={canCreateIntroChapter}
-          introChapterTitle={introChapterTitle}
-          isCreatingIntroChapter={isCreatingIntroChapter}
-          onCreateIntroChapter={handleCreateIntroChapter}
+          onCreateIntroChapter={() => onCreateIntroChapter(storyId)}
           onEditChapter={(chapterId) => onEditChapter(storyId, chapterId)}
-          onIntroChapterTitleChange={setIntroChapterTitle}
           introChapter={introChapter}
         />
       </>
@@ -187,24 +167,14 @@ export function StoryEditor({
 }
 
 interface ChapterSectionProps {
-  readonly canCreateIntroChapter: boolean
-  readonly introChapterTitle: string
-  readonly isCreatingIntroChapter: boolean
-  readonly onCreateIntroChapter: (
-    event: React.SyntheticEvent<HTMLFormElement>,
-  ) => void
+  readonly onCreateIntroChapter: () => void
   readonly onEditChapter: (chapterId: string) => void
-  readonly onIntroChapterTitleChange: (title: string) => void
   readonly introChapter?: Chapter
 }
 
 function ChapterSection({
-  canCreateIntroChapter,
-  introChapterTitle,
-  isCreatingIntroChapter,
   onCreateIntroChapter,
   onEditChapter,
-  onIntroChapterTitleChange,
   introChapter,
 }: ChapterSectionProps) {
   return (
@@ -224,35 +194,19 @@ function ChapterSection({
           onEditChapter={onEditChapter}
         />
       ) : (
-        <IntroChapterForm
-          canCreateIntroChapter={canCreateIntroChapter}
-          introChapterTitle={introChapterTitle}
-          isCreatingIntroChapter={isCreatingIntroChapter}
-          onCreateIntroChapter={onCreateIntroChapter}
-          onIntroChapterTitleChange={onIntroChapterTitleChange}
-        />
+        <IntroChapterEmptyState onCreateIntroChapter={onCreateIntroChapter} />
       )}
     </section>
   )
 }
 
-interface IntroChapterFormProps {
-  readonly canCreateIntroChapter: boolean
-  readonly introChapterTitle: string
-  readonly isCreatingIntroChapter: boolean
-  readonly onCreateIntroChapter: (
-    event: React.SyntheticEvent<HTMLFormElement>,
-  ) => void
-  readonly onIntroChapterTitleChange: (title: string) => void
+interface IntroChapterEmptyStateProps {
+  readonly onCreateIntroChapter: () => void
 }
 
-function IntroChapterForm({
-  canCreateIntroChapter,
-  introChapterTitle,
-  isCreatingIntroChapter,
+function IntroChapterEmptyState({
   onCreateIntroChapter,
-  onIntroChapterTitleChange,
-}: IntroChapterFormProps) {
+}: IntroChapterEmptyStateProps) {
   return (
     <div className="mt-6 rounded-lg border border-dashed border-stone-300 bg-stone-50 p-5">
       <h3 className="text-base font-semibold">Start with an intro chapter</h3>
@@ -260,30 +214,14 @@ function IntroChapterForm({
         Every story begins with one top-level chapter. Later chapters are added
         from the chapter they follow.
       </p>
-      <form
-        className="mt-5 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end"
-        onSubmit={onCreateIntroChapter}
+      <Button
+        className="mt-5"
+        onClick={onCreateIntroChapter}
+        variant="primary"
       >
-        <label className="grid gap-2 text-sm font-medium text-stone-800">
-          Intro chapter title
-          <TextInput
-            name="introChapterTitle"
-            onChange={(event) =>
-              onIntroChapterTitleChange(event.target.value)
-            }
-            value={introChapterTitle}
-          />
-        </label>
-        <Button
-          className="sm:mb-0"
-          disabled={!canCreateIntroChapter}
-          type="submit"
-          variant="primary"
-        >
-          <PlusCircle aria-hidden="true" size={18} />
-          {isCreatingIntroChapter ? 'Creating...' : 'Add Intro Chapter'}
-        </Button>
-      </form>
+        <PlusCircle aria-hidden="true" size={18} />
+        Add Intro Chapter
+      </Button>
     </div>
   )
 }

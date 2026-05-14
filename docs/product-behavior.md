@@ -24,19 +24,22 @@
   trims the latest chapter from the path.
 - Reader path history is scoped to the current story and resets when opening a
   different story.
-- Reader is read-only — no editing in this view.
+- Reader does not edit inline, but the current chapter page has actions to edit
+  the chapter or add a child chapter from it.
 
 ### Story Editor
 - User opens a story in edit mode from the dashboard.
 - Edit story title and description at the top.
 - Intro chapter panel below with a clear empty state when no intro exists.
 - When a story has no chapters, the editor offers an "Add Intro Chapter"
-  action that creates the introductory chapter.
+  action that opens a separate intro chapter creation page.
 - Once the introductory chapter exists, new chapters are added from an
   existing parent chapter page, not from the top-level story editor.
 - Each chapter can be edited (title + content) in a separate form view.
-- Chapter editor shows the chapter's outgoing child chapters and includes an
-  "Add Child Chapter" action that creates a child linked to the current chapter.
+- Chapter editor is only for editing the selected chapter's title and content.
+- Chapter creation collects title and content, creates either the intro chapter
+  or a child linked to the selected parent chapter, then opens the new chapter
+  for editing.
 - A tree view shows the story's branching structure.
 
 ### Installable PWA

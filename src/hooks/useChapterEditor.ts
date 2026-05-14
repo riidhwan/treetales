@@ -1,24 +1,12 @@
 import { useEffect, useState } from 'react'
 
 import { getErrorMessage } from '@/lib/errors'
-import {
-  createChapter,
-  getChapterById,
-  getNextChapters,
-  updateChapter,
-} from '@/services/chapterDb'
+import { getChapterById, updateChapter } from '@/services/chapterDb'
 import { getStoryById } from '@/services/storyDb'
-import type {
-  Chapter,
-  CreateChapterInput,
-  Story,
-  UpdateChapterInput,
-} from '@/services/types'
+import type { Chapter, Story, UpdateChapterInput } from '@/services/types'
 
 export interface ChapterEditorServices {
-  readonly createChapter: (input: CreateChapterInput) => Promise<Chapter>
   readonly getChapterById: (chapterId: string) => Promise<Chapter | undefined>
-  readonly getNextChapters: (chapterId: string) => Promise<Chapter[]>
   readonly getStoryById: (storyId: string) => Promise<Story | undefined>
   readonly updateChapter: (
     chapterId: string,
@@ -27,9 +15,7 @@ export interface ChapterEditorServices {
 }
 
 export const DEFAULT_CHAPTER_EDITOR_SERVICES: ChapterEditorServices = {
-  createChapter,
   getChapterById,
-  getNextChapters,
   getStoryById,
   updateChapter,
 }
@@ -52,30 +38,20 @@ export function useChapterEditor({
   storyId,
 }: UseChapterEditorOptions) {
   const [chapter, setChapter] = useState<Chapter | undefined>()
-  const [childChapters, setChildChapters] = useState<Chapter[]>([])
   const [content, setContent] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | undefined>()
-  const [isCreatingChildChapter, setIsCreatingChildChapter] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [newChildChapterTitle, setNewChildChapterTitle] =
-    useState('New chapter')
   const [status, setStatus] = useState<ChapterEditorStatus>('loading')
   const [story, setStory] = useState<Story | undefined>()
   const [successMessage, setSuccessMessage] = useState<string | undefined>()
   const [title, setTitle] = useState('')
 
   const trimmedTitle = title.trim()
-  const trimmedNewChildChapterTitle = newChildChapterTitle.trim()
   const canSave =
     Boolean(chapter) &&
     status === 'ready' &&
     trimmedTitle.length > 0 &&
     !isSaving
-  const canCreateChildChapter =
-    Boolean(chapter) &&
-    status === 'ready' &&
-    trimmedNewChildChapterTitle.length > 0 &&
-    !isCreatingChildChapter
 
   useEffect(() => {
     let isCurrent = true
@@ -94,7 +70,6 @@ export function useChapterEditor({
 
         if (!loadedStory) {
           setChapter(undefined)
-          setChildChapters([])
           setStory(undefined)
           setStatus('missing-story')
           return
@@ -108,24 +83,12 @@ export function useChapterEditor({
 
         if (!loadedChapter || loadedChapter.storyId !== storyId) {
           setChapter(undefined)
-          setChildChapters([])
           setStory(loadedStory)
           setStatus('missing-chapter')
           return
         }
 
-        const loadedChildChapters = await services.getNextChapters(chapterId)
-
-        if (!isCurrent) {
-          return
-        }
-
         setChapter(loadedChapter)
-        setChildChapters(
-          loadedChildChapters.filter(
-            (childChapter) => childChapter.storyId === storyId,
-          ),
-        )
         setContent(loadedChapter.content)
         setStory(loadedStory)
         setTitle(loadedChapter.title)
@@ -177,53 +140,14 @@ export function useChapterEditor({
     }
   }
 
-  async function createChildChapter() {
-    if (!canCreateChildChapter) {
-      return undefined
-    }
-
-    setIsCreatingChildChapter(true)
-    setErrorMessage(undefined)
-    setSuccessMessage(undefined)
-
-    try {
-      const childChapter = await services.createChapter({
-        content: '',
-        parentChapterId: chapterId,
-        storyId,
-        title: trimmedNewChildChapterTitle,
-      })
-
-      setChildChapters((currentChildChapters) => [
-        ...currentChildChapters,
-        childChapter,
-      ])
-      setNewChildChapterTitle('New chapter')
-      setSuccessMessage('Child chapter created.')
-
-      return childChapter
-    } catch (error) {
-      setErrorMessage(getErrorMessage(error))
-      return undefined
-    } finally {
-      setIsCreatingChildChapter(false)
-    }
-  }
-
   return {
-    canCreateChildChapter,
     canSave,
     chapter,
-    childChapters,
     content,
-    createChildChapter,
     errorMessage,
-    isCreatingChildChapter,
     isSaving,
-    newChildChapterTitle,
     saveChapter,
     setContent,
-    setNewChildChapterTitle,
     setTitle,
     status,
     story,

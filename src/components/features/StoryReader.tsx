@@ -1,4 +1,4 @@
-import { ArrowLeft, BookOpen, Edit3, Home } from 'lucide-react'
+import { ArrowLeft, BookOpen, Edit3, Home, PlusCircle } from 'lucide-react'
 
 import {
   type StoryReaderServices,
@@ -10,6 +10,7 @@ import type { Chapter } from '@/services/types'
 
 interface Props {
   readonly chapterId?: string
+  readonly onCreateChildChapter: (storyId: string, parentChapterId: string) => void
   readonly onEditChapter: (storyId: string, chapterId: string) => void
   readonly onEditStory: (storyId: string) => void
   readonly onOpenDashboard: () => void
@@ -20,6 +21,7 @@ interface Props {
 
 export function StoryReader({
   chapterId,
+  onCreateChildChapter,
   onEditChapter,
   onEditStory,
   onOpenDashboard,
@@ -97,14 +99,25 @@ export function StoryReader({
             {story.title}
           </p>
           <h1 className="mt-2 text-3xl font-bold">{currentChapter.title}</h1>
-          <Button
-            className="mt-4"
-            onClick={() => onEditChapter(storyId, currentChapter.id)}
-            size="sm"
-          >
-            <Edit3 aria-hidden="true" size={16} />
-            Edit Chapter
-          </Button>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              onClick={() => onEditChapter(storyId, currentChapter.id)}
+              size="sm"
+            >
+              <Edit3 aria-hidden="true" size={16} />
+              Edit Chapter
+            </Button>
+            <Button
+              onClick={() =>
+                onCreateChildChapter(storyId, currentChapter.id)
+              }
+              size="sm"
+              variant="primary"
+            >
+              <PlusCircle aria-hidden="true" size={16} />
+              Add Child Chapter
+            </Button>
+          </div>
         </header>
 
         <div className="whitespace-pre-wrap py-8 text-base leading-8 text-stone-800">
