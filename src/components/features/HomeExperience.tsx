@@ -15,6 +15,7 @@ export function HomeExperience({
   services,
 }: Props) {
   const {
+    canInstallNatively,
     continueToMobileSite,
     installApp,
     installStatus,
@@ -29,6 +30,7 @@ export function HomeExperience({
   if (shouldShowInstallChoice) {
     return (
       <MobileInstallChoice
+        canInstallNatively={canInstallNatively}
         installStatus={installStatus}
         onContinue={continueToMobileSite}
         onInstall={() => void installApp()}
