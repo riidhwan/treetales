@@ -32,6 +32,7 @@ const config = defineConfig(({ mode }) => {
         include: ['src/**/*.{ts,tsx}'],
         exclude: [
           'src/**/*.test.{ts,tsx}',
+          'src/**/*.worker.ts',
           'src/routes/**',
           'src/routeTree.gen.ts',
         ],

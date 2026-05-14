@@ -1,14 +1,14 @@
 # Architecture
 
-React 19 + TanStack Start (React Router) + Tailwind CSS v4 + TypeScript strict mode. Client-side only — no server, no backend. Browser-local PGlite persistence via a thin service layer.
+React 19 + TanStack Start (React Router) + Tailwind CSS v4 + TypeScript strict mode. Client-side only — no server, no backend. Browser-local persistence through a thin service layer.
 
 The app is installable as a basic PWA. `public/manifest.json` owns install
 metadata, `public/sw.js` provides the service worker, and `src/pwa.ts` registers
 it on the production client. In development, `src/pwa.ts` unregisters local
 TreeTales service workers and clears their caches so Vite modules are never
 served from stale PWA storage. The service worker caches the app shell and
-static assets only; story persistence remains browser-local PGlite, with no
-cross-device offline sync.
+static assets only; story persistence remains browser-local, with no cross-device
+offline sync.
 
 ## Layer-First Structure
 
@@ -115,15 +115,24 @@ rendered.
 
 ## Services Layer (`src/services/`)
 
-Thin wrappers around PGlite transactions. No React state, no component caching — components call services directly and manage their own loading/error state.
+Thin wrappers around browser-local persistence. No React state, no component
+caching — components call services directly and manage their own loading/error
+state.
+
+The current active story and chapter services still use direct IndexedDB.
+Inactive PGlite foundation modules coexist beside them until the service
+switch-over slice replaces the direct IndexedDB calls.
 
 | File | Responsibility |
 |---|---|
-| `storyDb.ts` | Story CRUD: create, getAll, getById, update, delete |
-| `chapterDb.ts` | Chapter CRUD: create, getById, getByStoryId, getIntroChapterByStoryId, update, delete; + getNextChapters(chapterId) |
+| `db.ts` | Active direct IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
+| `storyDb.ts` | Active Story CRUD: create, getAll, getById, update, delete |
+| `chapterDb.ts` | Active Chapter CRUD: create, getById, getByStoryId, getIntroChapterByStoryId, update, delete; + getNextChapters(chapterId) |
 | `exampleStory.ts` | Creates or returns the built-in example story and its chapters |
 | `types.ts` | Shared service data shapes and create/update input contracts |
-| `db.ts` | PGlite connection, schema setup, transaction helpers, and row mapping utilities |
+| `pgliteConfig.ts` | PGlite storage id and worker id constants |
+| `pglite.worker.ts` | PGlite multi-tab worker entry using production storage `idb://treetales-pglite` |
+| `pgliteDb.ts` | Inactive PGlite connection creation, schema setup, and forward migrations |
 
 Story and chapter records are created with `crypto.randomUUID()` ids and
 `Date.now()` timestamps. Updates preserve `createdAt` and refresh `updatedAt`.
@@ -140,9 +149,10 @@ Chapter writes enforce basic graph integrity before committing:
 
 ## PGlite Schema
 
-PGlite runs in the browser through the multi-tab worker and persists to a clean
-PGlite data directory, `idb://treetales-pglite`. Existing pre-production direct
-IndexedDB data does not need an automatic migration path.
+The inactive PGlite foundation runs in the browser through the multi-tab worker
+and persists to a clean PGlite data directory, `idb://treetales-pglite`.
+Existing pre-production direct IndexedDB data does not need an automatic
+migration path.
 
 The schema uses plain SQL, owned by the service layer:
 
@@ -157,15 +167,15 @@ Deleting a story cascades to its chapters. Deleting a chapter clears direct
 children's parent chapter reference instead of deleting descendants. Chapter
 cycle prevention stays in application code inside the service layer.
 
-Schema setup and forward migrations live in `src/services/db.ts` or a focused
-database module under `src/services/`. Mutating service operations use explicit
-SQL transactions. Reads can use direct queries unless they are part of a write
-validation flow.
+Schema setup and forward migrations live in `src/services/pgliteDb.ts`. Future
+mutating PGlite service operations should use explicit SQL transactions. Reads
+can use direct queries unless they are part of a write validation flow.
 
 ## Test Helpers (`src/test/`)
 
 Shared test-only helpers live in `src/test/` when they remove repeated setup
-across service, hook, route, or component tests. Service tests use in-memory
-PGlite so SQL schema, constraints, transactions, and row mapping are exercised
-directly. Keep these helpers small and specific to test infrastructure;
-production code should not import from `src/test/`.
+across service, hook, route, or component tests. Active direct IndexedDB service
+tests use fake IndexedDB. PGlite foundation tests use the in-memory PGlite
+helper so SQL schema, constraints, transactions, and row mapping can be
+exercised directly. Keep these helpers small and specific to test
+infrastructure; production code should not import from `src/test/`.
