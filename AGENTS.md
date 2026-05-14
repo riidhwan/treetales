@@ -18,8 +18,9 @@ When that happens, explain the concern or better alternative briefly and concret
 - `npm run lint`: run TypeScript checks and ESLint/SonarJS analysis.
 - `npm run preview`: serve the production build locally.
 - `npm run test`: run Vitest once.
+- `npm run test:coverage`: run Vitest with coverage thresholds.
 
-Run the narrowest relevant tests first. For route, store, service, or UI changes, also run `npm run lint`, `npm run test`, and `npm run build` before reporting completion unless the user asks to skip verification.
+Run the narrowest relevant tests first. For route, store, service, or UI changes, also run `npm run lint`, `npm run test`, `npm run test:coverage`, and `npm run build` before reporting completion unless the user asks to skip verification.
 
 ## Coding Style & Naming Conventions
 
