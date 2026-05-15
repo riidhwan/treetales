@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import { getErrorMessage } from '@/lib/errors'
-import { getChaptersByStoryId } from '@/services/chapterDb'
+import { getChaptersByStoryId } from '@/services/chapterService'
 import {
   createExampleStory,
   type ExampleStory,

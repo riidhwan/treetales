@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getChaptersByStoryId, getNextChapters } from '@/services/chapterDb'
+import { getChaptersByStoryId, getNextChapters } from '@/services/chapterService'
 import { createExampleStory } from '@/services/exampleStory'
 import { getStories } from '@/services/storyService'
 import {

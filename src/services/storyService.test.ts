@@ -4,7 +4,7 @@ import {
   createChapter,
   getChapterById,
   getChaptersByStoryId,
-} from '@/services/chapterDb'
+} from '@/services/chapterService'
 import {
   createStory,
   deleteStory,
