@@ -11,7 +11,7 @@ import {
   requestToPromise,
   typedRequest,
   transactionDone,
-} from '@/services/db'
+} from '@/repositories/indexedDb/db'
 import type { Chapter, Story } from '@/services/types'
 import {
   deleteTestDatabase,

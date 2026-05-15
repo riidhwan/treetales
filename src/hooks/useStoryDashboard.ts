@@ -10,7 +10,7 @@ import {
   createStory,
   deleteStory,
   getStories,
-} from '@/services/storyDb'
+} from '@/services/storyService'
 import type { Chapter, CreateStoryInput, Story } from '@/services/types'
 
 export interface StorySummary extends Story {

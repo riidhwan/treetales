@@ -17,7 +17,8 @@ src/
 ├── routes/           # Thin TanStack Router file routes
 ├── components/       # See component layers below
 ├── hooks/            # Feature state/effects extracted from UI components
-├── services/         # Data access layer
+├── services/         # Application-facing story/chapter operations
+├── repositories/     # Persistence adapters and storage-specific mapping
 ├── lib/              # Shared pure utilities and boundary helpers
 ├── test/             # Shared test-only helpers
 └── styles.css        # Global Tailwind CSS imports and base styles
@@ -115,26 +116,28 @@ rendered.
 
 ## Services Layer (`src/services/`)
 
-Thin wrappers around browser-local persistence. No React state, no component
+Application-facing story and chapter operations. No React state, no component
 caching — components call services directly and manage their own loading/error
-state.
+state. Services own generated domain fields such as `id`, `createdAt`, and
+`updatedAt`, then call repositories to persist the requested domain change.
 
-The current active story and chapter services still use direct IndexedDB.
-Inactive PGlite foundation modules coexist beside them until the service
-switch-over slice replaces the direct IndexedDB calls.
+During the PGlite migration, active story and chapter service exports can stay
+wired to direct IndexedDB while inactive PGlite repositories are added behind an
+internal boundary. When a persistence area is touched for the
+service/repository split, move its active IndexedDB implementation behind an
+IndexedDB repository in the same slice so the service boundary remains honest.
+The production persistence switch should happen in one coherent cut-over slice.
 
 | File | Responsibility |
 |---|---|
-| `db.ts` | Active direct IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
-| `storyDb.ts` | Active Story CRUD: create, getAll, getById, update, delete |
-| `chapterDb.ts` | Active Chapter CRUD: create, getById, getByStoryId, getIntroChapterByStoryId, update, delete; + getNextChapters(chapterId) |
+| `storyService.ts` | Active Story service API |
+| `storyDb.ts` | Temporary compatibility re-export for existing Story imports |
+| `db.ts` | Temporary compatibility re-export for existing IndexedDB imports |
+| `chapterDb.ts` | Active Chapter service API until the service/repository cut-over |
 | `exampleStory.ts` | Creates or returns the built-in example story and its chapters |
 | `types.ts` | Shared service data shapes and create/update input contracts |
-| `pgliteConfig.ts` | PGlite storage id and worker id constants |
-| `pglite.worker.ts` | PGlite multi-tab worker entry using production storage `idb://treetales-pglite` |
-| `pgliteDb.ts` | Inactive PGlite connection creation, schema setup, and forward migrations |
 
-Story and chapter records are created with `crypto.randomUUID()` ids and
+Story and chapter services create records with `crypto.randomUUID()` ids and
 `Date.now()` timestamps. Updates preserve `createdAt` and refresh `updatedAt`.
 Deleting a story deletes all chapters for that story. Deleting a chapter clears
 that chapter id from the `parentChapterId` of direct child chapters in the same
@@ -147,6 +150,63 @@ Chapter writes enforce basic graph integrity before committing:
 - a chapter cannot parent itself
 - parent relationships cannot create cycles
 
+## Repositories Layer (`src/repositories/`)
+
+Persistence adapters for browser-local storage. Repositories own storage
+transactions, schema-specific constraints, row-to-domain mapping, and storage
+error normalization. They do not own React state, component navigation, or
+generation of domain values such as ids and timestamps.
+
+Repository APIs should accept and return domain records or domain patches rather
+than exposing storage-shaped rows. Storage-specific names such as `story_id`,
+`created_at`, or SQL `RETURNING` details stay inside the repository module.
+Repositories may perform partial updates and return the persisted domain record
+when storage decides whether the record exists and what the final stored value
+is. Services still provide generated values such as `updatedAt` in those
+patches.
+
+Repositories normalize expected domain-relevant outcomes at the boundary:
+missing reads return `undefined`, missing deletes return `false`, and missing
+updates return `undefined`. Unexpected storage failures may still throw while
+preserving the original cause.
+
+Shared repository contracts live in `src/repositories/types.ts`. Domain records
+and service input types remain in `src/services/types.ts` until there is a
+separate reason to move them. Storage-specific implementations live under a
+provider directory, such as `src/repositories/pglite/`, so connection setup,
+configuration, migrations, worker entry points, and SQL repositories stay
+together.
+
+Current storage-specific repository files include:
+
+| File | Responsibility |
+|---|---|
+| `indexedDb/db.ts` | Active direct IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
+| `indexedDb/storyRepository.ts` | Active IndexedDB Story persistence adapter |
+| `pglite/config.ts` | PGlite storage id and worker id constants |
+| `pglite/pglite.worker.ts` | PGlite multi-tab worker entry using production storage `idb://treetales-pglite` |
+| `pglite/db.ts` | Inactive PGlite connection creation, schema setup, and forward migrations |
+| `pglite/storyRepository.ts` | Inactive PGlite Story persistence adapter with SQL row mapping and explicit write transactions |
+
+Cross-record persistence effects should stay explicit at the service boundary.
+For example, Story deletion may coordinate a Story repository with a Chapter
+repository operation such as deleting all Chapters for a Story; it should not
+hide Chapter cleanup inside the Story repository.
+
+Multi-repository writes should eventually run inside an explicit
+storage-specific unit-of-work boundary so related writes commit or fail
+together. Add that boundary in its own migration slice rather than expanding a
+single inactive repository slice.
+
+Until that unit-of-work boundary exists, cross-repository service operations
+such as `deleteStory` may remain as temporary legacy service paths. Do not add
+temporary repository methods that hide those cross-record effects.
+
+When renaming an app-facing service, prefer adding the correctly named service
+module first and leaving the old `*Db.ts` file as a temporary compatibility
+re-export. Migrate first-party imports to the correctly named service in the
+same slice when the change is mechanical and contained.
+
 ## PGlite Schema
 
 The inactive PGlite foundation runs in the browser through the multi-tab worker
@@ -154,7 +214,7 @@ and persists to a clean PGlite data directory, `idb://treetales-pglite`.
 Existing pre-production direct IndexedDB data does not need an automatic
 migration path.
 
-The schema uses plain SQL, owned by the service layer:
+The schema uses plain SQL, owned by the repository layer:
 
 - **`stories`** — keyed by `id`
 - **`chapters`** — keyed by `id`, with `story_id` referencing `stories.id`
@@ -165,11 +225,15 @@ The schema uses plain SQL, owned by the service layer:
 
 Deleting a story cascades to its chapters. Deleting a chapter clears direct
 children's parent chapter reference instead of deleting descendants. Chapter
-cycle prevention stays in application code inside the service layer.
+cycle prevention stays in application code above or inside the repository
+boundary, but must run before committing a mutating chapter operation.
 
-Schema setup and forward migrations live in `src/services/pgliteDb.ts`. Future
-mutating PGlite service operations should use explicit SQL transactions. Reads
-can use direct queries unless they are part of a write validation flow.
+Schema setup and forward migrations live with the PGlite repository
+implementation. Mutating PGlite repository operations should use explicit SQL
+transactions. Reads can use direct queries unless they are part of a write
+validation flow. Inactive PGlite repositories accept a `PGliteInterface`
+dependency so tests can use in-memory databases and production service exports
+can stay wired to direct IndexedDB until the cut-over slice.
 
 ## Test Helpers (`src/test/`)
 

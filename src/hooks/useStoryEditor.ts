@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { getErrorMessage } from '@/lib/errors'
 import { getIntroChapterByStoryId } from '@/services/chapterDb'
-import { getStoryById, updateStory } from '@/services/storyDb'
+import { getStoryById, updateStory } from '@/services/storyService'
 import type { Chapter, Story, UpdateStoryInput } from '@/services/types'
 
 export interface StoryEditorServices {

@@ -5,7 +5,7 @@ import {
   getChaptersByStoryId,
   getNextChapters,
 } from '@/services/chapterDb'
-import { getStoryById } from '@/services/storyDb'
+import { getStoryById } from '@/services/storyService'
 import type { Chapter, Story } from '@/services/types'
 
 export interface StoryReaderServices {

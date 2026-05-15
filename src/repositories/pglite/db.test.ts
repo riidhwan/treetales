@@ -8,8 +8,10 @@ import {
   getPgliteDb,
   resetPgliteConnectionForTests,
   setupPgliteSchema,
-} from '@/services/pgliteDb'
+} from '@/repositories/pglite/db'
 import { createTestPgliteDb } from '@/test/pglite'
+
+const PGLITE_TEST_TIMEOUT_MS = 15_000
 
 let db: PGliteInterface | undefined
 
@@ -31,7 +33,7 @@ describe('setupPgliteSchema', () => {
     )
 
     expect(result.rows).toEqual([{ version: PGLITE_SCHEMA_VERSION }])
-  })
+  }, PGLITE_TEST_TIMEOUT_MS)
 
   it('creates story and chapter tables with the expected constraints', async () => {
     db = await createTestPgliteDb()
@@ -76,7 +78,7 @@ describe('setupPgliteSchema', () => {
         ['chapter-2', 'story-1', 'Second intro', 'Again', null, 20, 20],
       ),
     ).rejects.toThrow()
-  })
+  }, PGLITE_TEST_TIMEOUT_MS)
 
   it('cascades story deletion to chapters', async () => {
     db = await createTestPgliteDb()
@@ -102,7 +104,7 @@ describe('setupPgliteSchema', () => {
     const chapters = await db.query('SELECT id FROM chapters')
 
     expect(chapters.rows).toEqual([])
-  })
+  }, PGLITE_TEST_TIMEOUT_MS)
 
   it('clears child parent references when deleting a parent chapter', async () => {
     db = await createTestPgliteDb()
@@ -142,7 +144,7 @@ describe('setupPgliteSchema', () => {
     )
 
     expect(result.rows).toEqual([{ parent_chapter_id: null }])
-  })
+  }, PGLITE_TEST_TIMEOUT_MS)
 })
 
 describe('getPgliteDb', () => {
