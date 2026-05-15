@@ -133,7 +133,8 @@ The production persistence switch should happen in one coherent cut-over slice.
 | `storyService.ts` | Active Story service API |
 | `storyDb.ts` | Temporary compatibility re-export for existing Story imports |
 | `db.ts` | Temporary compatibility re-export for existing IndexedDB imports |
-| `chapterDb.ts` | Active Chapter service API until the service/repository cut-over |
+| `chapterService.ts` | Active Chapter service API |
+| `chapterDb.ts` | Temporary compatibility re-export for existing Chapter imports |
 | `exampleStory.ts` | Creates or returns the built-in example story and its chapters |
 | `types.ts` | Shared service data shapes and create/update input contracts |
 
@@ -183,10 +184,12 @@ Current storage-specific repository files include:
 |---|---|
 | `indexedDb/db.ts` | Active direct IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
 | `indexedDb/storyRepository.ts` | Active IndexedDB Story persistence adapter |
+| `indexedDb/chapterRepository.ts` | Active IndexedDB Chapter persistence adapter with graph validation |
 | `pglite/config.ts` | PGlite storage id and worker id constants |
 | `pglite/pglite.worker.ts` | PGlite multi-tab worker entry using production storage `idb://treetales-pglite` |
 | `pglite/db.ts` | Inactive PGlite connection creation, schema setup, and forward migrations |
 | `pglite/storyRepository.ts` | Inactive PGlite Story persistence adapter with SQL row mapping and explicit write transactions |
+| `pglite/chapterRepository.ts` | Inactive PGlite Chapter persistence adapter with SQL row mapping and transaction-scoped graph validation |
 
 Cross-record persistence effects should stay explicit at the service boundary.
 For example, Story deletion may coordinate a Story repository with a Chapter

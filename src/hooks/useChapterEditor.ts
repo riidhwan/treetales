@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { getErrorMessage } from '@/lib/errors'
-import { getChapterById, updateChapter } from '@/services/chapterDb'
+import { getChapterById, updateChapter } from '@/services/chapterService'
 import { getStoryById } from '@/services/storyService'
 import type { Chapter, Story, UpdateChapterInput } from '@/services/types'
 

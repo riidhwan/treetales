@@ -133,7 +133,8 @@ Current service-facing files are:
 | `storyService.ts` | Active Story service API |
 | `storyDb.ts` | Temporary compatibility re-export for existing Story imports |
 | `db.ts` | Temporary compatibility re-export for existing IndexedDB imports |
-| `chapterDb.ts` | Active Chapter service API until the service/repository cut-over |
+| `chapterService.ts` | Active Chapter service API |
+| `chapterDb.ts` | Temporary compatibility re-export for existing Chapter imports |
 | `exampleStory.ts` | Built-in example story creation/reuse |
 | `types.ts` | Shared records and input contracts |
 
@@ -179,10 +180,12 @@ Current repository files are:
 |---|---|
 | `indexedDb/db.ts` | Active direct IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
 | `indexedDb/storyRepository.ts` | Active IndexedDB Story persistence adapter |
+| `indexedDb/chapterRepository.ts` | Active IndexedDB Chapter persistence adapter |
 | `pglite/config.ts` | PGlite storage id and worker id constants |
 | `pglite/pglite.worker.ts` | PGlite multi-tab worker entry |
 | `pglite/db.ts` | Inactive PGlite connection creation, schema setup, and forward migrations |
 | `pglite/storyRepository.ts` | Inactive PGlite Story persistence adapter |
+| `pglite/chapterRepository.ts` | Inactive PGlite Chapter persistence adapter |
 
 Cross-record persistence effects should stay explicit at the service boundary.
 For example, Story deletion may coordinate a Story repository with a Chapter

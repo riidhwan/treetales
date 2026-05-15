@@ -8,14 +8,14 @@ import {
   getIntroChapterByStoryId,
   getNextChapters,
   updateChapter,
-} from '@/services/chapterDb'
+} from '@/services/chapterService'
 import { createStory } from '@/services/storyService'
 import {
   deleteTestDatabase,
   installFakeIndexedDb,
 } from '@/test/indexedDb'
 
-describe('chapterDb', () => {
+describe('chapterService', () => {
   beforeEach(() => {
     installFakeIndexedDb()
   })

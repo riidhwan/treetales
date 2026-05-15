@@ -4,7 +4,7 @@ import { getErrorMessage } from '@/lib/errors'
 import {
   getChaptersByStoryId,
   getNextChapters,
-} from '@/services/chapterDb'
+} from '@/services/chapterService'
 import { getStoryById } from '@/services/storyService'
 import type { Chapter, Story } from '@/services/types'
 
