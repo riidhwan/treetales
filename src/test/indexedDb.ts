@@ -1,6 +1,6 @@
 import { IDBFactory } from 'fake-indexeddb'
 
-import { DB_NAME } from '@/services/db'
+import { DB_NAME } from '@/repositories/indexedDb/db'
 
 export function installFakeIndexedDb(): void {
   globalThis.indexedDB = new IDBFactory()

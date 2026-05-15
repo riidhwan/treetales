@@ -9,7 +9,7 @@ import {
   getNextChapters,
   updateChapter,
 } from '@/services/chapterDb'
-import { createStory } from '@/services/storyDb'
+import { createStory } from '@/services/storyService'
 import {
   deleteTestDatabase,
   installFakeIndexedDb,

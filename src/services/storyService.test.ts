@@ -11,13 +11,13 @@ import {
   getStories,
   getStoryById,
   updateStory,
-} from '@/services/storyDb'
+} from '@/services/storyService'
 import {
   deleteTestDatabase,
   installFakeIndexedDb,
 } from '@/test/indexedDb'
 
-describe('storyDb', () => {
+describe('storyService', () => {
   beforeEach(() => {
     installFakeIndexedDb()
   })

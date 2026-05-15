@@ -1,0 +1,3 @@
+# Service and repository persistence boundary
+
+TreeTales splits app-facing persistence operations from storage adapters: services remain the API used by hooks, components, and routes, while repositories own storage-specific transactions, schema details, row mapping, and error normalization. Services generate domain values such as ids and timestamps, then pass domain records or domain patches to repositories. During the PGlite migration, compatibility exports such as `storyDb.ts` may remain temporarily, and multi-repository unit-of-work support is deferred to its own slice so inactive repository work does not expand into a broad transaction refactor.

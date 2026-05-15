@@ -111,31 +111,101 @@ All exported functions have a one-line JSDoc comment when the behaviour is non-o
 
 ## Services (`src/services/`)
 
-Services are thin browser-local persistence wrappers and domain data helpers.
-They own persistence transactions, schema upgrades, integrity checks, and
-input/output types. They do not own React state, UI state, or component
-navigation.
+Services are application-facing story and chapter operations used by hooks,
+components, and route adapters. They do not own React state, UI state, or
+component navigation.
 
-The active story and chapter services still use direct IndexedDB. PGlite
-foundation code is present but inactive until the service switch-over slice.
+Services own generated domain fields such as `id`, `createdAt`, and
+`updatedAt`. They call repositories with domain records or domain patches and
+keep storage-specific details out of component-facing contracts.
 
-Current service files are:
+During the PGlite migration, the active story and chapter service exports can
+stay wired to direct IndexedDB while inactive repositories are added behind an
+internal boundary. When a persistence area is touched for the service/repository
+split, move its active IndexedDB implementation behind an IndexedDB repository
+in the same slice so the service boundary remains honest. The production
+persistence switch should happen in one coherent cut-over slice.
+
+Current service-facing files are:
 
 | File | Responsibility |
 |---|---|
-| `db.ts` | Active direct IndexedDB connection, upgrade, transaction helpers, legacy parent migration |
-| `storyDb.ts` | Story CRUD |
-| `chapterDb.ts` | Chapter CRUD and chapter graph integrity |
+| `storyService.ts` | Active Story service API |
+| `storyDb.ts` | Temporary compatibility re-export for existing Story imports |
+| `db.ts` | Temporary compatibility re-export for existing IndexedDB imports |
+| `chapterDb.ts` | Active Chapter service API until the service/repository cut-over |
 | `exampleStory.ts` | Built-in example story creation/reuse |
 | `types.ts` | Shared records and input contracts |
-| `pgliteConfig.ts` | PGlite storage id and worker id constants |
-| `pglite.worker.ts` | PGlite multi-tab worker entry |
-| `pgliteDb.ts` | Inactive PGlite connection creation, schema setup, and forward migrations |
 
 Direct IndexedDB service tests use fake IndexedDB helpers from `src/test/`.
 PGlite foundation tests use the in-memory PGlite helper from `src/test/`.
 Component and hook tests can keep using fake service dependencies when the
 persistence layer is not under test.
+
+## Repositories (`src/repositories/`)
+
+Repositories are persistence adapters. They own storage transactions, schema
+setup, schema-specific integrity checks, row-to-domain mapping, and storage
+error normalization.
+
+Repository APIs should accept and return domain records or domain patches rather
+than exposing storage-shaped rows. Storage-specific names such as `story_id`,
+`created_at`, SQL `RETURNING` details, object store names, and index names stay
+inside the repository module.
+
+Repositories may perform partial updates and return the persisted domain record
+when storage decides whether the record exists and what the final stored value
+is. Services still provide generated values such as `updatedAt` in those
+patches.
+
+Repositories should not generate domain values such as ids or timestamps.
+Services provide those values before calling a repository.
+
+Repositories normalize expected domain-relevant outcomes at the boundary:
+missing reads return `undefined`, missing deletes return `false`, and missing
+updates return `undefined`. Unexpected storage failures may still throw while
+preserving the original cause.
+
+Shared repository contracts live in `src/repositories/types.ts`. Domain records
+and service input types remain in `src/services/types.ts` until there is a
+separate reason to move them. Storage-specific implementations live under a
+provider directory, such as `src/repositories/pglite/`, so connection setup,
+configuration, migrations, worker entry points, and SQL repositories stay
+together.
+
+Current repository files are:
+
+| File | Responsibility |
+|---|---|
+| `indexedDb/db.ts` | Active direct IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
+| `indexedDb/storyRepository.ts` | Active IndexedDB Story persistence adapter |
+| `pglite/config.ts` | PGlite storage id and worker id constants |
+| `pglite/pglite.worker.ts` | PGlite multi-tab worker entry |
+| `pglite/db.ts` | Inactive PGlite connection creation, schema setup, and forward migrations |
+| `pglite/storyRepository.ts` | Inactive PGlite Story persistence adapter |
+
+Cross-record persistence effects should stay explicit at the service boundary.
+For example, Story deletion may coordinate a Story repository with a Chapter
+repository operation such as deleting all Chapters for a Story; it should not
+hide Chapter cleanup inside the Story repository.
+
+Multi-repository writes should eventually run inside an explicit
+storage-specific unit-of-work boundary so related writes commit or fail
+together. Add that boundary in its own migration slice rather than expanding a
+single inactive repository slice.
+
+Until that unit-of-work boundary exists, cross-repository service operations
+such as `deleteStory` may remain as temporary legacy service paths. Do not add
+temporary repository methods that hide those cross-record effects.
+
+When renaming an app-facing service, prefer adding the correctly named service
+module first and leaving the old `*Db.ts` file as a temporary compatibility
+re-export. Migrate first-party imports to the correctly named service in the
+same slice when the change is mechanical and contained.
+
+Inactive PGlite repositories should accept a `PGliteInterface` rather than
+calling `getPgliteDb()` directly. Use plain SQL and wrap mutating operations in
+explicit transactions.
 
 ## Optional Store (e.g. Zustand)
 
@@ -303,6 +373,7 @@ Standards by unit type:
 - Hooks: use `renderHook`, wrap state changes in `act`, use fake timers for time-dependent behavior, and assert returned state/actions instead of hook internals.
 - Components: use Testing Library queries by role, label, and visible text first. Use `user-event` for user flows, reserve `fireEvent` for low-level events that `user-event` cannot express, and assert visible UI or callback outcomes.
 - Stores and services: reset persisted or module state in `beforeEach`; assert state transitions, returned values, and externally visible side effects.
+- Repositories: test storage mapping, persistence side effects, transaction behavior, and normalized missing-record outcomes through the repository contract. Keep service tests focused on app-facing semantics such as generated ids/timestamps and delegation behavior; do not duplicate every repository persistence assertion at the service layer.
 - Routes and loaders: test loader/search behavior separately from page rendering where practical; route component tests may mock router plumbing but should still assert page-level behavior.
 
 Avoid:

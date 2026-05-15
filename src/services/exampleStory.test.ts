@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getChaptersByStoryId, getNextChapters } from '@/services/chapterDb'
 import { createExampleStory } from '@/services/exampleStory'
-import { getStories } from '@/services/storyDb'
+import { getStories } from '@/services/storyService'
 import {
   deleteTestDatabase,
   installFakeIndexedDb,

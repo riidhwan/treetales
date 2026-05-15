@@ -6,7 +6,7 @@ import {
   getChapterById,
   getIntroChapterByStoryId,
 } from '@/services/chapterDb'
-import { getStoryById } from '@/services/storyDb'
+import { getStoryById } from '@/services/storyService'
 import type { Chapter, CreateChapterInput, Story } from '@/services/types'
 
 export interface ChapterCreatorServices {

@@ -1,7 +1,7 @@
 import type { PGliteInterface } from '@electric-sql/pglite'
 import { PGliteWorker } from '@electric-sql/pglite/worker'
 
-import { PGLITE_WORKER_ID } from '@/services/pgliteConfig'
+import { PGLITE_WORKER_ID } from '@/repositories/pglite/config'
 
 export const PGLITE_SCHEMA_VERSION = 1
 
@@ -117,4 +117,3 @@ function createPgliteWorker(): Worker {
     type: 'module',
   })
 }
-
