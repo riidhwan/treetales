@@ -1,13 +1,5 @@
 import { sortByCreatedAt } from '@/lib/sorting'
-import {
-  CHAPTERS_STORE,
-  CHAPTER_STORY_ID_INDEX,
-  STORIES_STORE,
-  openDb,
-  requestToPromise,
-  typedRequest,
-  transactionDone,
-} from '@/services/db'
+import { createPgliteRepositoryUnitOfWork } from '@/repositories/pglite/unitOfWork'
 import type { Chapter, Story } from '@/services/types'
 
 export interface ExampleStory {
@@ -23,29 +15,15 @@ const EXAMPLE_CHAPTER_IDS = {
   tower: 'example-chapter-bell-tower',
   trail: 'example-chapter-willow-lights',
 } as const
+const repositoryUnitOfWork = createPgliteRepositoryUnitOfWork()
 
 export async function createExampleStory(): Promise<ExampleStory> {
-  const db = await openDb()
-
-  try {
-    const transaction = db.transaction(
-      [STORIES_STORE, CHAPTERS_STORE],
-      'readwrite',
-    )
-    const storiesStore = transaction.objectStore(STORIES_STORE)
-    const chaptersStore = transaction.objectStore(CHAPTERS_STORE)
-    const existingStory = await requestToPromise(
-      typedRequest<Story | undefined>(storiesStore.get(EXAMPLE_STORY_ID)),
-    )
-
+  return repositoryUnitOfWork.run(async ({ stories, chapters }) => {
+    const existingStory = await stories.findStoryById(EXAMPLE_STORY_ID)
     if (existingStory) {
-      const existingChapters = await requestToPromise(
-        typedRequest<Chapter[]>(
-          chaptersStore.index(CHAPTER_STORY_ID_INDEX).getAll(existingStory.id),
-        ),
+      const existingChapters = await chapters.findChaptersByStoryId(
+        existingStory.id,
       )
-
-      await transactionDone(transaction)
 
       return {
         chapters: sortByCreatedAt(existingChapters),
@@ -62,20 +40,16 @@ export async function createExampleStory(): Promise<ExampleStory> {
       createdAt: now,
       updatedAt: now,
     }
-    const chapters = createExampleChapters(now)
+    const exampleChapters = createExampleChapters(now)
 
-    storiesStore.add(story)
+    await stories.insertStory(story)
 
-    for (const chapter of chapters) {
-      chaptersStore.add(chapter)
+    for (const chapter of exampleChapters) {
+      await chapters.insertChapter(chapter)
     }
 
-    await transactionDone(transaction)
-
-    return { chapters, story }
-  } finally {
-    db.close()
-  }
+    return { chapters: exampleChapters, story }
+  })
 }
 
 function createExampleChapters(createdAt: number): Chapter[] {

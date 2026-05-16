@@ -1,5 +1,16 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest'
 
+import type { PGliteInterface } from '@electric-sql/pglite'
+
+import { getPgliteDb } from '@/repositories/pglite/db'
 import {
   createChapter,
   deleteChapter,
@@ -10,19 +21,35 @@ import {
   updateChapter,
 } from '@/services/chapterService'
 import { createStory } from '@/services/storyService'
-import {
-  deleteTestDatabase,
-  installFakeIndexedDb,
-} from '@/test/indexedDb'
+import { createTestPgliteDb } from '@/test/pglite'
+
+vi.mock('@/repositories/pglite/db', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/repositories/pglite/db')>()
+
+  return {
+    ...actual,
+    getPgliteDb: vi.fn(),
+  }
+})
+
+let db: PGliteInterface
+const PGLITE_TEST_TIMEOUT_MS = 15_000
 
 describe('chapterService', () => {
-  beforeEach(() => {
-    installFakeIndexedDb()
-  })
+  beforeAll(async () => {
+    db = await createTestPgliteDb()
+    vi.mocked(getPgliteDb).mockResolvedValue(db)
+  }, PGLITE_TEST_TIMEOUT_MS)
 
   afterEach(async () => {
     vi.restoreAllMocks()
-    await deleteTestDatabase()
+    vi.mocked(getPgliteDb).mockResolvedValue(db)
+    await db.query('DELETE FROM stories')
+  })
+
+  afterAll(async () => {
+    await db.close()
   })
 
   it('creates, reads, updates, and deletes chapters', async () => {
@@ -145,33 +172,28 @@ describe('chapterService', () => {
     await expect(getIntroChapterByStoryId(story.id)).resolves.toEqual(intro)
   })
 
-  it('returns the earliest intro chapter when legacy data has multiple intros', async () => {
-    let now = 100
-    vi.spyOn(Date, 'now').mockImplementation(() => now)
-
+  it('rejects multiple intro chapters for one story', async () => {
     const story = await createStory({
       title: 'Story',
       description: 'Description',
     })
-    const laterIntro = await createChapter({
+    const intro = await createChapter({
       storyId: story.id,
-      title: 'Later Intro',
-      content: 'Later',
+      title: 'Intro',
+      content: 'Start',
       parentChapterId: null,
     })
 
-    now = 50
-    const earliestIntro = await createChapter({
-      storyId: story.id,
-      title: 'Earliest Intro',
-      content: 'Earlier',
-      parentChapterId: null,
-    })
+    await expect(
+      createChapter({
+        storyId: story.id,
+        title: 'Second Intro',
+        content: 'Again',
+        parentChapterId: null,
+      }),
+    ).rejects.toThrow()
 
-    await expect(getIntroChapterByStoryId(story.id)).resolves.toEqual(
-      earliestIntro,
-    )
-    expect(laterIntro.createdAt).toBeGreaterThan(earliestIntro.createdAt)
+    await expect(getIntroChapterByStoryId(story.id)).resolves.toEqual(intro)
   })
 
   it('removes deleted chapter ids from remaining chapter parents', async () => {
@@ -302,6 +324,7 @@ describe('chapterService', () => {
     vi.spyOn(Date, 'now').mockImplementation(() => now)
     vi.spyOn(crypto, 'randomUUID')
       .mockReturnValueOnce('00000000-0000-4000-8000-0000000000ff')
+      .mockReturnValueOnce('00000000-0000-4000-8000-000000000000')
       .mockReturnValueOnce('00000000-0000-4000-8000-00000000000b')
       .mockReturnValueOnce('00000000-0000-4000-8000-00000000000a')
       .mockReturnValueOnce('00000000-0000-4000-8000-00000000000c')
@@ -310,17 +333,23 @@ describe('chapterService', () => {
       title: 'Story',
       description: 'Description',
     })
+    const root = await createChapter({
+      storyId: story.id,
+      title: 'Root',
+      content: 'Start',
+      parentChapterId: null,
+    })
     const secondById = await createChapter({
       storyId: story.id,
       title: 'Second',
       content: 'Same time',
-      parentChapterId: null,
+      parentChapterId: root.id,
     })
     const firstById = await createChapter({
       storyId: story.id,
       title: 'First',
       content: 'Same time',
-      parentChapterId: null,
+      parentChapterId: root.id,
     })
 
     now = 50
@@ -328,11 +357,12 @@ describe('chapterService', () => {
       storyId: story.id,
       title: 'Earlier',
       content: 'Earlier time',
-      parentChapterId: null,
+      parentChapterId: root.id,
     })
 
     await expect(getChaptersByStoryId(story.id)).resolves.toEqual([
       firstByDate,
+      root,
       firstById,
       secondById,
     ])
@@ -349,11 +379,17 @@ describe('chapterService', () => {
       content: 'Start',
       parentChapterId: null,
     })
+    const middle = await createChapter({
+      storyId: story.id,
+      title: 'Middle',
+      content: 'Continue',
+      parentChapterId: root.id,
+    })
     const child = await createChapter({
       storyId: story.id,
       title: 'Child',
       content: 'Continue',
-      parentChapterId: null,
+      parentChapterId: middle.id,
     })
 
     const updatedChapter = await updateChapter(child.id, {
@@ -389,7 +425,7 @@ describe('chapterService', () => {
       storyId: story.id,
       title: 'Unlinked',
       content: 'Elsewhere',
-      parentChapterId: null,
+      parentChapterId: linked.id,
     })
 
     now = 90
@@ -400,7 +436,7 @@ describe('chapterService', () => {
       updatedAt: 90,
     })
     await expect(getChapterById(unlinked.id)).resolves.toMatchObject({
-      parentChapterId: null,
+      parentChapterId: linked.id,
       updatedAt: unlinked.updatedAt,
     })
   })

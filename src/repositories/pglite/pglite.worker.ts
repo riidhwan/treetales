@@ -3,6 +3,6 @@ import { worker } from '@electric-sql/pglite/worker'
 
 import { PGLITE_DATA_DIR } from '@/repositories/pglite/config'
 
-await worker({
+void worker({
   init: (options) => PGlite.create(PGLITE_DATA_DIR, options),
 })

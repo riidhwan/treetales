@@ -27,8 +27,16 @@ interface PgliteQueryExecutor {
   readonly query: PGliteInterface['query']
 }
 
+interface PgliteTransactionProvider extends PgliteQueryExecutor {
+  readonly transaction: PGliteInterface['transaction']
+}
+
+type PgliteRepositoryExecutor =
+  | PgliteQueryExecutor
+  | PgliteTransactionProvider
+
 export function createPgliteChapterRepository(
-  db: PGliteInterface,
+  db: PgliteRepositoryExecutor,
 ): ChapterRepository {
   return {
     insertChapter: (chapter) => insertChapter(db, chapter),
@@ -43,10 +51,10 @@ export function createPgliteChapterRepository(
 }
 
 async function insertChapter(
-  db: PGliteInterface,
+  db: PgliteRepositoryExecutor,
   chapter: Chapter,
 ): Promise<void> {
-  await db.transaction(async (transaction) => {
+  await runPgliteWrite(db, async (transaction) => {
     await validateChapterWrite(transaction, chapter)
     await transaction.query(
       `
@@ -122,7 +130,7 @@ async function findChaptersByStoryId(
 }
 
 async function findIntroChapterByStoryId(
-  db: PGliteInterface,
+  db: PgliteQueryExecutor,
   storyId: string,
 ): Promise<Chapter | undefined> {
   const result = await db.query<ChapterRow>(
@@ -147,7 +155,7 @@ async function findIntroChapterByStoryId(
 }
 
 async function findChildChapters(
-  db: PGliteInterface,
+  db: PgliteQueryExecutor,
   chapterId: string,
 ): Promise<Chapter[]> {
   const result = await db.query<ChapterRow>(
@@ -171,11 +179,11 @@ async function findChildChapters(
 }
 
 async function updateChapter(
-  db: PGliteInterface,
+  db: PgliteRepositoryExecutor,
   id: string,
   input: UpdateChapterRepositoryInput,
 ): Promise<Chapter | undefined> {
-  return db.transaction(async (transaction) => {
+  return runPgliteWrite(db, async (transaction) => {
     const currentChapter = await findChapterById(transaction, id)
 
     if (!currentChapter) {
@@ -226,11 +234,11 @@ async function updateChapter(
 }
 
 async function deleteChapter(
-  db: PGliteInterface,
+  db: PgliteRepositoryExecutor,
   id: string,
   input: DeleteChapterRepositoryInput,
 ): Promise<boolean> {
-  return db.transaction(async (transaction) => {
+  return runPgliteWrite(db, async (transaction) => {
     const chapter = await findChapterById(transaction, id)
 
     if (!chapter) {
@@ -268,6 +276,23 @@ async function deleteChapter(
 
     return true
   })
+}
+
+function runPgliteWrite<T>(
+  db: PgliteRepositoryExecutor,
+  operation: (transaction: PgliteQueryExecutor) => Promise<T>,
+): Promise<T> {
+  if (hasTransaction(db)) {
+    return db.transaction(operation)
+  }
+
+  return operation(db)
+}
+
+function hasTransaction(
+  db: PgliteRepositoryExecutor,
+): db is PgliteTransactionProvider {
+  return 'transaction' in db && typeof db.transaction === 'function'
 }
 
 async function validateChapterWrite(

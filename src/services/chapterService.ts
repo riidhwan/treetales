@@ -1,11 +1,11 @@
-import { createIndexedDbChapterRepository } from '@/repositories/indexedDb/chapterRepository'
+import { getPgliteDb } from '@/repositories/pglite/db'
+import { createPgliteChapterRepository } from '@/repositories/pglite/chapterRepository'
+import type { ChapterRepository } from '@/repositories/types'
 import type {
   Chapter,
   CreateChapterInput,
   UpdateChapterInput,
 } from '@/services/types'
-
-const chapterRepository = createIndexedDbChapterRepository()
 
 export async function createChapter(
   input: CreateChapterInput,
@@ -21,41 +21,60 @@ export async function createChapter(
     updatedAt: now,
   }
 
+  const chapterRepository = await getChapterRepository()
   await chapterRepository.insertChapter(chapter)
 
   return chapter
 }
 
-export function getChapterById(id: string): Promise<Chapter | undefined> {
+export async function getChapterById(id: string): Promise<Chapter | undefined> {
+  const chapterRepository = await getChapterRepository()
+
   return chapterRepository.findChapterById(id)
 }
 
-export function getChaptersByStoryId(storyId: string): Promise<Chapter[]> {
+export async function getChaptersByStoryId(storyId: string): Promise<Chapter[]> {
+  const chapterRepository = await getChapterRepository()
+
   return chapterRepository.findChaptersByStoryId(storyId)
 }
 
-export function getIntroChapterByStoryId(
+export async function getIntroChapterByStoryId(
   storyId: string,
 ): Promise<Chapter | undefined> {
+  const chapterRepository = await getChapterRepository()
+
   return chapterRepository.findIntroChapterByStoryId(storyId)
 }
 
-export function getNextChapters(chapterId: string): Promise<Chapter[]> {
+export async function getNextChapters(chapterId: string): Promise<Chapter[]> {
+  const chapterRepository = await getChapterRepository()
+
   return chapterRepository.findChildChapters(chapterId)
 }
 
-export function updateChapter(
+export async function updateChapter(
   id: string,
   input: UpdateChapterInput,
 ): Promise<Chapter | undefined> {
+  const chapterRepository = await getChapterRepository()
+
   return chapterRepository.updateChapter(id, {
     ...input,
     updatedAt: Date.now(),
   })
 }
 
-export function deleteChapter(id: string): Promise<boolean> {
+export async function deleteChapter(id: string): Promise<boolean> {
+  const chapterRepository = await getChapterRepository()
+
   return chapterRepository.deleteChapter(id, {
     unlinkedChildrenUpdatedAt: Date.now(),
   })
+}
+
+async function getChapterRepository(): Promise<ChapterRepository> {
+  const db = await getPgliteDb()
+
+  return createPgliteChapterRepository(db)
 }

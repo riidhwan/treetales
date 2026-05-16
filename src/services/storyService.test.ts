@@ -1,5 +1,16 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest'
 
+import type { PGliteInterface } from '@electric-sql/pglite'
+
+import { getPgliteDb } from '@/repositories/pglite/db'
 import {
   createChapter,
   getChapterById,
@@ -12,19 +23,35 @@ import {
   getStoryById,
   updateStory,
 } from '@/services/storyService'
-import {
-  deleteTestDatabase,
-  installFakeIndexedDb,
-} from '@/test/indexedDb'
+import { createTestPgliteDb } from '@/test/pglite'
+
+vi.mock('@/repositories/pglite/db', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/repositories/pglite/db')>()
+
+  return {
+    ...actual,
+    getPgliteDb: vi.fn(),
+  }
+})
+
+let db: PGliteInterface
+const PGLITE_TEST_TIMEOUT_MS = 15_000
 
 describe('storyService', () => {
-  beforeEach(() => {
-    installFakeIndexedDb()
-  })
+  beforeAll(async () => {
+    db = await createTestPgliteDb()
+    vi.mocked(getPgliteDb).mockResolvedValue(db)
+  }, PGLITE_TEST_TIMEOUT_MS)
 
   afterEach(async () => {
     vi.restoreAllMocks()
-    await deleteTestDatabase()
+    vi.mocked(getPgliteDb).mockResolvedValue(db)
+    await db.query('DELETE FROM stories')
+  })
+
+  afterAll(async () => {
+    await db.close()
   })
 
   it('creates, reads, updates, and deletes stories', async () => {

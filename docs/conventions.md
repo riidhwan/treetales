@@ -119,12 +119,10 @@ Services own generated domain fields such as `id`, `createdAt`, and
 `updatedAt`. They call repositories with domain records or domain patches and
 keep storage-specific details out of component-facing contracts.
 
-During the PGlite migration, the active story and chapter service exports can
-stay wired to direct IndexedDB while inactive repositories are added behind an
-internal boundary. When a persistence area is touched for the service/repository
-split, move its active IndexedDB implementation behind an IndexedDB repository
-in the same slice so the service boundary remains honest. The production
-persistence switch should happen in one coherent cut-over slice.
+Active story and chapter service exports are wired to browser-local PGlite
+repositories. Existing direct IndexedDB adapters and compatibility exports stay
+temporarily for the cleanup slice, but new production persistence work should
+target the PGlite path.
 
 Current service-facing files are:
 
@@ -132,16 +130,15 @@ Current service-facing files are:
 |---|---|
 | `storyService.ts` | Active Story service API |
 | `storyDb.ts` | Temporary compatibility re-export for existing Story imports |
-| `db.ts` | Temporary compatibility re-export for existing IndexedDB imports |
+| `db.ts` | Temporary compatibility re-export for old IndexedDB imports |
 | `chapterService.ts` | Active Chapter service API |
 | `chapterDb.ts` | Temporary compatibility re-export for existing Chapter imports |
 | `exampleStory.ts` | Built-in example story creation/reuse |
 | `types.ts` | Shared records and input contracts |
 
-Direct IndexedDB service tests use fake IndexedDB helpers from `src/test/`.
-PGlite foundation tests use the in-memory PGlite helper from `src/test/`.
-Component and hook tests can keep using fake service dependencies when the
-persistence layer is not under test.
+Production service and PGlite repository tests use the in-memory PGlite helper
+from `src/test/`. Component and hook tests can keep using fake service
+dependencies when the persistence layer is not under test.
 
 ## Repositories (`src/repositories/`)
 
@@ -178,15 +175,16 @@ Current repository files are:
 
 | File | Responsibility |
 |---|---|
-| `indexedDb/db.ts` | Active direct IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
-| `indexedDb/storyRepository.ts` | Active IndexedDB Story persistence adapter |
-| `indexedDb/chapterRepository.ts` | Active IndexedDB Chapter persistence adapter |
-| `indexedDb/unitOfWork.ts` | Active IndexedDB unit-of-work boundary for multi-repository writes |
+| `indexedDb/db.ts` | Legacy direct IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
+| `indexedDb/storyRepository.ts` | Legacy IndexedDB Story persistence adapter |
+| `indexedDb/chapterRepository.ts` | Legacy IndexedDB Chapter persistence adapter |
+| `indexedDb/unitOfWork.ts` | Legacy IndexedDB unit-of-work boundary for multi-repository writes |
 | `pglite/config.ts` | PGlite storage id and worker id constants |
 | `pglite/pglite.worker.ts` | PGlite multi-tab worker entry |
-| `pglite/db.ts` | Inactive PGlite connection creation, schema setup, and forward migrations |
-| `pglite/storyRepository.ts` | Inactive PGlite Story persistence adapter |
-| `pglite/chapterRepository.ts` | Inactive PGlite Chapter persistence adapter |
+| `pglite/db.ts` | Active PGlite connection creation, schema setup, and forward migrations |
+| `pglite/storyRepository.ts` | Active PGlite Story persistence adapter |
+| `pglite/chapterRepository.ts` | Active PGlite Chapter persistence adapter |
+| `pglite/unitOfWork.ts` | Active PGlite unit-of-work boundary for multi-repository writes |
 
 Cross-record persistence effects should stay explicit at the service boundary.
 For example, Story deletion may coordinate a Story repository with a Chapter
@@ -195,7 +193,7 @@ hide Chapter cleanup inside the Story repository.
 
 Multi-repository writes should run inside an explicit storage-specific
 unit-of-work boundary so related writes commit or fail together. The active
-IndexedDB path uses `createIndexedDbRepositoryUnitOfWork()` for these service
+PGlite path uses `createPgliteRepositoryUnitOfWork()` for these service
 operations. Keep cross-record effects explicit in the service operation and use
 transaction-scoped repositories inside the unit of work instead of opening
 storage transactions directly from services.
@@ -205,9 +203,9 @@ module first and leaving the old `*Db.ts` file as a temporary compatibility
 re-export. Migrate first-party imports to the correctly named service in the
 same slice when the change is mechanical and contained.
 
-Inactive PGlite repositories should accept a `PGliteInterface` rather than
-calling `getPgliteDb()` directly. Use plain SQL and wrap mutating operations in
-explicit transactions.
+PGlite repositories should accept a `PGliteInterface` or transaction-scoped
+query executor rather than calling `getPgliteDb()` directly. Use plain SQL and
+wrap standalone mutating operations in explicit transactions.
 
 ## Optional Store (e.g. Zustand)
 
@@ -298,7 +296,7 @@ Conventional Commits — `feat:`, `fix:`, `refactor:`, `style:`, `docs:`, `chore
 
 Routine development happens on topic branches and merges to `master` through pull requests. Direct pushes to `master` are reserved for emergencies. Branch names use lowercase Conventional Commit-style prefixes plus a short kebab-case description: `feat/add-story-outliner`, `fix/chapter-link-validation`, `docs/branch-naming-convention`. For issue-backed work, include the issue number after the prefix: `feat/123-add-story-outliner`. Before starting issue-backed work or creating a new branch, fetch the latest `origin/master`, check the current branch, and base the work on that current remote state. If fetching is unavailable, report that limitation before branching or implementing. Before committing or opening a PR, make sure the branch is fresh and purpose-specific for the current work, not an old branch that has already merged or belongs to another PR. When in doubt, refresh `origin/master` and create a new branch from it before committing. Pull requests must pass the required quality gate checks (lint, tests, coverage, build) before merge. GitHub-native secret scanning and push protection are the secret leak controls for this repo; do not add a third-party secret scanner unless the workflow is intentionally revised.
 
-GitHub Issues are used for task tracking. Before implementation, check for an existing issue or create/draft one unless the change is truly tiny. Use `Refs #N` or `Closes #N` in commit messages when useful.
+GitHub Issues are used for task tracking. Before implementation, check for an existing issue or create/draft one unless the change is truly tiny. Use `Closes #N` in PR bodies and commit messages for complete, verified issue-backed work that should close on merge or push. Use `Refs #N` only when the work is related but intentionally leaves the issue open.
 
 Large changes are work that spans multiple features, broad refactors, risky behaviour changes, persistence/data-flow changes, or thousands of lines of code. Use one parent issue for the end goal and native GitHub sub-issues for independently shippable slices. Do not rely only on textual `Refs #N` links when the sub-issue relationship is available. Each sub-issue must leave `master` buildable, testable, deployable, and safe for normal users. For tightly coupled migrations, inactive implementation slices are acceptable. For partial user-facing features that cannot safely ship yet, hide the incomplete behavior behind a feature flag that follows the feature flag rules below. Production behavior must switch in one coherent deployable sub-issue.
 
