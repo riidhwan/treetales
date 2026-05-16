@@ -12,81 +12,63 @@ import {
 } from '@/repositories/indexedDb/db'
 import type { Story } from '@/services/types'
 
-export function createIndexedDbStoryRepository(): StoryRepository {
+interface StoryRepositoryOptions {
+  readonly transaction?: IDBTransaction
+}
+
+export function createIndexedDbStoryRepository(
+  options: StoryRepositoryOptions = {},
+): StoryRepository {
   return {
-    insertStory,
-    findStories,
-    findStoryById,
-    updateStory,
-    deleteStory,
+    insertStory: (story) => insertStory(options, story),
+    findStories: () => findStories(options),
+    findStoryById: (id) => findStoryById(options, id),
+    updateStory: (id, input) => updateStory(options, id, input),
+    deleteStory: (id) => deleteStory(options, id),
   }
 }
 
-async function insertStory(story: Story): Promise<void> {
-  const db = await openDb()
-
-  try {
-    const transaction = db.transaction(STORIES_STORE, 'readwrite')
-    const store = transaction.objectStore(STORIES_STORE)
-
-    store.add(story)
-    await transactionDone(transaction)
-  } finally {
-    db.close()
-  }
+async function insertStory(
+  options: StoryRepositoryOptions,
+  story: Story,
+): Promise<void> {
+  await withStoryStore(options, 'readwrite', async (store) => {
+    await requestToPromise(typedRequest<IDBValidKey>(store.add(story)))
+  })
 }
 
-async function findStories(): Promise<Story[]> {
-  const db = await openDb()
-
-  try {
-    const transaction = db.transaction(STORIES_STORE, 'readonly')
-    const store = transaction.objectStore(STORIES_STORE)
+async function findStories(
+  options: StoryRepositoryOptions,
+): Promise<Story[]> {
+  return withStoryStore(options, 'readonly', async (store) => {
     const stories = await requestToPromise(
       typedRequest<Story[]>(store.getAll()),
     )
 
-    await transactionDone(transaction)
-
     return sortByCreatedAt(stories)
-  } finally {
-    db.close()
-  }
+  })
 }
 
-async function findStoryById(id: string): Promise<Story | undefined> {
-  const db = await openDb()
-
-  try {
-    const transaction = db.transaction(STORIES_STORE, 'readonly')
-    const store = transaction.objectStore(STORIES_STORE)
-    const story = await requestToPromise(
-      typedRequest<Story | undefined>(store.get(id)),
-    )
-
-    await transactionDone(transaction)
-
-    return story
-  } finally {
-    db.close()
-  }
+async function findStoryById(
+  options: StoryRepositoryOptions,
+  id: string,
+): Promise<Story | undefined> {
+  return withStoryStore(options, 'readonly', (store) =>
+    requestToPromise(typedRequest<Story | undefined>(store.get(id))),
+  )
 }
 
 async function updateStory(
+  options: StoryRepositoryOptions,
   id: string,
   input: UpdateStoryRepositoryInput,
 ): Promise<Story | undefined> {
-  const db = await openDb()
-
-  try {
-    const transaction = db.transaction(STORIES_STORE, 'readwrite')
-    const store = transaction.objectStore(STORIES_STORE)
+  return withStoryStore(options, 'readwrite', async (store) => {
     const story = await requestToPromise(
       typedRequest<Story | undefined>(store.get(id)),
     )
 
     if (!story) {
-      await transactionDone(transaction)
       return undefined
     }
 
@@ -96,34 +78,49 @@ async function updateStory(
       updatedAt: input.updatedAt,
     }
 
-    store.put(updatedStory)
-    await transactionDone(transaction)
+    await requestToPromise(typedRequest<IDBValidKey>(store.put(updatedStory)))
 
     return updatedStory
-  } finally {
-    db.close()
-  }
+  })
 }
 
-async function deleteStory(id: string): Promise<boolean> {
-  const db = await openDb()
-
-  try {
-    const transaction = db.transaction(STORIES_STORE, 'readwrite')
-    const store = transaction.objectStore(STORIES_STORE)
+async function deleteStory(
+  options: StoryRepositoryOptions,
+  id: string,
+): Promise<boolean> {
+  return withStoryStore(options, 'readwrite', async (store) => {
     const story = await requestToPromise(
       typedRequest<Story | undefined>(store.get(id)),
     )
 
     if (!story) {
-      await transactionDone(transaction)
       return false
     }
 
-    store.delete(id)
-    await transactionDone(transaction)
+    await requestToPromise(typedRequest<undefined>(store.delete(id)))
 
     return true
+  })
+}
+
+async function withStoryStore<T>(
+  options: StoryRepositoryOptions,
+  mode: IDBTransactionMode,
+  operation: (store: IDBObjectStore) => Promise<T>,
+): Promise<T> {
+  if (options.transaction) {
+    return operation(options.transaction.objectStore(STORIES_STORE))
+  }
+
+  const db = await openDb()
+
+  try {
+    const transaction = db.transaction(STORIES_STORE, mode)
+    const store = transaction.objectStore(STORIES_STORE)
+    const result = await operation(store)
+    await transactionDone(transaction)
+
+    return result
   } finally {
     db.close()
   }

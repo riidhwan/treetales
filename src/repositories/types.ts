@@ -45,3 +45,14 @@ export interface ChapterRepository {
     input: DeleteChapterRepositoryInput,
   ) => Promise<boolean>
 }
+
+export interface RepositoryUnitOfWorkContext {
+  readonly stories: StoryRepository
+  readonly chapters: ChapterRepository
+}
+
+export interface RepositoryUnitOfWork {
+  readonly run: <T>(
+    operation: (context: RepositoryUnitOfWorkContext) => Promise<T>,
+  ) => Promise<T>
+}
