@@ -5,6 +5,7 @@ import type {
 } from '@/repositories/types'
 import {
   STORIES_STORE,
+  assertTransactionSupportsMode,
   openDb,
   requestToPromise,
   typedRequest,
@@ -109,6 +110,7 @@ async function withStoryStore<T>(
   operation: (store: IDBObjectStore) => Promise<T>,
 ): Promise<T> {
   if (options.transaction) {
+    assertTransactionSupportsMode(options.transaction, mode)
     return operation(options.transaction.objectStore(STORIES_STORE))
   }
 

@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createIndexedDbChapterRepository } from '@/repositories/indexedDb/chapterRepository'
+import {
+  CHAPTERS_STORE,
+  STORIES_STORE,
+  openDb,
+  transactionDone,
+} from '@/repositories/indexedDb/db'
 import { createIndexedDbStoryRepository } from '@/repositories/indexedDb/storyRepository'
 import { createIndexedDbRepositoryUnitOfWork } from '@/repositories/indexedDb/unitOfWork'
 import type { ChapterRepository, StoryRepository } from '@/repositories/types'
@@ -67,6 +73,32 @@ describe('indexedDbRepositoryUnitOfWork', () => {
 
     await expect(stories.findStoryById(story.id)).resolves.toEqual(story)
     await expect(chapters.findChapterById(chapter.id)).resolves.toEqual(chapter)
+  })
+
+  it('rejects writes when a repository receives a readonly transaction', async () => {
+    const db = await openDb()
+
+    try {
+      const transaction = db.transaction(
+        [STORIES_STORE, CHAPTERS_STORE],
+        'readonly',
+      )
+      const done = transactionDone(transaction)
+      const readonlyStories = createIndexedDbStoryRepository({ transaction })
+      const readonlyChapters = createIndexedDbChapterRepository({ transaction })
+      const story = createStory({ id: 'story-1' })
+      const chapter = createChapter({ id: 'chapter-1', storyId: story.id })
+
+      await expect(readonlyStories.insertStory(story)).rejects.toThrow(
+        'readonly IndexedDB transaction',
+      )
+      await expect(readonlyChapters.insertChapter(chapter)).rejects.toThrow(
+        'readonly IndexedDB transaction',
+      )
+      await done
+    } finally {
+      db.close()
+    }
   })
 })
 

@@ -10,6 +10,7 @@ import {
   CHAPTER_STORY_ID_INDEX,
   STORIES_STORE,
   abortTransaction,
+  assertTransactionSupportsMode,
   openDb,
   requestToPromise,
   typedRequest,
@@ -206,6 +207,7 @@ async function withTransaction<T>(
   operation: (transaction: IDBTransaction) => Promise<T>,
 ): Promise<T> {
   if (options.transaction) {
+    assertTransactionSupportsMode(options.transaction, mode)
     return operation(options.transaction)
   }
 

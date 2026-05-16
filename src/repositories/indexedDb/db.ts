@@ -153,3 +153,14 @@ export function abortTransaction(
 
   throw error
 }
+
+export function assertTransactionSupportsMode(
+  transaction: IDBTransaction,
+  requestedMode: IDBTransactionMode,
+): void {
+  if (requestedMode === 'readwrite' && transaction.mode === 'readonly') {
+    throw new Error(
+      'A readonly IndexedDB transaction cannot run a readwrite repository operation.',
+    )
+  }
+}
