@@ -16,8 +16,20 @@ interface StoryRow {
   readonly updated_at: TimestampColumn
 }
 
+interface PgliteQueryExecutor {
+  readonly query: PGliteInterface['query']
+}
+
+interface PgliteTransactionProvider extends PgliteQueryExecutor {
+  readonly transaction: PGliteInterface['transaction']
+}
+
+type PgliteRepositoryExecutor =
+  | PgliteQueryExecutor
+  | PgliteTransactionProvider
+
 export function createPgliteStoryRepository(
-  db: PGliteInterface,
+  db: PgliteRepositoryExecutor,
 ): StoryRepository {
   return {
     insertStory: (story) => insertStory(db, story),
@@ -28,8 +40,11 @@ export function createPgliteStoryRepository(
   }
 }
 
-async function insertStory(db: PGliteInterface, story: Story): Promise<void> {
-  await db.transaction(async (transaction) => {
+async function insertStory(
+  db: PgliteRepositoryExecutor,
+  story: Story,
+): Promise<void> {
+  await runPgliteWrite(db, async (transaction) => {
     await transaction.query(
       `
         INSERT INTO stories (id, title, description, created_at, updated_at)
@@ -46,7 +61,7 @@ async function insertStory(db: PGliteInterface, story: Story): Promise<void> {
   })
 }
 
-async function findStories(db: PGliteInterface): Promise<Story[]> {
+async function findStories(db: PgliteQueryExecutor): Promise<Story[]> {
   const result = await db.query<StoryRow>(`
     SELECT id, title, description, created_at, updated_at
     FROM stories
@@ -57,7 +72,7 @@ async function findStories(db: PGliteInterface): Promise<Story[]> {
 }
 
 async function findStoryById(
-  db: PGliteInterface,
+  db: PgliteQueryExecutor,
   id: string,
 ): Promise<Story | undefined> {
   const result = await db.query<StoryRow>(
@@ -73,11 +88,11 @@ async function findStoryById(
 }
 
 async function updateStory(
-  db: PGliteInterface,
+  db: PgliteRepositoryExecutor,
   id: string,
   input: UpdateStoryRepositoryInput,
 ): Promise<Story | undefined> {
-  return db.transaction(async (transaction) => {
+  return runPgliteWrite(db, async (transaction) => {
     const result = await transaction.query<StoryRow>(
       `
         UPDATE stories
@@ -96,10 +111,10 @@ async function updateStory(
 }
 
 async function deleteStory(
-  db: PGliteInterface,
+  db: PgliteRepositoryExecutor,
   id: string,
 ): Promise<boolean> {
-  return db.transaction(async (transaction) => {
+  return runPgliteWrite(db, async (transaction) => {
     const result = await transaction.query<{ readonly id: string }>(
       'DELETE FROM stories WHERE id = $1 RETURNING id',
       [id],
@@ -107,6 +122,23 @@ async function deleteStory(
 
     return result.rows.length > 0
   })
+}
+
+function runPgliteWrite<T>(
+  db: PgliteRepositoryExecutor,
+  operation: (transaction: PgliteQueryExecutor) => Promise<T>,
+): Promise<T> {
+  if (hasTransaction(db)) {
+    return db.transaction(operation)
+  }
+
+  return operation(db)
+}
+
+function hasTransaction(
+  db: PgliteRepositoryExecutor,
+): db is PgliteTransactionProvider {
+  return 'transaction' in db && typeof db.transaction === 'function'
 }
 
 function mapStoryRow(row: StoryRow): Story {

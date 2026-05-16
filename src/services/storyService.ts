@@ -1,9 +1,10 @@
-import { createIndexedDbStoryRepository } from '@/repositories/indexedDb/storyRepository'
-import { createIndexedDbRepositoryUnitOfWork } from '@/repositories/indexedDb/unitOfWork'
+import { getPgliteDb } from '@/repositories/pglite/db'
+import { createPgliteStoryRepository } from '@/repositories/pglite/storyRepository'
+import { createPgliteRepositoryUnitOfWork } from '@/repositories/pglite/unitOfWork'
+import type { StoryRepository } from '@/repositories/types'
 import type { CreateStoryInput, Story, UpdateStoryInput } from '@/services/types'
 
-const storyRepository = createIndexedDbStoryRepository()
-const repositoryUnitOfWork = createIndexedDbRepositoryUnitOfWork()
+const repositoryUnitOfWork = createPgliteRepositoryUnitOfWork()
 
 export async function createStory(input: CreateStoryInput): Promise<Story> {
   const now = Date.now()
@@ -15,23 +16,30 @@ export async function createStory(input: CreateStoryInput): Promise<Story> {
     updatedAt: now,
   }
 
+  const storyRepository = await getStoryRepository()
   await storyRepository.insertStory(story)
 
   return story
 }
 
-export function getStories(): Promise<Story[]> {
+export async function getStories(): Promise<Story[]> {
+  const storyRepository = await getStoryRepository()
+
   return storyRepository.findStories()
 }
 
-export function getStoryById(id: string): Promise<Story | undefined> {
+export async function getStoryById(id: string): Promise<Story | undefined> {
+  const storyRepository = await getStoryRepository()
+
   return storyRepository.findStoryById(id)
 }
 
-export function updateStory(
+export async function updateStory(
   id: string,
   input: UpdateStoryInput,
 ): Promise<Story | undefined> {
+  const storyRepository = await getStoryRepository()
+
   return storyRepository.updateStory(id, {
     ...input,
     updatedAt: Date.now(),
@@ -57,4 +65,10 @@ export async function deleteStory(id: string): Promise<boolean> {
 
     return stories.deleteStory(id)
   })
+}
+
+async function getStoryRepository(): Promise<StoryRepository> {
+  const db = await getPgliteDb()
+
+  return createPgliteStoryRepository(db)
 }

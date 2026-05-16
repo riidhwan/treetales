@@ -121,18 +121,16 @@ caching — components call services directly and manage their own loading/error
 state. Services own generated domain fields such as `id`, `createdAt`, and
 `updatedAt`, then call repositories to persist the requested domain change.
 
-During the PGlite migration, active story and chapter service exports can stay
-wired to direct IndexedDB while inactive PGlite repositories are added behind an
-internal boundary. When a persistence area is touched for the
-service/repository split, move its active IndexedDB implementation behind an
-IndexedDB repository in the same slice so the service boundary remains honest.
-The production persistence switch should happen in one coherent cut-over slice.
+Active story and chapter service exports are wired to browser-local PGlite
+repositories. Existing direct IndexedDB adapters and compatibility exports stay
+in the repository tree only until the cleanup slice removes the old migration
+scaffolding.
 
 | File | Responsibility |
 |---|---|
 | `storyService.ts` | Active Story service API |
 | `storyDb.ts` | Temporary compatibility re-export for existing Story imports |
-| `db.ts` | Temporary compatibility re-export for existing IndexedDB imports |
+| `db.ts` | Temporary compatibility re-export for old IndexedDB imports |
 | `chapterService.ts` | Active Chapter service API |
 | `chapterDb.ts` | Temporary compatibility re-export for existing Chapter imports |
 | `exampleStory.ts` | Creates or returns the built-in example story and its chapters |
@@ -182,15 +180,16 @@ Current storage-specific repository files include:
 
 | File | Responsibility |
 |---|---|
-| `indexedDb/db.ts` | Active direct IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
-| `indexedDb/storyRepository.ts` | Active IndexedDB Story persistence adapter |
-| `indexedDb/chapterRepository.ts` | Active IndexedDB Chapter persistence adapter with graph validation |
-| `indexedDb/unitOfWork.ts` | Active IndexedDB unit-of-work boundary for multi-repository writes |
+| `indexedDb/db.ts` | Legacy direct IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
+| `indexedDb/storyRepository.ts` | Legacy IndexedDB Story persistence adapter |
+| `indexedDb/chapterRepository.ts` | Legacy IndexedDB Chapter persistence adapter with graph validation |
+| `indexedDb/unitOfWork.ts` | Legacy IndexedDB unit-of-work boundary for multi-repository writes |
 | `pglite/config.ts` | PGlite storage id and worker id constants |
 | `pglite/pglite.worker.ts` | PGlite multi-tab worker entry using production storage `idb://treetales-pglite` |
-| `pglite/db.ts` | Inactive PGlite connection creation, schema setup, and forward migrations |
-| `pglite/storyRepository.ts` | Inactive PGlite Story persistence adapter with SQL row mapping and explicit write transactions |
-| `pglite/chapterRepository.ts` | Inactive PGlite Chapter persistence adapter with SQL row mapping and transaction-scoped graph validation |
+| `pglite/db.ts` | Active PGlite connection creation, schema setup, and forward migrations |
+| `pglite/storyRepository.ts` | Active PGlite Story persistence adapter with SQL row mapping and explicit write transactions |
+| `pglite/chapterRepository.ts` | Active PGlite Chapter persistence adapter with SQL row mapping and transaction-scoped graph validation |
+| `pglite/unitOfWork.ts` | Active PGlite unit-of-work boundary for multi-repository writes |
 
 Cross-record persistence effects should stay explicit at the service boundary.
 For example, Story deletion may coordinate a Story repository with a Chapter
@@ -199,11 +198,9 @@ hide Chapter cleanup inside the Story repository.
 
 Multi-repository writes should run inside an explicit storage-specific
 unit-of-work boundary so related writes commit or fail together. The active
-IndexedDB path exposes that boundary through
-`createIndexedDbRepositoryUnitOfWork()`, which opens one transaction and passes
+PGlite path exposes that boundary through
+`createPgliteRepositoryUnitOfWork()`, which opens one SQL transaction and passes
 transaction-scoped story and chapter repositories to the service operation.
-PGlite can map the same repository unit-of-work contract to `db.transaction(...)`
-when it becomes the active storage path.
 
 Cross-repository service operations such as `deleteStory` should use the
 unit-of-work boundary rather than opening storage transactions directly. Do not
@@ -216,7 +213,7 @@ same slice when the change is mechanical and contained.
 
 ## PGlite Schema
 
-The inactive PGlite foundation runs in the browser through the multi-tab worker
+The active PGlite foundation runs in the browser through the multi-tab worker
 and persists to a clean PGlite data directory, `idb://treetales-pglite`.
 Existing pre-production direct IndexedDB data does not need an automatic
 migration path.
@@ -238,15 +235,14 @@ boundary, but must run before committing a mutating chapter operation.
 Schema setup and forward migrations live with the PGlite repository
 implementation. Mutating PGlite repository operations should use explicit SQL
 transactions. Reads can use direct queries unless they are part of a write
-validation flow. Inactive PGlite repositories accept a `PGliteInterface`
-dependency so tests can use in-memory databases and production service exports
-can stay wired to direct IndexedDB until the cut-over slice.
+validation flow. PGlite repositories accept a `PGliteInterface` or
+transaction-scoped query executor so tests can use in-memory databases and
+unit-of-work operations can share a single transaction.
 
 ## Test Helpers (`src/test/`)
 
 Shared test-only helpers live in `src/test/` when they remove repeated setup
-across service, hook, route, or component tests. Active direct IndexedDB service
-tests use fake IndexedDB. PGlite foundation tests use the in-memory PGlite
-helper so SQL schema, constraints, transactions, and row mapping can be
-exercised directly. Keep these helpers small and specific to test
-infrastructure; production code should not import from `src/test/`.
+across service, hook, route, or component tests. Production service tests use
+the in-memory PGlite helper so SQL schema, constraints, transactions, and row
+mapping can be exercised directly. Keep these helpers small and specific to
+test infrastructure; production code should not import from `src/test/`.
