@@ -52,6 +52,8 @@ For pull requests, include a concise description, linked issue, verification com
 
 ## GitHub Issues & Larger Work
 
+Use the `github-issues` skill when creating or editing GitHub issues, decomposing work, starting issue-backed work, opening issue-backed PRs, managing blockers, or auditing issue relationships before handoff.
+
 Use GitHub Issues as the durable task queue for non-trivial work. Check for an existing issue before implementation; create or draft one unless the change is tiny. Large work should use a parent issue plus native GitHub sub-issues for independently shippable vertical slices. Do not rely only on textual `Refs #N` links when the sub-issue relationship is available. Each sub-issue must leave `master` buildable, testable, deployable, and safe for normal users; for tightly coupled migrations, inactive implementation slices are acceptable, and partial user-facing features that cannot safely ship yet must stay behind a feature flag. Production behavior must switch in one coherent deployable sub-issue.
 
 Use feature flags only when incomplete user-facing behavior must land before it is ready. Each flag needs an owner issue, default state, reason, enable/removal condition, and cleanup issue.
