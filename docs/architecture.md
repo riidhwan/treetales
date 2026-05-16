@@ -185,6 +185,7 @@ Current storage-specific repository files include:
 | `indexedDb/db.ts` | Active direct IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
 | `indexedDb/storyRepository.ts` | Active IndexedDB Story persistence adapter |
 | `indexedDb/chapterRepository.ts` | Active IndexedDB Chapter persistence adapter with graph validation |
+| `indexedDb/unitOfWork.ts` | Active IndexedDB unit-of-work boundary for multi-repository writes |
 | `pglite/config.ts` | PGlite storage id and worker id constants |
 | `pglite/pglite.worker.ts` | PGlite multi-tab worker entry using production storage `idb://treetales-pglite` |
 | `pglite/db.ts` | Inactive PGlite connection creation, schema setup, and forward migrations |
@@ -196,14 +197,17 @@ For example, Story deletion may coordinate a Story repository with a Chapter
 repository operation such as deleting all Chapters for a Story; it should not
 hide Chapter cleanup inside the Story repository.
 
-Multi-repository writes should eventually run inside an explicit
-storage-specific unit-of-work boundary so related writes commit or fail
-together. Add that boundary in its own migration slice rather than expanding a
-single inactive repository slice.
+Multi-repository writes should run inside an explicit storage-specific
+unit-of-work boundary so related writes commit or fail together. The active
+IndexedDB path exposes that boundary through
+`createIndexedDbRepositoryUnitOfWork()`, which opens one transaction and passes
+transaction-scoped story and chapter repositories to the service operation.
+PGlite can map the same repository unit-of-work contract to `db.transaction(...)`
+when it becomes the active storage path.
 
-Until that unit-of-work boundary exists, cross-repository service operations
-such as `deleteStory` may remain as temporary legacy service paths. Do not add
-temporary repository methods that hide those cross-record effects.
+Cross-repository service operations such as `deleteStory` should use the
+unit-of-work boundary rather than opening storage transactions directly. Do not
+add temporary repository methods that hide those cross-record effects.
 
 When renaming an app-facing service, prefer adding the correctly named service
 module first and leaving the old `*Db.ts` file as a temporary compatibility

@@ -10,199 +10,215 @@ import {
   CHAPTER_STORY_ID_INDEX,
   STORIES_STORE,
   abortTransaction,
+  assertTransactionSupportsMode,
   openDb,
   requestToPromise,
   typedRequest,
   transactionDone,
 } from '@/repositories/indexedDb/db'
+import type { StoreName } from '@/repositories/indexedDb/db'
 import type { Chapter, Story } from '@/services/types'
 
-export function createIndexedDbChapterRepository(): ChapterRepository {
+interface ChapterRepositoryOptions {
+  readonly transaction?: IDBTransaction
+}
+
+export function createIndexedDbChapterRepository(
+  options: ChapterRepositoryOptions = {},
+): ChapterRepository {
   return {
-    insertChapter,
-    findChapterById,
-    findChaptersByStoryId,
-    findIntroChapterByStoryId,
-    findChildChapters,
-    updateChapter,
-    deleteChapter,
+    insertChapter: (chapter) => insertChapter(options, chapter),
+    findChapterById: (id) => findChapterById(options, id),
+    findChaptersByStoryId: (storyId) => findChaptersByStoryId(options, storyId),
+    findIntroChapterByStoryId: (storyId) =>
+      findIntroChapterByStoryId(options, storyId),
+    findChildChapters: (chapterId) => findChildChapters(options, chapterId),
+    updateChapter: (id, input) => updateChapter(options, id, input),
+    deleteChapter: (id, input) => deleteChapter(options, id, input),
   }
 }
 
-async function insertChapter(chapter: Chapter): Promise<void> {
-  const db = await openDb()
+async function insertChapter(
+  options: ChapterRepositoryOptions,
+  chapter: Chapter,
+): Promise<void> {
+  await withTransaction(
+    options,
+    [STORIES_STORE, CHAPTERS_STORE],
+    'readwrite',
+    async (transaction) => {
+      const chaptersStore = transaction.objectStore(CHAPTERS_STORE)
 
-  try {
-    const transaction = db.transaction(
-      [STORIES_STORE, CHAPTERS_STORE],
-      'readwrite',
-    )
-    const chaptersStore = transaction.objectStore(CHAPTERS_STORE)
-
-    await validateChapterWrite(transaction, chapter)
-    chaptersStore.add(chapter)
-    await transactionDone(transaction)
-  } finally {
-    db.close()
-  }
+      await validateChapterWrite(transaction, chapter)
+      await requestToPromise(
+        typedRequest<IDBValidKey>(chaptersStore.add(chapter)),
+      )
+    },
+  )
 }
 
-async function findChapterById(id: string): Promise<Chapter | undefined> {
-  const db = await openDb()
-
-  try {
-    const transaction = db.transaction(CHAPTERS_STORE, 'readonly')
-    const store = transaction.objectStore(CHAPTERS_STORE)
-    const chapter = await requestToPromise(
-      typedRequest<Chapter | undefined>(store.get(id)),
-    )
-
-    await transactionDone(transaction)
-
-    return chapter
-  } finally {
-    db.close()
-  }
+async function findChapterById(
+  options: ChapterRepositoryOptions,
+  id: string,
+): Promise<Chapter | undefined> {
+  return withChapterStore(options, 'readonly', (store) =>
+    requestToPromise(typedRequest<Chapter | undefined>(store.get(id))),
+  )
 }
 
-async function findChaptersByStoryId(storyId: string): Promise<Chapter[]> {
-  const db = await openDb()
-
-  try {
-    const transaction = db.transaction(CHAPTERS_STORE, 'readonly')
-    const store = transaction.objectStore(CHAPTERS_STORE)
+async function findChaptersByStoryId(
+  options: ChapterRepositoryOptions,
+  storyId: string,
+): Promise<Chapter[]> {
+  return withChapterStore(options, 'readonly', async (store) => {
     const index = store.index(CHAPTER_STORY_ID_INDEX)
     const chapters = await requestToPromise(
       typedRequest<Chapter[]>(index.getAll(storyId)),
     )
 
-    await transactionDone(transaction)
-
     return sortByCreatedAt(chapters)
-  } finally {
-    db.close()
-  }
+  })
 }
 
 async function findIntroChapterByStoryId(
+  options: ChapterRepositoryOptions,
   storyId: string,
 ): Promise<Chapter | undefined> {
-  const db = await openDb()
-
-  try {
-    const transaction = db.transaction(CHAPTERS_STORE, 'readonly')
-    const store = transaction.objectStore(CHAPTERS_STORE)
-    const index = store.index(CHAPTER_STORY_ID_INDEX)
-    const introChapter = await findIntroChapter(index, storyId)
-
-    await transactionDone(transaction)
-
-    return introChapter
-  } finally {
-    db.close()
-  }
+  return withChapterStore(options, 'readonly', (store) =>
+    findIntroChapter(store.index(CHAPTER_STORY_ID_INDEX), storyId),
+  )
 }
 
-async function findChildChapters(chapterId: string): Promise<Chapter[]> {
-  const db = await openDb()
-
-  try {
-    const transaction = db.transaction(CHAPTERS_STORE, 'readonly')
-    const store = transaction.objectStore(CHAPTERS_STORE)
+async function findChildChapters(
+  options: ChapterRepositoryOptions,
+  chapterId: string,
+): Promise<Chapter[]> {
+  return withChapterStore(options, 'readonly', async (store) => {
     const index = store.index(CHAPTER_PARENT_ID_INDEX)
     const chapters = await requestToPromise(
       typedRequest<Chapter[]>(index.getAll(chapterId)),
     )
 
-    await transactionDone(transaction)
-
     return sortByCreatedAt(chapters)
-  } finally {
-    db.close()
-  }
+  })
 }
 
 async function updateChapter(
+  options: ChapterRepositoryOptions,
   id: string,
   input: UpdateChapterRepositoryInput,
 ): Promise<Chapter | undefined> {
-  const db = await openDb()
+  return withTransaction(
+    options,
+    [STORIES_STORE, CHAPTERS_STORE],
+    'readwrite',
+    async (transaction) => {
+      const chaptersStore = transaction.objectStore(CHAPTERS_STORE)
+      const chapter = await requestToPromise(
+        typedRequest<Chapter | undefined>(chaptersStore.get(id)),
+      )
 
-  try {
-    const transaction = db.transaction(
-      [STORIES_STORE, CHAPTERS_STORE],
-      'readwrite',
-    )
-    const chaptersStore = transaction.objectStore(CHAPTERS_STORE)
-    const chapter = await requestToPromise(
-      typedRequest<Chapter | undefined>(chaptersStore.get(id)),
-    )
+      if (!chapter) {
+        return undefined
+      }
 
-    if (!chapter) {
-      await transactionDone(transaction)
-      return undefined
-    }
+      const updatedChapter: Chapter = {
+        ...chapter,
+        ...input,
+        parentChapterId:
+          'parentChapterId' in input
+            ? (input.parentChapterId ?? null)
+            : chapter.parentChapterId,
+        updatedAt: input.updatedAt,
+      }
 
-    const updatedChapter: Chapter = {
-      ...chapter,
-      ...input,
-      parentChapterId:
-        'parentChapterId' in input
-          ? (input.parentChapterId ?? null)
-          : chapter.parentChapterId,
-      updatedAt: input.updatedAt,
-    }
+      await validateChapterWrite(transaction, updatedChapter)
+      await requestToPromise(
+        typedRequest<IDBValidKey>(chaptersStore.put(updatedChapter)),
+      )
 
-    await validateChapterWrite(transaction, updatedChapter)
-    chaptersStore.put(updatedChapter)
-    await transactionDone(transaction)
-
-    return updatedChapter
-  } finally {
-    db.close()
-  }
+      return updatedChapter
+    },
+  )
 }
 
 async function deleteChapter(
+  options: ChapterRepositoryOptions,
   id: string,
   input: DeleteChapterRepositoryInput,
 ): Promise<boolean> {
+  return withTransaction(
+    options,
+    [CHAPTERS_STORE],
+    'readwrite',
+    async (transaction) => {
+      const chaptersStore = transaction.objectStore(CHAPTERS_STORE)
+      const chapter = await requestToPromise(
+        typedRequest<Chapter | undefined>(chaptersStore.get(id)),
+      )
+
+      if (!chapter) {
+        return false
+      }
+
+      const storyChapters = await requestToPromise(
+        typedRequest<Chapter[]>(
+          chaptersStore.index(CHAPTER_STORY_ID_INDEX).getAll(chapter.storyId),
+        ),
+      )
+
+      for (const storyChapter of storyChapters) {
+        if (storyChapter.parentChapterId !== id) {
+          continue
+        }
+
+        await requestToPromise(
+          typedRequest<IDBValidKey>(
+            chaptersStore.put({
+              ...storyChapter,
+              parentChapterId: null,
+              updatedAt: input.unlinkedChildrenUpdatedAt,
+            } satisfies Chapter),
+          ),
+        )
+      }
+
+      await requestToPromise(typedRequest<undefined>(chaptersStore.delete(id)))
+
+      return true
+    },
+  )
+}
+
+async function withChapterStore<T>(
+  options: ChapterRepositoryOptions,
+  mode: IDBTransactionMode,
+  operation: (store: IDBObjectStore) => Promise<T>,
+): Promise<T> {
+  return withTransaction(options, [CHAPTERS_STORE], mode, (transaction) =>
+    operation(transaction.objectStore(CHAPTERS_STORE)),
+  )
+}
+
+async function withTransaction<T>(
+  options: ChapterRepositoryOptions,
+  storeNames: readonly StoreName[],
+  mode: IDBTransactionMode,
+  operation: (transaction: IDBTransaction) => Promise<T>,
+): Promise<T> {
+  if (options.transaction) {
+    assertTransactionSupportsMode(options.transaction, mode)
+    return operation(options.transaction)
+  }
+
   const db = await openDb()
 
   try {
-    const transaction = db.transaction(CHAPTERS_STORE, 'readwrite')
-    const chaptersStore = transaction.objectStore(CHAPTERS_STORE)
-    const chapter = await requestToPromise(
-      typedRequest<Chapter | undefined>(chaptersStore.get(id)),
-    )
-
-    if (!chapter) {
-      await transactionDone(transaction)
-      return false
-    }
-
-    const storyChapters = await requestToPromise(
-      typedRequest<Chapter[]>(
-        chaptersStore.index(CHAPTER_STORY_ID_INDEX).getAll(chapter.storyId),
-      ),
-    )
-
-    for (const storyChapter of storyChapters) {
-      if (storyChapter.parentChapterId !== id) {
-        continue
-      }
-
-      chaptersStore.put({
-        ...storyChapter,
-        parentChapterId: null,
-        updatedAt: input.unlinkedChildrenUpdatedAt,
-      } satisfies Chapter)
-    }
-
-    chaptersStore.delete(id)
+    const transaction = db.transaction([...storeNames], mode)
+    const result = await operation(transaction)
     await transactionDone(transaction)
 
-    return true
+    return result
   } finally {
     db.close()
   }

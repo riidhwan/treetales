@@ -114,6 +114,39 @@ function ControlledStoryReader({
   )
 }
 
+function StorySwitchingReader({
+  onSelectChapter,
+  services,
+  storyId,
+}: {
+  readonly onSelectChapter: (chapterId: string) => void
+  readonly services: StoryReaderServices
+  readonly storyId: string
+}) {
+  const [chapterIdByStoryId, setChapterIdByStoryId] = useState<
+    Record<string, string | undefined>
+  >({})
+
+  return (
+    <StoryReader
+      chapterId={chapterIdByStoryId[storyId]}
+      onCreateChildChapter={vi.fn()}
+      onEditChapter={vi.fn()}
+      onEditStory={vi.fn()}
+      onOpenDashboard={vi.fn()}
+      onSelectChapter={(selectedChapterId) => {
+        onSelectChapter(selectedChapterId)
+        setChapterIdByStoryId((currentChapterIdByStoryId) => ({
+          ...currentChapterIdByStoryId,
+          [storyId]: selectedChapterId,
+        }))
+      }}
+      services={services}
+      storyId={storyId}
+    />
+  )
+}
+
 function deferred<TValue>() {
   let resolve!: (value: TValue) => void
   let reject!: (reason?: unknown) => void
@@ -478,11 +511,7 @@ describe('StoryReader', () => {
       ),
     }
     const view = render(
-      <StoryReader
-        onCreateChildChapter={vi.fn()}
-        onEditChapter={vi.fn()}
-        onEditStory={vi.fn()}
-        onOpenDashboard={vi.fn()}
+      <StorySwitchingReader
         onSelectChapter={onSelectChapter}
         services={services}
         storyId="story-1"
@@ -492,12 +521,7 @@ describe('StoryReader', () => {
     fireEvent.click(await screen.findByRole('button', { name: /continue/i }))
 
     view.rerender(
-      <StoryReader
-        chapterId="story-1-next"
-        onCreateChildChapter={vi.fn()}
-        onEditChapter={vi.fn()}
-        onEditStory={vi.fn()}
-        onOpenDashboard={vi.fn()}
+      <StorySwitchingReader
         onSelectChapter={onSelectChapter}
         services={services}
         storyId="story-1"
@@ -507,11 +531,7 @@ describe('StoryReader', () => {
     expect(await screen.findByRole('button', { name: 'Back' })).toBeTruthy()
 
     view.rerender(
-      <StoryReader
-        onCreateChildChapter={vi.fn()}
-        onEditChapter={vi.fn()}
-        onEditStory={vi.fn()}
-        onOpenDashboard={vi.fn()}
+      <StorySwitchingReader
         onSelectChapter={onSelectChapter}
         services={services}
         storyId="story-2"

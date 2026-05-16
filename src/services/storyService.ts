@@ -1,21 +1,9 @@
 import { createIndexedDbStoryRepository } from '@/repositories/indexedDb/storyRepository'
-import {
-  CHAPTERS_STORE,
-  CHAPTER_STORY_ID_INDEX,
-  STORIES_STORE,
-  openDb,
-  requestToPromise,
-  typedRequest,
-  transactionDone,
-} from '@/repositories/indexedDb/db'
-import type {
-  Chapter,
-  CreateStoryInput,
-  Story,
-  UpdateStoryInput,
-} from '@/services/types'
+import { createIndexedDbRepositoryUnitOfWork } from '@/repositories/indexedDb/unitOfWork'
+import type { CreateStoryInput, Story, UpdateStoryInput } from '@/services/types'
 
 const storyRepository = createIndexedDbStoryRepository()
+const repositoryUnitOfWork = createIndexedDbRepositoryUnitOfWork()
 
 export async function createStory(input: CreateStoryInput): Promise<Story> {
   const now = Date.now()
@@ -50,46 +38,23 @@ export function updateStory(
   })
 }
 
-// Temporary legacy path until repository unit-of-work support lands in #71.
 export async function deleteStory(id: string): Promise<boolean> {
-  const db = await openDb()
+  const unlinkedChildrenUpdatedAt = Date.now()
 
-  try {
-    const transaction = db.transaction(
-      [STORIES_STORE, CHAPTERS_STORE],
-      'readwrite',
-    )
-    const storiesStore = transaction.objectStore(STORIES_STORE)
-    const chaptersStore = transaction.objectStore(CHAPTERS_STORE)
-    const chapterStoryIndex = chaptersStore.index(CHAPTER_STORY_ID_INDEX)
-    const story = await requestToPromise(
-      typedRequest<Story | undefined>(storiesStore.get(id)),
-    )
-
+  return repositoryUnitOfWork.run(async ({ stories, chapters }) => {
+    const story = await stories.findStoryById(id)
     if (!story) {
-      await transactionDone(transaction)
       return false
     }
 
-    const chapters = await requestToPromise(
-      typedRequest<Chapter[]>(chapterStoryIndex.getAll(id)),
-    )
+    const storyChapters = await chapters.findChaptersByStoryId(id)
 
-    for (const chapter of chapters) {
-      chaptersStore.delete(chapter.id)
+    for (const chapter of storyChapters) {
+      await chapters.deleteChapter(chapter.id, {
+        unlinkedChildrenUpdatedAt,
+      })
     }
 
-    storiesStore.delete(id)
-    await transactionDone(transaction)
-
-    return true
-  } catch (error) {
-    if (error instanceof Error) {
-      throw error
-    }
-
-    throw new Error('Failed to delete story.', { cause: error })
-  } finally {
-    db.close()
-  }
+    return stories.deleteStory(id)
+  })
 }

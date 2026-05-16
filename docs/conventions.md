@@ -181,6 +181,7 @@ Current repository files are:
 | `indexedDb/db.ts` | Active direct IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
 | `indexedDb/storyRepository.ts` | Active IndexedDB Story persistence adapter |
 | `indexedDb/chapterRepository.ts` | Active IndexedDB Chapter persistence adapter |
+| `indexedDb/unitOfWork.ts` | Active IndexedDB unit-of-work boundary for multi-repository writes |
 | `pglite/config.ts` | PGlite storage id and worker id constants |
 | `pglite/pglite.worker.ts` | PGlite multi-tab worker entry |
 | `pglite/db.ts` | Inactive PGlite connection creation, schema setup, and forward migrations |
@@ -192,14 +193,12 @@ For example, Story deletion may coordinate a Story repository with a Chapter
 repository operation such as deleting all Chapters for a Story; it should not
 hide Chapter cleanup inside the Story repository.
 
-Multi-repository writes should eventually run inside an explicit
-storage-specific unit-of-work boundary so related writes commit or fail
-together. Add that boundary in its own migration slice rather than expanding a
-single inactive repository slice.
-
-Until that unit-of-work boundary exists, cross-repository service operations
-such as `deleteStory` may remain as temporary legacy service paths. Do not add
-temporary repository methods that hide those cross-record effects.
+Multi-repository writes should run inside an explicit storage-specific
+unit-of-work boundary so related writes commit or fail together. The active
+IndexedDB path uses `createIndexedDbRepositoryUnitOfWork()` for these service
+operations. Keep cross-record effects explicit in the service operation and use
+transaction-scoped repositories inside the unit of work instead of opening
+storage transactions directly from services.
 
 When renaming an app-facing service, prefer adding the correctly named service
 module first and leaving the old `*Db.ts` file as a temporary compatibility
