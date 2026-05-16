@@ -292,7 +292,17 @@ Routine development happens on topic branches and merges to `master` through pul
 
 GitHub Issues are used for task tracking. Before implementation, check for an existing issue or create/draft one unless the change is truly tiny. Use `Closes #N` in PR bodies and commit messages for complete, verified issue-backed work that should close on merge or push. Use `Refs #N` only when the work is related but intentionally leaves the issue open.
 
+Use the local `github-issues` skill when creating or editing GitHub issues, decomposing work, starting issue-backed work, opening issue-backed PRs, managing blockers, or auditing issue relationships before handoff. The skill owns the operational checklists and issue templates.
+
 Large changes are work that spans multiple features, broad refactors, risky behaviour changes, persistence/data-flow changes, or thousands of lines of code. Use one parent issue for the end goal and native GitHub sub-issues for independently shippable slices. Do not rely only on textual `Refs #N` links when the sub-issue relationship is available. Each sub-issue must leave `master` buildable, testable, deployable, and safe for normal users. For tightly coupled migrations, inactive implementation slices are acceptable. For partial user-facing features that cannot safely ship yet, hide the incomplete behavior behind a feature flag that follows the feature flag rules below. Production behavior must switch in one coherent deployable sub-issue.
+
+Native GitHub relationships are the source of truth for issue structure. Use sub-issues for "part of" relationships and blocked-by/blocking relationships for real sequencing dependencies. Do not encode required hierarchy or blockers only in issue prose, checklists, or `Refs #N` links. If a required native relationship cannot be created, read, or verified through available GitHub tooling, stop and report the limitation instead of silently falling back to text-only links.
+
+Issue descriptions should use a consistent structure. Parent issues describe outcome, context, scope, out-of-scope work, planned slices, dependencies, and completion criteria. Sub-issues and standalone work issues describe outcome, parent context when applicable, related decisions, scope, out-of-scope work, dependencies, and verification. For architecture, persistence, routing, data-flow, feature-flag, or workflow-policy changes, include a `Related Decisions` section that links the applicable ADRs/docs or says `None identified`.
+
+Before starting an existing issue, inspect the target issue, parent issue when present, child/sub-issues when relevant, blocking relationships, linked PRs or branch context when visible, and ADRs/docs linked from the issue graph. State the big picture before editing: parent goal, this issue's slice, blockers, and related ADRs.
+
+Before handing off issue-backed work, audit the issue graph: whether the issue is a parent, sub-issue, or standalone issue; whether required native sub-issue and blocking relationships exist; whether linked ADRs/docs were followed or updated; whether follow-up issues are needed; and whether the parent issue can close, must stay open, or needs updated completion criteria.
 
 Prefer vertical slices over layer-only mega-PRs:
 
