@@ -119,10 +119,10 @@ Services own generated domain fields such as `id`, `createdAt`, and
 `updatedAt`. They call repositories with domain records or domain patches and
 keep storage-specific details out of component-facing contracts.
 
-Active story and chapter service exports are wired to browser-local PGlite
-repositories. Existing direct IndexedDB adapters and compatibility exports stay
-temporarily for the cleanup slice, but new production persistence work should
-target the PGlite path.
+Active story and chapter service exports are wired to browser-local IndexedDB
+repositories. Compatibility exports stay temporarily for old import paths, but
+new production persistence work should target the active service modules and
+repository contracts.
 
 Current service-facing files are:
 
@@ -136,7 +136,7 @@ Current service-facing files are:
 | `exampleStory.ts` | Built-in example story creation/reuse |
 | `types.ts` | Shared records and input contracts |
 
-Production service and PGlite repository tests use the in-memory PGlite helper
+Production service and IndexedDB repository tests use the fake IndexedDB helper
 from `src/test/`. Component and hook tests can keep using fake service
 dependencies when the persistence layer is not under test.
 
@@ -167,24 +167,17 @@ preserving the original cause.
 Shared repository contracts live in `src/repositories/types.ts`. Domain records
 and service input types remain in `src/services/types.ts` until there is a
 separate reason to move them. Storage-specific implementations live under a
-provider directory, such as `src/repositories/pglite/`, so connection setup,
-configuration, migrations, worker entry points, and SQL repositories stay
-together.
+provider directory, such as `src/repositories/indexedDb/`, so connection setup,
+upgrades, transaction helpers, and provider-specific repositories stay together.
 
 Current repository files are:
 
 | File | Responsibility |
 |---|---|
-| `indexedDb/db.ts` | Legacy direct IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
-| `indexedDb/storyRepository.ts` | Legacy IndexedDB Story persistence adapter |
-| `indexedDb/chapterRepository.ts` | Legacy IndexedDB Chapter persistence adapter |
-| `indexedDb/unitOfWork.ts` | Legacy IndexedDB unit-of-work boundary for multi-repository writes |
-| `pglite/config.ts` | PGlite storage id and worker id constants |
-| `pglite/pglite.worker.ts` | PGlite multi-tab worker entry |
-| `pglite/db.ts` | Active PGlite connection creation, schema setup, and forward migrations |
-| `pglite/storyRepository.ts` | Active PGlite Story persistence adapter |
-| `pglite/chapterRepository.ts` | Active PGlite Chapter persistence adapter |
-| `pglite/unitOfWork.ts` | Active PGlite unit-of-work boundary for multi-repository writes |
+| `indexedDb/db.ts` | Active IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
+| `indexedDb/storyRepository.ts` | Active IndexedDB Story persistence adapter |
+| `indexedDb/chapterRepository.ts` | Active IndexedDB Chapter persistence adapter |
+| `indexedDb/unitOfWork.ts` | Active IndexedDB unit-of-work boundary for multi-repository writes |
 
 Cross-record persistence effects should stay explicit at the service boundary.
 For example, Story deletion may coordinate a Story repository with a Chapter
@@ -193,7 +186,7 @@ hide Chapter cleanup inside the Story repository.
 
 Multi-repository writes should run inside an explicit storage-specific
 unit-of-work boundary so related writes commit or fail together. The active
-PGlite path uses `createPgliteRepositoryUnitOfWork()` for these service
+IndexedDB path uses `createIndexedDbRepositoryUnitOfWork()` for these service
 operations. Keep cross-record effects explicit in the service operation and use
 transaction-scoped repositories inside the unit of work instead of opening
 storage transactions directly from services.
@@ -203,9 +196,10 @@ module first and leaving the old `*Db.ts` file as a temporary compatibility
 re-export. Migrate first-party imports to the correctly named service in the
 same slice when the change is mechanical and contained.
 
-PGlite repositories should accept a `PGliteInterface` or transaction-scoped
-query executor rather than calling `getPgliteDb()` directly. Use plain SQL and
-wrap standalone mutating operations in explicit transactions.
+IndexedDB repositories may accept an `IDBTransaction` for unit-of-work
+operations rather than opening their own database connection. Standalone
+operations should open and close their own database connection through the
+provider helper.
 
 ## Optional Store (e.g. Zustand)
 

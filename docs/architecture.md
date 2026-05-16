@@ -75,7 +75,7 @@ specific:
 | `useStoryReader.ts` | Loads reader data, tracks the selected chapter, and exposes navigation options |
 
 Hooks depend on the service layer through small service interfaces with default
-implementations. Tests can pass fake services without mocking PGlite.
+implementations. Tests can pass fake services without touching IndexedDB.
 
 ## Shared Utilities (`src/lib/`)
 
@@ -109,7 +109,7 @@ Chapter {
 }
 ```
 
-Chapter content stays a plain `string` in PGlite and service contracts. The
+Chapter content stays a plain `string` in persistence and service contracts. The
 reader and chapter authoring views interpret that string as markdown using
 common markdown, GFM extensions, and single-newline breaks; raw HTML is not
 rendered.
@@ -121,10 +121,9 @@ caching — components call services directly and manage their own loading/error
 state. Services own generated domain fields such as `id`, `createdAt`, and
 `updatedAt`, then call repositories to persist the requested domain change.
 
-Active story and chapter service exports are wired to browser-local PGlite
-repositories. Existing direct IndexedDB adapters and compatibility exports stay
-in the repository tree only until the cleanup slice removes the old migration
-scaffolding.
+Active story and chapter service exports are wired to browser-local IndexedDB
+repositories. Compatibility exports stay in the service tree only until old
+imports are migrated to the correctly named service modules.
 
 | File | Responsibility |
 |---|---|
@@ -172,24 +171,17 @@ preserving the original cause.
 Shared repository contracts live in `src/repositories/types.ts`. Domain records
 and service input types remain in `src/services/types.ts` until there is a
 separate reason to move them. Storage-specific implementations live under a
-provider directory, such as `src/repositories/pglite/`, so connection setup,
-configuration, migrations, worker entry points, and SQL repositories stay
-together.
+provider directory, such as `src/repositories/indexedDb/`, so connection setup,
+upgrades, transaction helpers, and provider-specific repositories stay together.
 
 Current storage-specific repository files include:
 
 | File | Responsibility |
 |---|---|
-| `indexedDb/db.ts` | Legacy direct IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
-| `indexedDb/storyRepository.ts` | Legacy IndexedDB Story persistence adapter |
-| `indexedDb/chapterRepository.ts` | Legacy IndexedDB Chapter persistence adapter with graph validation |
-| `indexedDb/unitOfWork.ts` | Legacy IndexedDB unit-of-work boundary for multi-repository writes |
-| `pglite/config.ts` | PGlite storage id and worker id constants |
-| `pglite/pglite.worker.ts` | PGlite multi-tab worker entry using production storage `idb://treetales-pglite` |
-| `pglite/db.ts` | Active PGlite connection creation, schema setup, and forward migrations |
-| `pglite/storyRepository.ts` | Active PGlite Story persistence adapter with SQL row mapping and explicit write transactions |
-| `pglite/chapterRepository.ts` | Active PGlite Chapter persistence adapter with SQL row mapping and transaction-scoped graph validation |
-| `pglite/unitOfWork.ts` | Active PGlite unit-of-work boundary for multi-repository writes |
+| `indexedDb/db.ts` | Active IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
+| `indexedDb/storyRepository.ts` | Active IndexedDB Story persistence adapter |
+| `indexedDb/chapterRepository.ts` | Active IndexedDB Chapter persistence adapter with graph validation |
+| `indexedDb/unitOfWork.ts` | Active IndexedDB unit-of-work boundary for multi-repository writes |
 
 Cross-record persistence effects should stay explicit at the service boundary.
 For example, Story deletion may coordinate a Story repository with a Chapter
@@ -198,9 +190,10 @@ hide Chapter cleanup inside the Story repository.
 
 Multi-repository writes should run inside an explicit storage-specific
 unit-of-work boundary so related writes commit or fail together. The active
-PGlite path exposes that boundary through
-`createPgliteRepositoryUnitOfWork()`, which opens one SQL transaction and passes
-transaction-scoped story and chapter repositories to the service operation.
+IndexedDB path exposes that boundary through
+`createIndexedDbRepositoryUnitOfWork()`, which opens one readwrite transaction
+and passes transaction-scoped story and chapter repositories to the service
+operation.
 
 Cross-repository service operations such as `deleteStory` should use the
 unit-of-work boundary rather than opening storage transactions directly. Do not
@@ -211,38 +204,34 @@ module first and leaving the old `*Db.ts` file as a temporary compatibility
 re-export. Migrate first-party imports to the correctly named service in the
 same slice when the change is mechanical and contained.
 
-## PGlite Schema
+## IndexedDB Schema
 
-The active PGlite foundation runs in the browser through the multi-tab worker
-and persists to a clean PGlite data directory, `idb://treetales-pglite`.
-Existing pre-production direct IndexedDB data does not need an automatic
-migration path.
+The active IndexedDB foundation uses the browser database `TreeTales` and
+persists stories in the current browser profile. Existing short-lived PGlite
+data does not need an automatic migration path.
 
-The schema uses plain SQL, owned by the repository layer:
+The schema is owned by the repository layer:
 
 - **`stories`** — keyed by `id`
-- **`chapters`** — keyed by `id`, with `story_id` referencing `stories.id`
-  and `parent_chapter_id` referencing `chapters.id`
-- Indexes on `chapters.story_id` and `chapters.parent_chapter_id`
-- A partial unique index on `chapters(story_id) where parent_chapter_id is null`
-  so each story has at most one intro chapter
+- **`chapters`** — keyed by `id`
+- Chapter indexes on `storyId` and `parentChapterId`
 
-Deleting a story cascades to its chapters. Deleting a chapter clears direct
-children's parent chapter reference instead of deleting descendants. Chapter
-cycle prevention stays in application code above or inside the repository
-boundary, but must run before committing a mutating chapter operation.
+Deleting a story explicitly deletes its chapters through the service
+unit-of-work boundary. Deleting a chapter clears direct children's parent
+chapter reference instead of deleting descendants. Chapter write validation
+rejects missing stories, missing parents, parents from other stories,
+self-parenting, multiple intro chapters for one story, and cycles before
+committing a mutating chapter operation.
 
-Schema setup and forward migrations live with the PGlite repository
-implementation. Mutating PGlite repository operations should use explicit SQL
-transactions. Reads can use direct queries unless they are part of a write
-validation flow. PGlite repositories accept a `PGliteInterface` or
-transaction-scoped query executor so tests can use in-memory databases and
-unit-of-work operations can share a single transaction.
+Schema setup and forward upgrades live with the IndexedDB repository
+implementation. Repository operations may accept a transaction so standalone
+operations and unit-of-work operations share the same adapter code.
 
 ## Test Helpers (`src/test/`)
 
 Shared test-only helpers live in `src/test/` when they remove repeated setup
-across service, hook, route, or component tests. Production service tests use
-the in-memory PGlite helper so SQL schema, constraints, transactions, and row
-mapping can be exercised directly. Keep these helpers small and specific to
-test infrastructure; production code should not import from `src/test/`.
+across service, hook, route, or component tests. Production service and
+IndexedDB repository tests use the fake IndexedDB helper so object stores,
+indexes, transactions, and validation can be exercised directly. Keep these
+helpers small and specific to test infrastructure; production code should not
+import from `src/test/`.
