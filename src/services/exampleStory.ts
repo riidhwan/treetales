@@ -1,5 +1,5 @@
 import { sortByCreatedAt } from '@/lib/sorting'
-import { createPgliteRepositoryUnitOfWork } from '@/repositories/pglite/unitOfWork'
+import { createIndexedDbRepositoryUnitOfWork } from '@/repositories/indexedDb/unitOfWork'
 import type { Chapter, Story } from '@/services/types'
 
 export interface ExampleStory {
@@ -15,7 +15,7 @@ const EXAMPLE_CHAPTER_IDS = {
   tower: 'example-chapter-bell-tower',
   trail: 'example-chapter-willow-lights',
 } as const
-const repositoryUnitOfWork = createPgliteRepositoryUnitOfWork()
+const repositoryUnitOfWork = createIndexedDbRepositoryUnitOfWork()
 
 export async function createExampleStory(): Promise<ExampleStory> {
   return repositoryUnitOfWork.run(async ({ stories, chapters }) => {

@@ -1,10 +1,9 @@
-import { getPgliteDb } from '@/repositories/pglite/db'
-import { createPgliteStoryRepository } from '@/repositories/pglite/storyRepository'
-import { createPgliteRepositoryUnitOfWork } from '@/repositories/pglite/unitOfWork'
+import { createIndexedDbStoryRepository } from '@/repositories/indexedDb/storyRepository'
+import { createIndexedDbRepositoryUnitOfWork } from '@/repositories/indexedDb/unitOfWork'
 import type { StoryRepository } from '@/repositories/types'
 import type { CreateStoryInput, Story, UpdateStoryInput } from '@/services/types'
 
-const repositoryUnitOfWork = createPgliteRepositoryUnitOfWork()
+const repositoryUnitOfWork = createIndexedDbRepositoryUnitOfWork()
 
 export async function createStory(input: CreateStoryInput): Promise<Story> {
   const now = Date.now()
@@ -16,20 +15,20 @@ export async function createStory(input: CreateStoryInput): Promise<Story> {
     updatedAt: now,
   }
 
-  const storyRepository = await getStoryRepository()
+  const storyRepository = getStoryRepository()
   await storyRepository.insertStory(story)
 
   return story
 }
 
 export async function getStories(): Promise<Story[]> {
-  const storyRepository = await getStoryRepository()
+  const storyRepository = getStoryRepository()
 
   return storyRepository.findStories()
 }
 
 export async function getStoryById(id: string): Promise<Story | undefined> {
-  const storyRepository = await getStoryRepository()
+  const storyRepository = getStoryRepository()
 
   return storyRepository.findStoryById(id)
 }
@@ -38,7 +37,7 @@ export async function updateStory(
   id: string,
   input: UpdateStoryInput,
 ): Promise<Story | undefined> {
-  const storyRepository = await getStoryRepository()
+  const storyRepository = getStoryRepository()
 
   return storyRepository.updateStory(id, {
     ...input,
@@ -67,8 +66,6 @@ export async function deleteStory(id: string): Promise<boolean> {
   })
 }
 
-async function getStoryRepository(): Promise<StoryRepository> {
-  const db = await getPgliteDb()
-
-  return createPgliteStoryRepository(db)
+function getStoryRepository(): StoryRepository {
+  return createIndexedDbStoryRepository()
 }

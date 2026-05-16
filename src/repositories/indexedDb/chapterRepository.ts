@@ -299,6 +299,18 @@ async function validateChapterWrite(
         ),
       )
     }
+  } else {
+    const existingIntroChapter = storyChapters.find(
+      (storyChapter) =>
+        storyChapter.parentChapterId === null && storyChapter.id !== chapter.id,
+    )
+
+    if (existingIntroChapter) {
+      abortTransaction(
+        transaction,
+        new Error(`Story ${chapter.storyId} already has an intro chapter.`),
+      )
+    }
   }
 
   chapterById.set(chapter.id, chapter)
