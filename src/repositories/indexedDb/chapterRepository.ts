@@ -288,7 +288,7 @@ async function validateChapterWrite(
     storyChapters.map((storyChapter) => [storyChapter.id, storyChapter]),
   )
 
-  if (chapter.parentChapterId) {
+  if (chapter.parentChapterId !== null) {
     const parentChapter = chapterById.get(chapter.parentChapterId)
 
     if (!parentChapter) {
@@ -316,7 +316,7 @@ async function validateChapterWrite(
   chapterById.set(chapter.id, chapter)
 
   if (
-    chapter.parentChapterId &&
+    chapter.parentChapterId !== null &&
     canReachChapter(chapter.id, chapter.parentChapterId, chapterById)
   ) {
     abortTransaction(
