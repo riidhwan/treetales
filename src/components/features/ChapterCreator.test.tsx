@@ -78,6 +78,7 @@ function createServices(options?: CreateServicesOptions) {
 function renderChapterCreator({
   intro = false,
   onChapterCreated = vi.fn(),
+  onGoBack = vi.fn(),
   onOpenDashboard = vi.fn(),
   onOpenParentChapter = vi.fn(),
   onOpenStoryEditor = vi.fn(),
@@ -86,6 +87,7 @@ function renderChapterCreator({
 }: {
   readonly intro?: boolean
   readonly onChapterCreated?: (storyId: string, chapterId: string) => void
+  readonly onGoBack?: () => void
   readonly onOpenDashboard?: () => void
   readonly onOpenParentChapter?: (storyId: string, chapterId: string) => void
   readonly onOpenStoryEditor?: (storyId: string) => void
@@ -95,6 +97,7 @@ function renderChapterCreator({
   return render(
     <ChapterCreator
       onChapterCreated={onChapterCreated}
+      onGoBack={onGoBack}
       onOpenDashboard={onOpenDashboard}
       onOpenParentChapter={onOpenParentChapter}
       onOpenStoryEditor={onOpenStoryEditor}
@@ -138,9 +141,16 @@ describe('ChapterCreator', () => {
     renderChapterCreator()
 
     expect(
-      await screen.findByRole('heading', { name: 'Add Child Chapter' }),
+      await screen.findByText('The Old Road - Child of The Gate'),
     ).toBeTruthy()
-    expect(screen.getByText('Follows The Gate.')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Write' }).getAttribute(
+      'aria-pressed',
+    )).toBe('true')
+    expect(screen.getByText('0 words')).toBeTruthy()
+    expect(screen.getByRole('status')).toHaveProperty(
+      'textContent',
+      'Draft empty',
+    )
     expect(screen.getByLabelText('Title')).toHaveProperty('value', '')
     expect(screen.getByLabelText('Content')).toHaveProperty('value', '')
   })
@@ -150,7 +160,7 @@ describe('ChapterCreator', () => {
 
     renderChapterCreator({ services })
 
-    await screen.findByRole('heading', { name: 'Add Child Chapter' })
+    await screen.findByText('The Old Road - Child of The Gate')
 
     const createButton = screen.getByRole('button', {
       name: /create chapter/i,
@@ -167,7 +177,7 @@ describe('ChapterCreator', () => {
 
     renderChapterCreator({ onChapterCreated, services })
 
-    await screen.findByRole('heading', { name: 'Add Child Chapter' })
+    await screen.findByText('The Old Road - Child of The Gate')
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: '  The Cellar  ' },
     })
@@ -203,7 +213,7 @@ describe('ChapterCreator', () => {
 
     renderChapterCreator({ onChapterCreated, services })
 
-    await screen.findByRole('heading', { name: 'Add Child Chapter' })
+    await screen.findByText('The Old Road - Child of The Gate')
     expect(screen.queryByText('Nothing to preview yet.')).toBeNull()
 
     fireEvent.change(screen.getByLabelText('Title'), {
@@ -223,7 +233,7 @@ describe('ChapterCreator', () => {
     expect(within(preview).getByText('Listen').tagName).toBe('LI')
     expect(screen.queryByLabelText('Content')).toBeNull()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Write' }))
 
     expect(screen.getByLabelText('Content')).toHaveProperty('value', markdown)
 
@@ -253,10 +263,7 @@ describe('ChapterCreator', () => {
     })
 
     expect(
-      await screen.findByRole('heading', { name: 'Add Intro Chapter' }),
-    ).toBeTruthy()
-    expect(
-      screen.getByText('This is the first chapter readers will see.'),
+      await screen.findByText('The Old Road - Intro Chapter'),
     ).toBeTruthy()
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: '  First Light  ' },
@@ -340,7 +347,7 @@ describe('ChapterCreator', () => {
 
     renderChapterCreator({ services: createServicesMock })
 
-    await screen.findByRole('heading', { name: 'Add Child Chapter' })
+    await screen.findByText('The Old Road - Child of The Gate')
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: 'The Cellar' },
     })
@@ -359,12 +366,25 @@ describe('ChapterCreator', () => {
 
     renderChapterCreator({ onOpenDashboard, onOpenParentChapter })
 
-    await screen.findByRole('heading', { name: 'Add Child Chapter' })
+    await screen.findByText('The Old Road - Child of The Gate')
     fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
     fireEvent.click(screen.getByRole('button', { name: 'Parent Chapter' }))
 
     expect(onOpenDashboard).toHaveBeenCalled()
     expect(onOpenParentChapter).toHaveBeenCalledWith('story-1', 'chapter-1')
+  })
+
+  it('calls browser-history back separately from parent chapter navigation', async () => {
+    const onGoBack = vi.fn()
+    const onOpenParentChapter = vi.fn()
+
+    renderChapterCreator({ onGoBack, onOpenParentChapter })
+
+    await screen.findByText('The Old Road - Child of The Gate')
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+
+    expect(onGoBack).toHaveBeenCalled()
+    expect(onOpenParentChapter).not.toHaveBeenCalled()
   })
 
   it('calls story editor navigation from intro creation', async () => {
@@ -377,9 +397,56 @@ describe('ChapterCreator', () => {
       services,
     })
 
-    await screen.findByRole('heading', { name: 'Add Intro Chapter' })
+    await screen.findByText('The Old Road - Intro Chapter')
     fireEvent.click(screen.getByRole('button', { name: 'Story Editor' }))
 
     expect(onOpenStoryEditor).toHaveBeenCalledWith('story-1')
+  })
+
+  it('shows draft status and confirms before leaving with draft changes', async () => {
+    const onOpenDashboard = vi.fn()
+    const onGoBack = vi.fn()
+    const onOpenParentChapter = vi.fn()
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false)
+
+    renderChapterCreator({ onGoBack, onOpenDashboard, onOpenParentChapter })
+
+    await screen.findByText('The Old Road - Child of The Gate')
+    fireEvent.change(screen.getByLabelText('Content'), {
+      target: { value: 'A draft path.' },
+    })
+
+    expect(screen.getByRole('status')).toHaveProperty(
+      'textContent',
+      'Draft not created',
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Parent Chapter' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+
+    expect(confirmSpy).toHaveBeenCalledTimes(3)
+    expect(onGoBack).not.toHaveBeenCalled()
+    expect(onOpenDashboard).not.toHaveBeenCalled()
+    expect(onOpenParentChapter).not.toHaveBeenCalled()
+
+    confirmSpy.mockReturnValue(true)
+    fireEvent.click(screen.getByRole('button', { name: 'Parent Chapter' }))
+
+    expect(onOpenParentChapter).toHaveBeenCalledWith('story-1', 'chapter-1')
+  })
+
+  it('does not create from the keyboard save shortcut', async () => {
+    const services = createServices()
+
+    renderChapterCreator({ services })
+
+    await screen.findByText('The Old Road - Child of The Gate')
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'The Cellar' },
+    })
+    fireEvent.keyDown(window, { ctrlKey: true, key: 's' })
+
+    expect(services.createChapter).not.toHaveBeenCalled()
   })
 })

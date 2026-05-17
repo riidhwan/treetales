@@ -1,17 +1,21 @@
-import type { SyntheticEvent } from 'react'
-import { ArrowLeft, Home, PlusCircle } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import type { ReactNode, SyntheticEvent } from 'react'
+import { ArrowLeft, BookOpen, Home, PlusCircle } from 'lucide-react'
 
 import {
   type ChapterCreatorServices,
   useChapterCreator,
 } from '@/hooks/useChapterCreator'
+import {
+  type ChapterWritingMode,
+  ChapterWritingSurface,
+} from '@/components/features/ChapterWritingSurface'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
-import { MarkdownEditor } from '@/components/ui/MarkdownEditor'
-import { TextInput } from '@/components/ui/TextInput'
 
 interface Props {
   readonly onChapterCreated: (storyId: string, chapterId: string) => void
+  readonly onGoBack: () => void
   readonly onOpenDashboard: () => void
   readonly onOpenParentChapter?: (storyId: string, chapterId: string) => void
   readonly onOpenStoryEditor: (storyId: string) => void
@@ -22,6 +26,7 @@ interface Props {
 
 export function ChapterCreator({
   onChapterCreated,
+  onGoBack,
   onOpenDashboard,
   onOpenParentChapter,
   onOpenStoryEditor,
@@ -44,9 +49,38 @@ export function ChapterCreator({
     title,
   } = useChapterCreator({ parentChapterId, services, storyId })
   const isIntroChapter = !parentChapterId
+  const [editorMode, setEditorMode] = useState<ChapterWritingMode>('write')
+  const [hasTouchedTitle, setHasTouchedTitle] = useState(false)
+  const hasDraftChanges = status === 'ready' && (title !== '' || content !== '')
+  const titleError =
+    title.trim().length === 0 && (hasTouchedTitle || title.length > 0)
+      ? 'Chapter title is required.'
+      : undefined
+  const draftStatus = getDraftStatus({
+    errorMessage,
+    hasDraftChanges,
+    isCreating,
+  })
+
+  useEffect(() => {
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      if (!hasDraftChanges) {
+        return
+      }
+
+      event.preventDefault()
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [hasDraftChanges])
 
   function handleCreate(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
+    setHasTouchedTitle(true)
     createChapterFromForm()
       .then((chapter) => {
         if (chapter) {
@@ -56,49 +90,50 @@ export function ChapterCreator({
       .catch(() => undefined)
   }
 
+  function confirmNavigation(navigate: () => void) {
+    if (
+      !hasDraftChanges ||
+      window.confirm('Discard this chapter draft?')
+    ) {
+      navigate()
+    }
+  }
+
   return (
-    <main className="min-h-screen bg-stone-50 text-stone-950">
-      <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
-        <nav
-          aria-label="Chapter creation actions"
-          className="flex flex-wrap justify-between gap-3"
-        >
-          <Button
-            onClick={() => {
-              if (parentChapterId && onOpenParentChapter) {
-                onOpenParentChapter(storyId, parentChapterId)
-                return
-              }
-
-              onOpenStoryEditor(storyId)
-            }}
-            size="sm"
-          >
-            <ArrowLeft aria-hidden="true" size={16} />
-            {parentChapterId ? 'Parent Chapter' : 'Story Editor'}
-          </Button>
-          <Button onClick={onOpenDashboard} size="sm">
-            <Home aria-hidden="true" size={16} />
-            Dashboard
-          </Button>
-        </nav>
-
-        <CreatorContent
-          canCreate={canCreate}
-          content={content}
-          errorMessage={errorMessage}
-          introChapterTitle={introChapter?.title}
-          isCreating={isCreating}
-          isIntroChapter={isIntroChapter}
-          onCreate={handleCreate}
-          onContentChange={setContent}
-          onTitleChange={setTitle}
-          parentChapterTitle={parentChapter?.title}
-          status={status}
-          storyTitle={story?.title}
-          title={title}
-        />
-      </section>
+    <main className="min-h-screen bg-stone-100 text-stone-950">
+      <CreatorContent
+        canCreate={canCreate}
+        content={content}
+        draftStatus={draftStatus}
+        editorMode={editorMode}
+        errorMessage={errorMessage}
+        introChapterTitle={introChapter?.title}
+        isCreating={isCreating}
+        isIntroChapter={isIntroChapter}
+        onContentChange={setContent}
+        onCreate={handleCreate}
+        onGoBack={() => confirmNavigation(onGoBack)}
+        onOpenDashboard={() => confirmNavigation(onOpenDashboard)}
+        onOpenParentChapter={
+          parentChapterId && onOpenParentChapter
+            ? () =>
+                confirmNavigation(() =>
+                  onOpenParentChapter(storyId, parentChapterId),
+                )
+            : undefined
+        }
+        onOpenStoryEditor={() =>
+          confirmNavigation(() => onOpenStoryEditor(storyId))
+        }
+        onSelectMode={setEditorMode}
+        onTitleBlur={() => setHasTouchedTitle(true)}
+        onTitleChange={setTitle}
+        parentChapterTitle={parentChapter?.title}
+        status={status}
+        storyTitle={story?.title}
+        title={title}
+        titleError={titleError}
+      />
     </main>
   )
 }
@@ -106,69 +141,146 @@ export function ChapterCreator({
 interface CreatorContentProps {
   readonly canCreate: boolean
   readonly content: string
+  readonly draftStatus: string
+  readonly editorMode: ChapterWritingMode
   readonly errorMessage?: string
   readonly introChapterTitle?: string
   readonly isCreating: boolean
   readonly isIntroChapter: boolean
   readonly onContentChange: (content: string) => void
   readonly onCreate: (event: SyntheticEvent<HTMLFormElement>) => void
+  readonly onGoBack: () => void
+  readonly onOpenDashboard: () => void
+  readonly onOpenParentChapter?: () => void
+  readonly onOpenStoryEditor: () => void
+  readonly onSelectMode: (mode: ChapterWritingMode) => void
+  readonly onTitleBlur: () => void
   readonly onTitleChange: (title: string) => void
   readonly parentChapterTitle?: string
   readonly status: ReturnType<typeof useChapterCreator>['status']
   readonly storyTitle?: string
   readonly title: string
+  readonly titleError?: string
 }
 
 function CreatorContent({
   canCreate,
   content,
+  draftStatus,
+  editorMode,
   errorMessage,
   introChapterTitle,
   isCreating,
   isIntroChapter,
   onContentChange,
   onCreate,
+  onGoBack,
+  onOpenDashboard,
+  onOpenParentChapter,
+  onOpenStoryEditor,
+  onSelectMode,
+  onTitleBlur,
   onTitleChange,
   parentChapterTitle,
   status,
   storyTitle,
   title,
+  titleError,
 }: CreatorContentProps) {
   if (status === 'ready') {
     return (
-      <ChapterCreationForm
-        canCreate={canCreate}
-        content={content}
-        errorMessage={errorMessage}
-        isCreating={isCreating}
-        isIntroChapter={isIntroChapter}
-        onContentChange={onContentChange}
-        onCreate={onCreate}
-        onTitleChange={onTitleChange}
-        parentChapterTitle={parentChapterTitle}
-        storyTitle={storyTitle}
-        title={title}
-      />
+      <>
+        {errorMessage ? (
+          <div className="mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6">
+            <Alert role="alert" variant="error">
+              {errorMessage}
+            </Alert>
+          </div>
+        ) : null}
+
+        <ChapterWritingSurface
+          canSubmit={canCreate}
+          content={content}
+          contentPlaceholder="Write this chapter in markdown..."
+          isSubmitting={isCreating}
+          mode={editorMode}
+          navigationActions={
+            <Button onClick={onGoBack} size="sm">
+              <ArrowLeft aria-hidden="true" size={16} />
+              Back
+            </Button>
+          }
+          onContentChange={onContentChange}
+          onModeChange={onSelectMode}
+          onSubmit={onCreate}
+          onTitleBlur={onTitleBlur}
+          onTitleChange={onTitleChange}
+          primaryActionIcon={<PlusCircle aria-hidden="true" size={16} />}
+          primaryActionLabel="Create Chapter"
+          secondaryActions={
+            <>
+              {onOpenParentChapter ? (
+                <Button onClick={onOpenParentChapter} size="sm">
+                  <ArrowLeft aria-hidden="true" size={16} />
+                  Parent Chapter
+                </Button>
+              ) : null}
+
+              <Button onClick={onOpenStoryEditor} size="sm">
+                <BookOpen aria-hidden="true" size={16} />
+                Story Editor
+              </Button>
+
+              <Button onClick={onOpenDashboard} size="sm">
+                <Home aria-hidden="true" size={16} />
+                Dashboard
+              </Button>
+            </>
+          }
+          statusText={draftStatus}
+          submittingActionLabel="Creating..."
+          title={title}
+          titleError={titleError}
+          titlePlaceholder="Untitled chapter"
+          toolbarContext={getToolbarContext({
+            isIntroChapter,
+            parentChapterTitle,
+            storyTitle,
+          })}
+        />
+      </>
     )
   }
 
   if (status === 'loading') {
     return (
-      <Alert className="shadow-sm">
-        {isIntroChapter
-          ? 'Loading story...'
-          : 'Loading parent chapter...'}
-      </Alert>
+      <UnavailableLayout
+        onOpenDashboard={onOpenDashboard}
+        onOpenPrevious={onGoBack}
+        previousLabel={isIntroChapter ? 'Story Editor' : 'Parent Chapter'}
+      >
+        <Alert className="shadow-sm">
+          {isIntroChapter
+            ? 'Loading story...'
+            : 'Loading parent chapter...'}
+        </Alert>
+      </UnavailableLayout>
     )
   }
 
   return (
-    <ChapterCreationUnavailable
-      errorMessage={errorMessage}
-      introChapterTitle={introChapterTitle}
-      status={status}
-      storyTitle={storyTitle}
-    />
+    <UnavailableLayout
+      onOpenDashboard={onOpenDashboard}
+      onOpenPrevious={onGoBack}
+      previousLabel={isIntroChapter ? 'Story Editor' : 'Parent Chapter'}
+    >
+      <ChapterCreationUnavailable
+        errorMessage={errorMessage}
+        introChapterTitle={introChapterTitle}
+        status={status}
+        storyTitle={storyTitle}
+      />
+    </UnavailableLayout>
   )
 }
 
@@ -221,87 +333,6 @@ function ChapterCreationUnavailable({
   ) : null
 }
 
-interface ChapterCreationFormProps {
-  readonly canCreate: boolean
-  readonly content: string
-  readonly errorMessage?: string
-  readonly isCreating: boolean
-  readonly isIntroChapter: boolean
-  readonly onContentChange: (content: string) => void
-  readonly onCreate: (event: SyntheticEvent<HTMLFormElement>) => void
-  readonly onTitleChange: (title: string) => void
-  readonly parentChapterTitle?: string
-  readonly storyTitle?: string
-  readonly title: string
-}
-
-function ChapterCreationForm({
-  canCreate,
-  content,
-  errorMessage,
-  isCreating,
-  isIntroChapter,
-  onContentChange,
-  onCreate,
-  onTitleChange,
-  parentChapterTitle,
-  storyTitle,
-  title,
-}: ChapterCreationFormProps) {
-  return (
-    <>
-      {errorMessage ? (
-        <Alert role="alert" variant="error">
-          {errorMessage}
-        </Alert>
-      ) : null}
-
-      <form
-        className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8"
-        onSubmit={onCreate}
-      >
-        <div className="border-b border-stone-200 pb-5">
-          <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
-            {storyTitle ?? 'Chapter creator'}
-          </p>
-          <h1 className="mt-2 text-3xl font-bold">
-            {isIntroChapter ? 'Add Intro Chapter' : 'Add Child Chapter'}
-          </h1>
-          <p className="mt-2 text-sm text-stone-600">
-            {isIntroChapter
-              ? 'This is the first chapter readers will see.'
-              : `Follows ${parentChapterTitle ?? 'the selected chapter'}.`}
-          </p>
-        </div>
-
-        <div className="mt-6 grid gap-5">
-          <label className="grid gap-2 text-sm font-medium text-stone-800">
-            Title
-            <TextInput
-              name="title"
-              onChange={(event) => onTitleChange(event.target.value)}
-              value={title}
-            />
-          </label>
-          <MarkdownEditor
-            label="Content"
-            name="content"
-            onChange={onContentChange}
-            value={content}
-          />
-        </div>
-
-        <div className="mt-6 flex flex-wrap gap-2">
-          <Button disabled={!canCreate} type="submit" variant="primary">
-            <PlusCircle aria-hidden="true" size={18} />
-            {isCreating ? 'Creating...' : 'Create Chapter'}
-          </Button>
-        </div>
-      </form>
-    </>
-  )
-}
-
 interface MissingStateProps {
   readonly description: string
   readonly kicker?: string
@@ -322,4 +353,86 @@ function MissingState({ description, kicker, title }: MissingStateProps) {
       </p>
     </section>
   )
+}
+
+interface UnavailableLayoutProps {
+  readonly children: ReactNode
+  readonly onOpenDashboard: () => void
+  readonly onOpenPrevious: () => void
+  readonly previousLabel: string
+}
+
+function UnavailableLayout({
+  children,
+  onOpenDashboard,
+  onOpenPrevious,
+  previousLabel,
+}: UnavailableLayoutProps) {
+  return (
+    <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
+      <nav
+        aria-label="Chapter creation actions"
+        className="flex flex-wrap justify-between gap-3"
+      >
+        <Button onClick={onOpenPrevious} size="sm">
+          <ArrowLeft aria-hidden="true" size={16} />
+          {previousLabel}
+        </Button>
+        <Button onClick={onOpenDashboard} size="sm">
+          <Home aria-hidden="true" size={16} />
+          Dashboard
+        </Button>
+      </nav>
+
+      {children}
+    </section>
+  )
+}
+
+interface DraftStatusOptions {
+  readonly errorMessage?: string
+  readonly hasDraftChanges: boolean
+  readonly isCreating: boolean
+}
+
+function getDraftStatus({
+  errorMessage,
+  hasDraftChanges,
+  isCreating,
+}: DraftStatusOptions) {
+  if (isCreating) {
+    return 'Creating...'
+  }
+
+  if (errorMessage) {
+    return 'Could not create'
+  }
+
+  if (hasDraftChanges) {
+    return 'Draft not created'
+  }
+
+  return 'Draft empty'
+}
+
+interface ToolbarContextOptions {
+  readonly isIntroChapter: boolean
+  readonly parentChapterTitle?: string
+  readonly storyTitle?: string
+}
+
+function getToolbarContext({
+  isIntroChapter,
+  parentChapterTitle,
+  storyTitle,
+}: ToolbarContextOptions) {
+  const contextStoryTitle = storyTitle ?? 'Story'
+
+  if (isIntroChapter) {
+    return `${contextStoryTitle} - Intro Chapter`
+  }
+
+  return `${contextStoryTitle} - Child of ${
+    parentChapterTitle ?? 'selected chapter'
+  }`
 }
