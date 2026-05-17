@@ -40,10 +40,32 @@
   existing parent chapter page, not from the top-level story editor.
 - Each chapter can be edited (title + content) in a separate form view.
 - Chapter editor is only for editing the selected chapter's title and content.
+- Chapter creation uses the same document-first writing surface as chapter
+  editing: the new chapter's title is edited inline as the document heading,
+  and the markdown editor gets most of the available page space.
 - Chapter creation collects title and markdown content, lets the user toggle
-  the content field between editing and markdown preview, creates either the
-  intro chapter or a child linked to the selected parent chapter, then opens the
-  new chapter for editing.
+  between writing and markdown preview in the same document column, creates
+  either the intro chapter or a child linked to the selected parent chapter,
+  then opens the new chapter for editing.
+- Chapter creation keeps the create action reachable in a sticky toolbar and
+  may show lightweight writing metadata such as word count, but it does not bind
+  `Ctrl+S`/`Cmd+S` to the one-time create action.
+- Chapter creation uses draft-oriented status language before a chapter exists,
+  such as empty, not-created, creating, and failure states rather than saved
+  states.
+- If the user changes the draft title or content before creating the chapter,
+  leaving the chapter creation page asks for confirmation before discarding the
+  draft.
+- Chapter creation requires a non-empty title but allows empty content, so
+  writers can create branch structure before drafting prose.
+- Chapter creation uses the same title and content placeholders for intro and
+  child chapters: "Untitled chapter" and "Write this chapter in markdown...".
+- Child chapter creation provides a stable action back to the parent chapter and
+  a stable action back to the story editor. Intro chapter creation provides a
+  stable action back to the story editor. Parent/story context belongs in the
+  toolbar rather than inside the document body.
+- Child chapter creation immediately links the new child to the selected parent
+  chapter.
 - Chapter editing keeps the markdown textarea as the source of truth and lets
   the user toggle to a markdown preview without converting the saved content.
 - Chapter editing uses a document-first writing surface rather than a standard
