@@ -77,10 +77,12 @@ function createServices(options?: CreateServicesOptions) {
 function renderChapterEditor({
   onGoBack = vi.fn(),
   onOpenDashboard = vi.fn(),
+  onOpenStoryEditor = vi.fn(),
   services = createServices(),
 }: {
   readonly onGoBack?: () => void
   readonly onOpenDashboard?: () => void
+  readonly onOpenStoryEditor?: () => void
   readonly services?: ReturnType<typeof createServices>
 } = {}) {
   return render(
@@ -88,6 +90,7 @@ function renderChapterEditor({
       chapterId="chapter-1"
       onGoBack={onGoBack}
       onOpenDashboard={onOpenDashboard}
+      onOpenStoryEditor={onOpenStoryEditor}
       services={services}
       storyId="story-1"
     />,
@@ -128,8 +131,7 @@ describe('ChapterEditor', () => {
 
     renderChapterEditor({ services })
 
-    expect(await screen.findByRole('heading', { name: 'The Gate' }))
-      .toBeTruthy()
+    expect(await screen.findByDisplayValue('The Gate')).toBeTruthy()
     expect(screen.getByLabelText('Title')).toHaveProperty(
       'value',
       'The Gate',
@@ -138,7 +140,28 @@ describe('ChapterEditor', () => {
       'value',
       'The path begins here.',
     )
+    expect(screen.getByRole('button', { name: 'Write' }).getAttribute(
+      'aria-pressed',
+    )).toBe('true')
+    expect(screen.getByText('4 words')).toBeTruthy()
     expect(screen.queryByRole('heading', { name: 'Child Chapters' })).toBeNull()
+  })
+
+  it('counts rendered prose words without markdown link targets', async () => {
+    const services = createServices({
+      chapters: [
+        createChapter({
+          content:
+            'Read [the old road](https://example.com/old-road) and <https://example.com/hidden>.',
+        }),
+      ],
+    })
+
+    renderChapterEditor({ services })
+
+    await screen.findByDisplayValue('The Gate')
+
+    expect(screen.getByText('5 words')).toBeTruthy()
   })
 
   it('saves trimmed title and raw content values', async () => {
@@ -146,14 +169,18 @@ describe('ChapterEditor', () => {
 
     renderChapterEditor({ services })
 
-    await screen.findByRole('heading', { name: 'The Gate' })
+    await screen.findByDisplayValue('The Gate')
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: '  River Fork  ' },
     })
     fireEvent.change(screen.getByLabelText('Content'), {
       target: { value: '  Keep the leading space.\n' },
     })
-    fireEvent.click(screen.getByRole('button', { name: /save chapter/i }))
+    expect(screen.getByRole('status')).toHaveProperty(
+      'textContent',
+      'Unsaved changes',
+    )
+    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
 
     await waitFor(() => {
       expect(services.updateChapter).toHaveBeenCalledWith('chapter-1', {
@@ -185,7 +212,7 @@ describe('ChapterEditor', () => {
 
     renderChapterEditor({ services })
 
-    await screen.findByRole('heading', { name: 'The Gate' })
+    await screen.findByDisplayValue('The Gate')
     expect(screen.queryByRole('region', { name: 'Content preview' })).toBeNull()
 
     fireEvent.change(screen.getByLabelText('Content'), {
@@ -202,11 +229,11 @@ describe('ChapterEditor', () => {
     expect(within(preview).getByText('Watch the stones').tagName).toBe('LI')
     expect(screen.queryByLabelText('Content')).toBeNull()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Write' }))
 
     expect(screen.getByLabelText('Content')).toHaveProperty('value', markdown)
 
-    fireEvent.click(screen.getByRole('button', { name: /save chapter/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
 
     await waitFor(() => {
       expect(services.updateChapter).toHaveBeenCalledWith('chapter-1', {
@@ -221,12 +248,12 @@ describe('ChapterEditor', () => {
 
     renderChapterEditor({ services })
 
-    await screen.findByRole('heading', { name: 'The Gate' })
+    await screen.findByDisplayValue('The Gate')
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: '   ' },
     })
 
-    const saveButton = screen.getByRole('button', { name: /save chapter/i })
+    const saveButton = screen.getByRole('button', { name: /^save$/i })
     expect(saveButton).toHaveProperty('disabled', true)
     fireEvent.click(saveButton)
 
@@ -262,7 +289,7 @@ describe('ChapterEditor', () => {
 
     renderChapterEditor({ services })
 
-    await screen.findByRole('heading', { name: 'The Gate' })
+    await screen.findByDisplayValue('The Gate')
 
     expect(
       screen.queryByRole('button', { name: /add child chapter/i }),
@@ -290,24 +317,94 @@ describe('ChapterEditor', () => {
 
     renderChapterEditor({ services: saveServices })
 
-    await screen.findByRole('heading', { name: 'The Gate' })
-    fireEvent.click(screen.getByRole('button', { name: /save chapter/i }))
+    await screen.findByDisplayValue('The Gate')
+    fireEvent.change(screen.getByLabelText('Content'), {
+      target: { value: 'Changed before failure.' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
 
     expect((await screen.findByRole('alert')).textContent).toBe(
       'Could not save chapter.',
     )
+    expect(screen.getByRole('status')).toHaveProperty(
+      'textContent',
+      'Could not save',
+    )
   })
 
-  it('calls dashboard and back navigation callbacks', async () => {
+  it('saves from the keyboard shortcut in write and preview modes', async () => {
+    const services = createServices()
+
+    renderChapterEditor({ services })
+
+    await screen.findByDisplayValue('The Gate')
+    fireEvent.change(screen.getByLabelText('Content'), {
+      target: { value: 'A changed path.' },
+    })
+    fireEvent.keyDown(window, { ctrlKey: true, key: 's' })
+
+    await waitFor(() => {
+      expect(services.updateChapter).toHaveBeenCalledWith('chapter-1', {
+        content: 'A changed path.',
+        title: 'The Gate',
+      })
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }))
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'Preview Save' },
+    })
+    fireEvent.keyDown(window, { key: 's', metaKey: true })
+
+    await waitFor(() => {
+      expect(services.updateChapter).toHaveBeenLastCalledWith('chapter-1', {
+        content: 'A changed path.',
+        title: 'Preview Save',
+      })
+    })
+  })
+
+  it('confirms before leaving with unsaved changes', async () => {
     const onGoBack = vi.fn()
     const onOpenDashboard = vi.fn()
+    const onOpenStoryEditor = vi.fn()
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false)
 
-    renderChapterEditor({ onGoBack, onOpenDashboard })
+    renderChapterEditor({ onGoBack, onOpenDashboard, onOpenStoryEditor })
 
-    await screen.findByRole('heading', { name: 'The Gate' })
+    await screen.findByDisplayValue('The Gate')
+    fireEvent.change(screen.getByLabelText('Content'), {
+      target: { value: 'A changed path.' },
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Story Editor' }))
+
+    expect(confirmSpy).toHaveBeenCalledTimes(3)
+    expect(onGoBack).not.toHaveBeenCalled()
+    expect(onOpenDashboard).not.toHaveBeenCalled()
+    expect(onOpenStoryEditor).not.toHaveBeenCalled()
+
+    confirmSpy.mockReturnValue(true)
+    fireEvent.click(screen.getByRole('button', { name: 'Story Editor' }))
+
+    expect(onOpenStoryEditor).toHaveBeenCalled()
+  })
+
+  it('calls story editor, dashboard, and back navigation callbacks', async () => {
+    const onGoBack = vi.fn()
+    const onOpenDashboard = vi.fn()
+    const onOpenStoryEditor = vi.fn()
+
+    renderChapterEditor({ onGoBack, onOpenDashboard, onOpenStoryEditor })
+
+    await screen.findByDisplayValue('The Gate')
+    fireEvent.click(screen.getByRole('button', { name: 'Story Editor' }))
     fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
 
+    expect(onOpenStoryEditor).toHaveBeenCalled()
     expect(onOpenDashboard).toHaveBeenCalled()
     expect(onGoBack).toHaveBeenCalled()
   })

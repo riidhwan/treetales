@@ -26,6 +26,12 @@ function ChapterEditorRoute() {
           to: '/',
         })
       }
+      onOpenStoryEditor={() =>
+        void navigate({
+          params: { storyId },
+          to: '/stories/$storyId/edit',
+        })
+      }
       storyId={storyId}
     />
   )
