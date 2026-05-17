@@ -147,6 +147,23 @@ describe('ChapterEditor', () => {
     expect(screen.queryByRole('heading', { name: 'Child Chapters' })).toBeNull()
   })
 
+  it('counts rendered prose words without markdown link targets', async () => {
+    const services = createServices({
+      chapters: [
+        createChapter({
+          content:
+            'Read [the old road](https://example.com/old-road) and <https://example.com/hidden>.',
+        }),
+      ],
+    })
+
+    renderChapterEditor({ services })
+
+    await screen.findByDisplayValue('The Gate')
+
+    expect(screen.getByText('5 words')).toBeTruthy()
+  })
+
   it('saves trimmed title and raw content values', async () => {
     const services = createServices()
 
@@ -301,10 +318,17 @@ describe('ChapterEditor', () => {
     renderChapterEditor({ services: saveServices })
 
     await screen.findByDisplayValue('The Gate')
+    fireEvent.change(screen.getByLabelText('Content'), {
+      target: { value: 'Changed before failure.' },
+    })
     fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
 
     expect((await screen.findByRole('alert')).textContent).toBe(
       'Could not save chapter.',
+    )
+    expect(screen.getByRole('status')).toHaveProperty(
+      'textContent',
+      'Could not save',
     )
   })
 

@@ -364,12 +364,12 @@ function getSaveStatus({
     return 'Saving...'
   }
 
-  if (hasUnsavedChanges) {
-    return 'Unsaved changes'
-  }
-
   if (errorMessage) {
     return 'Could not save'
+  }
+
+  if (hasUnsavedChanges) {
+    return 'Unsaved changes'
   }
 
   if (successMessage) {
@@ -380,7 +380,8 @@ function getSaveStatus({
 }
 
 function countMarkdownWords(markdown: string) {
-  const prose = markdown
+  const prose = replaceMarkdownLinksWithLabels(markdown)
+    .replace(/<https?:\/\/[^>\s]+>/g, ' ')
     .replace(/```[\s\S]*?```/g, ' ')
     .replace(/`([^`]+)`/g, '$1')
     .replace(/^#{1,6}\s+/gm, '')
@@ -392,6 +393,44 @@ function countMarkdownWords(markdown: string) {
   return prose
     .split(/[^A-Za-z0-9'-]+/)
     .filter((word) => /[A-Za-z0-9]/.test(word)).length
+}
+
+function replaceMarkdownLinksWithLabels(markdown: string) {
+  let prose = ''
+  let index = 0
+
+  while (index < markdown.length) {
+    const labelStart = markdown.indexOf('[', index)
+
+    if (labelStart === -1) {
+      prose += markdown.slice(index)
+      break
+    }
+
+    const labelEnd = markdown.indexOf(']', labelStart + 1)
+    const targetStart = labelEnd === -1 ? -1 : labelEnd + 1
+
+    if (labelEnd === -1 || markdown.at(targetStart) !== '(') {
+      prose += markdown.slice(index, labelStart + 1)
+      index = labelStart + 1
+      continue
+    }
+
+    const targetEnd = markdown.indexOf(')', targetStart + 1)
+
+    if (targetEnd === -1) {
+      prose += markdown.slice(index, labelStart + 1)
+      index = labelStart + 1
+      continue
+    }
+
+    const isImage = labelStart > 0 && markdown.at(labelStart - 1) === '!'
+    prose += markdown.slice(index, isImage ? labelStart - 1 : labelStart)
+    prose += markdown.slice(labelStart + 1, labelEnd)
+    index = targetEnd + 1
+  }
+
+  return prose
 }
 
 interface MissingStateProps {
