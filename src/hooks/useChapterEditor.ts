@@ -41,12 +41,17 @@ export function useChapterEditor({
   const [content, setContent] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | undefined>()
   const [isSaving, setIsSaving] = useState(false)
+  const [lastSavedContent, setLastSavedContent] = useState('')
+  const [lastSavedTitle, setLastSavedTitle] = useState('')
   const [status, setStatus] = useState<ChapterEditorStatus>('loading')
   const [story, setStory] = useState<Story | undefined>()
   const [successMessage, setSuccessMessage] = useState<string | undefined>()
   const [title, setTitle] = useState('')
 
   const trimmedTitle = title.trim()
+  const hasUnsavedChanges =
+    status === 'ready' &&
+    (title !== lastSavedTitle || content !== lastSavedContent)
   const canSave =
     Boolean(chapter) &&
     status === 'ready' &&
@@ -90,6 +95,8 @@ export function useChapterEditor({
 
         setChapter(loadedChapter)
         setContent(loadedChapter.content)
+        setLastSavedContent(loadedChapter.content)
+        setLastSavedTitle(loadedChapter.title)
         setStory(loadedStory)
         setTitle(loadedChapter.title)
         setStatus('ready')
@@ -131,6 +138,8 @@ export function useChapterEditor({
 
       setChapter(updatedChapter)
       setContent(updatedChapter.content)
+      setLastSavedContent(updatedChapter.content)
+      setLastSavedTitle(updatedChapter.title)
       setTitle(updatedChapter.title)
       setSuccessMessage('Chapter saved.')
     } catch (error) {
@@ -145,6 +154,7 @@ export function useChapterEditor({
     chapter,
     content,
     errorMessage,
+    hasUnsavedChanges,
     isSaving,
     saveChapter,
     setContent,

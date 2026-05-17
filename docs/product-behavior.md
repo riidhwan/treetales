@@ -46,6 +46,22 @@
   new chapter for editing.
 - Chapter editing keeps the markdown textarea as the source of truth and lets
   the user toggle to a markdown preview without converting the saved content.
+- Chapter editing uses a document-first writing surface rather than a standard
+  form layout: the selected chapter's title is edited inline as the document
+  heading, and the markdown editor gets most of the available page space.
+- Chapter editing provides a stable action back to the story editor, alongside
+  browser-history Back and Dashboard navigation, so users can return to the
+  story structure without depending on how they entered the editor.
+- Chapter editing keeps explicit save behaviour. The save action remains
+  reachable in a sticky toolbar, shows save state such as unsaved/saving/saved,
+  and supports the standard `Ctrl+S`/`Cmd+S` shortcut.
+- If the user changes the chapter title or content after the last successful
+  load or save, leaving the chapter editor asks for confirmation before
+  discarding unsaved changes.
+- Chapter editing previews markdown through a Write/Preview mode switch in the
+  same document column, not a side-by-side split pane.
+- Chapter editing may show lightweight writing metadata such as word count, but
+  metadata does not affect saved chapter content.
 - A tree view shows the story's branching structure.
 
 ### Installable PWA

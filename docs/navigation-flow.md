@@ -63,9 +63,12 @@ URL: `/stories/$storyId/chapters/$chapterId/edit`
 
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
-| Saving... / Save Chapter | `ChapterEditor` | Submits the enclosing form |
 | Back | `ChapterEditor` | Calls `onGoBack` |
 | Dashboard | `ChapterEditor` | `/` |
+| Back | `EditorToolbar` | Calls `onGoBack` |
+| Saving... / Save | `EditorToolbar` | Submits the enclosing form |
+| Story Editor | `EditorToolbar` | Calls `onOpenStoryEditor` |
+| Dashboard | `EditorToolbar` | Calls `onOpenDashboard` |
 
 Runtime notes:
 

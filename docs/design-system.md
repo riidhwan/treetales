@@ -12,6 +12,12 @@ or variants are useful.
 - Responsive reads well on mobile — use Tailwind breakpoints (`sm:`, `md:`) for layout adjustments
 - Consistent spacing scale follows Tailwind defaults
 - Colors use Tailwind's built-in palette; there are no custom theme tokens
+- Long-form writing views should use a document-first layout: a centered
+  readable-width writing column, no surrounding form card around the primary
+  editor, and a slim sticky toolbar for navigation, mode switching, save state,
+  and primary actions.
+- On mobile, long-form writing toolbars may wrap into two compact rows rather
+  than hiding essential save or preview controls behind extra navigation.
 
 ## Component Layers
 
