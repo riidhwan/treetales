@@ -104,9 +104,7 @@ function ControlledStoryReader({
       onOpenDashboard={vi.fn()}
       onSelectChapter={(selectedChapterId) => {
         onSelectChapter(selectedChapterId)
-        setTimeout(() => {
-          setChapterId(selectedChapterId)
-        }, 0)
+        setChapterId(selectedChapterId)
       }}
       services={services}
       storyId={storyId}
