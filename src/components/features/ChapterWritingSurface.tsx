@@ -23,7 +23,6 @@ interface Props {
   readonly primaryActionIcon: ReactNode
   readonly primaryActionLabel: string
   readonly secondaryActions?: ReactNode
-  readonly statusText: string
   readonly submittingActionLabel: string
   readonly title: string
   readonly titleError?: string
@@ -46,7 +45,6 @@ export function ChapterWritingSurface({
   primaryActionIcon,
   primaryActionLabel,
   secondaryActions,
-  statusText,
   submittingActionLabel,
   title,
   titleError,
@@ -56,9 +54,9 @@ export function ChapterWritingSurface({
   const wordCount = countMarkdownWords(content)
 
   return (
-    <form className="min-h-screen" onSubmit={onSubmit}>
+    <form className="min-h-screen pb-24 sm:pb-20" onSubmit={onSubmit}>
       <header className="sticky top-0 z-20 border-b border-stone-200 bg-white/95 shadow-sm backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2 px-3 py-2 sm:px-5">
+        <div className="mx-auto flex w-full max-w-6xl items-center gap-2 px-3 py-2 sm:px-5">
           {navigationActions}
 
           <div className="min-w-0 flex-1 px-1">
@@ -66,38 +64,6 @@ export function ChapterWritingSurface({
               {toolbarContext}
             </p>
           </div>
-
-          <div
-            aria-label="Editor mode"
-            className="flex rounded-md border border-stone-300 bg-stone-100 p-1"
-            role="group"
-          >
-            <ModeButton
-              isSelected={mode === 'write'}
-              label="Write"
-              onClick={() => onModeChange('write')}
-            >
-              <Pencil aria-hidden="true" size={15} />
-            </ModeButton>
-            <ModeButton
-              isSelected={mode === 'preview'}
-              label="Preview"
-              onClick={() => onModeChange('preview')}
-            >
-              <Eye aria-hidden="true" size={15} />
-            </ModeButton>
-          </div>
-
-          <p className="min-w-24 text-right text-xs font-medium text-stone-600">
-            {wordCount} {wordCount === 1 ? 'word' : 'words'}
-          </p>
-
-          <p
-            className="min-w-28 text-right text-xs font-semibold text-stone-700"
-            role="status"
-          >
-            {statusText}
-          </p>
 
           <Button
             disabled={!canSubmit}
@@ -160,6 +126,31 @@ export function ChapterWritingSurface({
           </div>
         </div>
       </section>
+
+      <div
+        aria-label="Editor mode"
+        className="fixed bottom-14 left-1/2 z-30 flex -translate-x-1/2 rounded-md border border-stone-300 bg-white p-1 shadow-lg sm:bottom-4"
+        role="group"
+      >
+        <ModeButton
+          isSelected={mode === 'write'}
+          label="Write"
+          onClick={() => onModeChange('write')}
+        >
+          <Pencil aria-hidden="true" size={15} />
+        </ModeButton>
+        <ModeButton
+          isSelected={mode === 'preview'}
+          label="Preview"
+          onClick={() => onModeChange('preview')}
+        >
+          <Eye aria-hidden="true" size={15} />
+        </ModeButton>
+      </div>
+
+      <p className="fixed bottom-4 right-3 z-30 rounded-md border border-stone-200 bg-white/95 px-2 py-1 text-xs font-medium text-stone-600 shadow-sm sm:right-5">
+        {wordCount} {wordCount === 1 ? 'word' : 'words'}
+      </p>
     </form>
   )
 }

@@ -77,12 +77,10 @@ function createServices(options?: CreateServicesOptions) {
 function renderChapterEditor({
   onGoBack = vi.fn(),
   onOpenDashboard = vi.fn(),
-  onOpenStoryEditor = vi.fn(),
   services = createServices(),
 }: {
   readonly onGoBack?: () => void
   readonly onOpenDashboard?: () => void
-  readonly onOpenStoryEditor?: () => void
   readonly services?: ReturnType<typeof createServices>
 } = {}) {
   return render(
@@ -90,7 +88,6 @@ function renderChapterEditor({
       chapterId="chapter-1"
       onGoBack={onGoBack}
       onOpenDashboard={onOpenDashboard}
-      onOpenStoryEditor={onOpenStoryEditor}
       services={services}
       storyId="story-1"
     />,
@@ -176,10 +173,7 @@ describe('ChapterEditor', () => {
     fireEvent.change(screen.getByLabelText('Content'), {
       target: { value: '  Keep the leading space.\n' },
     })
-    expect(screen.getByRole('status')).toHaveProperty(
-      'textContent',
-      'Unsaved changes',
-    )
+    expect(screen.queryByRole('status')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
 
     await waitFor(() => {
@@ -188,9 +182,6 @@ describe('ChapterEditor', () => {
         title: 'River Fork',
       })
     })
-    expect((await screen.findByRole('status')).textContent).toBe(
-      'Chapter saved.',
-    )
   })
 
   it('previews markdown while saving the raw markdown content', async () => {
@@ -326,10 +317,7 @@ describe('ChapterEditor', () => {
     expect((await screen.findByRole('alert')).textContent).toBe(
       'Could not save chapter.',
     )
-    expect(screen.getByRole('status')).toHaveProperty(
-      'textContent',
-      'Could not save',
-    )
+    expect(screen.queryByRole('status')).toBeNull()
   })
 
   it('saves from the keyboard shortcut in write and preview modes', async () => {
@@ -367,10 +355,9 @@ describe('ChapterEditor', () => {
   it('confirms before leaving with unsaved changes', async () => {
     const onGoBack = vi.fn()
     const onOpenDashboard = vi.fn()
-    const onOpenStoryEditor = vi.fn()
     const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false)
 
-    renderChapterEditor({ onGoBack, onOpenDashboard, onOpenStoryEditor })
+    renderChapterEditor({ onGoBack, onOpenDashboard })
 
     await screen.findByDisplayValue('The Gate')
     fireEvent.change(screen.getByLabelText('Content'), {
@@ -379,32 +366,28 @@ describe('ChapterEditor', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
     fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Story Editor' }))
 
-    expect(confirmSpy).toHaveBeenCalledTimes(3)
+    expect(confirmSpy).toHaveBeenCalledTimes(2)
     expect(onGoBack).not.toHaveBeenCalled()
     expect(onOpenDashboard).not.toHaveBeenCalled()
-    expect(onOpenStoryEditor).not.toHaveBeenCalled()
 
     confirmSpy.mockReturnValue(true)
-    fireEvent.click(screen.getByRole('button', { name: 'Story Editor' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
 
-    expect(onOpenStoryEditor).toHaveBeenCalled()
+    expect(onOpenDashboard).toHaveBeenCalled()
   })
 
-  it('calls story editor, dashboard, and back navigation callbacks', async () => {
+  it('calls dashboard and back navigation callbacks', async () => {
     const onGoBack = vi.fn()
     const onOpenDashboard = vi.fn()
-    const onOpenStoryEditor = vi.fn()
 
-    renderChapterEditor({ onGoBack, onOpenDashboard, onOpenStoryEditor })
+    renderChapterEditor({ onGoBack, onOpenDashboard })
 
     await screen.findByDisplayValue('The Gate')
-    fireEvent.click(screen.getByRole('button', { name: 'Story Editor' }))
     fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
 
-    expect(onOpenStoryEditor).toHaveBeenCalled()
+    expect(screen.queryByRole('button', { name: 'Story Editor' })).toBeNull()
     expect(onOpenDashboard).toHaveBeenCalled()
     expect(onGoBack).toHaveBeenCalled()
   })

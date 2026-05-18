@@ -175,17 +175,10 @@ function collectTextFromJsx(node) {
     }
 
     if (ts.isJsxExpression(child) && child.expression) {
-      const expression = child.expression
+      const expressionText = getExpressionText(child.expression)
 
-      if (ts.isStringLiteralLike(expression)) {
-        parts.push(expression.text)
-      } else if (ts.isConditionalExpression(expression)) {
-        parts.push(getStringOptions(expression).join(' / '))
-      } else if (
-        ts.isPropertyAccessExpression(expression) ||
-        ts.isIdentifier(expression)
-      ) {
-        parts.push(`{${expression.getText()}}`)
+      if (expressionText) {
+        parts.push(expressionText)
       }
 
       return
@@ -214,16 +207,41 @@ function collectTextFromJsx(node) {
   return parts.join(' ').replace(/\s+/g, ' ').trim() || 'Unlabelled control'
 }
 
-function getStringOptions(node) {
-  const options = []
+function getExpressionText(expression) {
+  if (ts.isStringLiteralLike(expression)) {
+    return expression.text
+  }
 
-  walk(node, (child) => {
-    if (ts.isStringLiteralLike(child)) {
-      options.push(child.text)
-    }
-  })
+  if (ts.isConditionalExpression(expression)) {
+    return getConditionalTextOptions(expression).join(' / ')
+  }
 
-  return [...new Set(options)]
+  if (ts.isIdentifier(expression) || ts.isPropertyAccessExpression(expression)) {
+    const expressionText = expression.getText()
+
+    return /Icon$/.test(expressionText) ? undefined : `{${expressionText}}`
+  }
+
+  return undefined
+}
+
+function getConditionalTextOptions(node) {
+  return [
+    getTextOption(node.whenTrue),
+    getTextOption(node.whenFalse),
+  ].filter(Boolean)
+}
+
+function getTextOption(node) {
+  if (ts.isStringLiteralLike(node)) {
+    return node.text
+  }
+
+  if (ts.isIdentifier(node) || ts.isPropertyAccessExpression(node)) {
+    return `{${node.getText()}}`
+  }
+
+  return undefined
 }
 
 function findCallNames(node) {
@@ -311,14 +329,32 @@ function getCallbackNames(expression) {
   }
 
   if (ts.isCallExpression(expression)) {
-    return findCallNames(expression)
+    return findCallNamesAndIdentifierArguments(expression)
   }
 
   if (ts.isArrowFunction(expression) || ts.isFunctionExpression(expression)) {
-    return findCallNames(expression.body)
+    return findCallNamesAndIdentifierArguments(expression.body)
   }
 
-  return findCallNames(expression)
+  return findCallNamesAndIdentifierArguments(expression)
+}
+
+function findCallNamesAndIdentifierArguments(node) {
+  const names = findCallNames(node)
+
+  walk(node, (child) => {
+    if (!ts.isCallExpression(child)) {
+      return
+    }
+
+    for (const argument of child.arguments) {
+      if (ts.isIdentifier(argument)) {
+        names.push(argument.text)
+      }
+    }
+  })
+
+  return [...new Set(names)]
 }
 
 function getCallbackName(expression) {
@@ -433,11 +469,13 @@ function getFunctionComponentName(node) {
 }
 
 function getButtonAction(openingElement, element) {
-  const label = collectTextFromJsx(element)
+  const label =
+    getAttributeText(getAttribute(openingElement, 'aria-label')) ??
+    collectTextFromJsx(element)
   const onClick = getAttribute(openingElement, 'onClick')
   const type = getAttributeText(getAttribute(openingElement, 'type'))
   const callbackNames = getCallbackNames(getAttributeExpression(onClick))
-  const [callbackName] = callbackNames
+  const callbackName = getPrimaryCallbackName(callbackNames)
   const fallback = getButtonFallback(callbackName, type)
 
   return {
@@ -447,6 +485,14 @@ function getButtonAction(openingElement, element) {
     fallback,
     label,
   }
+}
+
+function getPrimaryCallbackName(callbackNames) {
+  return (
+    callbackNames.find((callbackName) =>
+      /^on[A-Z]/.test(callbackName),
+    ) ?? callbackNames[0]
+  )
 }
 
 function getButtonFallback(callbackName, type) {
@@ -509,20 +555,40 @@ function getChildUsage(openingElement, componentNames) {
       continue
     }
 
-    const expression = getAttributeExpression(property)
+    const value = getPropMapValue(property)
 
-    if (expression && ts.isIdentifier(expression)) {
-      propMap.set(property.name.text, expression.text)
-    } else if (expression) {
-      const callbackName = getCallbackName(expression)
-
-      if (callbackName) {
-        propMap.set(property.name.text, callbackName)
-      }
+    if (value) {
+      propMap.set(property.name.text, value)
     }
   }
 
   return { childName, propMap }
+}
+
+function getPropMapValue(property) {
+  if (property.initializer && ts.isStringLiteral(property.initializer)) {
+    return property.initializer.text
+  }
+
+  const expression = getAttributeExpression(property)
+
+  if (!expression) {
+    return undefined
+  }
+
+  if (ts.isStringLiteralLike(expression)) {
+    return expression.text
+  }
+
+  if (ts.isConditionalExpression(expression)) {
+    return getConditionalTextOptions(expression).join(' / ')
+  }
+
+  if (ts.isIdentifier(expression)) {
+    return expression.text
+  }
+
+  return getCallbackName(expression)
 }
 
 async function getFeatureComponents() {
@@ -600,6 +666,7 @@ function collectComponentActions(
   componentName,
   components,
   callbackTargets,
+  propValues = new Map(),
   seen = new Set(),
 ) {
   const component = components.get(componentName)
@@ -614,7 +681,7 @@ function collectComponentActions(
     normalizeRouteAction(routePath, {
       component: componentName,
       destination: getActionDestination(action, callbackTargets),
-      label: action.label,
+      label: resolvePropPlaceholders(action.label, propValues),
       note: getActionNote(action, callbackTargets),
     }),
   )
@@ -634,6 +701,7 @@ function collectComponentActions(
         childUsage.childName,
         components,
         childTargets,
+        new Map([...propValues, ...childUsage.propMap]),
         new Set(seen),
       ),
     )
@@ -642,24 +710,55 @@ function collectComponentActions(
   return dedupeActions(actions)
 }
 
+function resolvePropPlaceholders(label, propValues) {
+  let resolved = ''
+  let index = 0
+
+  while (index < label.length) {
+    const placeholderStart = label.indexOf('{', index)
+
+    if (placeholderStart === -1) {
+      resolved += label.slice(index)
+      break
+    }
+
+    const placeholderEnd = label.indexOf('}', placeholderStart + 1)
+
+    if (placeholderEnd === -1) {
+      resolved += label.slice(index)
+      break
+    }
+
+    const propName = label.slice(placeholderStart + 1, placeholderEnd)
+    resolved += label.slice(index, placeholderStart)
+    resolved += propValues.get(propName) ?? label.slice(placeholderStart, placeholderEnd + 1)
+    index = placeholderEnd + 1
+  }
+
+  return resolved.replace(/\s+/g, ' ').trim()
+}
+
 function getActionNote(action, callbackTargets) {
   if (action.target) {
     return 'Static link'
   }
 
-  const hasCallbackTarget = action.callbackNames?.some((name) =>
+  const targetCallbackName = action.callbackNames?.find((name) =>
     callbackTargets.has(name),
   )
 
-  if (hasCallbackTarget) {
-    return `Calls \`${action.callbackName}\``
+  if (targetCallbackName) {
+    return `Calls \`${targetCallbackName}\``
   }
 
   return action.fallback
 }
 
 function normalizeRouteAction(routePath, action) {
-  if (action.label === 'Parent Chapter / Story Editor') {
+  if (
+    action.label === 'Parent Chapter / Story Editor' ||
+    action.label === 'Story Editor / Parent Chapter'
+  ) {
     if (routePath === '/stories/$storyId/chapters/new') {
       return {
         ...action,

@@ -36,6 +36,8 @@ This project uses Vitest with Testing Library dependencies available. Place test
 
 `AGENTS.md` is the entry point, not the full instruction set. Read the relevant docs before changing covered areas: `docs/product-behavior.md` for user-facing flows, `docs/architecture.md` for shared data flow, stores, services, or routing, `docs/design-system.md` for UI and styling, and `docs/conventions.md` for broad refactors, tests, or verification choices.
 
+Do not edit `docs/product-behavior.md` by hand; it is generated. When product behavior or navigation-derived documentation needs to change, update the source/generator as needed and run `npm run docs:navigation`.
+
 Treat those docs as authoritative repository instructions. Keep code and docs synchronized in the same task: when behavior, architecture, conventions, vocabulary, or design changes, update the corresponding docs before handing off. If a required doc cannot be read, stop and ask how to proceed.
 
 ## Working Tree Safety

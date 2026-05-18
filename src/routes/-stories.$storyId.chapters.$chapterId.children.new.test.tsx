@@ -13,7 +13,7 @@ describe('chapter creator route', () => {
     expect(Route.options.loader).toBeUndefined()
   })
 
-  it('replaces child creation history when returning to the parent chapter', () => {
+  it('does not wire a separate parent chapter navigation action', () => {
     const routeSource = readFileSync(
       resolve(
         process.cwd(),
@@ -22,9 +22,7 @@ describe('chapter creator route', () => {
       'utf8',
     )
 
-    expect(routeSource).toMatch(
-      /onOpenParentChapter=[\s\S]*?navigate\(\{\s*replace: true,[\s\S]*?to: '\/stories\/\$storyId\/chapters\/\$chapterId\/edit'/,
-    )
+    expect(routeSource).not.toContain('onOpenParentChapter')
   })
 
   it('uses browser history for the chapter creation Back action', () => {
