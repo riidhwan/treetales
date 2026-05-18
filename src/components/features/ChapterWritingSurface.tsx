@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import type { ReactNode, SyntheticEvent } from 'react'
 import { Eye, Pencil } from 'lucide-react'
 
@@ -52,6 +53,18 @@ export function ChapterWritingSurface({
   toolbarContext,
 }: Props) {
   const wordCount = countMarkdownWords(content)
+  const contentTextAreaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    const textArea = contentTextAreaRef.current
+
+    if (!textArea) {
+      return
+    }
+
+    textArea.style.height = 'auto'
+    textArea.style.height = `${textArea.scrollHeight}px`
+  }, [content, mode])
 
   return (
     <form className="min-h-screen pb-24 sm:pb-20" onSubmit={onSubmit}>
@@ -79,9 +92,12 @@ export function ChapterWritingSurface({
         </div>
       </header>
 
-      <section className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:py-10">
-        <div className="mx-auto min-h-[calc(100vh-10rem)] w-full max-w-[52rem] border-stone-200 bg-white px-5 py-6 shadow-sm sm:border sm:px-10 sm:py-10 lg:px-14">
-          <label className="block">
+      <section className="mx-auto w-full max-w-5xl px-0 py-0 sm:px-6 sm:py-6 lg:py-10">
+        <section
+          aria-label="Chapter document"
+          className="mx-auto min-h-[calc(100vh-7rem)] w-full max-w-[52rem] border-stone-200 bg-white px-2 py-5 shadow-sm sm:min-h-[calc(100vh-10rem)] sm:border sm:px-8 sm:py-8 lg:px-8"
+        >
+          <label className="block px-2 sm:px-0">
             <span className="sr-only">Title</span>
             <input
               aria-invalid={Boolean(titleError)}
@@ -94,16 +110,16 @@ export function ChapterWritingSurface({
             />
           </label>
           {titleError ? (
-            <p className="mt-2 text-sm font-medium text-red-700">
+            <p className="mt-2 px-2 text-sm font-medium text-red-700 sm:px-0">
               {titleError}
             </p>
           ) : null}
 
-          <div className="mt-8">
+          <div className="mt-5 sm:mt-6">
             {mode === 'preview' ? (
               <section
                 aria-label="Content preview"
-                className="min-h-[calc(100vh-18rem)]"
+                className="min-h-[calc(100vh-18rem)] px-2 sm:px-0"
               >
                 <MarkdownContent
                   className="space-y-5"
@@ -115,7 +131,8 @@ export function ChapterWritingSurface({
               <label className="block">
                 <span className="sr-only">Content</span>
                 <TextArea
-                  className="min-h-[calc(100vh-18rem)] w-full resize-none border-0 p-0 text-lg leading-8 shadow-none outline-none focus:border-transparent focus:ring-0"
+                  ref={contentTextAreaRef}
+                  className="min-h-[calc(100vh-15rem)] w-full resize-none overflow-hidden border-0 p-0 text-lg leading-8 shadow-none outline-none focus:!border-transparent focus:!ring-0 sm:min-h-[calc(100vh-18rem)]"
                   name="content"
                   onChange={(event) => onContentChange(event.target.value)}
                   placeholder={contentPlaceholder}
@@ -124,7 +141,7 @@ export function ChapterWritingSurface({
               </label>
             )}
           </div>
-        </div>
+        </section>
       </section>
 
       <div
