@@ -37,7 +37,7 @@ See `src/components/` structure in `@docs/architecture.md`.
   `Alert`, `Button`, `MarkdownContent`, `MarkdownEditor`, `TextArea`, and
   `TextInput`
 - `src/components/features/` — Full feature composites currently including
-  `StoryDashboard`, `StoryEditor`, and `StoryReader`
+  `StoryDashboard`, `StoryDetail`, `StoryEditor`, and `StoryReader`
 - `src/components/domain/` — Optional future layer for self-contained
   business-aware components once a component is reused across features
 

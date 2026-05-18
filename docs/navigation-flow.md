@@ -9,6 +9,7 @@ This document lists the current application URLs and the visible controls that c
 | URL | Page | Route file |
 | --- | --- | --- |
 | `/` | Home / Story Dashboard | `src/routes/index.tsx` |
+| `/stories/$storyId` | Story Detail | `src/routes/stories.$storyId.index.tsx` |
 | `/stories/$storyId/chapters/$chapterId/children/new` | Child Chapter Creator | `src/routes/stories.$storyId.chapters.$chapterId.children.new.tsx` |
 | `/stories/$storyId/chapters/$chapterId/edit` | Chapter Editor | `src/routes/stories.$storyId.chapters.$chapterId.edit.tsx` |
 | `/stories/$storyId/chapters/new` | Intro Chapter Creator | `src/routes/stories.$storyId.chapters.new.tsx` |
@@ -42,6 +43,21 @@ Runtime notes:
 - `Add Example Story` creates or reuses the example story and opens it in the reader.
 - `New Story` only opens the creation form.
 - `Delete` asks for confirmation and removes the story without navigation.
+
+### Story Detail
+
+URL: `/stories/$storyId`
+
+| Control label | Component | Destination / behaviour |
+| --- | --- | --- |
+| Dashboard | `StoryDetail` | `/` |
+| Read | `StoryDetail` | `/stories/$storyId/read` |
+| Edit | `StoryDetail` | `/stories/$storyId/edit` |
+| Deleting... / Delete | `StoryDetail` | Confirms and deletes the story |
+
+Runtime notes:
+
+- `Delete` asks for confirmation, removes the story, and returns to `/`.
 
 ### Child Chapter Creator
 
