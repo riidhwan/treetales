@@ -58,6 +58,7 @@ function renderReader({
   chapterId,
   onCreateChildChapter = vi.fn(),
   onEditChapter = vi.fn(),
+  onOpenStoryDetails = vi.fn(),
   onSelectChapter = vi.fn(),
   services = createServices(),
 }: {
@@ -67,6 +68,7 @@ function renderReader({
     parentChapterId: string,
   ) => void
   readonly onEditChapter?: (storyId: string, chapterId: string) => void
+  readonly onOpenStoryDetails?: (storyId: string) => void
   readonly onSelectChapter?: (chapterId: string) => void
   readonly services?: ReturnType<typeof createServices>
 } = {}) {
@@ -75,8 +77,8 @@ function renderReader({
       chapterId={chapterId}
       onCreateChildChapter={onCreateChildChapter}
       onEditChapter={onEditChapter}
-      onEditStory={vi.fn()}
       onOpenDashboard={vi.fn()}
+      onOpenStoryDetails={onOpenStoryDetails}
       onSelectChapter={onSelectChapter}
       services={services}
       storyId="story-1"
@@ -100,8 +102,8 @@ function ControlledStoryReader({
       chapterId={chapterId}
       onCreateChildChapter={vi.fn()}
       onEditChapter={vi.fn()}
-      onEditStory={vi.fn()}
       onOpenDashboard={vi.fn()}
+      onOpenStoryDetails={vi.fn()}
       onSelectChapter={(selectedChapterId) => {
         onSelectChapter(selectedChapterId)
         setChapterId(selectedChapterId)
@@ -130,8 +132,8 @@ function StorySwitchingReader({
       chapterId={chapterIdByStoryId[storyId]}
       onCreateChildChapter={vi.fn()}
       onEditChapter={vi.fn()}
-      onEditStory={vi.fn()}
       onOpenDashboard={vi.fn()}
+      onOpenStoryDetails={vi.fn()}
       onSelectChapter={(selectedChapterId) => {
         onSelectChapter(selectedChapterId)
         setChapterIdByStoryId((currentChapterIdByStoryId) => ({
@@ -214,6 +216,19 @@ describe('StoryReader', () => {
     expect(await screen.findByRole('heading', { name: 'First Chapter' }))
       .toBeTruthy()
     expect(screen.queryByRole('button', { name: 'Back' })).toBeNull()
+  })
+
+  it('opens story details from the reader toolbar', async () => {
+    const onOpenStoryDetails = vi.fn()
+    const services = createServices()
+
+    renderReader({ onOpenStoryDetails, services })
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Story Details' }),
+    )
+
+    expect(onOpenStoryDetails).toHaveBeenCalledWith('story-1')
   })
 
   it('loads the first chapter when no chapter id is supplied', async () => {
@@ -365,7 +380,7 @@ describe('StoryReader', () => {
     expect(services.getNextChapters).not.toHaveBeenCalled()
   })
 
-  it('renders Continue for a single next chapter and navigates to it', async () => {
+  it('renders a child chapter list for a single next chapter and navigates to it', async () => {
     const onSelectChapter = vi.fn()
     const introChapter = createChapter()
     const nextChapter = createChapter({
@@ -385,7 +400,12 @@ describe('StoryReader', () => {
       />,
     )
 
-    fireEvent.click(await screen.findByRole('button', { name: /continue/i }))
+    expect(await screen.findByText('Child Chapters')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: /continue/i })).toBeNull()
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /Across the Bridge/i }),
+    )
 
     expect(onSelectChapter).toHaveBeenCalledWith('chapter-next')
     expect(await screen.findByRole('heading', { name: 'Across the Bridge' }))
@@ -417,7 +437,7 @@ describe('StoryReader', () => {
       />,
     )
 
-    expect(await screen.findByText('Choose your path')).toBeTruthy()
+    expect(await screen.findByText('Child Chapters')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Cross the bridge' })).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Follow the river' }))
@@ -455,7 +475,7 @@ describe('StoryReader', () => {
       />,
     )
 
-    fireEvent.click(await screen.findByRole('button', { name: /continue/i }))
+    fireEvent.click(await screen.findByRole('button', { name: /Next Chapter/i }))
 
     expect(onSelectChapter).toHaveBeenLastCalledWith('chapter-next')
 
@@ -516,7 +536,7 @@ describe('StoryReader', () => {
       />,
     )
 
-    fireEvent.click(await screen.findByRole('button', { name: /continue/i }))
+    fireEvent.click(await screen.findByRole('button', { name: /First Next/i }))
 
     expect(await screen.findByRole('heading', { name: 'First Next' }))
       .toBeTruthy()
@@ -540,6 +560,7 @@ describe('StoryReader', () => {
 
     renderReader({ services })
 
+    expect(await screen.findByText('Child Chapters')).toBeTruthy()
     expect(await screen.findByText('The End')).toBeTruthy()
   })
 

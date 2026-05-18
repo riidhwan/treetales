@@ -26,18 +26,24 @@
   markdown includes common markdown plus GFM tables, task lists,
   strikethrough, autolinks, and single-newline breaks. Raw HTML in chapter
   content is not rendered.
+- Reader uses a document-first view-only surface aligned with chapter creation
+  and editing: a slim sticky toolbar, centered readable document, and no inline
+  editing controls in the document body.
+- Reader toolbar actions are icon-only controls for returning to the previous
+  chapter when available, opening story details, editing the current chapter,
+  and opening the dashboard.
 - At the bottom:
-  - Single next chapter → "Continue" button
-  - Multiple next chapters → list of clickable choices
-  - No next chapters → "The End" indicator
+  - One or more child chapters → list of clickable child chapter choices
+  - No child chapters → "The End" indicator
+  - "Add Child Chapter" action below the child chapter section
 - Forward navigation uses the selected next chapter and appends it to the
   session-local reading path used for Back navigation.
 - When the session path has a previous chapter, Back returns to that chapter and
   trims the latest chapter from the path.
 - Reader path history is scoped to the current story and resets when opening a
   different story.
-- Reader does not edit inline, but the current chapter page has actions to edit
-  the chapter or add a child chapter from it.
+- Reader does not edit inline, but the toolbar can open the current chapter for
+  editing and the bottom child chapter section can add a child chapter from it.
 
 ### Story Editor
 - User opens a story in edit mode from story detail or after creating a story.

@@ -1,4 +1,11 @@
-import { ArrowLeft, BookOpen, Edit3, Home, PlusCircle } from 'lucide-react'
+import {
+  ArrowLeft,
+  BookOpen,
+  Edit3,
+  Home,
+  PlusCircle,
+} from 'lucide-react'
+import type { ReactNode } from 'react'
 
 import {
   type StoryReaderServices,
@@ -7,14 +14,14 @@ import {
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { MarkdownContent } from '@/components/ui/MarkdownContent'
-import type { Chapter } from '@/services/types'
+import type { Chapter, Story } from '@/services/types'
 
 interface Props {
   readonly chapterId?: string
   readonly onCreateChildChapter: (storyId: string, parentChapterId: string) => void
   readonly onEditChapter: (storyId: string, chapterId: string) => void
-  readonly onEditStory: (storyId: string) => void
   readonly onOpenDashboard: () => void
+  readonly onOpenStoryDetails: (storyId: string) => void
   readonly onSelectChapter: (chapterId: string) => void
   readonly services?: StoryReaderServices
   readonly storyId: string
@@ -24,8 +31,8 @@ export function StoryReader({
   chapterId,
   onCreateChildChapter,
   onEditChapter,
-  onEditStory,
   onOpenDashboard,
+  onOpenStoryDetails,
   onSelectChapter,
   services,
   storyId,
@@ -40,8 +47,124 @@ export function StoryReader({
     status,
     story,
   } = useStoryReader({ chapterId, onSelectChapter, services, storyId })
+  const isReadingChapter = Boolean(story && currentChapter)
 
-  let readerContent: React.ReactNode
+  return (
+    <main className="min-h-screen bg-stone-100 text-stone-950">
+      {isReadingChapter && story && currentChapter ? (
+        <ReaderToolbar
+          onEditChapter={() => onEditChapter(storyId, currentChapter.id)}
+          onOpenDashboard={onOpenDashboard}
+          onOpenStoryDetails={() => onOpenStoryDetails(storyId)}
+          onSelectPreviousChapter={selectPreviousChapter}
+          previousChapter={previousChapter}
+        />
+      ) : null}
+
+      <section className="mx-auto w-full max-w-5xl px-0 py-0 sm:px-6 sm:py-6 lg:py-10">
+        <ReaderContent
+          currentChapter={currentChapter}
+          errorMessage={errorMessage}
+          nextChapters={nextChapters}
+          onCreateChildChapter={(parentChapterId) =>
+            onCreateChildChapter(storyId, parentChapterId)
+          }
+          onSelectNextChapter={selectNextChapter}
+          status={status}
+          story={story}
+        />
+      </section>
+    </main>
+  )
+}
+
+interface ReaderToolbarProps {
+  readonly onEditChapter: () => void
+  readonly onOpenDashboard: () => void
+  readonly onOpenStoryDetails: () => void
+  readonly onSelectPreviousChapter: () => void
+  readonly previousChapter?: Chapter
+}
+
+function ReaderToolbar({
+  onEditChapter,
+  onOpenDashboard,
+  onOpenStoryDetails,
+  onSelectPreviousChapter,
+  previousChapter,
+}: ReaderToolbarProps) {
+  return (
+    <header className="sticky top-0 z-20 border-b border-stone-200 bg-white/95 shadow-sm backdrop-blur">
+      <nav
+        aria-label="Reader actions"
+        className="mx-auto flex w-full max-w-6xl items-center gap-2 px-3 py-2 sm:px-5"
+      >
+        {previousChapter ? (
+          <Button
+            aria-label="Back"
+            className="px-3"
+            onClick={onSelectPreviousChapter}
+            size="sm"
+            title="Back"
+          >
+            <ArrowLeft aria-hidden="true" size={16} />
+          </Button>
+        ) : null}
+
+        <div className="flex-1" />
+
+        <Button
+          aria-label="Story Details"
+          className="px-3"
+          onClick={onOpenStoryDetails}
+          size="sm"
+          title="Story Details"
+        >
+          <BookOpen aria-hidden="true" size={16} />
+        </Button>
+        <Button
+          aria-label="Edit Chapter"
+          className="px-3"
+          onClick={onEditChapter}
+          size="sm"
+          title="Edit Chapter"
+        >
+          <Edit3 aria-hidden="true" size={16} />
+        </Button>
+        <Button
+          aria-label="Dashboard"
+          className="px-3"
+          onClick={onOpenDashboard}
+          size="sm"
+          title="Dashboard"
+        >
+          <Home aria-hidden="true" size={16} />
+        </Button>
+      </nav>
+    </header>
+  )
+}
+
+interface ReaderContentProps {
+  readonly currentChapter?: Chapter
+  readonly errorMessage?: string
+  readonly nextChapters: Chapter[]
+  readonly onCreateChildChapter: (parentChapterId: string) => void
+  readonly onSelectNextChapter: (chapter: Chapter) => void
+  readonly status: ReturnType<typeof useStoryReader>['status']
+  readonly story?: Story
+}
+
+function ReaderContent({
+  currentChapter,
+  errorMessage,
+  nextChapters,
+  onCreateChildChapter,
+  onSelectNextChapter,
+  status,
+  story,
+}: ReaderContentProps) {
+  let readerContent: ReactNode
 
   if (status === 'loading') {
     readerContent = (
@@ -82,43 +205,17 @@ export function StoryReader({
     )
   } else if (story && currentChapter) {
     readerContent = (
-      <article className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-        <header className="border-b border-stone-200 pb-5">
-          <div className="mb-4 flex flex-wrap items-center gap-3">
-            {previousChapter ? (
-              <Button
-                className="min-h-9"
-                onClick={selectPreviousChapter}
-                size="sm"
-              >
-                <ArrowLeft aria-hidden="true" size={16} />
-                Back
-              </Button>
-            ) : null}
-          </div>
+      <article
+        aria-label="Chapter document"
+        className="mx-auto min-h-[calc(100vh-7rem)] w-full max-w-[52rem] border-stone-200 bg-white px-4 py-6 shadow-sm sm:min-h-[calc(100vh-10rem)] sm:border sm:px-8 sm:py-8 lg:px-8"
+      >
+        <header>
           <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
             {story.title}
           </p>
-          <h1 className="mt-2 text-3xl font-bold">{currentChapter.title}</h1>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button
-              onClick={() => onEditChapter(storyId, currentChapter.id)}
-              size="sm"
-            >
-              <Edit3 aria-hidden="true" size={16} />
-              Edit Chapter
-            </Button>
-            <Button
-              onClick={() =>
-                onCreateChildChapter(storyId, currentChapter.id)
-              }
-              size="sm"
-              variant="primary"
-            >
-              <PlusCircle aria-hidden="true" size={16} />
-              Add Child Chapter
-            </Button>
-          </div>
+          <h1 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">
+            {currentChapter.title}
+          </h1>
         </header>
 
         <MarkdownContent
@@ -130,7 +227,10 @@ export function StoryReader({
         <footer className="border-t border-stone-200 pt-5">
           <NextChapterControls
             nextChapters={nextChapters}
-            onSelectChapter={selectNextChapter}
+            onCreateChildChapter={() =>
+              onCreateChildChapter(currentChapter.id)
+            }
+            onSelectChapter={onSelectNextChapter}
           />
         </footer>
       </article>
@@ -139,76 +239,51 @@ export function StoryReader({
     readerContent = null
   }
 
-  return (
-    <main className="min-h-screen bg-stone-50 text-stone-950">
-      <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
-        <nav
-          aria-label="Reader actions"
-          className="flex flex-wrap justify-between gap-3"
-        >
-          <Button onClick={onOpenDashboard} size="sm">
-            <Home aria-hidden="true" size={16} />
-            Dashboard
-          </Button>
-          <Button onClick={() => onEditStory(storyId)} size="sm">
-            <Edit3 aria-hidden="true" size={16} />
-            Edit Story
-          </Button>
-        </nav>
-
-        {readerContent}
-      </section>
-    </main>
-  )
+  return readerContent
 }
 
 interface NextChapterControlsProps {
   readonly nextChapters: Chapter[]
+  readonly onCreateChildChapter: () => void
   readonly onSelectChapter: (chapter: Chapter) => void
 }
 
 function NextChapterControls({
   nextChapters,
+  onCreateChildChapter,
   onSelectChapter,
 }: NextChapterControlsProps) {
-  if (nextChapters.length === 0) {
-    return (
-      <p className="inline-flex min-h-10 items-center rounded-md bg-stone-100 px-3 text-sm font-semibold text-stone-700">
-        The End
-      </p>
-    )
-  }
-
-  if (nextChapters.length === 1) {
-    const [nextChapter] = nextChapters
-
-    return (
-      <Button
-        onClick={() => onSelectChapter(nextChapter)}
-        variant="primary"
-      >
-        <BookOpen aria-hidden="true" size={16} />
-        Continue
-      </Button>
-    )
-  }
-
   return (
     <div>
       <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-500">
-        Choose your path
+        Child Chapters
       </h2>
-      <div className="mt-3 grid gap-2">
-        {nextChapters.map((nextChapter) => (
-          <Button
-            className="justify-start px-4 text-left"
-            key={nextChapter.id}
-            onClick={() => onSelectChapter(nextChapter)}
-          >
-            {nextChapter.title}
-          </Button>
-        ))}
-      </div>
+      {nextChapters.length === 0 ? (
+        <p className="mt-3 inline-flex min-h-10 items-center rounded-md bg-stone-100 px-3 text-sm font-semibold text-stone-700">
+          The End
+        </p>
+      ) : (
+        <div className="mt-3 grid gap-2">
+          {nextChapters.map((nextChapter) => (
+            <Button
+              className="justify-start px-4 text-left"
+              key={nextChapter.id}
+              onClick={() => onSelectChapter(nextChapter)}
+            >
+              {nextChapter.title}
+            </Button>
+          ))}
+        </div>
+      )}
+      <Button
+        className="mt-4"
+        onClick={onCreateChildChapter}
+        size="sm"
+        variant="primary"
+      >
+        <PlusCircle aria-hidden="true" size={16} />
+        Add Child Chapter
+      </Button>
     </div>
   )
 }

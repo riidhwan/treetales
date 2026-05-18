@@ -171,7 +171,7 @@ export function useStoryReader({
       }
 
       if (currentPathIndex >= 0) {
-        return currentPath.slice(0, currentPathIndex + 1)
+        return currentPath
       }
 
       return [currentChapter]

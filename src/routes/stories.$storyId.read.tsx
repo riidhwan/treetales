@@ -38,9 +38,9 @@ function StoryReaderRoute() {
           },
         })
       }
-      onEditStory={(selectedStoryId) =>
+      onOpenStoryDetails={(selectedStoryId) =>
         void navigate({
-          to: '/stories/$storyId/edit',
+          to: '/stories/$storyId',
           params: { storyId: selectedStoryId },
         })
       }

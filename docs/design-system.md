@@ -16,6 +16,9 @@ or variants are useful.
   readable-width writing column, no surrounding form card around the primary
   editor, and a slim sticky toolbar for navigation, context, and primary
   actions.
+- Long-form reading views should use the same document-first shell as writing
+  views while remaining view-only: centered readable document, slim sticky
+  toolbar, and no form controls inside the chapter body.
 - Long-form writing documents should scroll as one page. The title, validation
   feedback, and body editor belong to the same paper-like surface; avoid fixed
   body panes or nested editor scrollbars inside that document.
