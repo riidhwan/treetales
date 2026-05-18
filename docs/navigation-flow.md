@@ -126,13 +126,12 @@ URL: `/stories/$storyId/read`
 
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
-| Back | `StoryReader` | Moves to the previous reader chapter |
-| Edit Chapter | `StoryReader` | `/stories/$storyId/chapters/$chapterId/edit` |
-| Add Child Chapter | `StoryReader` | `/stories/$storyId/chapters/$chapterId/children/new` |
-| Dashboard | `StoryReader` | `/` |
-| Edit Story | `StoryReader` | `/stories/$storyId/edit` |
-| Continue | `NextChapterControls` | Calls `onSelectChapter` |
+| Back | `ReaderToolbar` | Calls `onSelectPreviousChapter` |
+| Story Details | `ReaderToolbar` | `/stories/$storyId` |
+| Edit Chapter | `ReaderToolbar` | `/stories/$storyId/chapters/$chapterId/edit` |
+| Dashboard | `ReaderToolbar` | `/` |
 | {nextChapter.title} | `NextChapterControls` | Calls `onSelectChapter` |
+| Add Child Chapter | `NextChapterControls` | `/stories/$storyId/chapters/$chapterId/children/new` |
 
 Runtime notes:
 
