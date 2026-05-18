@@ -49,9 +49,11 @@ URL: `/stories/$storyId/chapters/$chapterId/children/new`
 
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
-| Parent Chapter | `ChapterCreator` | `/stories/$storyId/chapters/$chapterId/edit` |
-| Dashboard | `ChapterCreator` | `/` |
-| Creating... / Create Chapter | `ChapterCreationForm` | Submits the enclosing form |
+| Back | `CreatorContent` | Calls `onGoBack` |
+| Dashboard | `CreatorContent` | Calls `onOpenDashboard` |
+| Saving... / Save | `ChapterWritingSurface` | Submits the enclosing form |
+| Parent Chapter | `UnavailableLayout` | `/stories/$storyId/chapters/$chapterId/edit` |
+| Dashboard | `UnavailableLayout` | Calls `onOpenDashboard` |
 
 Runtime notes:
 
@@ -65,10 +67,7 @@ URL: `/stories/$storyId/chapters/$chapterId/edit`
 | --- | --- | --- |
 | Back | `ChapterEditor` | Calls `onGoBack` |
 | Dashboard | `ChapterEditor` | `/` |
-| Back | `EditorToolbar` | Calls `onGoBack` |
-| Saving... / Save | `EditorToolbar` | Submits the enclosing form |
-| Story Editor | `EditorToolbar` | Calls `onOpenStoryEditor` |
-| Dashboard | `EditorToolbar` | Calls `onOpenDashboard` |
+| Saving... / Save | `ChapterWritingSurface` | Submits the enclosing form |
 
 Runtime notes:
 
@@ -80,9 +79,11 @@ URL: `/stories/$storyId/chapters/new`
 
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
-| Story Editor | `ChapterCreator` | `/stories/$storyId/edit` |
-| Dashboard | `ChapterCreator` | `/` |
-| Creating... / Create Chapter | `ChapterCreationForm` | Submits the enclosing form |
+| Back | `CreatorContent` | Calls `onGoBack` |
+| Dashboard | `CreatorContent` | Calls `onOpenDashboard` |
+| Saving... / Save | `ChapterWritingSurface` | Submits the enclosing form |
+| Story Editor | `UnavailableLayout` | `/stories/$storyId/edit` |
+| Dashboard | `UnavailableLayout` | Calls `onOpenDashboard` |
 
 Runtime notes:
 

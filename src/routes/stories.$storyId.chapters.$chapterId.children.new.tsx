@@ -34,22 +34,6 @@ function ChapterCreatorRoute() {
           to: '/',
         })
       }
-      onOpenParentChapter={(selectedStoryId, parentChapterId) =>
-        void navigate({
-          replace: true,
-          to: '/stories/$storyId/chapters/$chapterId/edit',
-          params: {
-            chapterId: parentChapterId,
-            storyId: selectedStoryId,
-          },
-        })
-      }
-      onOpenStoryEditor={(selectedStoryId) =>
-        void navigate({
-          to: '/stories/$storyId/edit',
-          params: { storyId: selectedStoryId },
-        })
-      }
       parentChapterId={chapterId}
       storyId={storyId}
     />

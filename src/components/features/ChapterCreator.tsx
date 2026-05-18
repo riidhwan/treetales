@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode, SyntheticEvent } from 'react'
-import { ArrowLeft, BookOpen, Home, PlusCircle } from 'lucide-react'
+import { ArrowLeft, Home, Save } from 'lucide-react'
 
 import {
   type ChapterCreatorServices,
@@ -17,8 +17,6 @@ interface Props {
   readonly onChapterCreated: (storyId: string, chapterId: string) => void
   readonly onGoBack: () => void
   readonly onOpenDashboard: () => void
-  readonly onOpenParentChapter?: (storyId: string, chapterId: string) => void
-  readonly onOpenStoryEditor: (storyId: string) => void
   readonly parentChapterId?: string
   readonly services?: ChapterCreatorServices
   readonly storyId: string
@@ -28,8 +26,6 @@ export function ChapterCreator({
   onChapterCreated,
   onGoBack,
   onOpenDashboard,
-  onOpenParentChapter,
-  onOpenStoryEditor,
   parentChapterId,
   services,
   storyId,
@@ -56,11 +52,6 @@ export function ChapterCreator({
     title.trim().length === 0 && (hasTouchedTitle || title.length > 0)
       ? 'Chapter title is required.'
       : undefined
-  const draftStatus = getDraftStatus({
-    errorMessage,
-    hasDraftChanges,
-    isCreating,
-  })
 
   useEffect(() => {
     function handleBeforeUnload(event: BeforeUnloadEvent) {
@@ -104,7 +95,6 @@ export function ChapterCreator({
       <CreatorContent
         canCreate={canCreate}
         content={content}
-        draftStatus={draftStatus}
         editorMode={editorMode}
         errorMessage={errorMessage}
         introChapterTitle={introChapter?.title}
@@ -114,17 +104,6 @@ export function ChapterCreator({
         onCreate={handleCreate}
         onGoBack={() => confirmNavigation(onGoBack)}
         onOpenDashboard={() => confirmNavigation(onOpenDashboard)}
-        onOpenParentChapter={
-          parentChapterId && onOpenParentChapter
-            ? () =>
-                confirmNavigation(() =>
-                  onOpenParentChapter(storyId, parentChapterId),
-                )
-            : undefined
-        }
-        onOpenStoryEditor={() =>
-          confirmNavigation(() => onOpenStoryEditor(storyId))
-        }
         onSelectMode={setEditorMode}
         onTitleBlur={() => setHasTouchedTitle(true)}
         onTitleChange={setTitle}
@@ -141,7 +120,6 @@ export function ChapterCreator({
 interface CreatorContentProps {
   readonly canCreate: boolean
   readonly content: string
-  readonly draftStatus: string
   readonly editorMode: ChapterWritingMode
   readonly errorMessage?: string
   readonly introChapterTitle?: string
@@ -151,8 +129,6 @@ interface CreatorContentProps {
   readonly onCreate: (event: SyntheticEvent<HTMLFormElement>) => void
   readonly onGoBack: () => void
   readonly onOpenDashboard: () => void
-  readonly onOpenParentChapter?: () => void
-  readonly onOpenStoryEditor: () => void
   readonly onSelectMode: (mode: ChapterWritingMode) => void
   readonly onTitleBlur: () => void
   readonly onTitleChange: (title: string) => void
@@ -166,7 +142,6 @@ interface CreatorContentProps {
 function CreatorContent({
   canCreate,
   content,
-  draftStatus,
   editorMode,
   errorMessage,
   introChapterTitle,
@@ -176,8 +151,6 @@ function CreatorContent({
   onCreate,
   onGoBack,
   onOpenDashboard,
-  onOpenParentChapter,
-  onOpenStoryEditor,
   onSelectMode,
   onTitleBlur,
   onTitleChange,
@@ -205,9 +178,13 @@ function CreatorContent({
           isSubmitting={isCreating}
           mode={editorMode}
           navigationActions={
-            <Button onClick={onGoBack} size="sm">
+            <Button
+              aria-label="Back"
+              className="px-3"
+              onClick={onGoBack}
+              size="sm"
+            >
               <ArrowLeft aria-hidden="true" size={16} />
-              Back
             </Button>
           }
           onContentChange={onContentChange}
@@ -215,30 +192,19 @@ function CreatorContent({
           onSubmit={onCreate}
           onTitleBlur={onTitleBlur}
           onTitleChange={onTitleChange}
-          primaryActionIcon={<PlusCircle aria-hidden="true" size={16} />}
-          primaryActionLabel="Create Chapter"
+          primaryActionIcon={<Save aria-hidden="true" size={16} />}
+          primaryActionLabel="Save"
           secondaryActions={
-            <>
-              {onOpenParentChapter ? (
-                <Button onClick={onOpenParentChapter} size="sm">
-                  <ArrowLeft aria-hidden="true" size={16} />
-                  Parent Chapter
-                </Button>
-              ) : null}
-
-              <Button onClick={onOpenStoryEditor} size="sm">
-                <BookOpen aria-hidden="true" size={16} />
-                Story Editor
-              </Button>
-
-              <Button onClick={onOpenDashboard} size="sm">
-                <Home aria-hidden="true" size={16} />
-                Dashboard
-              </Button>
-            </>
+            <Button
+              aria-label="Dashboard"
+              className="px-3"
+              onClick={onOpenDashboard}
+              size="sm"
+            >
+              <Home aria-hidden="true" size={16} />
+            </Button>
           }
-          statusText={draftStatus}
-          submittingActionLabel="Creating..."
+          submittingActionLabel="Saving..."
           title={title}
           titleError={titleError}
           titlePlaceholder="Untitled chapter"
@@ -378,41 +344,19 @@ function UnavailableLayout({
           <ArrowLeft aria-hidden="true" size={16} />
           {previousLabel}
         </Button>
-        <Button onClick={onOpenDashboard} size="sm">
+        <Button
+          aria-label="Dashboard"
+          className="px-3"
+          onClick={onOpenDashboard}
+          size="sm"
+        >
           <Home aria-hidden="true" size={16} />
-          Dashboard
         </Button>
       </nav>
 
       {children}
     </section>
   )
-}
-
-interface DraftStatusOptions {
-  readonly errorMessage?: string
-  readonly hasDraftChanges: boolean
-  readonly isCreating: boolean
-}
-
-function getDraftStatus({
-  errorMessage,
-  hasDraftChanges,
-  isCreating,
-}: DraftStatusOptions) {
-  if (isCreating) {
-    return 'Creating...'
-  }
-
-  if (errorMessage) {
-    return 'Could not create'
-  }
-
-  if (hasDraftChanges) {
-    return 'Draft not created'
-  }
-
-  return 'Draft empty'
 }
 
 interface ToolbarContextOptions {

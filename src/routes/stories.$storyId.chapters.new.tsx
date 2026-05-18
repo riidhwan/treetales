@@ -32,12 +32,6 @@ function IntroChapterCreatorRoute() {
           to: '/',
         })
       }
-      onOpenStoryEditor={(selectedStoryId) =>
-        void navigate({
-          to: '/stories/$storyId/edit',
-          params: { storyId: selectedStoryId },
-        })
-      }
       storyId={storyId}
     />
   )

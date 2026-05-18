@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode, SyntheticEvent } from 'react'
-import { ArrowLeft, BookOpen, Home, Save } from 'lucide-react'
+import { ArrowLeft, Home, Save } from 'lucide-react'
 
 import {
   type ChapterEditorServices,
@@ -17,7 +17,6 @@ interface Props {
   readonly chapterId: string
   readonly onGoBack: () => void
   readonly onOpenDashboard: () => void
-  readonly onOpenStoryEditor: () => void
   readonly services?: ChapterEditorServices
   readonly storyId: string
 }
@@ -26,7 +25,6 @@ export function ChapterEditor({
   chapterId,
   onGoBack,
   onOpenDashboard,
-  onOpenStoryEditor,
   services,
   storyId,
 }: Props) {
@@ -41,16 +39,9 @@ export function ChapterEditor({
     setTitle,
     status,
     story,
-    successMessage,
     title,
   } = useChapterEditor({ chapterId, services, storyId })
   const [editorMode, setEditorMode] = useState<ChapterWritingMode>('write')
-  const saveStatus = getSaveStatus({
-    errorMessage,
-    hasUnsavedChanges,
-    isSaving,
-    successMessage,
-  })
 
   useEffect(() => {
     function handleBeforeUnload(event: BeforeUnloadEvent) {
@@ -133,11 +124,12 @@ export function ChapterEditor({
         mode={editorMode}
         navigationActions={
           <Button
+            aria-label="Back"
+            className="px-3"
             onClick={() => confirmNavigation(onGoBack)}
             size="sm"
           >
             <ArrowLeft aria-hidden="true" size={16} />
-            Back
           </Button>
         }
         onContentChange={setContent}
@@ -147,25 +139,15 @@ export function ChapterEditor({
         primaryActionIcon={<Save aria-hidden="true" size={16} />}
         primaryActionLabel="Save"
         secondaryActions={
-          <>
-            <Button
-              onClick={() => confirmNavigation(onOpenStoryEditor)}
-              size="sm"
-            >
-              <BookOpen aria-hidden="true" size={16} />
-              Story Editor
-            </Button>
-
-            <Button
-              onClick={() => confirmNavigation(onOpenDashboard)}
-              size="sm"
-            >
-              <Home aria-hidden="true" size={16} />
-              Dashboard
-            </Button>
-          </>
+          <Button
+            aria-label="Dashboard"
+            className="px-3"
+            onClick={() => confirmNavigation(onOpenDashboard)}
+            size="sm"
+          >
+            <Home aria-hidden="true" size={16} />
+          </Button>
         }
-        statusText={saveStatus}
         submittingActionLabel="Saving..."
         title={title}
         titleError={
@@ -198,13 +180,21 @@ export function ChapterEditor({
             aria-label="Chapter editor actions"
             className="flex flex-wrap justify-between gap-3"
           >
-            <Button onClick={onGoBack} size="sm">
+            <Button
+              aria-label="Back"
+              className="px-3"
+              onClick={onGoBack}
+              size="sm"
+            >
               <ArrowLeft aria-hidden="true" size={16} />
-              Back
             </Button>
-            <Button onClick={onOpenDashboard} size="sm">
+            <Button
+              aria-label="Dashboard"
+              className="px-3"
+              onClick={onOpenDashboard}
+              size="sm"
+            >
               <Home aria-hidden="true" size={16} />
-              Dashboard
             </Button>
           </nav>
 
@@ -235,36 +225,4 @@ function MissingState({ description, kicker, title }: MissingStateProps) {
       </p>
     </section>
   )
-}
-
-interface SaveStatusOptions {
-  readonly errorMessage?: string
-  readonly hasUnsavedChanges: boolean
-  readonly isSaving: boolean
-  readonly successMessage?: string
-}
-
-function getSaveStatus({
-  errorMessage,
-  hasUnsavedChanges,
-  isSaving,
-  successMessage,
-}: SaveStatusOptions) {
-  if (isSaving) {
-    return 'Saving...'
-  }
-
-  if (errorMessage) {
-    return 'Could not save'
-  }
-
-  if (hasUnsavedChanges) {
-    return 'Unsaved changes'
-  }
-
-  if (successMessage) {
-    return successMessage
-  }
-
-  return 'Saved'
 }

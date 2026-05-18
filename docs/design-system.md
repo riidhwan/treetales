@@ -14,10 +14,14 @@ or variants are useful.
 - Colors use Tailwind's built-in palette; there are no custom theme tokens
 - Long-form writing views should use a document-first layout: a centered
   readable-width writing column, no surrounding form card around the primary
-  editor, and a slim sticky toolbar for navigation, mode switching, writing
-  metadata, status, and primary actions.
-- On mobile, long-form writing toolbars may wrap into two compact rows rather
-  than hiding essential save or preview controls behind extra navigation.
+  editor, and a slim sticky toolbar for navigation, context, and primary
+  actions.
+- Long-form writing views keep Write/Preview mode switching in a floating
+  bottom control and writing metadata such as word count in a quiet fixed
+  bottom-right position.
+- On mobile, long-form writing toolbars should keep secondary navigation terse
+  and preserve essential save or create controls without relying on extra
+  navigation.
 
 ## Component Layers
 
