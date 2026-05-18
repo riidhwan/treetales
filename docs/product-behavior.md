@@ -53,12 +53,27 @@
 - Reader Appearance applies to the chapter document text, including the chapter
   title and rendered chapter content. App chrome such as the toolbar and branch
   controls keeps the standard TreeTales interface styling.
+- Reader Appearance also applies to chapter document text in chapter creation
+  and chapter editing, including Write and Preview modes, because those surfaces
+  present the same authored chapter document.
+- Reader Appearance affects authoring placeholders inside the chapter title and
+  content fields so placeholder text uses the same document typography while
+  retaining standard muted placeholder styling.
+- Reader Appearance does not affect authoring chrome or metadata such as title
+  validation messages, toolbar context, mode controls, save/create buttons, or
+  word count.
 - Readerly is the default reader font. If bundled font assets fail to load, the
   reader remains usable with browser fallback fonts.
 - Reader font size is shown to users in points. The default is 14 pt; increase
   and decrease controls step by 1 pt and clamp the range from 10 pt to 24 pt.
 - Reader Appearance provides a reset action that returns font family and font
   size to their defaults.
+- Reader Appearance controls are available from the reader, chapter creation,
+  and chapter editing toolbars. All entry points use the same globally persisted
+  Reader Appearance value.
+- Reader Appearance changes are not actively synchronized across already-open
+  tabs or mounted surfaces; reloading or remounting a surface reads the latest
+  stored value.
 - Reader font selection uses a compact two-column option list in the Reader
   Appearance panel. The options are Readerly, Sourcerer, Cartisse, NV Charis,
   NV Garamond, NV Jost, NV Bitter, NV Legible Next, and NV Palatium.

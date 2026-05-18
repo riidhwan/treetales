@@ -10,6 +10,8 @@ import {
   type ChapterWritingMode,
   ChapterWritingSurface,
 } from '@/components/features/ChapterWritingSurface'
+import { ReaderAppearanceControl } from '@/components/domain/ReaderAppearanceControl'
+import { useReaderAppearance } from '@/hooks/useReaderAppearance'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 
@@ -44,8 +46,19 @@ export function ChapterCreator({
     story,
     title,
   } = useChapterCreator({ parentChapterId, services, storyId })
+  const {
+    canDecreaseFontSize,
+    canIncreaseFontSize,
+    decreaseFontSize,
+    increaseFontSize,
+    readerAppearance,
+    resetReaderAppearance,
+    selectedFontFamily,
+    setReaderFont,
+  } = useReaderAppearance()
   const isIntroChapter = !parentChapterId
   const [editorMode, setEditorMode] = useState<ChapterWritingMode>('write')
+  const [isAppearancePanelOpen, setIsAppearancePanelOpen] = useState(false)
   const [hasTouchedTitle, setHasTouchedTitle] = useState(false)
   const hasDraftChanges = status === 'ready' && (title !== '' || content !== '')
   const titleError =
@@ -108,6 +121,21 @@ export function ChapterCreator({
         onTitleBlur={() => setHasTouchedTitle(true)}
         onTitleChange={setTitle}
         parentChapterTitle={parentChapter?.title}
+        readerAppearanceControl={
+          <ReaderAppearanceControl
+            canDecreaseFontSize={canDecreaseFontSize}
+            canIncreaseFontSize={canIncreaseFontSize}
+            isPanelOpen={isAppearancePanelOpen}
+            onDecreaseFontSize={decreaseFontSize}
+            onIncreaseFontSize={increaseFontSize}
+            onOpenChange={setIsAppearancePanelOpen}
+            onResetReaderAppearance={resetReaderAppearance}
+            onSelectReaderFont={setReaderFont}
+            readerAppearance={readerAppearance}
+          />
+        }
+        readerFontFamily={selectedFontFamily}
+        readerFontSizePt={readerAppearance.fontSizePt}
         status={status}
         storyTitle={story?.title}
         title={title}
@@ -133,6 +161,9 @@ interface CreatorContentProps {
   readonly onTitleBlur: () => void
   readonly onTitleChange: (title: string) => void
   readonly parentChapterTitle?: string
+  readonly readerAppearanceControl: ReactNode
+  readonly readerFontFamily: string
+  readonly readerFontSizePt: number
   readonly status: ReturnType<typeof useChapterCreator>['status']
   readonly storyTitle?: string
   readonly title: string
@@ -155,6 +186,9 @@ function CreatorContent({
   onTitleBlur,
   onTitleChange,
   parentChapterTitle,
+  readerAppearanceControl,
+  readerFontFamily,
+  readerFontSizePt,
   status,
   storyTitle,
   title,
@@ -194,15 +228,20 @@ function CreatorContent({
           onTitleChange={onTitleChange}
           primaryActionIcon={<Save aria-hidden="true" size={16} />}
           primaryActionLabel="Save"
+          readerFontFamily={readerFontFamily}
+          readerFontSizePt={readerFontSizePt}
           secondaryActions={
-            <Button
-              aria-label="Dashboard"
-              className="px-3"
-              onClick={onOpenDashboard}
-              size="sm"
-            >
-              <Home aria-hidden="true" size={16} />
-            </Button>
+            <>
+              {readerAppearanceControl}
+              <Button
+                aria-label="Dashboard"
+                className="px-3"
+                onClick={onOpenDashboard}
+                size="sm"
+              >
+                <Home aria-hidden="true" size={16} />
+              </Button>
+            </>
           }
           submittingActionLabel="Saving..."
           title={title}

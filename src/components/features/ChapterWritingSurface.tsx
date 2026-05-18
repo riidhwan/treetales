@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import type { CSSProperties } from 'react'
 import type { ReactNode, SyntheticEvent } from 'react'
 import { Eye, Pencil } from 'lucide-react'
 
@@ -23,6 +24,8 @@ interface Props {
   readonly onTitleChange: (title: string) => void
   readonly primaryActionIcon: ReactNode
   readonly primaryActionLabel: string
+  readonly readerFontFamily: string
+  readonly readerFontSizePt: number
   readonly secondaryActions?: ReactNode
   readonly submittingActionLabel: string
   readonly title: string
@@ -45,6 +48,8 @@ export function ChapterWritingSurface({
   onTitleChange,
   primaryActionIcon,
   primaryActionLabel,
+  readerFontFamily,
+  readerFontSizePt,
   secondaryActions,
   submittingActionLabel,
   title,
@@ -54,6 +59,10 @@ export function ChapterWritingSurface({
 }: Props) {
   const wordCount = countMarkdownWords(content)
   const contentTextAreaRef = useRef<HTMLTextAreaElement>(null)
+  const readerDocumentStyle: CSSProperties = {
+    fontFamily: `"${readerFontFamily}", Georgia, serif`,
+    fontSize: `${readerFontSizePt}pt`,
+  }
 
   useEffect(() => {
     const textArea = contentTextAreaRef.current
@@ -64,7 +73,7 @@ export function ChapterWritingSurface({
 
     textArea.style.height = 'auto'
     textArea.style.height = `${textArea.scrollHeight}px`
-  }, [content, mode])
+  }, [content, mode, readerFontFamily, readerFontSizePt])
 
   return (
     <form className="min-h-screen pb-24 sm:pb-20" onSubmit={onSubmit}>
@@ -97,11 +106,11 @@ export function ChapterWritingSurface({
           aria-label="Chapter document"
           className="mx-auto min-h-[calc(100vh-7rem)] w-full max-w-[52rem] border-stone-200 bg-white px-2 py-5 shadow-sm sm:min-h-[calc(100vh-10rem)] sm:border sm:px-8 sm:py-8 lg:px-8"
         >
-          <label className="block px-2 sm:px-0">
+          <label className="block px-2 sm:px-0" style={readerDocumentStyle}>
             <span className="sr-only">Title</span>
             <input
               aria-invalid={Boolean(titleError)}
-              className="w-full border-0 bg-transparent p-0 text-3xl font-bold leading-tight text-stone-950 outline-none placeholder:text-stone-400 focus:ring-0 sm:text-4xl"
+              className="w-full border-0 bg-transparent p-0 text-[1.875em] font-bold leading-tight text-stone-950 outline-none placeholder:text-stone-400 focus:ring-0 sm:text-[2.25em]"
               name="title"
               onBlur={onTitleBlur}
               onChange={(event) => onTitleChange(event.target.value)}
@@ -125,6 +134,7 @@ export function ChapterWritingSurface({
                   className="space-y-5"
                   content={content}
                   emptyFallback="Nothing to preview yet."
+                  style={readerDocumentStyle}
                 />
               </section>
             ) : (
@@ -132,10 +142,11 @@ export function ChapterWritingSurface({
                 <span className="sr-only">Content</span>
                 <TextArea
                   ref={contentTextAreaRef}
-                  className="min-h-[calc(100vh-15rem)] w-full resize-none overflow-hidden border-0 p-0 text-lg leading-8 shadow-none outline-none focus:!border-transparent focus:!ring-0 sm:min-h-[calc(100vh-18rem)]"
+                  className="min-h-[calc(100vh-15rem)] w-full resize-none overflow-hidden border-0 p-0 leading-8 shadow-none outline-none focus:border-transparent! focus:ring-0! sm:min-h-[calc(100vh-18rem)]"
                   name="content"
                   onChange={(event) => onContentChange(event.target.value)}
                   placeholder={contentPlaceholder}
+                  style={readerDocumentStyle}
                   value={content}
                 />
               </label>

@@ -10,6 +10,8 @@ import {
   type ChapterWritingMode,
   ChapterWritingSurface,
 } from '@/components/features/ChapterWritingSurface'
+import { ReaderAppearanceControl } from '@/components/domain/ReaderAppearanceControl'
+import { useReaderAppearance } from '@/hooks/useReaderAppearance'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 
@@ -41,7 +43,18 @@ export function ChapterEditor({
     story,
     title,
   } = useChapterEditor({ chapterId, services, storyId })
+  const {
+    canDecreaseFontSize,
+    canIncreaseFontSize,
+    decreaseFontSize,
+    increaseFontSize,
+    readerAppearance,
+    resetReaderAppearance,
+    selectedFontFamily,
+    setReaderFont,
+  } = useReaderAppearance()
   const [editorMode, setEditorMode] = useState<ChapterWritingMode>('write')
+  const [isAppearancePanelOpen, setIsAppearancePanelOpen] = useState(false)
 
   useEffect(() => {
     function handleBeforeUnload(event: BeforeUnloadEvent) {
@@ -138,15 +151,30 @@ export function ChapterEditor({
         onTitleChange={setTitle}
         primaryActionIcon={<Save aria-hidden="true" size={16} />}
         primaryActionLabel="Save"
+        readerFontFamily={selectedFontFamily}
+        readerFontSizePt={readerAppearance.fontSizePt}
         secondaryActions={
-          <Button
-            aria-label="Dashboard"
-            className="px-3"
-            onClick={() => confirmNavigation(onOpenDashboard)}
-            size="sm"
-          >
-            <Home aria-hidden="true" size={16} />
-          </Button>
+          <>
+            <ReaderAppearanceControl
+              canDecreaseFontSize={canDecreaseFontSize}
+              canIncreaseFontSize={canIncreaseFontSize}
+              isPanelOpen={isAppearancePanelOpen}
+              onDecreaseFontSize={decreaseFontSize}
+              onIncreaseFontSize={increaseFontSize}
+              onOpenChange={setIsAppearancePanelOpen}
+              onResetReaderAppearance={resetReaderAppearance}
+              onSelectReaderFont={setReaderFont}
+              readerAppearance={readerAppearance}
+            />
+            <Button
+              aria-label="Dashboard"
+              className="px-3"
+              onClick={() => confirmNavigation(onOpenDashboard)}
+              size="sm"
+            >
+              <Home aria-hidden="true" size={16} />
+            </Button>
+          </>
         }
         submittingActionLabel="Saving..."
         title={title}

@@ -9,6 +9,7 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { ChapterCreator } from '@/components/features/ChapterCreator'
+import { READER_APPEARANCE_STORAGE_KEY } from '@/config'
 import type { Chapter, CreateChapterInput, Story } from '@/services/types'
 
 function createStory(overrides: Partial<Story> = {}): Story {
@@ -116,6 +117,7 @@ function deferred<TValue>() {
 describe('ChapterCreator', () => {
   afterEach(() => {
     cleanup()
+    window.localStorage.clear()
     vi.restoreAllMocks()
   })
 
@@ -241,6 +243,43 @@ describe('ChapterCreator', () => {
       })
     })
     expect(onChapterCreated).toHaveBeenCalledWith('story-1', 'chapter-2')
+  })
+
+  it('applies Reader Appearance to write and preview document text', async () => {
+    renderChapterCreator()
+
+    await screen.findByText('The Old Road - Child of The Gate')
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'The Cellar' },
+    })
+    fireEvent.change(screen.getByLabelText('Content'), {
+      target: { value: 'The stairs creak.' },
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reader Appearance' }))
+    fireEvent.click(screen.getByRole('button', { name: 'NV Garamond' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Increase Font Size' }))
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Title').parentElement?.style.fontFamily)
+        .toContain('NV Garamond')
+    })
+    expect(screen.getByLabelText('Content').style.fontFamily).toContain(
+      'NV Garamond',
+    )
+    expect(screen.getByLabelText('Content').style.fontSize).toBe('15pt')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }))
+
+    const preview = screen.getByRole('region', { name: 'Content preview' })
+    expect(
+      preview.firstElementChild instanceof HTMLElement
+        ? preview.firstElementChild.style.fontFamily
+        : '',
+    ).toContain('NV Garamond')
+    expect(
+      window.localStorage.getItem(READER_APPEARANCE_STORAGE_KEY),
+    ).toContain('"fontSizePt":15')
   })
 
   it('creates an intro chapter with title and content and opens it', async () => {

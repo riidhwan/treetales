@@ -9,6 +9,7 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { ChapterEditor } from '@/components/features/ChapterEditor'
+import { READER_APPEARANCE_STORAGE_KEY } from '@/config'
 import type { Chapter, Story, UpdateChapterInput } from '@/services/types'
 
 function createStory(overrides: Partial<Story> = {}): Story {
@@ -108,6 +109,7 @@ function deferred<TValue>() {
 describe('ChapterEditor', () => {
   afterEach(() => {
     cleanup()
+    window.localStorage.clear()
     vi.restoreAllMocks()
   })
 
@@ -233,6 +235,29 @@ describe('ChapterEditor', () => {
         title: 'The Gate',
       })
     })
+  })
+
+  it('uses stored Reader Appearance and exposes controls while editing', async () => {
+    window.localStorage.setItem(
+      READER_APPEARANCE_STORAGE_KEY,
+      JSON.stringify({ fontId: 'nv-jost', fontSizePt: 18 }),
+    )
+
+    renderChapterEditor()
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Title').parentElement?.style.fontFamily)
+        .toContain('NV Jost')
+    })
+    expect(screen.getByLabelText('Content').style.fontSize).toBe('18pt')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reader Appearance' }))
+    expect(screen.getByText('Reader Appearance')).toBeTruthy()
+    expect(
+      screen.getByRole('button', { name: 'NV Jost' }).getAttribute(
+        'aria-pressed',
+      ),
+    ).toBe('true')
   })
 
   it('disables save when the title is blank', async () => {

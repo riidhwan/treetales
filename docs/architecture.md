@@ -54,16 +54,17 @@ over inlining it if it meets any of these criteria:
 
 ## Component Layers
 
-`components/` currently has two required sublayers:
+`components/` currently has three required sublayers:
 
 | Sublayer | Rule | Examples |
 |---|---|---|
 | `ui/` | Generic, zero business logic, reusable anywhere | `Alert`, `Button`, `MarkdownContent`, `MarkdownEditor`, `TextArea`, `TextInput` |
+| `domain/` | Business-aware, self-contained components shared by more than one feature without owning feature state or service calls | `ReaderAppearanceControl` |
 | `features/` | Composite feature UI that wires hooks, services, navigation callbacks, and UI primitives into a full user-facing unit | `StoryDashboard`, `StoryDetail`, `StoryEditor`, `StoryReader` |
 
-There is currently no `components/domain/`. Add it only when a business-aware
-component is self-contained enough to be shared by more than one feature without
-owning feature state or service calls.
+`components/domain/` contains business-aware components that are self-contained
+enough to be shared by more than one feature without owning feature state or
+service calls, such as reusable Reader Appearance controls.
 
 A component that calls feature hooks, owns workflows, or coordinates services
 belongs in `features/`. Generic HTML wrappers and styling primitives belong in

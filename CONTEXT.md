@@ -25,7 +25,7 @@ A **Chapter** reached from another **Chapter**.
 _Avoid_: Child Chapter, child node, branch target
 
 **Reader Appearance**:
-A reader's presentation preferences while reading a **Chapter**.
+A user's presentation preferences for **Chapter** document text.
 _Avoid_: Style, configuration
 
 ## Relationships
@@ -47,4 +47,5 @@ _Avoid_: Style, configuration
 - "node" can describe the technical graph representation, but product language should use **Chapter**.
 - "child chapter" describes the technical parent-child relationship, but product language should use **Branch**.
 - "previous chapter" can imply browser or reader history — resolved: use **Parent Chapter** for structural navigation.
-- "style" and "configuration" can imply broad editor or app settings — resolved: use **Reader Appearance** for reading presentation preferences.
+- "style" and "configuration" can imply broad editor or app settings — resolved: use **Reader Appearance** for **Chapter** document text presentation preferences.
+- "Reader Appearance" was originally reading-only — resolved: it can also apply to chapter authoring surfaces when those surfaces present **Chapter** document text.
