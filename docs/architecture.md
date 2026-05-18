@@ -50,7 +50,7 @@ over inlining it if it meets any of these criteria:
 | Sublayer | Rule | Examples |
 |---|---|---|
 | `ui/` | Generic, zero business logic, reusable anywhere | `Alert`, `Button`, `MarkdownContent`, `MarkdownEditor`, `TextArea`, `TextInput` |
-| `features/` | Composite feature UI that wires hooks, services, navigation callbacks, and UI primitives into a full user-facing unit | `StoryDashboard`, `StoryEditor`, `StoryReader` |
+| `features/` | Composite feature UI that wires hooks, services, navigation callbacks, and UI primitives into a full user-facing unit | `StoryDashboard`, `StoryDetail`, `StoryEditor`, `StoryReader` |
 
 There is currently no `components/domain/`. Add it only when a business-aware
 component is self-contained enough to be shared by more than one feature without
@@ -69,6 +69,7 @@ specific:
 | File | Responsibility |
 |---|---|
 | `useStoryDashboard.ts` | Loads story summaries, creates stories/example content, deletes stories, and exposes dashboard form state |
+| `useStoryDetail.ts` | Loads one story for the story landing page and deletes it after confirmation |
 | `useStoryEditor.ts` | Loads editor data, resolves the intro chapter, and saves story fields |
 | `useChapterEditor.ts` | Loads one chapter and saves chapter fields |
 | `useChapterCreator.ts` | Loads story or parent chapter context and creates intro or child chapters from title + content |

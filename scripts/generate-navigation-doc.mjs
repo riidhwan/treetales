@@ -9,6 +9,7 @@ const OUTPUT_PATH = path.join(ROOT, 'docs/navigation-flow.md')
 
 const ROUTE_TITLE_BY_PATH = new Map([
   ['/', 'Home / Story Dashboard'],
+  ['/stories/$storyId/', 'Story Detail'],
   ['/stories/$storyId/read', 'Story Reader'],
   ['/stories/$storyId/edit', 'Story Editor'],
   ['/stories/$storyId/chapters/new', 'Intro Chapter Creator'],
@@ -32,6 +33,12 @@ const RUNTIME_NOTES_BY_ROUTE = new Map([
       '`Add Example Story` creates or reuses the example story and opens it in the reader.',
       '`New Story` only opens the creation form.',
       '`Delete` asks for confirmation and removes the story without navigation.',
+    ],
+  ],
+  [
+    '/stories/$storyId/',
+    [
+      '`Delete` asks for confirmation, removes the story, and returns to `/`.',
     ],
   ],
   [
@@ -848,6 +855,21 @@ function compareRoutePaths(left, right) {
   return left.routePath < right.routePath ? -1 : 1
 }
 
+function isLayoutRoute(route, routes) {
+  return (
+    !route.componentName &&
+    routes.some((candidate) => candidate.routePath === `${route.routePath}/`)
+  )
+}
+
+function formatRoutePath(routePath) {
+  if (routePath !== '/' && routePath.endsWith('/')) {
+    return routePath.slice(0, -1)
+  }
+
+  return routePath
+}
+
 async function generateNavigationDoc() {
   const { componentNames, components } = await getFeatureComponents()
   const routeFiles = await listFiles(ROUTES_DIR, '.tsx')
@@ -868,6 +890,7 @@ async function generateNavigationDoc() {
   }
 
   routes.sort(compareRoutePaths)
+  const visibleRoutes = routes.filter((route) => !isLayoutRoute(route, routes))
 
   const lines = [
     '# Navigation Flow',
@@ -880,8 +903,8 @@ async function generateNavigationDoc() {
     '',
     formatTable(
       ['URL', 'Page', 'Route file'],
-      routes.map((route) => [
-        `\`${escapeMarkdown(route.routePath)}\``,
+      visibleRoutes.map((route) => [
+        `\`${escapeMarkdown(formatRoutePath(route.routePath))}\``,
         escapeMarkdown(getPageTitle(route.routePath, route.componentName)),
         `\`${escapeMarkdown(path.relative(ROOT, route.file))}\``,
       ]),
@@ -892,7 +915,7 @@ async function generateNavigationDoc() {
     '## Page Actions',
   ]
 
-  for (const route of routes) {
+  for (const route of visibleRoutes) {
     const pageTitle = getPageTitle(route.routePath, route.componentName)
     const actions =
       route.componentName ?
@@ -904,7 +927,13 @@ async function generateNavigationDoc() {
         )
       : []
 
-    lines.push('', `### ${pageTitle}`, '', `URL: \`${route.routePath}\``, '')
+    lines.push(
+      '',
+      `### ${pageTitle}`,
+      '',
+      `URL: \`${formatRoutePath(route.routePath)}\``,
+      '',
+    )
 
     if (actions.length > 0) {
       lines.push(
