@@ -72,7 +72,7 @@ specific:
 | `useStoryDetail.ts` | Loads one story for the story landing page and deletes it after confirmation |
 | `useStoryEditor.ts` | Loads editor data, resolves the intro chapter, and saves story fields |
 | `useChapterEditor.ts` | Loads one chapter and saves chapter fields |
-| `useChapterCreator.ts` | Loads story or parent chapter context and creates intro or child chapters from title + content |
+| `useChapterCreator.ts` | Loads story or parent chapter context and creates intro chapters or branches from title + content |
 | `useStoryReader.ts` | Loads reader data, tracks the selected chapter, and exposes navigation options |
 
 Hooks depend on the service layer through small service interfaces with default
@@ -139,8 +139,7 @@ imports are migrated to the correctly named service modules.
 Story and chapter services create records with `crypto.randomUUID()` ids and
 `Date.now()` timestamps. Updates preserve `createdAt` and refresh `updatedAt`.
 Deleting a story deletes all chapters for that story. Deleting a chapter clears
-that chapter id from the `parentChapterId` of direct child chapters in the same
-story.
+that chapter id from the `parentChapterId` of direct branches in the same story.
 
 Chapter writes enforce basic graph integrity before committing:
 

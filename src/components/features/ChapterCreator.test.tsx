@@ -146,7 +146,7 @@ describe('ChapterCreator', () => {
     expect(screen.getByLabelText('Content')).toHaveProperty('value', '')
   })
 
-  it('requires a title before creating a child chapter', async () => {
+  it('requires a title before creating a branch', async () => {
     const services = createServices()
 
     renderChapterCreator({ services })
@@ -162,7 +162,7 @@ describe('ChapterCreator', () => {
     expect(services.createChapter).not.toHaveBeenCalled()
   })
 
-  it('creates a child chapter with title and content and opens it', async () => {
+  it('creates a branch with title and content and opens it', async () => {
     const onChapterCreated = vi.fn()
     const services = createServices()
 

@@ -256,7 +256,7 @@ function NextChapterControls({
   return (
     <div>
       <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-500">
-        Child Chapters
+        What happens next?
       </h2>
       {nextChapters.length === 0 ? (
         <p className="mt-3 inline-flex min-h-10 items-center rounded-md bg-stone-100 px-3 text-sm font-semibold text-stone-700">
@@ -282,7 +282,7 @@ function NextChapterControls({
         variant="primary"
       >
         <PlusCircle aria-hidden="true" size={16} />
-        Add Child Chapter
+        Add Branch
       </Button>
     </div>
   )

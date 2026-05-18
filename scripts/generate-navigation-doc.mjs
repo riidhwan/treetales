@@ -19,7 +19,7 @@ const ROUTE_TITLE_BY_PATH = new Map([
   ],
   [
     '/stories/$storyId/chapters/$chapterId/children/new',
-    'Child Chapter Creator',
+    'Branch Creator',
   ],
 ])
 
@@ -65,7 +65,7 @@ const RUNTIME_NOTES_BY_ROUTE = new Map([
   [
     '/stories/$storyId/chapters/$chapterId/children/new',
     [
-      '`Create Chapter` creates a child chapter and then opens `/stories/$storyId/chapters/$chapterId/edit` for the new chapter.',
+      '`Create Chapter` creates a branch and then opens `/stories/$storyId/chapters/$chapterId/edit` for the new chapter.',
     ],
   ],
   [

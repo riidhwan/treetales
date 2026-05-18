@@ -352,14 +352,14 @@ describe('StoryReader', () => {
     expect(onEditChapter).toHaveBeenCalledWith('story-1', 'chapter-1')
   })
 
-  it('opens child chapter creation from the current chapter', async () => {
+  it('opens branch creation from the current chapter', async () => {
     const onCreateChildChapter = vi.fn()
     const services = createServices()
 
     renderReader({ onCreateChildChapter, services })
 
     fireEvent.click(
-      await screen.findByRole('button', { name: /add child chapter/i }),
+      await screen.findByRole('button', { name: /add branch/i }),
     )
 
     expect(onCreateChildChapter).toHaveBeenCalledWith(
@@ -380,7 +380,7 @@ describe('StoryReader', () => {
     expect(services.getNextChapters).not.toHaveBeenCalled()
   })
 
-  it('renders a child chapter list for a single next chapter and navigates to it', async () => {
+  it('renders a branch list for a single next chapter and navigates to it', async () => {
     const onSelectChapter = vi.fn()
     const introChapter = createChapter()
     const nextChapter = createChapter({
@@ -400,7 +400,7 @@ describe('StoryReader', () => {
       />,
     )
 
-    expect(await screen.findByText('Child Chapters')).toBeTruthy()
+    expect(await screen.findByText('What happens next?')).toBeTruthy()
     expect(screen.queryByRole('button', { name: /continue/i })).toBeNull()
 
     fireEvent.click(
@@ -437,7 +437,7 @@ describe('StoryReader', () => {
       />,
     )
 
-    expect(await screen.findByText('Child Chapters')).toBeTruthy()
+    expect(await screen.findByText('What happens next?')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Cross the bridge' })).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Follow the river' }))
@@ -560,7 +560,7 @@ describe('StoryReader', () => {
 
     renderReader({ services })
 
-    expect(await screen.findByText('Child Chapters')).toBeTruthy()
+    expect(await screen.findByText('What happens next?')).toBeTruthy()
     expect(await screen.findByText('The End')).toBeTruthy()
   })
 

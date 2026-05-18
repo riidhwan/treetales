@@ -16,9 +16,9 @@ _Avoid_: Node, page, scene
 The first **Chapter** in a **Story**, with no parent chapter.
 _Avoid_: Root node, start page
 
-**Child Chapter**:
+**Branch**:
 A **Chapter** reached from another **Chapter**.
-_Avoid_: Child node, branch target
+_Avoid_: Child Chapter, child node, branch target
 
 ## Relationships
 
@@ -26,14 +26,15 @@ _Avoid_: Child node, branch target
 - A **Chapter** belongs to exactly one **Story**.
 - A **Story** has zero or one **Intro Chapter**.
 - A **Chapter** has zero or one parent **Chapter**.
-- A **Chapter** can have zero or more **Child Chapters**.
+- A **Chapter** can have zero or more **Branches**.
 - **Chapters** in the same **Story** cannot form cycles.
 
 ## Example dialogue
 
 > **Dev:** "When a reader opens a **Story**, should they start at any chapter?"
-> **Domain expert:** "No. They start at the **Intro Chapter**, then choose among its **Child Chapters** as the story branches."
+> **Domain expert:** "No. They start at the **Intro Chapter**, then choose among its **Branches** as the story unfolds."
 
 ## Flagged ambiguities
 
 - "node" can describe the technical graph representation, but product language should use **Chapter**.
+- "child chapter" describes the technical parent-child relationship, but product language should use **Branch**.
