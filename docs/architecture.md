@@ -10,6 +10,15 @@ served from stale PWA storage. The service worker caches the app shell and
 static assets only; story persistence remains browser-local, with no cross-device
 offline sync.
 
+Bundled reader fonts are static app assets. Third-party font notices and license
+references must be kept with the bundled assets or in project documentation when
+fonts are added, removed, or updated.
+
+Reader Appearance preferences are browser-local UI preferences stored outside
+the Story and Chapter persistence model, such as in `localStorage`. They should
+not be added to Story or Chapter records unless they become authored story
+content.
+
 ## Layer-First Structure
 
 ```

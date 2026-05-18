@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { StoryReader } from '@/components/features/StoryReader'
+import { READER_APPEARANCE_STORAGE_KEY } from '@/config'
 import type { StoryReaderServices } from '@/hooks/useStoryReader'
 import type { Chapter, Story } from '@/services/types'
 
@@ -161,6 +162,7 @@ function deferred<TValue>() {
 describe('StoryReader', () => {
   afterEach(() => {
     cleanup()
+    window.localStorage.clear()
     vi.restoreAllMocks()
   })
 
@@ -381,6 +383,110 @@ describe('StoryReader', () => {
     )
 
     expect(onEditChapter).toHaveBeenCalledWith('story-1', 'chapter-1')
+  })
+
+  it('opens Reader Appearance from the toolbar', async () => {
+    const services = createServices()
+
+    renderReader({ services })
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Reader Appearance' }),
+    )
+
+    expect(screen.getByText('Reader Appearance')).toBeTruthy()
+    expect(
+      screen.getByRole('button', { name: 'Readerly' }).getAttribute(
+        'aria-pressed',
+      ),
+    ).toBe('true')
+    expect(screen.getByText('14 pt')).toBeTruthy()
+  })
+
+  it('updates reader font and font size preferences', async () => {
+    const services = createServices()
+
+    renderReader({ services })
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Reader Appearance' }),
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'NV Garamond' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Increase Font Size' }))
+
+    expect(
+      screen.getByRole('button', { name: 'NV Garamond' }).getAttribute(
+        'aria-pressed',
+      ),
+    ).toBe('true')
+    expect(screen.getByText('15 pt')).toBeTruthy()
+
+    await waitFor(() => {
+      expect(
+        window.localStorage.getItem(READER_APPEARANCE_STORAGE_KEY),
+      ).toContain('"fontId":"nv-garamond"')
+    })
+    expect(window.localStorage.getItem(READER_APPEARANCE_STORAGE_KEY)).toContain(
+      '"fontSizePt":15',
+    )
+  })
+
+  it('uses stored reader appearance preferences', async () => {
+    window.localStorage.setItem(
+      READER_APPEARANCE_STORAGE_KEY,
+      JSON.stringify({ fontId: 'nv-jost', fontSizePt: 18 }),
+    )
+    const services = createServices()
+
+    renderReader({ services })
+
+    await screen.findByRole('heading', { name: 'The Gate' })
+    fireEvent.click(screen.getByRole('button', { name: 'Reader Appearance' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('18 pt')).toBeTruthy()
+    })
+    expect(
+      screen.getByRole('button', { name: 'NV Jost' }).getAttribute(
+        'aria-pressed',
+      ),
+    ).toBe('true')
+    expect(
+      screen.getByText('The path begins here.').parentElement?.style.fontFamily,
+    ).toContain('NV Jost')
+  })
+
+  it('resets reader appearance preferences to defaults', async () => {
+    window.localStorage.setItem(
+      READER_APPEARANCE_STORAGE_KEY,
+      JSON.stringify({ fontId: 'nv-jost', fontSizePt: 18 }),
+    )
+    const services = createServices()
+
+    renderReader({ services })
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Reader Appearance' }),
+    )
+    await waitFor(() => {
+      expect(screen.getByText('18 pt')).toBeTruthy()
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Reset Reader Appearance' }),
+    )
+
+    expect(screen.getByText('14 pt')).toBeTruthy()
+    expect(
+      screen.getByRole('button', { name: 'Readerly' }).getAttribute(
+        'aria-pressed',
+      ),
+    ).toBe('true')
+    await waitFor(() => {
+      expect(window.localStorage.getItem(READER_APPEARANCE_STORAGE_KEY)).toBe(
+        JSON.stringify({ fontId: 'readerly', fontSizePt: 14 }),
+      )
+    })
   })
 
   it('opens branch creation from the current chapter', async () => {

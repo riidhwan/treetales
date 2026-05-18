@@ -1,10 +1,22 @@
-import { BookOpen, CornerUpLeft, Edit3, Home, PlusCircle } from 'lucide-react'
-import type { ReactNode } from 'react'
+import {
+  BookOpen,
+  CornerUpLeft,
+  Edit3,
+  Home,
+  Minus,
+  Plus,
+  PlusCircle,
+  RotateCcw,
+  Type,
+} from 'lucide-react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 
+import { READER_FONT_OPTIONS, type ReaderFontId } from '@/config'
 import {
   type StoryReaderServices,
   useStoryReader,
 } from '@/hooks/useStoryReader'
+import { useReaderAppearance } from '@/hooks/useReaderAppearance'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { MarkdownContent } from '@/components/ui/MarkdownContent'
@@ -32,6 +44,16 @@ export function StoryReader({
   storyId,
 }: Props) {
   const {
+    canDecreaseFontSize,
+    canIncreaseFontSize,
+    decreaseFontSize,
+    increaseFontSize,
+    readerAppearance,
+    resetReaderAppearance,
+    selectedFontFamily,
+    setReaderFont,
+  } = useReaderAppearance()
+  const {
     currentChapter,
     errorMessage,
     nextChapters,
@@ -52,6 +74,13 @@ export function StoryReader({
           onOpenStoryDetails={() => onOpenStoryDetails(storyId)}
           onSelectParentChapter={selectParentChapter}
           parentChapter={parentChapter}
+          readerAppearance={readerAppearance}
+          onDecreaseFontSize={decreaseFontSize}
+          onIncreaseFontSize={increaseFontSize}
+          onResetReaderAppearance={resetReaderAppearance}
+          onSelectReaderFont={setReaderFont}
+          canDecreaseFontSize={canDecreaseFontSize}
+          canIncreaseFontSize={canIncreaseFontSize}
         />
       ) : null}
 
@@ -64,6 +93,8 @@ export function StoryReader({
             onCreateChildChapter(storyId, parentChapterId)
           }
           onSelectNextChapter={selectNextChapter}
+          readerFontFamily={selectedFontFamily}
+          readerFontSizePt={readerAppearance.fontSizePt}
           status={status}
           story={story}
         />
@@ -73,20 +104,36 @@ export function StoryReader({
 }
 
 interface ReaderToolbarProps {
+  readonly canDecreaseFontSize: boolean
+  readonly canIncreaseFontSize: boolean
+  readonly onDecreaseFontSize: () => void
   readonly onEditChapter: () => void
+  readonly onIncreaseFontSize: () => void
   readonly onOpenDashboard: () => void
   readonly onOpenStoryDetails: () => void
+  readonly onResetReaderAppearance: () => void
   readonly onSelectParentChapter: () => void
+  readonly onSelectReaderFont: (fontId: ReaderFontId) => void
   readonly parentChapter?: Chapter
+  readonly readerAppearance: ReturnType<typeof useReaderAppearance>['readerAppearance']
 }
 
 function ReaderToolbar({
+  canDecreaseFontSize,
+  canIncreaseFontSize,
+  onDecreaseFontSize,
   onEditChapter,
+  onIncreaseFontSize,
   onOpenDashboard,
   onOpenStoryDetails,
+  onResetReaderAppearance,
   onSelectParentChapter,
+  onSelectReaderFont,
   parentChapter,
+  readerAppearance,
 }: ReaderToolbarProps) {
+  const [isAppearancePanelOpen, setIsAppearancePanelOpen] = useState(false)
+
   return (
     <header className="sticky top-0 z-20 border-b border-stone-200 bg-white/95 shadow-sm backdrop-blur">
       <nav
@@ -116,6 +163,34 @@ function ReaderToolbar({
         >
           <BookOpen aria-hidden="true" size={16} />
         </Button>
+        <div className="relative">
+          <Button
+            aria-controls="reader-appearance-panel"
+            aria-expanded={isAppearancePanelOpen}
+            aria-label="Reader Appearance"
+            className="px-3"
+            onClick={() =>
+              setIsAppearancePanelOpen(
+                (currentPanelState) => !currentPanelState,
+              )
+            }
+            size="sm"
+            title="Reader Appearance"
+          >
+            <Type aria-hidden="true" size={16} />
+          </Button>
+          {isAppearancePanelOpen ? (
+            <ReaderAppearancePanel
+              canDecreaseFontSize={canDecreaseFontSize}
+              canIncreaseFontSize={canIncreaseFontSize}
+              onDecreaseFontSize={onDecreaseFontSize}
+              onIncreaseFontSize={onIncreaseFontSize}
+              onResetReaderAppearance={onResetReaderAppearance}
+              onSelectReaderFont={onSelectReaderFont}
+              readerAppearance={readerAppearance}
+            />
+          ) : null}
+        </div>
         <Button
           aria-label="Edit Chapter"
           className="px-3"
@@ -139,12 +214,113 @@ function ReaderToolbar({
   )
 }
 
+interface ReaderAppearancePanelProps {
+  readonly canDecreaseFontSize: boolean
+  readonly canIncreaseFontSize: boolean
+  readonly onDecreaseFontSize: () => void
+  readonly onIncreaseFontSize: () => void
+  readonly onResetReaderAppearance: () => void
+  readonly onSelectReaderFont: (fontId: ReaderFontId) => void
+  readonly readerAppearance: ReturnType<typeof useReaderAppearance>['readerAppearance']
+}
+
+function ReaderAppearancePanel({
+  canDecreaseFontSize,
+  canIncreaseFontSize,
+  onDecreaseFontSize,
+  onIncreaseFontSize,
+  onResetReaderAppearance,
+  onSelectReaderFont,
+  readerAppearance,
+}: ReaderAppearancePanelProps) {
+  return (
+    <div
+      className="fixed left-3 right-3 top-14 z-30 rounded-md border border-stone-200 bg-white p-3 text-stone-950 shadow-lg sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[22rem]"
+      id="reader-appearance-panel"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold">Reader Appearance</h2>
+        <Button
+          aria-label="Reset Reader Appearance"
+          className="min-h-8 px-2"
+          onClick={onResetReaderAppearance}
+          size="sm"
+          title="Reset Reader Appearance"
+        >
+          <RotateCcw aria-hidden="true" size={14} />
+        </Button>
+      </div>
+
+      <section className="mt-3" aria-labelledby="reader-font-options-label">
+        <h3
+          className="text-xs font-semibold uppercase text-stone-500"
+          id="reader-font-options-label"
+        >
+          Font
+        </h3>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          {READER_FONT_OPTIONS.map((fontOption) => (
+            <button
+              aria-pressed={readerAppearance.fontId === fontOption.id}
+              className="min-h-11 rounded-md border border-stone-200 px-3 text-left text-sm transition hover:bg-stone-50 aria-pressed:border-emerald-700 aria-pressed:bg-emerald-50 aria-pressed:text-emerald-900"
+              key={fontOption.id}
+              onClick={() => onSelectReaderFont(fontOption.id)}
+              style={{
+                fontFamily: `"${fontOption.cssFamily}", Georgia, serif`,
+              }}
+              type="button"
+            >
+              {fontOption.displayName}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-4" aria-labelledby="reader-font-size-label">
+        <div className="flex items-center justify-between gap-3">
+          <h3
+            className="text-xs font-semibold uppercase text-stone-500"
+            id="reader-font-size-label"
+          >
+            Font Size
+          </h3>
+          <p className="min-w-12 text-right text-sm font-semibold text-stone-700">
+            {readerAppearance.fontSizePt} pt
+          </p>
+        </div>
+        <div className="mt-2 flex items-center gap-2">
+          <Button
+            aria-label="Decrease Font Size"
+            className="flex-1"
+            disabled={!canDecreaseFontSize}
+            onClick={onDecreaseFontSize}
+            size="sm"
+          >
+            <Minus aria-hidden="true" size={16} />
+          </Button>
+          <Button
+            aria-label="Increase Font Size"
+            className="flex-1"
+            disabled={!canIncreaseFontSize}
+            onClick={onIncreaseFontSize}
+            size="sm"
+          >
+            <Plus aria-hidden="true" size={16} />
+          </Button>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 interface ReaderContentProps {
   readonly currentChapter?: Chapter
   readonly errorMessage?: string
   readonly nextChapters: Chapter[]
   readonly onCreateChildChapter: (parentChapterId: string) => void
   readonly onSelectNextChapter: (chapter: Chapter) => void
+  readonly readerFontFamily: string
+  readonly readerFontSizePt: number
   readonly status: ReturnType<typeof useStoryReader>['status']
   readonly story?: Story
 }
@@ -155,10 +331,16 @@ function ReaderContent({
   nextChapters,
   onCreateChildChapter,
   onSelectNextChapter,
+  readerFontFamily,
+  readerFontSizePt,
   status,
   story,
 }: ReaderContentProps) {
   let readerContent: ReactNode
+  const readerDocumentStyle: CSSProperties = {
+    fontFamily: `"${readerFontFamily}", Georgia, serif`,
+    fontSize: `${readerFontSizePt}pt`,
+  }
 
   if (status === 'loading') {
     readerContent = (
@@ -207,15 +389,18 @@ function ReaderContent({
           <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
             {story.title}
           </p>
-          <h1 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">
-            {currentChapter.title}
-          </h1>
+          <div style={readerDocumentStyle}>
+            <h1 className="mt-2 text-[1.875em] font-bold leading-tight sm:text-[2.25em]">
+              {currentChapter.title}
+            </h1>
+          </div>
         </header>
 
         <MarkdownContent
           className="space-y-5 py-8"
           content={currentChapter.content}
           emptyFallback="This chapter is blank."
+          style={readerDocumentStyle}
         />
 
         <footer className="border-t border-stone-200 pt-5">

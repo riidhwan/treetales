@@ -24,6 +24,10 @@ _Avoid_: Root node, start page
 A **Chapter** reached from another **Chapter**.
 _Avoid_: Child Chapter, child node, branch target
 
+**Reader Appearance**:
+A reader's presentation preferences while reading a **Chapter**.
+_Avoid_: Style, configuration
+
 ## Relationships
 
 - A **Story** has zero or more **Chapters**.
@@ -43,3 +47,4 @@ _Avoid_: Child Chapter, child node, branch target
 - "node" can describe the technical graph representation, but product language should use **Chapter**.
 - "child chapter" describes the technical parent-child relationship, but product language should use **Branch**.
 - "previous chapter" can imply browser or reader history — resolved: use **Parent Chapter** for structural navigation.
+- "style" and "configuration" can imply broad editor or app settings — resolved: use **Reader Appearance** for reading presentation preferences.

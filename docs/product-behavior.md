@@ -46,6 +46,24 @@
   different story.
 - Reader does not edit inline, but the toolbar can open the current chapter for
   editing and the bottom branch section can add a branch from it.
+- Reader Appearance controls reading presentation preferences such as font
+  family and font size. These preferences apply globally across all stories in
+  the current browser because they reflect reader comfort rather than story
+  content.
+- Reader Appearance applies to the chapter document text, including the chapter
+  title and rendered chapter content. App chrome such as the toolbar and branch
+  controls keeps the standard TreeTales interface styling.
+- Readerly is the default reader font. If bundled font assets fail to load, the
+  reader remains usable with browser fallback fonts.
+- Reader font size is shown to users in points. The default is 14 pt; increase
+  and decrease controls step by 1 pt and clamp the range from 10 pt to 24 pt.
+- Reader Appearance provides a reset action that returns font family and font
+  size to their defaults.
+- Reader font selection uses a compact two-column option list in the Reader
+  Appearance panel. The options are Readerly, Sourcerer, Cartisse, NV Charis,
+  NV Garamond, NV Jost, NV Bitter, NV Legible Next, and NV Palatium.
+- Each font option previews its own label in that font when the font asset is
+  available, while remaining selectable if the asset falls back.
 
 ### Story Editor
 - User opens a story in edit mode from story detail or after creating a story.

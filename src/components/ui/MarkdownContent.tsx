@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkBreaks from 'remark-breaks'
 import remarkGfm from 'remark-gfm'
@@ -8,12 +9,14 @@ interface Props {
   readonly className?: string
   readonly content: string
   readonly emptyFallback?: string
+  readonly style?: CSSProperties
 }
 
 export function MarkdownContent({
   className,
   content,
   emptyFallback,
+  style,
 }: Props) {
   const markdown = content || emptyFallback
 
@@ -22,7 +25,7 @@ export function MarkdownContent({
   }
 
   return (
-    <div className={cn('max-w-none text-stone-800', className)}>
+    <div className={cn('max-w-none text-stone-800', className)} style={style}>
       <ReactMarkdown
         components={{
           a: ({ children, href, title }) => (
@@ -47,17 +50,17 @@ export function MarkdownContent({
             </code>
           ),
           h1: ({ children }) => (
-            <h1 className="text-3xl font-bold leading-tight text-stone-950">
+            <h1 className="text-[1.875em] font-bold leading-tight text-stone-950">
               {children}
             </h1>
           ),
           h2: ({ children }) => (
-            <h2 className="text-2xl font-bold leading-tight text-stone-950">
+            <h2 className="text-[1.5em] font-bold leading-tight text-stone-950">
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="text-xl font-semibold leading-tight text-stone-950">
+            <h3 className="text-[1.25em] font-semibold leading-tight text-stone-950">
               {children}
             </h3>
           ),
@@ -67,10 +70,10 @@ export function MarkdownContent({
             <ol className="list-decimal space-y-2 pl-6">{children}</ol>
           ),
           p: ({ children }) => (
-            <p className="text-base leading-8 text-stone-800">{children}</p>
+            <p className="text-[1em] leading-8 text-stone-800">{children}</p>
           ),
           pre: ({ children }) => (
-            <pre className="overflow-x-auto rounded-md bg-stone-100 p-4 text-sm leading-6 text-stone-900">
+            <pre className="overflow-x-auto rounded-md bg-stone-100 p-4 text-[0.875em] leading-6 text-stone-900">
               {children}
             </pre>
           ),

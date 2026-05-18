@@ -1,6 +1,294 @@
 
 @import "tailwindcss";
 
+@font-face {
+  font-display: swap;
+  font-family: "Cartisse";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/reader/Cartisse-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Cartisse";
+  font-style: italic;
+  font-weight: 400;
+  src: url("/fonts/reader/Cartisse-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Cartisse";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/reader/Cartisse-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Cartisse";
+  font-style: italic;
+  font-weight: 700;
+  src: url("/fonts/reader/Cartisse-BoldItalic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Bitter";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/reader/NV_Bitter-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Bitter";
+  font-style: italic;
+  font-weight: 400;
+  src: url("/fonts/reader/NV_Bitter-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Bitter";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/reader/NV_Bitter-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Bitter";
+  font-style: italic;
+  font-weight: 700;
+  src: url("/fonts/reader/NV_Bitter-BoldItalic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Charis";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/reader/NV_Charis-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Charis";
+  font-style: italic;
+  font-weight: 400;
+  src: url("/fonts/reader/NV_Charis-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Charis";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/reader/NV_Charis-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Charis";
+  font-style: italic;
+  font-weight: 700;
+  src: url("/fonts/reader/NV_Charis-BoldItalic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Garamond";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/reader/NV_Garamond-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Garamond";
+  font-style: italic;
+  font-weight: 400;
+  src: url("/fonts/reader/NV_Garamond-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Garamond";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/reader/NV_Garamond-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Garamond";
+  font-style: italic;
+  font-weight: 700;
+  src: url("/fonts/reader/NV_Garamond-BoldItalic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Jost";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/reader/NV_Jost-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Jost";
+  font-style: italic;
+  font-weight: 400;
+  src: url("/fonts/reader/NV_Jost-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Jost";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/reader/NV_Jost-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Jost";
+  font-style: italic;
+  font-weight: 700;
+  src: url("/fonts/reader/NV_Jost-BoldItalic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Legible Next";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/reader/NV_Legible_Next-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Legible Next";
+  font-style: italic;
+  font-weight: 400;
+  src: url("/fonts/reader/NV_Legible_Next-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Legible Next";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/reader/NV_Legible_Next-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Legible Next";
+  font-style: italic;
+  font-weight: 700;
+  src: url("/fonts/reader/NV_Legible_Next-BoldItalic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Palatium";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/reader/NV_Palatium-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Palatium";
+  font-style: italic;
+  font-weight: 400;
+  src: url("/fonts/reader/NV_Palatium-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Palatium";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/reader/NV_Palatium-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "NV Palatium";
+  font-style: italic;
+  font-weight: 700;
+  src: url("/fonts/reader/NV_Palatium-BoldItalic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Readerly";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/reader/Readerly-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Readerly";
+  font-style: italic;
+  font-weight: 400;
+  src: url("/fonts/reader/Readerly-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Readerly";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/reader/Readerly-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Readerly";
+  font-style: italic;
+  font-weight: 700;
+  src: url("/fonts/reader/Readerly-BoldItalic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Sourcerer";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/reader/Sourcerer-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Sourcerer";
+  font-style: italic;
+  font-weight: 400;
+  src: url("/fonts/reader/Sourcerer-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Sourcerer";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/reader/Sourcerer-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "Sourcerer";
+  font-style: italic;
+  font-weight: 700;
+  src: url("/fonts/reader/Sourcerer-BoldItalic.ttf") format("truetype");
+}
+
 * {
   box-sizing: border-box;
 }
