@@ -15,6 +15,12 @@ function HomeRoute() {
           params: { storyId },
         })
       }
+      onOpenStory={(storyId) =>
+        void navigate({
+          to: '/stories/$storyId',
+          params: { storyId },
+        })
+      }
       onReadStory={(storyId) =>
         void navigate({
           to: '/stories/$storyId/read',

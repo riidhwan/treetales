@@ -22,6 +22,8 @@ When that happens, explain the concern or better alternative briefly and concret
 
 Run the narrowest relevant tests first. For route, store, service, or UI changes, also run `npm run lint`, `npm run test`, `npm run test:coverage`, and `npm run build` before reporting completion unless the user asks to skip verification.
 
+Do not start the development server for the user just so they can try the app. Run `npm run dev` only when the agent needs a live app for its own verification, such as browser-based UI checks or debugging runtime-only behaviour.
+
 ## Coding Style & Naming Conventions
 
 Use strict TypeScript. Prefer `interface` for object shapes and `type` for unions or aliases. Do not use `any`; use `unknown` at boundaries and narrow it explicitly. Use the `@/*` path alias outside the current directory, for example `import { thing } from '@/lib/thing'`.
@@ -36,7 +38,7 @@ This project uses Vitest with Testing Library dependencies available. Place test
 
 `AGENTS.md` is the entry point, not the full instruction set. Read the relevant docs before changing covered areas: `docs/product-behavior.md` for user-facing flows, `docs/architecture.md` for shared data flow, stores, services, or routing, `docs/design-system.md` for UI and styling, and `docs/conventions.md` for broad refactors, tests, or verification choices.
 
-Do not edit `docs/product-behavior.md` by hand; it is generated. When product behavior or navigation-derived documentation needs to change, update the source/generator as needed and run `npm run docs:navigation`.
+Do not edit `docs/navigation-flow.md` by hand; it is generated. When navigation-derived documentation needs to change, update the source/generator as needed and run `npm run docs:navigation`.
 
 Treat those docs as authoritative repository instructions. Keep code and docs synchronized in the same task: when behavior, architecture, conventions, vocabulary, or design changes, update the corresponding docs before handing off. If a required doc cannot be read, stop and ask how to proceed.
 

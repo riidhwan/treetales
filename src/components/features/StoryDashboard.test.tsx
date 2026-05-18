@@ -8,7 +8,7 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { StoryDashboard } from '@/components/features/StoryDashboard'
-import type { Chapter, CreateStoryInput, Story } from '@/services/types'
+import type { CreateStoryInput, Story } from '@/services/types'
 
 function createStory(overrides: Partial<Story>): Story {
   return {
@@ -21,23 +21,7 @@ function createStory(overrides: Partial<Story>): Story {
   }
 }
 
-function createChapter(overrides: Partial<Chapter>): Chapter {
-  return {
-    id: 'chapter-1',
-    storyId: 'story-1',
-    title: 'Chapter',
-    content: 'Content',
-    parentChapterId: null,
-    createdAt: 100,
-    updatedAt: 100,
-    ...overrides,
-  }
-}
-
-function createServices(
-  initialStories: Story[],
-  chapterCounts: Record<string, number>,
-) {
+function createServices(initialStories: Story[]) {
   let stories = [...initialStories]
 
   return {
@@ -53,10 +37,7 @@ function createServices(
       stories = [...stories, story]
 
       return Promise.resolve({
-        chapters: [
-          createChapter({ id: 'chapter-1', storyId: story.id }),
-          createChapter({ id: 'chapter-2', storyId: story.id }),
-        ],
+        chapters: [],
         story,
       })
     }),
@@ -73,21 +54,6 @@ function createServices(
 
       return Promise.resolve(story)
     }),
-    deleteStory: vi.fn((id: string) => {
-      stories = stories.filter((story) => story.id !== id)
-
-      return Promise.resolve(true)
-    }),
-    getChaptersByStoryId: vi.fn((storyId: string) =>
-      Promise.resolve(
-        Array.from({ length: chapterCounts[storyId] ?? 0 }, (_, index) =>
-          createChapter({
-            id: `${storyId}-chapter-${index + 1}`,
-            storyId,
-          }),
-        ),
-      ),
-    ),
     getStories: vi.fn(() => Promise.resolve(stories)),
   }
 }
@@ -110,11 +76,12 @@ describe('StoryDashboard', () => {
   })
 
   it('shows an empty state when no stories exist', async () => {
-    const services = createServices([], {})
+    const services = createServices([])
 
     render(
       <StoryDashboard
         onEditStory={vi.fn()}
+        onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
         services={services}
       />,
@@ -125,12 +92,13 @@ describe('StoryDashboard', () => {
 
   it('shows a loading state while stories are loading', () => {
     const pendingStories = deferred<Story[]>()
-    const services = createServices([], {})
+    const services = createServices([])
     services.getStories.mockReturnValue(pendingStories.promise)
 
     render(
       <StoryDashboard
         onEditStory={vi.fn()}
+        onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
         services={services}
       />,
@@ -142,12 +110,13 @@ describe('StoryDashboard', () => {
   })
 
   it('shows a load failure message', async () => {
-    const services = createServices([], {})
+    const services = createServices([])
     services.getStories.mockRejectedValue(new Error('Could not load stories.'))
 
     render(
       <StoryDashboard
         onEditStory={vi.fn()}
+        onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
         services={services}
       />,
@@ -159,32 +128,30 @@ describe('StoryDashboard', () => {
     expect(await screen.findByText('No stories yet')).toBeTruthy()
   })
 
-  it('lists stories with chapter counts and navigates to reader and editor', async () => {
-    const onEditStory = vi.fn()
-    const onReadStory = vi.fn()
-    const services = createServices([createStory({ id: 'story-7' })], {
-      'story-7': 2,
-    })
+  it('lists stories and opens story details from rows', async () => {
+    const onOpenStory = vi.fn()
+    const services = createServices([createStory({ id: 'story-7' })])
 
     render(
       <StoryDashboard
-        onEditStory={onEditStory}
-        onReadStory={onReadStory}
+        onEditStory={vi.fn()}
+        onOpenStory={onOpenStory}
+        onReadStory={vi.fn()}
         services={services}
       />,
     )
 
     expect(await screen.findByText('The Old Road')).toBeTruthy()
-    expect(screen.getByText('2 chapters')).toBeTruthy()
 
-    fireEvent.click(screen.getByRole('button', { name: /read/i }))
-    fireEvent.click(screen.getByRole('button', { name: /edit/i }))
+    fireEvent.click(screen.getByRole('button', { name: /open the old road/i }))
 
-    expect(onReadStory).toHaveBeenCalledWith('story-7')
-    expect(onEditStory).toHaveBeenCalledWith('story-7')
+    expect(onOpenStory).toHaveBeenCalledWith('story-7')
+    expect(screen.queryByRole('button', { name: /read/i })).toBeNull()
+    expect(screen.queryByRole('button', { name: /edit/i })).toBeNull()
+    expect(screen.queryByRole('button', { name: /delete/i })).toBeNull()
   })
 
-  it('renders singular chapter counts and empty descriptions', async () => {
+  it('renders empty descriptions', async () => {
     const services = createServices(
       [
         createStory({
@@ -192,66 +159,68 @@ describe('StoryDashboard', () => {
           description: '',
         }),
       ],
-      { 'story-7': 1 },
     )
 
     render(
       <StoryDashboard
         onEditStory={vi.fn()}
+        onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
         services={services}
       />,
     )
 
-    expect(await screen.findByText('1 chapter')).toBeTruthy()
-    expect(screen.getByText('No description yet.')).toBeTruthy()
+    expect(await screen.findByText('No description yet.')).toBeTruthy()
   })
 
   it('sorts stories by updated time and then title', async () => {
-    const services = createServices(
-      [
-        createStory({
-          id: 'story-a',
-          title: 'Zebra Path',
-          updatedAt: 500,
-        }),
-        createStory({
-          id: 'story-b',
-          title: 'Amber Path',
-          updatedAt: 500,
-        }),
-        createStory({
-          id: 'story-c',
-          title: 'Newest Path',
-          updatedAt: 700,
-        }),
-      ],
-      {},
-    )
+    const services = createServices([
+      createStory({
+        id: 'story-a',
+        title: 'Zebra Path',
+        updatedAt: 500,
+      }),
+      createStory({
+        id: 'story-b',
+        title: 'Amber Path',
+        updatedAt: 500,
+      }),
+      createStory({
+        id: 'story-c',
+        title: 'Newest Path',
+        updatedAt: 700,
+      }),
+    ])
 
     render(
       <StoryDashboard
         onEditStory={vi.fn()}
+        onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
         services={services}
       />,
     )
 
     await screen.findByText('Newest Path')
-    const headings = screen
-      .getAllByRole('heading', { level: 2 })
-      .map((heading) => heading.textContent)
+    const storyRows = screen
+      .getAllByRole('button', { name: /^open /i })
+      .map((row) => row.getAttribute('aria-label'))
 
-    expect(headings).toEqual(['Newest Path', 'Amber Path', 'Zebra Path'])
+    expect(storyRows).toEqual([
+      'Open Newest Path',
+      'Open Amber Path',
+      'Open Zebra Path',
+    ])
   })
 
   it('creates a story and opens the editor', async () => {
     const onEditStory = vi.fn()
-    const services = createServices([], {})
+    const services = createServices([])
 
     render(
       <StoryDashboard
         onEditStory={onEditStory}
+        onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
         services={services}
       />,
@@ -279,11 +248,12 @@ describe('StoryDashboard', () => {
 
   it('creates the example story and opens the reader', async () => {
     const onReadStory = vi.fn()
-    const services = createServices([], {})
+    const services = createServices([])
 
     render(
       <StoryDashboard
         onEditStory={vi.fn()}
+        onOpenStory={vi.fn()}
         onReadStory={onReadStory}
         services={services}
       />,
@@ -299,11 +269,10 @@ describe('StoryDashboard', () => {
     })
     expect(onReadStory).toHaveBeenCalledWith('example-story')
     expect(await screen.findByText('The Lantern Road')).toBeTruthy()
-    expect(screen.getByText('2 chapters')).toBeTruthy()
   })
 
   it('shows an example story creation failure message', async () => {
-    const services = createServices([], {})
+    const services = createServices([])
     services.createExampleStory.mockRejectedValue(
       new Error('Could not add example story.'),
     )
@@ -311,6 +280,7 @@ describe('StoryDashboard', () => {
     render(
       <StoryDashboard
         onEditStory={vi.fn()}
+        onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
         services={services}
       />,
@@ -327,11 +297,12 @@ describe('StoryDashboard', () => {
   })
 
   it('disables story creation when the title is blank', async () => {
-    const services = createServices([], {})
+    const services = createServices([])
 
     render(
       <StoryDashboard
         onEditStory={vi.fn()}
+        onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
         services={services}
       />,
@@ -354,12 +325,13 @@ describe('StoryDashboard', () => {
   })
 
   it('shows a create failure message and keeps the form open', async () => {
-    const services = createServices([], {})
+    const services = createServices([])
     services.createStory.mockRejectedValue(new Error('Could not create story.'))
 
     render(
       <StoryDashboard
         onEditStory={vi.fn()}
+        onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
         services={services}
       />,
@@ -378,75 +350,4 @@ describe('StoryDashboard', () => {
     expect(screen.getByRole('button', { name: /create story/i })).toBeTruthy()
   })
 
-  it('confirms before deleting a story', async () => {
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true)
-    const services = createServices([createStory({ id: 'story-9' })], {
-      'story-9': 1,
-    })
-
-    render(
-      <StoryDashboard
-        onEditStory={vi.fn()}
-        onReadStory={vi.fn()}
-        services={services}
-      />,
-    )
-
-    expect(await screen.findByText('The Old Road')).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: /delete/i }))
-
-    await waitFor(() => {
-      expect(services.deleteStory).toHaveBeenCalledWith('story-9')
-    })
-    expect(confirmSpy).toHaveBeenCalledWith(
-      'Delete "The Old Road"? This cannot be undone.',
-    )
-    expect(screen.queryByText('The Old Road')).toBeNull()
-  })
-
-  it('does not delete when confirmation is cancelled', async () => {
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false)
-    const services = createServices([createStory({ id: 'story-9' })], {
-      'story-9': 1,
-    })
-
-    render(
-      <StoryDashboard
-        onEditStory={vi.fn()}
-        onReadStory={vi.fn()}
-        services={services}
-      />,
-    )
-
-    expect(await screen.findByText('The Old Road')).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: /delete/i }))
-
-    expect(confirmSpy).toHaveBeenCalled()
-    expect(services.deleteStory).not.toHaveBeenCalled()
-    expect(screen.getByText('The Old Road')).toBeTruthy()
-  })
-
-  it('shows a delete failure message without removing the story', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
-    const services = createServices([createStory({ id: 'story-9' })], {
-      'story-9': 1,
-    })
-    services.deleteStory.mockRejectedValue(new Error('Could not delete story.'))
-
-    render(
-      <StoryDashboard
-        onEditStory={vi.fn()}
-        onReadStory={vi.fn()}
-        services={services}
-      />,
-    )
-
-    expect(await screen.findByText('The Old Road')).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: /delete/i }))
-
-    expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not delete story.',
-    )
-    expect(screen.getByText('The Old Road')).toBeTruthy()
-  })
 })

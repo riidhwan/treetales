@@ -518,14 +518,8 @@ describe('StoryReader', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: /continue/i }))
 
-    view.rerender(
-      <StorySwitchingReader
-        onSelectChapter={onSelectChapter}
-        services={services}
-        storyId="story-1"
-      />,
-    )
-
+    expect(await screen.findByRole('heading', { name: 'First Next' }))
+      .toBeTruthy()
     expect(await screen.findByRole('button', { name: 'Back' })).toBeTruthy()
 
     view.rerender(

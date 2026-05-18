@@ -31,8 +31,8 @@ const RUNTIME_NOTES_BY_ROUTE = new Map([
       '`Continue to Mobile Site` dismisses the install choice in the browser and shows the dashboard at the same URL.',
       '`Create Story` creates a story and opens `/stories/$storyId/edit` through the dashboard hook.',
       '`Add Example Story` creates or reuses the example story and opens it in the reader.',
+      'Story row buttons use browser-local story titles for their labels and open `/stories/$storyId`.',
       '`New Story` only opens the creation form.',
-      '`Delete` asks for confirmation and removes the story without navigation.',
     ],
   ],
   [
@@ -636,7 +636,10 @@ async function getFeatureComponents() {
           const opening = node.openingElement
           const tagName = getJsxTagName(opening.tagName)
 
-          if (tagName === 'Button') {
+          if (
+            tagName === 'Button' ||
+            (tagName === 'button' && getAttribute(opening, 'aria-label'))
+          ) {
             actions.push(getButtonAction(opening, node))
           } else if (tagName === 'a') {
             actions.push(getAnchorAction(opening, node))

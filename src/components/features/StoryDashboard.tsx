@@ -1,4 +1,4 @@
-import { BookOpen, Edit3, Plus, Sparkles, Trash2 } from 'lucide-react'
+import { ChevronRight, Plus, Sparkles } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 import {
@@ -11,12 +11,14 @@ import { TextInput } from '@/components/ui/TextInput'
 
 interface Props {
   readonly onEditStory: (storyId: string) => void
+  readonly onOpenStory: (storyId: string) => void
   readonly onReadStory: (storyId: string) => void
   readonly services?: StoryDashboardServices
 }
 
 export function StoryDashboard({
   onEditStory,
+  onOpenStory,
   onReadStory,
   services,
 }: Props) {
@@ -24,9 +26,7 @@ export function StoryDashboard({
     canCreate,
     createExampleStoryFromTemplate,
     createStoryFromForm,
-    deletingStoryId,
     description,
-    deleteStoryWithConfirmation,
     errorMessage,
     isCreatingExample,
     isFormOpen,
@@ -72,45 +72,29 @@ export function StoryDashboard({
     )
   } else {
     storiesContent = (
-      <section aria-label="Saved stories" className="grid gap-4 md:grid-cols-2">
+      <section aria-label="Saved stories" className="grid gap-3">
         {sortedStories.map((story) => (
-          <article
-            className="flex min-h-56 flex-col justify-between rounded-lg border border-stone-200 bg-white p-5 shadow-sm"
+          <button
+            aria-label={`Open ${story.title}`}
+            className="group grid h-24 w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-lg border border-stone-200 bg-white px-4 text-left shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 sm:px-5"
             key={story.id}
+            onClick={() => onOpenStory(story.id)}
+            type="button"
           >
-            <div>
-              <div className="flex items-start justify-between gap-4">
-                <h2 className="text-xl font-semibold">{story.title}</h2>
-                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
-                  {story.chapterCount}{' '}
-                  {story.chapterCount === 1 ? 'chapter' : 'chapters'}
-                </span>
-              </div>
-              <p className="mt-3 line-clamp-3 text-sm leading-6 text-stone-600">
+            <span className="min-w-0">
+              <span className="block truncate text-lg font-semibold text-stone-950">
+                {story.title}
+              </span>
+              <span className="mt-1 block truncate text-sm leading-6 text-stone-600">
                 {story.description || 'No description yet.'}
-              </p>
-            </div>
-
-            <div className="mt-6 flex flex-wrap gap-2">
-              <Button onClick={() => onReadStory(story.id)} size="sm">
-                <BookOpen aria-hidden="true" size={16} />
-                Read
-              </Button>
-              <Button onClick={() => onEditStory(story.id)} size="sm">
-                <Edit3 aria-hidden="true" size={16} />
-                Edit
-              </Button>
-              <Button
-                disabled={deletingStoryId === story.id}
-                onClick={() => void deleteStoryWithConfirmation(story)}
-                size="sm"
-                variant="danger"
-              >
-                <Trash2 aria-hidden="true" size={16} />
-                Delete
-              </Button>
-            </div>
-          </article>
+              </span>
+            </span>
+            <ChevronRight
+              aria-hidden="true"
+              className="text-stone-400 transition group-hover:text-emerald-700"
+              size={20}
+            />
+          </button>
         ))}
       </section>
     )

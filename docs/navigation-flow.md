@@ -30,9 +30,7 @@ URL: `/`
 | Continue to Mobile Site | `MobileInstallChoice` | Calls `onContinue` |
 | Add Example Story | `StoryDashboard` | Creates or opens the example story |
 | New Story | `StoryDashboard` | Opens the story creation form |
-| Read | `StoryDashboard` | `/stories/$storyId/read` |
-| Edit | `StoryDashboard` | `/stories/$storyId/edit` |
-| Delete | `StoryDashboard` | Confirms and deletes the story |
+| `Open ${story.title}` | `StoryDashboard` | `/stories/$storyId` |
 | Create Story | `StoryDashboard` | Submits the enclosing form |
 
 Runtime notes:
@@ -41,8 +39,8 @@ Runtime notes:
 - `Continue to Mobile Site` dismisses the install choice in the browser and shows the dashboard at the same URL.
 - `Create Story` creates a story and opens `/stories/$storyId/edit` through the dashboard hook.
 - `Add Example Story` creates or reuses the example story and opens it in the reader.
+- Story row buttons use browser-local story titles for their labels and open `/stories/$storyId`.
 - `New Story` only opens the creation form.
-- `Delete` asks for confirmation and removes the story without navigation.
 
 ### Story Detail
 
