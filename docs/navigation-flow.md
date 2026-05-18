@@ -126,7 +126,7 @@ URL: `/stories/$storyId/read`
 
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
-| Back | `ReaderToolbar` | Calls `onSelectPreviousChapter` |
+| Parent Chapter | `ReaderToolbar` | Calls `onSelectParentChapter` |
 | Story Details | `ReaderToolbar` | `/stories/$storyId` |
 | Edit Chapter | `ReaderToolbar` | `/stories/$storyId/chapters/$chapterId/edit` |
 | Dashboard | `ReaderToolbar` | `/` |
@@ -135,7 +135,7 @@ URL: `/stories/$storyId/read`
 
 Runtime notes:
 
-- `Back`, `Continue`, and branch choice buttons update the `chapterId` search parameter on the reader route.
+- `Parent Chapter` and branch choice buttons update the `chapterId` search parameter on the reader route.
 - Branch choice labels are chapter titles from browser-local persistence, so their labels are data-driven.
 - `The End` is an indicator, not a navigation control.
 

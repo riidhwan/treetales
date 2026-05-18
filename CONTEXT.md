@@ -12,6 +12,10 @@ _Avoid_: Book, tale, project
 A single authored passage within a **Story**.
 _Avoid_: Node, page, scene
 
+**Parent Chapter**:
+The **Chapter** from which a **Branch** is reached.
+_Avoid_: Previous chapter
+
 **Intro Chapter**:
 The first **Chapter** in a **Story**, with no parent chapter.
 _Avoid_: Root node, start page
@@ -38,3 +42,4 @@ _Avoid_: Child Chapter, child node, branch target
 
 - "node" can describe the technical graph representation, but product language should use **Chapter**.
 - "child chapter" describes the technical parent-child relationship, but product language should use **Branch**.
+- "previous chapter" can imply browser or reader history — resolved: use **Parent Chapter** for structural navigation.
