@@ -16,6 +16,12 @@ or variants are useful.
   readable-width writing column, no surrounding form card around the primary
   editor, and a slim sticky toolbar for navigation, context, and primary
   actions.
+- Long-form writing documents should scroll as one page. The title, validation
+  feedback, and body editor belong to the same paper-like surface; avoid fixed
+  body panes or nested editor scrollbars inside that document.
+- On mobile, paper-like long-form writing surfaces should use the full viewport
+  width without grey side gutters. Keep only enough internal padding for text
+  selection and comfortable edge spacing.
 - Long-form writing views keep Write/Preview mode switching in a floating
   bottom control and writing metadata such as word count in a quiet fixed
   bottom-right position.
