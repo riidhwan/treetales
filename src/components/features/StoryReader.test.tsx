@@ -482,6 +482,11 @@ describe('StoryReader', () => {
         'aria-pressed',
       ),
     ).toBe('true')
+    await waitFor(() => {
+      expect(window.localStorage.getItem(READER_APPEARANCE_STORAGE_KEY)).toBe(
+        JSON.stringify({ fontId: 'readerly', fontSizePt: 14 }),
+      )
+    })
   })
 
   it('opens branch creation from the current chapter', async () => {

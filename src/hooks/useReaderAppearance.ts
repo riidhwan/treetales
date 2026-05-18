@@ -59,10 +59,7 @@ export function useReaderAppearance(): ReaderAppearanceControls {
   }, [])
 
   useEffect(() => {
-    window.localStorage.setItem(
-      READER_APPEARANCE_STORAGE_KEY,
-      JSON.stringify(readerAppearance),
-    )
+    writeStoredReaderAppearance(readerAppearance)
   }, [readerAppearance])
 
   function setReaderFont(fontId: ReaderFontId) {
@@ -107,18 +104,29 @@ export function useReaderAppearance(): ReaderAppearanceControls {
 }
 
 function readStoredReaderAppearance(): ReaderAppearance | undefined {
-  const storedValue = window.localStorage.getItem(
-    READER_APPEARANCE_STORAGE_KEY,
-  )
-
-  if (!storedValue) {
-    return undefined
-  }
-
   try {
+    const storedValue = window.localStorage.getItem(
+      READER_APPEARANCE_STORAGE_KEY,
+    )
+
+    if (!storedValue) {
+      return undefined
+    }
+
     return parseReaderAppearance(JSON.parse(storedValue))
   } catch {
     return undefined
+  }
+}
+
+function writeStoredReaderAppearance(readerAppearance: ReaderAppearance) {
+  try {
+    window.localStorage.setItem(
+      READER_APPEARANCE_STORAGE_KEY,
+      JSON.stringify(readerAppearance),
+    )
+  } catch {
+    // Reader Appearance remains usable even when browser storage is unavailable.
   }
 }
 
