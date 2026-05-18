@@ -1,10 +1,4 @@
-import {
-  ArrowLeft,
-  BookOpen,
-  Edit3,
-  Home,
-  PlusCircle,
-} from 'lucide-react'
+import { BookOpen, CornerUpLeft, Edit3, Home, PlusCircle } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 import {
@@ -41,9 +35,9 @@ export function StoryReader({
     currentChapter,
     errorMessage,
     nextChapters,
-    previousChapter,
+    parentChapter,
+    selectParentChapter,
     selectNextChapter,
-    selectPreviousChapter,
     status,
     story,
   } = useStoryReader({ chapterId, onSelectChapter, services, storyId })
@@ -56,8 +50,8 @@ export function StoryReader({
           onEditChapter={() => onEditChapter(storyId, currentChapter.id)}
           onOpenDashboard={onOpenDashboard}
           onOpenStoryDetails={() => onOpenStoryDetails(storyId)}
-          onSelectPreviousChapter={selectPreviousChapter}
-          previousChapter={previousChapter}
+          onSelectParentChapter={selectParentChapter}
+          parentChapter={parentChapter}
         />
       ) : null}
 
@@ -82,16 +76,16 @@ interface ReaderToolbarProps {
   readonly onEditChapter: () => void
   readonly onOpenDashboard: () => void
   readonly onOpenStoryDetails: () => void
-  readonly onSelectPreviousChapter: () => void
-  readonly previousChapter?: Chapter
+  readonly onSelectParentChapter: () => void
+  readonly parentChapter?: Chapter
 }
 
 function ReaderToolbar({
   onEditChapter,
   onOpenDashboard,
   onOpenStoryDetails,
-  onSelectPreviousChapter,
-  previousChapter,
+  onSelectParentChapter,
+  parentChapter,
 }: ReaderToolbarProps) {
   return (
     <header className="sticky top-0 z-20 border-b border-stone-200 bg-white/95 shadow-sm backdrop-blur">
@@ -99,15 +93,15 @@ function ReaderToolbar({
         aria-label="Reader actions"
         className="mx-auto flex w-full max-w-6xl items-center gap-2 px-3 py-2 sm:px-5"
       >
-        {previousChapter ? (
+        {parentChapter ? (
           <Button
-            aria-label="Back"
+            aria-label="Parent Chapter"
             className="px-3"
-            onClick={onSelectPreviousChapter}
+            onClick={onSelectParentChapter}
             size="sm"
-            title="Back"
+            title="Parent Chapter"
           >
-            <ArrowLeft aria-hidden="true" size={16} />
+            <CornerUpLeft aria-hidden="true" size={16} />
           </Button>
         ) : null}
 

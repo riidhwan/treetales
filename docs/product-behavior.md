@@ -29,18 +29,19 @@
 - Reader uses a document-first view-only surface aligned with chapter creation
   and editing: a slim sticky toolbar, centered readable document, and no inline
   editing controls in the document body.
-- Reader toolbar actions are icon-only controls for returning to the previous
-  chapter when available, opening story details, editing the current chapter,
-  and opening the dashboard.
+- Reader toolbar actions are icon-only controls for opening the parent chapter
+  when one exists, opening story details, editing the current chapter, and
+  opening the dashboard.
 - At the bottom:
   - One or more branches → "What happens next?" followed by clickable
     branch choices
   - No branches → "The End" indicator
   - "Add Branch" action below the branch section
 - Forward navigation uses the selected next chapter and appends it to the
-  session-local reading path used for Back navigation.
-- When the session path has a previous chapter, Back returns to that chapter and
-  trims the latest chapter from the path.
+  session-local reading path.
+- When the current chapter has a parent chapter, Parent Chapter opens that
+  parent and trims the session path to that parent when it already exists in the
+  path.
 - Reader path history is scoped to the current story and resets when opening a
   different story.
 - Reader does not edit inline, but the toolbar can open the current chapter for

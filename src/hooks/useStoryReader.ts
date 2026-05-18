@@ -53,17 +53,18 @@ export function useStoryReader({
     nextChapters: [],
     status: 'loading',
   })
-  const [visitedChapters, setVisitedChapters] = useState<Chapter[]>([])
+  const [, setVisitedChapters] = useState<Chapter[]>([])
 
   const { currentChapter, status } = readerState
-  const previousChapter = useMemo(
+  const parentChapter = useMemo(
     () =>
-      visitedChapters.length > 1
-        ? visitedChapters[visitedChapters.length - 2]
+      currentChapter?.parentChapterId
+        ? readerState.chapters.find(
+            (chapter) => chapter.id === currentChapter.parentChapterId,
+          )
         : undefined,
-    [visitedChapters],
+    [currentChapter, readerState.chapters],
   )
-
   useEffect(() => {
     setVisitedChapters([])
   }, [storyId])
@@ -178,15 +179,6 @@ export function useStoryReader({
     })
   }, [currentChapter, status])
 
-  function selectPreviousChapter() {
-    if (!previousChapter) {
-      return
-    }
-
-    setVisitedChapters((currentPath) => currentPath.slice(0, -1))
-    onSelectChapter(previousChapter.id)
-  }
-
   function selectNextChapter(nextChapter: Chapter) {
     setVisitedChapters((currentPath) => {
       const pathWithCurrent =
@@ -208,10 +200,29 @@ export function useStoryReader({
     onSelectChapter(nextChapter.id)
   }
 
+  function selectParentChapter() {
+    if (!parentChapter) {
+      return
+    }
+
+    setVisitedChapters((currentPath) => {
+      const parentPathIndex = currentPath.findIndex(
+        (visitedChapter) => visitedChapter.id === parentChapter.id,
+      )
+
+      if (parentPathIndex >= 0) {
+        return currentPath.slice(0, parentPathIndex + 1)
+      }
+
+      return [parentChapter]
+    })
+    onSelectChapter(parentChapter.id)
+  }
+
   return {
     ...readerState,
-    previousChapter,
+    parentChapter,
     selectNextChapter,
-    selectPreviousChapter,
+    selectParentChapter,
   }
 }

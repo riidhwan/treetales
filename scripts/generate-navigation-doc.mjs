@@ -44,7 +44,7 @@ const RUNTIME_NOTES_BY_ROUTE = new Map([
   [
     '/stories/$storyId/read',
     [
-      '`Back`, `Continue`, and branch choice buttons update the `chapterId` search parameter on the reader route.',
+      '`Parent Chapter` and branch choice buttons update the `chapterId` search parameter on the reader route.',
       'Branch choice labels are chapter titles from browser-local persistence, so their labels are data-driven.',
       '`The End` is an indicator, not a navigation control.',
     ],
@@ -83,7 +83,6 @@ const ACTION_SUMMARY_BY_CALLBACK = new Map([
   ['saveStory', 'Saves story details'],
   ['saveChapter', 'Saves chapter details'],
   ['createChapterFromForm', 'Creates a chapter from the form'],
-  ['selectPreviousChapter', 'Moves to the previous reader chapter'],
   ['selectNextChapter', 'Moves to a reader chapter'],
   ['setIsFormOpen', 'Opens the story creation form'],
 ])

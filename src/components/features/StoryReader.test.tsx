@@ -200,7 +200,7 @@ describe('StoryReader', () => {
     ).toBeTruthy()
   })
 
-  it('does not show Back for a direct load with one chapter in the path', async () => {
+  it('does not show Parent Chapter for the intro chapter', async () => {
     const services = createServices({
       chapters: [
         createChapter({
@@ -216,6 +216,7 @@ describe('StoryReader', () => {
     expect(await screen.findByRole('heading', { name: 'First Chapter' }))
       .toBeTruthy()
     expect(screen.queryByRole('button', { name: 'Back' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Parent Chapter' })).toBeNull()
   })
 
   it('opens story details from the reader toolbar', async () => {
@@ -339,6 +340,36 @@ describe('StoryReader', () => {
     expect(services.getNextChapters).toHaveBeenCalledWith('chapter-selected')
   })
 
+  it('opens the parent chapter from a direct child chapter load', async () => {
+    const onSelectChapter = vi.fn()
+    const parentChapter = createChapter({
+      id: 'chapter-parent',
+      title: 'Parent Chapter',
+    })
+    const childChapter = createChapter({
+      id: 'chapter-child',
+      title: 'Child Chapter',
+      parentChapterId: 'chapter-parent',
+    })
+    const services = createServices({
+      chapters: [parentChapter, childChapter],
+    })
+
+    renderReader({
+      chapterId: 'chapter-child',
+      onSelectChapter,
+      services,
+    })
+
+    expect(await screen.findByRole('heading', { name: 'Child Chapter' }))
+      .toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Back' })).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Parent Chapter' }))
+
+    expect(onSelectChapter).toHaveBeenCalledWith('chapter-parent')
+  })
+
   it('opens the current chapter for editing', async () => {
     const onEditChapter = vi.fn()
     const services = createServices()
@@ -447,7 +478,7 @@ describe('StoryReader', () => {
       .toBeTruthy()
   })
 
-  it('navigates back to the previous chapter and trims the session path', async () => {
+  it('navigates to the parent chapter and trims the session path', async () => {
     const onSelectChapter = vi.fn()
     const firstChapter = createChapter({
       id: 'chapter-first',
@@ -481,17 +512,19 @@ describe('StoryReader', () => {
 
     expect(await screen.findByRole('heading', { name: 'Next Chapter' }))
       .toBeTruthy()
-    expect(await screen.findByRole('button', { name: 'Back' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Back' })).toBeNull()
+    expect(await screen.findByRole('button', { name: 'Parent Chapter' }))
+      .toBeTruthy()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Parent Chapter' }))
 
     expect(onSelectChapter).toHaveBeenLastCalledWith('chapter-first')
     await waitFor(() => {
-      expect(screen.queryByRole('button', { name: 'Back' })).toBeNull()
+      expect(screen.queryByRole('button', { name: 'Parent Chapter' })).toBeNull()
     })
   })
 
-  it('clears the back path when switching stories in the same reader', async () => {
+  it('clears parent navigation when switching to a story intro', async () => {
     const onSelectChapter = vi.fn()
     const firstStory = createStory({ id: 'story-1', title: 'First Story' })
     const secondStory = createStory({ id: 'story-2', title: 'Second Story' })
@@ -540,7 +573,9 @@ describe('StoryReader', () => {
 
     expect(await screen.findByRole('heading', { name: 'First Next' }))
       .toBeTruthy()
-    expect(await screen.findByRole('button', { name: 'Back' })).toBeTruthy()
+    expect(await screen.findByRole('button', { name: 'Parent Chapter' }))
+      .toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Back' })).toBeNull()
 
     view.rerender(
       <StorySwitchingReader
@@ -553,6 +588,7 @@ describe('StoryReader', () => {
     expect(await screen.findByRole('heading', { name: 'Second Intro' }))
       .toBeTruthy()
     expect(screen.queryByRole('button', { name: 'Back' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Parent Chapter' })).toBeNull()
   })
 
   it('renders The End for a terminal chapter', async () => {
