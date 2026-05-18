@@ -1,35 +1,25 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import { getErrorMessage } from '@/lib/errors'
-import { getChaptersByStoryId } from '@/services/chapterService'
 import {
   createExampleStory,
   type ExampleStory,
 } from '@/services/exampleStory'
 import {
   createStory,
-  deleteStory,
   getStories,
 } from '@/services/storyService'
-import type { Chapter, CreateStoryInput, Story } from '@/services/types'
-
-export interface StorySummary extends Story {
-  readonly chapterCount: number
-}
+import type { CreateStoryInput, Story } from '@/services/types'
 
 export interface StoryDashboardServices {
   readonly createExampleStory: () => Promise<ExampleStory>
   readonly createStory: (input: CreateStoryInput) => Promise<Story>
-  readonly deleteStory: (id: string) => Promise<boolean>
-  readonly getChaptersByStoryId: (storyId: string) => Promise<Chapter[]>
   readonly getStories: () => Promise<Story[]>
 }
 
 export const DEFAULT_STORY_DASHBOARD_SERVICES: StoryDashboardServices = {
   createExampleStory,
   createStory,
-  deleteStory,
-  getChaptersByStoryId,
   getStories,
 }
 
@@ -44,14 +34,13 @@ export function useStoryDashboard({
   onReadStory,
   services = DEFAULT_STORY_DASHBOARD_SERVICES,
 }: UseStoryDashboardOptions) {
-  const [stories, setStories] = useState<StorySummary[]>([])
+  const [stories, setStories] = useState<Story[]>([])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
   const [isCreatingExample, setIsCreatingExample] = useState(false)
   const [isFormOpen, setIsFormOpen] = useState(false)
-  const [deletingStoryId, setDeletingStoryId] = useState<string | undefined>()
   const [errorMessage, setErrorMessage] = useState<string | undefined>()
 
   const trimmedTitle = title.trim()
@@ -78,19 +67,9 @@ export function useStoryDashboard({
 
       try {
         const loadedStories = await services.getStories()
-        const storySummaries = await Promise.all(
-          loadedStories.map(async (story) => {
-            const chapters = await services.getChaptersByStoryId(story.id)
-
-            return {
-              ...story,
-              chapterCount: chapters.length,
-            }
-          }),
-        )
 
         if (isCurrent) {
-          setStories(storySummaries)
+          setStories(loadedStories)
         }
       } catch (error) {
         if (isCurrent) {
@@ -126,10 +105,7 @@ export function useStoryDashboard({
 
       setStories((currentStories) => [
         ...currentStories,
-        {
-          ...story,
-          chapterCount: 0,
-        },
+        story,
       ])
       setTitle('')
       setDescription('')
@@ -151,10 +127,7 @@ export function useStoryDashboard({
 
       setStories((currentStories) => [
         ...currentStories.filter((story) => story.id !== exampleStory.story.id),
-        {
-          ...exampleStory.story,
-          chapterCount: exampleStory.chapters.length,
-        },
+        exampleStory.story,
       ])
       onReadStory(exampleStory.story.id)
     } catch (error) {
@@ -164,36 +137,11 @@ export function useStoryDashboard({
     }
   }
 
-  async function deleteStoryWithConfirmation(story: StorySummary) {
-    if (!window.confirm(`Delete "${story.title}"? This cannot be undone.`)) {
-      return
-    }
-
-    setDeletingStoryId(story.id)
-    setErrorMessage(undefined)
-
-    try {
-      const wasDeleted = await services.deleteStory(story.id)
-
-      if (wasDeleted) {
-        setStories((currentStories) =>
-          currentStories.filter((currentStory) => currentStory.id !== story.id),
-        )
-      }
-    } catch (error) {
-      setErrorMessage(getErrorMessage(error))
-    } finally {
-      setDeletingStoryId(undefined)
-    }
-  }
-
   return {
     canCreate,
     createExampleStoryFromTemplate,
     createStoryFromForm,
-    deletingStoryId,
     description,
-    deleteStoryWithConfirmation,
     errorMessage,
     isCreatingExample,
     isFormOpen,

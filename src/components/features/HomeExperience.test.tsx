@@ -33,8 +33,6 @@ function createServices(): StoryDashboardServices {
   return {
     createExampleStory: vi.fn(),
     createStory: vi.fn(),
-    deleteStory: vi.fn(),
-    getChaptersByStoryId: vi.fn(() => Promise.resolve([])),
     getStories: vi.fn(() => Promise.resolve([])),
   }
 }
@@ -43,6 +41,7 @@ function renderHomeExperience() {
   return render(
     <HomeExperience
       onEditStory={vi.fn()}
+      onOpenStory={vi.fn()}
       onReadStory={vi.fn()}
       services={createServices()}
     />,

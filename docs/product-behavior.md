@@ -8,11 +8,20 @@
 - After creating a story, user is redirected to the story editor.
 - Empty state offers an example story that creates a built-in branching story in
   this browser and opens it in the reader.
-- Each story card has: title, description, chapter count, and actions (Read, Edit, Delete).
-- Delete shows a confirmation dialog before removing.
+- Each story appears as a fixed-height list row with title and description.
+  Long titles and descriptions truncate to keep rows even.
+- Selecting a story row opens the story detail page.
+
+### Story Detail
+- User opens an existing story from the dashboard and lands on the story detail page.
+- Story detail shows the story title and description.
+- Story detail provides actions to read, edit, or delete the story.
+- Delete shows a confirmation dialog before removing the story and returning to
+  the dashboard.
 
 ### Story Reader
-- User opens a story from the dashboard and lands on the first chapter.
+- User opens a story from story detail or the example-story empty state and
+  lands on the first chapter.
 - Chapter displays title and content rendered from markdown text. Supported
   markdown includes common markdown plus GFM tables, task lists,
   strikethrough, autolinks, and single-newline breaks. Raw HTML in chapter
@@ -31,7 +40,7 @@
   the chapter or add a child chapter from it.
 
 ### Story Editor
-- User opens a story in edit mode from the dashboard.
+- User opens a story in edit mode from story detail or after creating a story.
 - Edit story title and description at the top.
 - Intro chapter panel below with a clear empty state when no intro exists.
 - When a story has no chapters, the editor offers an "Add Intro Chapter"
