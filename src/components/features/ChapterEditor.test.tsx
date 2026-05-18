@@ -141,7 +141,8 @@ describe('ChapterEditor', () => {
       'aria-pressed',
     )).toBe('true')
     expect(screen.getByText('4 words')).toBeTruthy()
-    expect(screen.queryByRole('heading', { name: 'Child Chapters' })).toBeNull()
+    expect(screen.queryByRole('heading', { name: 'What happens next?' }))
+      .toBeNull()
   })
 
   it('counts rendered prose words without markdown link targets', async () => {
@@ -275,7 +276,7 @@ describe('ChapterEditor', () => {
     ).toBeTruthy()
   })
 
-  it('does not show child chapter controls on the edit page', async () => {
+  it('does not show branch controls on the edit page', async () => {
     const services = createServices()
 
     renderChapterEditor({ services })
@@ -283,9 +284,10 @@ describe('ChapterEditor', () => {
     await screen.findByDisplayValue('The Gate')
 
     expect(
-      screen.queryByRole('button', { name: /add child chapter/i }),
+      screen.queryByRole('button', { name: /add branch/i }),
     ).toBeNull()
-    expect(screen.queryByRole('heading', { name: 'Child Chapters' })).toBeNull()
+    expect(screen.queryByRole('heading', { name: 'What happens next?' }))
+      .toBeNull()
   })
 
   it('shows load and save failure messages', async () => {

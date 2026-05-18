@@ -33,9 +33,10 @@
   chapter when available, opening story details, editing the current chapter,
   and opening the dashboard.
 - At the bottom:
-  - One or more child chapters → list of clickable child chapter choices
-  - No child chapters → "The End" indicator
-  - "Add Child Chapter" action below the child chapter section
+  - One or more branches → "What happens next?" followed by clickable
+    branch choices
+  - No branches → "The End" indicator
+  - "Add Branch" action below the branch section
 - Forward navigation uses the selected next chapter and appends it to the
   session-local reading path used for Back navigation.
 - When the session path has a previous chapter, Back returns to that chapter and
@@ -43,7 +44,7 @@
 - Reader path history is scoped to the current story and resets when opening a
   different story.
 - Reader does not edit inline, but the toolbar can open the current chapter for
-  editing and the bottom child chapter section can add a child chapter from it.
+  editing and the bottom branch section can add a branch from it.
 
 ### Story Editor
 - User opens a story in edit mode from story detail or after creating a story.
@@ -73,13 +74,13 @@
   draft.
 - Chapter creation requires a non-empty title but allows empty content, so
   writers can create branch structure before drafting prose.
-- Chapter creation uses the same title and content placeholders for intro and
-  child chapters: "Untitled chapter" and "Write this chapter in markdown...".
-- Child chapter creation provides a stable action back to the parent chapter and
+- Chapter creation uses the same title and content placeholders for intro
+  chapters and branches: "Untitled chapter" and "Write this chapter in markdown...".
+- Branch creation provides a stable action back to the parent chapter and
   a stable action back to the story editor. Intro chapter creation provides a
   stable action back to the story editor. Parent/story context belongs in the
   toolbar rather than inside the document body.
-- Child chapter creation immediately links the new child to the selected parent
+- Branch creation immediately links the new branch to the selected parent
   chapter.
 - Chapter editing keeps the markdown textarea as the source of truth and lets
   the user toggle to a markdown preview without converting the saved content.
@@ -131,8 +132,8 @@
 - The first chapter created in a story is the introductory chapter (no parents).
 - A chapter can only have zero or one parent chapter.
 - A chapter can be the parent of zero, one, or multiple other chapters.
-- Creating a child chapter from a parent chapter immediately links the new
-  chapter to that parent.
+- Creating a branch from a parent chapter immediately links the new chapter to
+  that parent.
 - Cycles are rejected: a chapter cannot be its own ancestor.
 
 ## Backlog (Future)

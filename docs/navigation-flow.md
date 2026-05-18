@@ -10,7 +10,7 @@ This document lists the current application URLs and the visible controls that c
 | --- | --- | --- |
 | `/` | Home / Story Dashboard | `src/routes/index.tsx` |
 | `/stories/$storyId` | Story Detail | `src/routes/stories.$storyId.index.tsx` |
-| `/stories/$storyId/chapters/$chapterId/children/new` | Child Chapter Creator | `src/routes/stories.$storyId.chapters.$chapterId.children.new.tsx` |
+| `/stories/$storyId/chapters/$chapterId/children/new` | Branch Creator | `src/routes/stories.$storyId.chapters.$chapterId.children.new.tsx` |
 | `/stories/$storyId/chapters/$chapterId/edit` | Chapter Editor | `src/routes/stories.$storyId.chapters.$chapterId.edit.tsx` |
 | `/stories/$storyId/chapters/new` | Intro Chapter Creator | `src/routes/stories.$storyId.chapters.new.tsx` |
 | `/stories/$storyId/edit` | Story Editor | `src/routes/stories.$storyId.edit.tsx` |
@@ -57,7 +57,7 @@ Runtime notes:
 
 - `Delete` asks for confirmation, removes the story, and returns to `/`.
 
-### Child Chapter Creator
+### Branch Creator
 
 URL: `/stories/$storyId/chapters/$chapterId/children/new`
 
@@ -71,7 +71,7 @@ URL: `/stories/$storyId/chapters/$chapterId/children/new`
 
 Runtime notes:
 
-- `Create Chapter` creates a child chapter and then opens `/stories/$storyId/chapters/$chapterId/edit` for the new chapter.
+- `Create Chapter` creates a branch and then opens `/stories/$storyId/chapters/$chapterId/edit` for the new chapter.
 
 ### Chapter Editor
 
@@ -131,7 +131,7 @@ URL: `/stories/$storyId/read`
 | Edit Chapter | `ReaderToolbar` | `/stories/$storyId/chapters/$chapterId/edit` |
 | Dashboard | `ReaderToolbar` | `/` |
 | {nextChapter.title} | `NextChapterControls` | Calls `onSelectChapter` |
-| Add Child Chapter | `NextChapterControls` | `/stories/$storyId/chapters/$chapterId/children/new` |
+| Add Branch | `NextChapterControls` | `/stories/$storyId/chapters/$chapterId/children/new` |
 
 Runtime notes:
 
