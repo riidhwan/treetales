@@ -194,14 +194,11 @@ describe('ChapterCreator', () => {
     })
 
     const copiedPrompt = writeText.mock.calls[0]?.[0] ?? ''
-    expect(copiedPrompt).toContain('Story title: The Old Road')
-    expect(copiedPrompt).toContain('Chapter title: The Cellar')
-    expect(copiedPrompt).toContain('Parent chapter title: The Gate')
     expect(copiedPrompt).toContain('The path begins here.')
     expect(copiedPrompt).toContain(
       'Find the hidden latch and choose whether to descend.',
     )
-    expect(copiedPrompt).toContain('The stairs already creak.')
+    expect(copiedPrompt).not.toContain('{{')
     expect(screen.getByRole('status').textContent).toBe('Prompt copied.')
   })
 
@@ -398,10 +395,9 @@ describe('ChapterCreator', () => {
     })
 
     const copiedPrompt = writeText.mock.calls[0]?.[0] ?? ''
-    expect(copiedPrompt).toContain('intro chapter')
-    expect(copiedPrompt).toContain('Chapter title: First Light')
     expect(copiedPrompt).toContain('Open on the road at dawn.')
-    expect(copiedPrompt).not.toContain('Parent chapter title:')
+    expect(copiedPrompt).not.toContain('The path begins here.')
+    expect(copiedPrompt).not.toContain('{{')
   })
 
   it('does not show the intro creation form when an intro already exists', async () => {

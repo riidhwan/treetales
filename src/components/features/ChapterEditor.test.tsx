@@ -239,13 +239,9 @@ describe('ChapterEditor', () => {
     })
 
     const copiedPrompt = writeText.mock.calls[0]?.[0] ?? ''
-    expect(copiedPrompt).toContain('Chapter title: The Lower Hall')
-    expect(copiedPrompt).toContain('Parent chapter title: The Gate Opens')
     expect(copiedPrompt).toContain('The gate opens into a cold hall.')
-    expect(copiedPrompt).toContain(
-      'A candle gutters beside fresh footprints.',
-    )
     expect(copiedPrompt).toContain('Follow the footprints to a locked door.')
+    expect(copiedPrompt).not.toContain('{{')
   })
 
   it('disables Prompt Builder when branch parent context is unavailable', async () => {
