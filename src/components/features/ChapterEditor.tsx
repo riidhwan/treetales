@@ -10,6 +10,7 @@ import {
   type ChapterWritingMode,
   ChapterWritingSurface,
 } from '@/components/features/ChapterWritingSurface'
+import { ChapterPromptBuilderControl } from '@/components/features/ChapterPromptBuilderControl'
 import { ReaderAppearanceControl } from '@/components/domain/ReaderAppearanceControl'
 import { useReaderAppearance } from '@/hooks/useReaderAppearance'
 import { Alert } from '@/components/ui/Alert'
@@ -32,10 +33,13 @@ export function ChapterEditor({
 }: Props) {
   const {
     canSave,
+    chapter,
     content,
     errorMessage,
     hasUnsavedChanges,
     isSaving,
+    parentChapter,
+    parentChapterUnavailable,
     saveChapter,
     setContent,
     setTitle,
@@ -165,6 +169,24 @@ export function ChapterEditor({
               onResetReaderAppearance={resetReaderAppearance}
               onSelectReaderFont={setReaderFont}
               readerAppearance={readerAppearance}
+            />
+            <ChapterPromptBuilderControl
+              chapterTitle={title}
+              draftContent={content}
+              isPromptBuilderDisabled={parentChapterUnavailable}
+              parentChapter={
+                parentChapter
+                  ? {
+                      content: parentChapter.content,
+                      title: parentChapter.title,
+                    }
+                  : undefined
+              }
+              promptBuilderDisabledReason="Parent Chapter unavailable"
+              storyTitle={story?.title}
+              templateKind={
+                chapter?.parentChapterId ? 'branch' : 'intro'
+              }
             />
             <Button
               aria-label="Dashboard"

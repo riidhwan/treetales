@@ -95,11 +95,27 @@
   and the markdown editor gets most of the available page space.
 - Chapter creation collects title and markdown content, lets the user toggle
   between writing and markdown preview in the same document column, creates
-  either the intro chapter or a child linked to the selected parent chapter,
+  either the intro chapter or a branch linked to the selected parent chapter,
   then opens the new chapter for editing.
 - Chapter creation keeps the create action reachable in a sticky toolbar and
   may show lightweight writing metadata such as word count, but it does not bind
   `Ctrl+S`/`Cmd+S` to the one-time create action.
+- Chapter creation and chapter editing expose an icon-only Writing Assist
+  toolbar action. Writing Assist opens a menu with Prompt Builder and a disabled
+  Write with LLM option.
+- Prompt Builder opens a modal where the author can enter a Rough Plot and copy
+  a generated prompt for an external LLM. TreeTales does not call an LLM,
+  display generated prose, or change chapter content from this flow.
+- Prompt Builder uses separate templates for Intro Chapters and Branches. The
+  templates can interpolate the current in-memory chapter title and content,
+  the Rough Plot, the story title, and for Branches the immediate Parent Chapter
+  title and content.
+- Prompt Builder keeps Rough Plot text only for the current page session. Rough
+  Plot text is not saved with the Story or Chapter and does not affect
+  unsaved-change warnings.
+- If copying the generated prompt fails, Prompt Builder shows the generated
+  prompt so the author can copy it manually.
+- Write with LLM is visible but disabled; direct LLM writing is a future feature.
 - Chapter creation uses draft-oriented status language before a chapter exists,
   such as empty, not-created, creating, and failure states rather than saved
   states.
@@ -134,6 +150,9 @@
   same document column, not a side-by-side split pane.
 - Chapter editing may show lightweight writing metadata such as word count, but
   metadata does not affect saved chapter content.
+- Branch editing disables Prompt Builder when the immediate Parent Chapter
+  cannot be loaded. Intro Chapter Prompt Builder does not require Parent Chapter
+  context.
 - A tree view shows the story's branching structure.
 
 ### Installable PWA

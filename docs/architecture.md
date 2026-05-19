@@ -19,6 +19,10 @@ the Story and Chapter persistence model, such as in `localStorage`. They should
 not be added to Story or Chapter records unless they become authored story
 content.
 
+Prompt Builder is a client-only authoring aid. It uses static feature-owned
+prompt templates and browser clipboard access; it does not call an LLM, require
+network access, or persist Rough Plot text in Story or Chapter records.
+
 ## Layer-First Structure
 
 ```
@@ -69,6 +73,11 @@ service calls, such as reusable Reader Appearance controls.
 A component that calls feature hooks, owns workflows, or coordinates services
 belongs in `features/`. Generic HTML wrappers and styling primitives belong in
 `ui/`.
+
+Feature-owned Prompt Builder templates live beside the chapter authoring
+feature because they encode TreeTales authoring language, not generic
+interpolation behavior. Template placeholders use double braces such as
+`{{roughPlot}}`, `{{draftContent}}`, and `{{parentChapterContent}}`.
 
 ## Hooks Layer (`src/hooks/`)
 

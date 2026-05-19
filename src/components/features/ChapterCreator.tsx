@@ -10,6 +10,7 @@ import {
   type ChapterWritingMode,
   ChapterWritingSurface,
 } from '@/components/features/ChapterWritingSurface'
+import { ChapterPromptBuilderControl } from '@/components/features/ChapterPromptBuilderControl'
 import { ReaderAppearanceControl } from '@/components/domain/ReaderAppearanceControl'
 import { useReaderAppearance } from '@/hooks/useReaderAppearance'
 import { Alert } from '@/components/ui/Alert'
@@ -134,6 +135,22 @@ export function ChapterCreator({
             readerAppearance={readerAppearance}
           />
         }
+        promptBuilderControl={
+          <ChapterPromptBuilderControl
+            chapterTitle={title}
+            draftContent={content}
+            parentChapter={
+              parentChapter
+                ? {
+                    content: parentChapter.content,
+                    title: parentChapter.title,
+                  }
+                : undefined
+            }
+            storyTitle={story?.title}
+            templateKind={isIntroChapter ? 'intro' : 'branch'}
+          />
+        }
         readerFontFamily={selectedFontFamily}
         readerFontSizePt={readerAppearance.fontSizePt}
         status={status}
@@ -161,6 +178,7 @@ interface CreatorContentProps {
   readonly onTitleBlur: () => void
   readonly onTitleChange: (title: string) => void
   readonly parentChapterTitle?: string
+  readonly promptBuilderControl: ReactNode
   readonly readerAppearanceControl: ReactNode
   readonly readerFontFamily: string
   readonly readerFontSizePt: number
@@ -186,6 +204,7 @@ function CreatorContent({
   onTitleBlur,
   onTitleChange,
   parentChapterTitle,
+  promptBuilderControl,
   readerAppearanceControl,
   readerFontFamily,
   readerFontSizePt,
@@ -233,6 +252,7 @@ function CreatorContent({
           secondaryActions={
             <>
               {readerAppearanceControl}
+              {promptBuilderControl}
               <Button
                 aria-label="Dashboard"
                 className="px-3"
@@ -415,7 +435,7 @@ function getToolbarContext({
     return `${contextStoryTitle} - Intro Chapter`
   }
 
-  return `${contextStoryTitle} - Child of ${
+  return `${contextStoryTitle} - Branch from ${
     parentChapterTitle ?? 'selected chapter'
   }`
 }
