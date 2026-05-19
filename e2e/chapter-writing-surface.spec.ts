@@ -48,6 +48,45 @@ test('uses the page as the chapter writing scroll container', async ({
   await expect.poll(() => hasPageScroll(page)).toBe(true)
 })
 
+test('keeps page scroll stable while typing near the bottom', async ({
+  page,
+}) => {
+  const longContent = Array.from(
+    { length: 120 },
+    (_, index) =>
+      `Paragraph ${index + 1}: The road keeps bending through the trees.`,
+  ).join('\n\n')
+
+  await page.getByRole('button', { name: 'New Story' }).first().click()
+  await page.getByLabel('Title').fill('Long Road')
+  await page.getByLabel('Description').fill('A long writing surface test')
+  await page.getByRole('button', { name: 'Create Story' }).click()
+  await page.getByRole('button', { name: 'Add Intro Chapter' }).click()
+
+  await expect(page.getByText('Long Road - Intro Chapter')).toBeVisible()
+  await page.getByLabel('Title').fill('The Opening Path')
+  await page.getByLabel('Content').fill(longContent)
+
+  const content = page.getByLabel('Content')
+
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+  await content.focus()
+  await content.evaluate((element) => {
+    const textArea = element as HTMLTextAreaElement
+
+    textArea.selectionStart = textArea.value.length
+    textArea.selectionEnd = textArea.value.length
+  })
+
+  const beforeScrollY = await page.evaluate(() => window.scrollY)
+
+  await page.keyboard.type('!')
+
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBe(beforeScrollY)
+})
+
 async function hasFullWidthPaper(page: Page) {
   const box = await page
     .locator('section[aria-label="Chapter document"]')

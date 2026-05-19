@@ -71,8 +71,18 @@ export function ChapterWritingSurface({
       return
     }
 
+    const previousScrollY = window.scrollY
+    const previousHeight = textArea.offsetHeight
+
     textArea.style.height = 'auto'
-    textArea.style.height = `${textArea.scrollHeight}px`
+
+    const nextHeight = textArea.scrollHeight
+
+    textArea.style.height = `${nextHeight}px`
+
+    if (nextHeight >= previousHeight && window.scrollY < previousScrollY) {
+      window.scrollTo(window.scrollX, previousScrollY)
+    }
   }, [content, mode, readerFontFamily, readerFontSizePt])
 
   return (
