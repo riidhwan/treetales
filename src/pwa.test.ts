@@ -53,6 +53,7 @@ function installCachesMock(cacheNames: string[]) {
 describe('registerAppServiceWorker', () => {
   afterEach(() => {
     vi.restoreAllMocks()
+    vi.unstubAllEnvs()
   })
 
   it('does nothing when service workers are unavailable', async () => {
@@ -101,5 +102,35 @@ describe('registerAppServiceWorker', () => {
     await vi.waitFor(() => {
       expect(serviceWorker.getRegistrations).toHaveBeenCalledTimes(1)
     })
+  })
+
+  it('skips cache cleanup when CacheStorage is unavailable in development', async () => {
+    const serviceWorker = installServiceWorkerMock([])
+    const windowWithOptionalCaches = window as Omit<Window, 'caches'> & {
+      caches?: CacheStorage
+    }
+
+    delete windowWithOptionalCaches.caches
+    const { registerAppServiceWorker } = await importPwaModule()
+
+    registerAppServiceWorker()
+
+    await vi.waitFor(() => {
+      expect(serviceWorker.getRegistrations).toHaveBeenCalled()
+    })
+    expect(serviceWorker.register).not.toHaveBeenCalled()
+  })
+
+  it('registers the service worker in production mode', async () => {
+    vi.stubEnv('DEV', false)
+    const serviceWorker = installServiceWorkerMock([])
+    const { registerAppServiceWorker } = await importPwaModule()
+
+    registerAppServiceWorker()
+
+    await vi.waitFor(() => {
+      expect(serviceWorker.register).toHaveBeenCalledWith('/sw.js')
+    })
+    expect(serviceWorker.getRegistrations).not.toHaveBeenCalled()
   })
 })

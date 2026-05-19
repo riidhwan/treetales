@@ -118,6 +118,17 @@ describe('StoryDetail', () => {
     expect(await screen.findByText('No description yet.')).toBeTruthy()
   })
 
+  it('shows a fallback when the story has no title', async () => {
+    const services = createServices({
+      story: createStory({ title: '' }),
+    })
+
+    renderDetail({ services })
+
+    expect(await screen.findByRole('heading', { name: 'Untitled story' }))
+      .toBeTruthy()
+  })
+
   it('navigates to read and edit flows', async () => {
     const onEditStory = vi.fn()
     const onReadStory = vi.fn()
@@ -180,6 +191,23 @@ describe('StoryDetail', () => {
       'Delete "The Old Road"? This cannot be undone.',
     )
     expect(onDeleted).toHaveBeenCalled()
+  })
+
+  it('shows deleting state while deletion is pending', async () => {
+    const pendingDelete = deferred<boolean>()
+    const services = createServices()
+    services.deleteStory.mockReturnValue(pendingDelete.promise)
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+
+    renderDetail({ services })
+
+    await screen.findByRole('heading', { name: 'The Old Road' })
+    fireEvent.click(screen.getByRole('button', { name: /delete/i }))
+
+    expect(await screen.findByRole('button', { name: /deleting/i }))
+      .toBeTruthy()
+
+    pendingDelete.resolve(true)
   })
 
   it('keeps the story when deletion is cancelled', async () => {

@@ -127,6 +127,19 @@ function mockClipboard() {
   return writeText
 }
 
+function mockFailingClipboard() {
+  const writeText = vi.fn<(text: string) => Promise<void>>(() =>
+    Promise.reject(new Error('Clipboard blocked')),
+  )
+
+  Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText },
+  })
+
+  return writeText
+}
+
 describe('ChapterCreator', () => {
   afterEach(() => {
     cleanup()
@@ -216,6 +229,18 @@ describe('ChapterCreator', () => {
     fireEvent.click(createButton)
 
     expect(services.createChapter).not.toHaveBeenCalled()
+  })
+
+  it('shows title validation after the title field is touched', async () => {
+    renderChapterCreator()
+
+    await screen.findByText('The Old Road - Branch from The Gate')
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: '   ' },
+    })
+    fireEvent.blur(screen.getByLabelText('Title'))
+
+    expect(screen.getByText('Chapter title is required.')).toBeTruthy()
   })
 
   it('creates a branch with title and content and opens it', async () => {
@@ -400,6 +425,28 @@ describe('ChapterCreator', () => {
     expect(copiedPrompt).not.toContain('{{')
   })
 
+  it('shows the generated Prompt Builder prompt when clipboard copy fails', async () => {
+    mockFailingClipboard()
+
+    renderChapterCreator()
+
+    await screen.findByText('The Old Road - Branch from The Gate')
+    fireEvent.click(screen.getByRole('button', { name: 'Writing Assist' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Prompt Builder' }))
+    fireEvent.change(screen.getByLabelText('Rough plot'), {
+      target: { value: 'Search for the hidden hinge.' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Copy prompt' }))
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'Could not copy prompt.',
+    )
+    expect(screen.getByLabelText('Generated prompt')).toHaveProperty(
+      'value',
+      expect.stringContaining('Search for the hidden hinge.'),
+    )
+  })
+
   it('does not show the intro creation form when an intro already exists', async () => {
     const services = createServices({
       chapters: [createChapter({ title: 'Existing Intro' })],
@@ -535,6 +582,28 @@ describe('ChapterCreator', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
 
     expect(onGoBack).toHaveBeenCalled()
+  })
+
+  it('prevents beforeunload only after draft changes exist', async () => {
+    renderChapterCreator()
+
+    await screen.findByText('The Old Road - Branch from The Gate')
+
+    const unchangedEvent = new Event('beforeunload', { cancelable: true })
+    const unchangedPreventDefault = vi.spyOn(unchangedEvent, 'preventDefault')
+    window.dispatchEvent(unchangedEvent)
+
+    expect(unchangedPreventDefault).not.toHaveBeenCalled()
+
+    fireEvent.change(screen.getByLabelText('Content'), {
+      target: { value: 'A draft path.' },
+    })
+
+    const changedEvent = new Event('beforeunload', { cancelable: true })
+    const changedPreventDefault = vi.spyOn(changedEvent, 'preventDefault')
+    window.dispatchEvent(changedEvent)
+
+    expect(changedPreventDefault).toHaveBeenCalled()
   })
 
   it('does not create from the keyboard save shortcut', async () => {

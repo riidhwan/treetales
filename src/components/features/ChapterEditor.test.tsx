@@ -454,6 +454,43 @@ describe('ChapterEditor', () => {
     })
   })
 
+  it('ignores unrelated keyboard shortcuts', async () => {
+    const services = createServices()
+
+    renderChapterEditor({ services })
+
+    await screen.findByDisplayValue('The Gate')
+    fireEvent.change(screen.getByLabelText('Content'), {
+      target: { value: 'A changed path.' },
+    })
+    fireEvent.keyDown(window, { ctrlKey: true, key: 'k' })
+    fireEvent.keyDown(window, { key: 's' })
+
+    expect(services.updateChapter).not.toHaveBeenCalled()
+  })
+
+  it('prevents beforeunload only while unsaved changes exist', async () => {
+    renderChapterEditor()
+
+    await screen.findByDisplayValue('The Gate')
+
+    const unchangedEvent = new Event('beforeunload', { cancelable: true })
+    const unchangedPreventDefault = vi.spyOn(unchangedEvent, 'preventDefault')
+    window.dispatchEvent(unchangedEvent)
+
+    expect(unchangedPreventDefault).not.toHaveBeenCalled()
+
+    fireEvent.change(screen.getByLabelText('Content'), {
+      target: { value: 'A changed path.' },
+    })
+
+    const changedEvent = new Event('beforeunload', { cancelable: true })
+    const changedPreventDefault = vi.spyOn(changedEvent, 'preventDefault')
+    window.dispatchEvent(changedEvent)
+
+    expect(changedPreventDefault).toHaveBeenCalled()
+  })
+
   it('confirms before leaving with unsaved changes', async () => {
     const onGoBack = vi.fn()
     const onOpenDashboard = vi.fn()

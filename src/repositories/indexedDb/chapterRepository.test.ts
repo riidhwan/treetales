@@ -2,7 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createIndexedDbChapterRepository } from '@/repositories/indexedDb/chapterRepository'
 import { createIndexedDbStoryRepository } from '@/repositories/indexedDb/storyRepository'
-import type { ChapterRepository, StoryRepository } from '@/repositories/types'
+import type {
+  ChapterRepository,
+  StoryRepository,
+  UpdateChapterRepositoryInput,
+} from '@/repositories/types'
 import type { Chapter, Story } from '@/services/types'
 import {
   deleteTestDatabase,
@@ -162,6 +166,43 @@ describe('indexedDbChapterRepository', () => {
         updatedAt: 300,
       }),
     ).rejects.toThrow('cycles')
+  })
+
+  it('rejects a second intro chapter for the same story', async () => {
+    const story = createStory({ id: 'story-1' })
+    const intro = createChapter({ id: 'chapter-intro', storyId: story.id })
+
+    await stories.insertStory(story)
+    await chapters.insertChapter(intro)
+
+    await expect(
+      chapters.insertChapter(
+        createChapter({ id: 'chapter-second-intro', storyId: story.id }),
+      ),
+    ).rejects.toThrow('already has an intro chapter')
+  })
+
+  it('rejects explicit undefined parent patches when they would create a second intro', async () => {
+    const story = createStory({ id: 'story-1' })
+    const parent = createChapter({ id: 'chapter-parent', storyId: story.id })
+    const child = createChapter({
+      id: 'chapter-child',
+      parentChapterId: parent.id,
+      storyId: story.id,
+    })
+
+    await stories.insertStory(story)
+    await chapters.insertChapter(parent)
+    await chapters.insertChapter(child)
+
+    const patch = {
+      parentChapterId: undefined,
+      updatedAt: 300,
+    } as unknown as UpdateChapterRepositoryInput
+
+    await expect(chapters.updateChapter(child.id, patch)).rejects.toThrow(
+      'already has an intro chapter',
+    )
   })
 
   it('clears direct child parents when deleting a chapter', async () => {
