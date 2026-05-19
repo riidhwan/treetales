@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   CHAPTERS_STORE,
@@ -24,6 +24,7 @@ describe('openDb', () => {
   })
 
   afterEach(async () => {
+    vi.restoreAllMocks()
     await deleteTestDatabase()
   })
 
@@ -61,8 +62,12 @@ describe('openDb', () => {
     const root = await requestToPromise(
       typedRequest<Chapter | undefined>(chaptersStore.get('chapter-root')),
     )
+    const emptyParent = await requestToPromise(
+      typedRequest<Chapter | undefined>(chaptersStore.get('chapter-empty-parent')),
+    )
 
     expect(root?.parentChapterId).toBeNull()
+    expect(emptyParent?.parentChapterId).toBeNull()
     expect(child?.parentChapterId).toBe('chapter-root')
     expect('parentChapterIds' in (child ?? {})).toBe(false)
     await expect(transactionDone(transaction)).resolves.toBeUndefined()
@@ -112,6 +117,47 @@ describe('openDb', () => {
 
     db.close()
   })
+
+  it('uses fallback errors when IndexedDB requests and transactions fail without error details', async () => {
+    const request = {} as IDBRequest<string>
+    const requestPromise = requestToPromise(request)
+
+    request.onerror?.(new Event('error'))
+
+    await expect(requestPromise).rejects.toThrow('IndexedDB request failed.')
+
+    const failedTransaction = {} as IDBTransaction
+    const failedTransactionPromise = transactionDone(failedTransaction)
+
+    failedTransaction.onerror?.(new Event('error'))
+
+    await expect(failedTransactionPromise).rejects.toThrow(
+      'IndexedDB transaction failed.',
+    )
+
+    const abortedTransaction = {} as IDBTransaction
+    const abortedTransactionPromise = transactionDone(abortedTransaction)
+
+    abortedTransaction.onabort?.(new Event('abort'))
+
+    await expect(abortedTransactionPromise).rejects.toThrow(
+      'IndexedDB transaction aborted.',
+    )
+  })
+
+  it('uses a fallback error when opening the database fails without error details', async () => {
+    const request = {} as IDBOpenDBRequest
+
+    vi.spyOn(indexedDB, 'open').mockReturnValue(request)
+
+    const openPromise = openDb()
+
+    request.onerror?.(new Event('error'))
+
+    await expect(openPromise).rejects.toThrow(
+      'Failed to open IndexedDB database.',
+    )
+  })
 })
 
 function createStory(id: string): Story {
@@ -156,6 +202,15 @@ function openLegacyDb(): Promise<IDBDatabase> {
         parentChapterIds: ['chapter-root'],
         createdAt: 20,
         updatedAt: 20,
+      })
+      chaptersStore.add({
+        id: 'chapter-empty-parent',
+        storyId: 'story-1',
+        title: 'Empty Parent',
+        content: 'Continue',
+        parentChapterIds: undefined,
+        createdAt: 30,
+        updatedAt: 30,
       })
     }
 
