@@ -43,6 +43,9 @@ export function useChapterEditor({
   const [isSaving, setIsSaving] = useState(false)
   const [lastSavedContent, setLastSavedContent] = useState('')
   const [lastSavedTitle, setLastSavedTitle] = useState('')
+  const [parentChapter, setParentChapter] = useState<Chapter | undefined>()
+  const [parentChapterUnavailable, setParentChapterUnavailable] =
+    useState(false)
   const [status, setStatus] = useState<ChapterEditorStatus>('loading')
   const [story, setStory] = useState<Story | undefined>()
   const [successMessage, setSuccessMessage] = useState<string | undefined>()
@@ -75,6 +78,8 @@ export function useChapterEditor({
 
         if (!loadedStory) {
           setChapter(undefined)
+          setParentChapter(undefined)
+          setParentChapterUnavailable(false)
           setStory(undefined)
           setStatus('missing-story')
           return
@@ -88,10 +93,27 @@ export function useChapterEditor({
 
         if (!loadedChapter || loadedChapter.storyId !== storyId) {
           setChapter(undefined)
+          setParentChapter(undefined)
+          setParentChapterUnavailable(false)
           setStory(loadedStory)
           setStatus('missing-chapter')
           return
         }
+
+        const loadedParentContext = loadedChapter.parentChapterId
+          ? await loadParentChapterContext({
+              parentChapterId: loadedChapter.parentChapterId,
+              services,
+              storyId,
+            })
+          : { parentChapter: undefined, unavailable: false }
+
+        if (!isCurrent) {
+          return
+        }
+
+        setParentChapter(loadedParentContext.parentChapter)
+        setParentChapterUnavailable(loadedParentContext.unavailable)
 
         setChapter(loadedChapter)
         setContent(loadedChapter.content)
@@ -103,6 +125,8 @@ export function useChapterEditor({
       } catch (error) {
         if (isCurrent) {
           setErrorMessage(getErrorMessage(error))
+          setParentChapter(undefined)
+          setParentChapterUnavailable(false)
           setStatus('ready')
         }
       }
@@ -132,6 +156,8 @@ export function useChapterEditor({
 
       if (!updatedChapter || updatedChapter.storyId !== storyId) {
         setChapter(undefined)
+        setParentChapter(undefined)
+        setParentChapterUnavailable(false)
         setStatus('missing-chapter')
         return
       }
@@ -156,6 +182,8 @@ export function useChapterEditor({
     errorMessage,
     hasUnsavedChanges,
     isSaving,
+    parentChapter,
+    parentChapterUnavailable,
     saveChapter,
     setContent,
     setTitle,
@@ -163,5 +191,34 @@ export function useChapterEditor({
     story,
     successMessage,
     title,
+  }
+}
+
+interface LoadParentChapterContextOptions {
+  readonly parentChapterId: string
+  readonly services: ChapterEditorServices
+  readonly storyId: string
+}
+
+async function loadParentChapterContext({
+  parentChapterId,
+  services,
+  storyId,
+}: LoadParentChapterContextOptions) {
+  try {
+    const loadedParentChapter = await services.getChapterById(parentChapterId)
+    const hasAvailableParentChapter = loadedParentChapter?.storyId === storyId
+
+    return {
+      parentChapter: hasAvailableParentChapter
+        ? loadedParentChapter
+        : undefined,
+      unavailable: !hasAvailableParentChapter,
+    }
+  } catch {
+    return {
+      parentChapter: undefined,
+      unavailable: true,
+    }
   }
 }

@@ -114,6 +114,19 @@ function deferred<TValue>() {
   return { promise, reject, resolve }
 }
 
+function mockClipboard() {
+  const writeText = vi.fn<(text: string) => Promise<void>>(() =>
+    Promise.resolve(),
+  )
+
+  Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText },
+  })
+
+  return writeText
+}
+
 describe('ChapterCreator', () => {
   afterEach(() => {
     cleanup()
@@ -137,7 +150,7 @@ describe('ChapterCreator', () => {
     renderChapterCreator()
 
     expect(
-      await screen.findByText('The Old Road - Child of The Gate'),
+      await screen.findByText('The Old Road - Branch from The Gate'),
     ).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Write' }).getAttribute(
       'aria-pressed',
@@ -148,12 +161,56 @@ describe('ChapterCreator', () => {
     expect(screen.getByLabelText('Content')).toHaveProperty('value', '')
   })
 
+  it('copies a branch Prompt Builder prompt from rough plot and parent context', async () => {
+    const writeText = mockClipboard()
+
+    renderChapterCreator()
+
+    await screen.findByText('The Old Road - Branch from The Gate')
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'The Cellar' },
+    })
+    fireEvent.change(screen.getByLabelText('Content'), {
+      target: { value: 'The stairs already creak.' },
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Writing Assist' }))
+    expect(screen.getByRole('button', { name: /Write with LLM/ }))
+      .toHaveProperty('disabled', true)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Prompt Builder' }))
+    expect(
+      screen.getByRole('dialog', { name: 'Prompt Builder' }),
+    ).toBeTruthy()
+    expect(screen.queryByLabelText('Generated prompt')).toBeNull()
+
+    fireEvent.change(screen.getByLabelText('Rough plot'), {
+      target: { value: 'Find the hidden latch and choose whether to descend.' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Copy prompt' }))
+
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalled()
+    })
+
+    const copiedPrompt = writeText.mock.calls[0]?.[0] ?? ''
+    expect(copiedPrompt).toContain('Story title: The Old Road')
+    expect(copiedPrompt).toContain('Chapter title: The Cellar')
+    expect(copiedPrompt).toContain('Parent chapter title: The Gate')
+    expect(copiedPrompt).toContain('The path begins here.')
+    expect(copiedPrompt).toContain(
+      'Find the hidden latch and choose whether to descend.',
+    )
+    expect(copiedPrompt).toContain('The stairs already creak.')
+    expect(screen.getByRole('status').textContent).toBe('Prompt copied.')
+  })
+
   it('requires a title before creating a branch', async () => {
     const services = createServices()
 
     renderChapterCreator({ services })
 
-    await screen.findByText('The Old Road - Child of The Gate')
+    await screen.findByText('The Old Road - Branch from The Gate')
 
     const createButton = screen.getByRole('button', {
       name: /^save$/i,
@@ -170,7 +227,7 @@ describe('ChapterCreator', () => {
 
     renderChapterCreator({ onChapterCreated, services })
 
-    await screen.findByText('The Old Road - Child of The Gate')
+    await screen.findByText('The Old Road - Branch from The Gate')
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: '  The Cellar  ' },
     })
@@ -206,7 +263,7 @@ describe('ChapterCreator', () => {
 
     renderChapterCreator({ onChapterCreated, services })
 
-    await screen.findByText('The Old Road - Child of The Gate')
+    await screen.findByText('The Old Road - Branch from The Gate')
     expect(screen.queryByText('Nothing to preview yet.')).toBeNull()
 
     fireEvent.change(screen.getByLabelText('Title'), {
@@ -248,7 +305,7 @@ describe('ChapterCreator', () => {
   it('applies Reader Appearance to write and preview document text', async () => {
     renderChapterCreator()
 
-    await screen.findByText('The Old Road - Child of The Gate')
+    await screen.findByText('The Old Road - Branch from The Gate')
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: 'The Cellar' },
     })
@@ -316,6 +373,37 @@ describe('ChapterCreator', () => {
     expect(onChapterCreated).toHaveBeenCalledWith('story-1', 'chapter-1')
   })
 
+  it('copies an intro Prompt Builder prompt without parent chapter context', async () => {
+    const writeText = mockClipboard()
+    const services = createServices({ chapters: [] })
+
+    renderChapterCreator({
+      intro: true,
+      services,
+    })
+
+    await screen.findByText('The Old Road - Intro Chapter')
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'First Light' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Writing Assist' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Prompt Builder' }))
+    fireEvent.change(screen.getByLabelText('Rough plot'), {
+      target: { value: 'Open on the road at dawn.' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Copy prompt' }))
+
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalled()
+    })
+
+    const copiedPrompt = writeText.mock.calls[0]?.[0] ?? ''
+    expect(copiedPrompt).toContain('intro chapter')
+    expect(copiedPrompt).toContain('Chapter title: First Light')
+    expect(copiedPrompt).toContain('Open on the road at dawn.')
+    expect(copiedPrompt).not.toContain('Parent chapter title:')
+  })
+
   it('does not show the intro creation form when an intro already exists', async () => {
     const services = createServices({
       chapters: [createChapter({ title: 'Existing Intro' })],
@@ -377,7 +465,7 @@ describe('ChapterCreator', () => {
 
     renderChapterCreator({ services: createServicesMock })
 
-    await screen.findByText('The Old Road - Child of The Gate')
+    await screen.findByText('The Old Road - Branch from The Gate')
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: 'The Cellar' },
     })
@@ -395,7 +483,7 @@ describe('ChapterCreator', () => {
 
     renderChapterCreator({ onOpenDashboard })
 
-    await screen.findByText('The Old Road - Child of The Gate')
+    await screen.findByText('The Old Road - Branch from The Gate')
     fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
 
     expect(onOpenDashboard).toHaveBeenCalled()
@@ -407,7 +495,7 @@ describe('ChapterCreator', () => {
 
     renderChapterCreator({ onGoBack })
 
-    await screen.findByText('The Old Road - Child of The Gate')
+    await screen.findByText('The Old Road - Branch from The Gate')
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
 
     expect(onGoBack).toHaveBeenCalled()
@@ -433,7 +521,7 @@ describe('ChapterCreator', () => {
 
     renderChapterCreator({ onGoBack, onOpenDashboard })
 
-    await screen.findByText('The Old Road - Child of The Gate')
+    await screen.findByText('The Old Road - Branch from The Gate')
     fireEvent.change(screen.getByLabelText('Content'), {
       target: { value: 'A draft path.' },
     })
@@ -458,7 +546,7 @@ describe('ChapterCreator', () => {
 
     renderChapterCreator({ services })
 
-    await screen.findByText('The Old Road - Child of The Gate')
+    await screen.findByText('The Old Road - Branch from The Gate')
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: 'The Cellar' },
     })

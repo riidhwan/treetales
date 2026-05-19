@@ -106,6 +106,19 @@ function deferred<TValue>() {
   return { promise, reject, resolve }
 }
 
+function mockClipboard() {
+  const writeText = vi.fn<(text: string) => Promise<void>>(() =>
+    Promise.resolve(),
+  )
+
+  Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText },
+  })
+
+  return writeText
+}
+
 describe('ChapterEditor', () => {
   afterEach(() => {
     cleanup()
@@ -185,6 +198,72 @@ describe('ChapterEditor', () => {
         title: 'River Fork',
       })
     })
+  })
+
+  it('copies an editing Prompt Builder prompt from current unsaved values', async () => {
+    const writeText = mockClipboard()
+    const parentChapter = createChapter({
+      id: 'chapter-parent',
+      content: 'The gate opens into a cold hall.',
+      title: 'The Gate Opens',
+    })
+    const branchChapter = createChapter({
+      content: 'A candle gutters.',
+      id: 'chapter-1',
+      parentChapterId: parentChapter.id,
+      title: 'The Hall',
+    })
+    const services = createServices({
+      chapters: [parentChapter, branchChapter],
+    })
+
+    renderChapterEditor({ services })
+
+    await screen.findByDisplayValue('The Hall')
+    fireEvent.change(screen.getByLabelText('Title'), {
+      target: { value: 'The Lower Hall' },
+    })
+    fireEvent.change(screen.getByLabelText('Content'), {
+      target: { value: 'A candle gutters beside fresh footprints.' },
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Writing Assist' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Prompt Builder' }))
+    fireEvent.change(screen.getByLabelText('Rough plot'), {
+      target: { value: 'Follow the footprints to a locked door.' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Copy prompt' }))
+
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalled()
+    })
+
+    const copiedPrompt = writeText.mock.calls[0]?.[0] ?? ''
+    expect(copiedPrompt).toContain('Chapter title: The Lower Hall')
+    expect(copiedPrompt).toContain('Parent chapter title: The Gate Opens')
+    expect(copiedPrompt).toContain('The gate opens into a cold hall.')
+    expect(copiedPrompt).toContain(
+      'A candle gutters beside fresh footprints.',
+    )
+    expect(copiedPrompt).toContain('Follow the footprints to a locked door.')
+  })
+
+  it('disables Prompt Builder when branch parent context is unavailable', async () => {
+    const branchChapter = createChapter({
+      parentChapterId: 'missing-parent',
+      title: 'The Hall',
+    })
+    const services = createServices({
+      chapters: [branchChapter],
+    })
+
+    renderChapterEditor({ services })
+
+    await screen.findByDisplayValue('The Hall')
+    fireEvent.click(screen.getByRole('button', { name: 'Writing Assist' }))
+
+    expect(screen.getByRole('button', { name: 'Prompt Builder' }))
+      .toHaveProperty('disabled', true)
   })
 
   it('previews markdown while saving the raw markdown content', async () => {
