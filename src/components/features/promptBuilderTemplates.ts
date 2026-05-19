@@ -9,15 +9,13 @@ interface PromptBuilderValues {
   readonly storyTitle: string
 }
 
-const INTRO_CHAPTER_PROMPT_TEMPLATE = `You are a writer of a "Choose Your Own Adventure" book. The chapter you write will treat the reader as the main character (e.g instead of writing "I had a dream", you should write "You had a dream"). The chapter you write must always end in a way that many different branches of actions can be taken. You will write a story based on the rough plot described below.
+const INTRO_CHAPTER_PROMPT_TEMPLATE = `You are a writer of a "Choose Your Own Adventure" book. The chapter you write will treat the reader as the main character (e.g instead of writing "I had a dream", you should write "You had a dream"). You will write a story based on the \`plot\` described below. Write in markdown codeblock.
 
 <plot>
 {{roughPlot}}
-</plot>
+</plot>`
 
-Write only the chapter content in markdown. Continue naturally from the parent chapter without repeating it. Do not include a title, explanation, notes, or code fence.`
-
-const BRANCH_CHAPTER_PROMPT_TEMPLATE = `You are a writer of a "Choose Your Own Adventure" book. The chapter you write will treat the reader as the main character (e.g instead of writing "I had a dream", you should write "You had a dream"). The chapter you write must always end in a way that many different branches of actions can be taken. You will write a story based on the rough plot described below.
+const BRANCH_CHAPTER_PROMPT_TEMPLATE = `You are a writer of a "Choose Your Own Adventure" book. The chapter you write will treat the reader as the main character (e.g instead of writing "I had a dream", you should write "You had a dream"). You will write a story based on the \`plot\` described below. Write in markdown codeblock.
 
 <previous_story note="this is just a reference of what happened before the plot">
 {{parentChapterContent}}
@@ -25,9 +23,7 @@ const BRANCH_CHAPTER_PROMPT_TEMPLATE = `You are a writer of a "Choose Your Own A
 
 <plot>
 {{roughPlot}}
-</plot>
-
-Write only the chapter content in markdown. Continue naturally from the parent chapter without repeating it. Do not include a title, explanation, notes, or code fence.`
+</plot>`
 
 const PROMPT_BUILDER_TEMPLATES: Record<PromptBuilderTemplateKind, string> = {
   branch: BRANCH_CHAPTER_PROMPT_TEMPLATE,
