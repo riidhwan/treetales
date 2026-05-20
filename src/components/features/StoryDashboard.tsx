@@ -103,29 +103,36 @@ export function StoryDashboard({
   return (
     <main className="min-h-screen bg-tt-parchment text-tt-ink">
       <section className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-8 sm:px-8 lg:px-10">
-        <header className="flex flex-col gap-4 border-b border-tt-line pb-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
-              TreeTales
-            </p>
-            <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
-              Story dashboard
-            </h1>
-          </div>
-          <div className="flex flex-col items-start gap-3 sm:items-end">
-            <p className="max-w-xl text-sm leading-6 text-tt-muted">
-              Manage branching stories saved in this browser.
-            </p>
-            <Button onClick={() => setIsFormOpen(true)} variant="primary">
-              <Plus aria-hidden="true" size={18} />
-              New Story
-            </Button>
+        <header className="border-b border-tt-line pb-6">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-2xl">
+              <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
+                TreeTales
+              </p>
+              <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
+                Story dashboard
+              </h1>
+              <p className="mt-3 text-sm leading-6 text-tt-muted sm:text-base">
+                Manage branching stories saved in this browser.
+              </p>
+            </div>
+            {sortedStories.length > 0 ? (
+              <Button
+                className="w-full sm:w-auto"
+                onClick={() => setIsFormOpen(true)}
+                variant="primary"
+              >
+                <Plus aria-hidden="true" size={18} />
+                New Story
+              </Button>
+            ) : null}
           </div>
         </header>
 
         {isFormOpen ? (
           <form
-            className="grid gap-4 rounded-lg border border-tt-line bg-tt-paper/85 p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto] sm:items-end"
+            aria-label="New story"
+            className="grid gap-4 border-b border-tt-line pb-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto] sm:items-end"
             onSubmit={(event) => {
               event.preventDefault()
               void createStoryFromForm()
@@ -150,6 +157,7 @@ export function StoryDashboard({
               />
             </label>
             <Button
+              className="w-full sm:w-auto"
               disabled={!canCreate}
               type="submit"
               variant="primary"

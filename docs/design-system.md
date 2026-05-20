@@ -20,6 +20,25 @@ and chapter authoring views keep paper-like document surfaces with minimal
 accent use. Shared controls, forms, dialogs, alerts, and toolbars should remain
 consistent rather than using feature-specific color treatments.
 
+Story-management screens use a shared workbench layout. The page header groups
+the screen title, concise description, and primary page action in one clear
+hierarchy. Compact navigation belongs above or beside that header, while
+section-specific actions belong in the section header that owns them. Avoid
+duplicating the same primary action in multiple places within the first
+viewport. Reader and chapter authoring screens remain document-first rather
+than adopting this workbench layout.
+
+Management screens should not read as stacks of unrelated cards. Use unframed
+sections for page structure inside the workbench column, and reserve bordered
+cards for repeated items, dialogs, empty states, destructive confirmation areas,
+and other bounded objects.
+
+On mobile, story-management screens keep the same workbench hierarchy instead
+of adding sticky bottom actions. Stack the page title and description above a
+full-width primary page action, then place content below. Reserve sticky
+toolbars and fixed controls for reader and chapter authoring surfaces where
+navigation or Save/Create access must remain persistent.
+
 The style revamp should rely on typography, color, spacing, paper-like
 surfaces, borders, icons, and small CSS-only literary details rather than large
 illustrations or image assets. Do not add hero art, decorative scenes, or
@@ -76,6 +95,14 @@ document typography.
 - On mobile, long-form writing toolbars should keep secondary navigation terse
   and preserve essential save or create controls without relying on extra
   navigation.
+- Reader toolbar actions stay icon-only with accessible labels and titles so
+  reading chrome remains minimal. Chapter writing and creation keep explicit
+  text labels on the primary Save or Create action because those actions commit
+  user work; secondary writing actions may stay compact and icon-led.
+- Reader Branch choices are narrative navigation and should look like
+  story-choice rows rather than generic app buttons. The Add Branch action is
+  an authoring command and remains a normal app button placed below the Branch
+  choices.
 
 ## Component Layers
 
@@ -111,9 +138,21 @@ The dashboard remains the usable story library, not a marketing landing page.
 Use a warm full-page background, a compact TreeTales header with a concise
 purpose statement, and saved **Story** rows that feel like shelf labels or paper
 slips rather than generic white cards. The new-story form should feel like an
-inline writing slip. Empty states should invite authors into the product, with
-the example **Story** presented as the stronger first action when no stories
-exist.
+inline writing slip placed directly below the dashboard header, not a modal or
+competing standalone card. Empty states should invite authors into the product,
+with the example **Story** presented as the stronger first action when no
+stories exist. In the empty dashboard state, Add Example Story is the primary
+action and New Story is secondary; once saved **Stories** exist, New Story
+becomes the primary dashboard action.
+
+## Story Editor
+
+Story editing is metadata management, not document editing. Keep Story title
+and description editing in a conventional form rather than using the inline
+document-title pattern from Chapter writing. Avoid presenting the same Story
+title as both the dominant page heading and the editable field label/value; use
+the page header for "Edit Story" context and let the form own the editable
+title.
 
 ## Character Cards
 
@@ -121,6 +160,12 @@ Story detail Character cards are feature-owned UI in `StoryDetail`. Keep cards
 fixed-height so the grid remains even as custom-property content varies. The
 card content should start at the top, with long names and custom-property
 previews truncated instead of expanding the card.
+
+Story detail treats Read and Edit as page-level navigation actions, so they
+belong in the story workbench header action area. Delete is a destructive
+maintenance action and should be visually separated from normal navigation,
+placed after the primary Story detail content, and styled quieter than the main
+summary and Character sections.
 
 Character dialogs use standard TreeTales dialog styling: a dim page overlay,
 white rounded dialog panel, title block, close action, and footer actions.

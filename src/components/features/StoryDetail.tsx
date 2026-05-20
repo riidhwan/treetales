@@ -94,40 +94,23 @@ export function StoryDetail({
           </Alert>
         ) : null}
 
-        <article className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm sm:p-8">
+        <article className="border-b border-tt-line pb-6">
           <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
-            Story
+            Story summary
           </p>
-          <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
-            {story.title || 'Untitled story'}
-          </h1>
           <p className="mt-4 text-sm leading-6 text-tt-muted sm:text-base">
             {story.description || 'No description yet.'}
           </p>
-
-          <div className="mt-7 flex flex-wrap gap-2">
-            <Button onClick={() => onReadStory(story.id)} variant="primary">
-              <BookOpen aria-hidden="true" size={18} />
-              Read
-            </Button>
-            <Button onClick={() => onEditStory(story.id)}>
-              <Edit3 aria-hidden="true" size={18} />
-              Edit
-            </Button>
-            <Button
-              disabled={isDeleting}
-              onClick={() => void deleteStoryWithConfirmation()}
-              variant="danger"
-            >
-              <Trash2 aria-hidden="true" size={18} />
-              {isDeleting ? 'Deleting...' : 'Delete'}
-            </Button>
-          </div>
         </article>
 
         <CharacterSection
           characterDialog={characterDialog}
           titleId={characterTitleId}
+        />
+
+        <StoryMaintenanceSection
+          isDeleting={isDeleting}
+          onDelete={() => void deleteStoryWithConfirmation()}
         />
       </>
     )
@@ -136,19 +119,90 @@ export function StoryDetail({
   return (
     <main className="min-h-screen bg-tt-parchment text-tt-ink">
       <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
-        <nav
-          aria-label="Story detail actions"
-          className="flex flex-wrap justify-between gap-3"
-        >
-          <Button onClick={onOpenDashboard} size="sm">
-            <Home aria-hidden="true" size={16} />
-            Dashboard
-          </Button>
-        </nav>
+        {story ? (
+          <header className="border-b border-tt-line pb-6">
+            <nav aria-label="Story detail navigation">
+              <Button onClick={onOpenDashboard} size="sm">
+                <Home aria-hidden="true" size={16} />
+                Dashboard
+              </Button>
+            </nav>
+            <div className="mt-6 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
+                  Story
+                </p>
+                <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
+                  {story.title || 'Untitled story'}
+                </h1>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Button
+                  className="w-full sm:w-auto"
+                  onClick={() => onReadStory(story.id)}
+                  variant="primary"
+                >
+                  <BookOpen aria-hidden="true" size={18} />
+                  Read
+                </Button>
+                <Button
+                  className="w-full sm:w-auto"
+                  onClick={() => onEditStory(story.id)}
+                >
+                  <Edit3 aria-hidden="true" size={18} />
+                  Edit
+                </Button>
+              </div>
+            </div>
+          </header>
+        ) : (
+          <nav
+            aria-label="Story detail navigation"
+            className="flex flex-wrap justify-between gap-3"
+          >
+            <Button onClick={onOpenDashboard} size="sm">
+              <Home aria-hidden="true" size={16} />
+              Dashboard
+            </Button>
+          </nav>
+        )}
 
         {detailContent}
       </section>
     </main>
+  )
+}
+
+interface StoryMaintenanceSectionProps {
+  readonly isDeleting: boolean
+  readonly onDelete: () => void
+}
+
+function StoryMaintenanceSection({
+  isDeleting,
+  onDelete,
+}: StoryMaintenanceSectionProps) {
+  return (
+    <section className="border-t border-tt-line pt-5">
+      <p className="text-sm font-semibold uppercase tracking-wide text-tt-muted">
+        Story maintenance
+      </p>
+      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="max-w-xl text-sm leading-6 text-tt-muted">
+          Delete this Story and all of its Chapters and Characters.
+        </p>
+        <Button
+          className="w-full sm:w-auto"
+          disabled={isDeleting}
+          onClick={onDelete}
+          size="sm"
+          variant="danger"
+        >
+          <Trash2 aria-hidden="true" size={16} />
+          {isDeleting ? 'Deleting...' : 'Delete'}
+        </Button>
+      </div>
+    </section>
   )
 }
 
@@ -190,7 +244,7 @@ function CharacterSection({
 
   return (
     <>
-      <section className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm sm:p-8">
+      <section className="pb-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">

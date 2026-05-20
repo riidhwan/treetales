@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  ChevronRight,
   CornerUpLeft,
   Edit3,
   Home,
@@ -325,13 +326,19 @@ function NextChapterControls({
       ) : (
         <div className="mt-3 grid gap-2">
           {nextChapters.map((nextChapter) => (
-            <Button
-              className="justify-start px-4 text-left"
+            <button
+              className="group flex min-h-12 w-full items-center justify-between gap-3 rounded-md border border-tt-line bg-tt-paper-deep/35 px-4 py-3 text-left text-sm font-semibold text-tt-ink transition hover:border-tt-gold hover:bg-tt-gold-soft/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tt-gold"
               key={nextChapter.id}
               onClick={() => onSelectChapter(nextChapter)}
+              type="button"
             >
-              {nextChapter.title}
-            </Button>
+              <span>{nextChapter.title}</span>
+              <ChevronRight
+                aria-hidden="true"
+                className="shrink-0 text-tt-muted transition group-hover:text-tt-moss"
+                size={18}
+              />
+            </button>
           ))}
         </div>
       )}
