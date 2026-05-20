@@ -18,6 +18,19 @@
 - Story detail provides actions to read, edit, or delete the story.
 - Delete shows a confirmation dialog before removing the story and returning to
   the dashboard.
+- Story detail shows Story-level Character cards below the story summary.
+- Character cards use a fixed height, show the character name and gender, and
+  preview the first three custom properties with long keys and values
+  truncated. When more than three custom properties exist, the card shows a
+  remaining-count indicator.
+- Selecting a Character card opens a read-only detail dialog with the full
+  plain-text custom property values.
+- Story detail lets users create, edit, and delete Characters from dialogs.
+  Create and edit require a non-empty name, support gender selection, and let
+  users add, remove, and reorder custom properties.
+- Leaving a Character create or edit dialog with unsaved changes asks for
+  confirmation before discarding the draft.
+- Character delete asks for confirmation before removing the Character.
 
 ### Story Reader
 - User opens a story from story detail or the example-story empty state and
