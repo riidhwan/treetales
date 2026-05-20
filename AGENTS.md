@@ -60,6 +60,24 @@ Use the `github-issues` skill when creating or editing GitHub issues, decomposin
 
 Use GitHub Issues as the durable task queue for non-trivial work. Check for an existing issue before implementation; create or draft one unless the change is tiny. Large work should use a parent issue plus native GitHub sub-issues for independently shippable vertical slices. Do not rely only on textual `Refs #N` links when the sub-issue relationship is available. Each sub-issue must leave `master` buildable, testable, deployable, and safe for normal users; for tightly coupled migrations, inactive implementation slices are acceptable, and partial user-facing features that cannot safely ship yet must stay behind a feature flag. Production behavior must switch in one coherent deployable sub-issue.
 
+Before implementation, always estimate the requested change size. For tiny changes, this can be a one-line forecast; for larger changes, include expected files touched, architectural layers touched, changed-line range, whether the work fits the normal PR budget, and a split proposal when it does not fit.
+
+Before opening a PR, report the actual changed files, additions/deletions, layers touched, whether the PR stayed within the approved budget, and where any large-PR approval is documented. If actual size exceeds the approved plan, stop before opening the PR and ask whether to split or proceed.
+
+Non-trivial issues and PRs must include a `Review Size` section. Issues should estimate files, changed lines, layers, budget fit, and split plan. PRs should report actual files, additions/deletions, layers, budget fit, and any large-PR approval. Tiny changes may use a one-line Review Size summary.
+
+Normal feature PRs should target no more than 800 changed lines, 12 changed files, and 3 architectural layers. Tests count toward these limits. If a planned change is likely to exceed any limit, split the task before implementation; if the limit is discovered mid-work, stop and ask whether to split or continue with an explicitly larger PR.
+
+Large PRs require explicit pre-approval after stating the expected size, the reason the PR should exceed the budget, and at least one split alternative. The PR description must explain why it exceeds the review budget.
+
+Ambiguous approval such as "continue" is not enough for an over-budget PR. Ask whether to approve one larger PR despite exceeding the budget or split into proposed sub-issues, and proceed as one large PR only after clear approval.
+
+If work exceeds the normal PR budget and is not explicitly approved as a large PR, create a parent issue plus native sub-issues before implementation. Each sub-issue should map to one reviewable PR and be implemented one at a time unless explicitly requested otherwise.
+
+When a feature introduces a new persisted concept or schema change, split by architectural layer first: domain/docs plus persistence/service foundation, then hook/UI integration, then polish or downstream integration if needed. For UI-only work, split by user-visible workflow.
+
+Foundation PRs may add inactive domain, persistence, service, or helper code only when tested directly, not user-visible, and tied to a named follow-up sub-issue that will activate it.
+
 Use feature flags only when incomplete user-facing behavior must land before it is ready. Each flag needs an owner issue, default state, reason, enable/removal condition, and cleanup issue.
 
 ## Agent-Specific Instructions

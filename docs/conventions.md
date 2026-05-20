@@ -1,5 +1,89 @@
 # Conventions
 
+## Task and PR Sizing
+
+Before implementation, estimate the requested change size. For tiny changes,
+this can be a one-line forecast. For larger changes, include expected files
+touched, architectural layers touched, changed-line range, whether the work fits
+the normal PR budget, and a split proposal when it does not fit.
+
+Before opening a PR, report the actual review size: changed files,
+additions/deletions, architectural layers touched, whether the PR stayed within
+the approved budget, and where any large-PR approval is documented. If the
+actual size exceeds the approved plan, stop before opening the PR and ask
+whether to split or proceed.
+
+Non-trivial issues and PRs must include a `Review Size` section. For issues,
+include estimated files, estimated changed lines, architectural layers, whether
+the work fits the normal PR budget, and the split plan when needed. For PRs,
+include changed files, additions/deletions, architectural layers, whether the PR
+stayed within the approved budget, and where any large-PR approval is
+documented. Tiny changes may use a one-line Review Size summary.
+
+Normal feature PRs should stay within this review budget:
+
+- No more than 800 changed lines, excluding generated files
+- No more than 12 changed files
+- No more than 3 architectural layers touched
+
+Test files count toward changed lines and changed files because they are review
+surface. If tests alone push a PR over budget, say that explicitly and ask
+whether to keep the larger PR or split the work. Do not use "mostly tests" as an
+automatic reason to exceed the budget.
+
+Generated files, such as `src/routeTree.gen.ts` and
+`docs/navigation-flow.md`, are excluded from the changed-line limit. They still
+count as changed files for awareness, but they should not force a split solely
+because they push the PR over the file-count limit. List generated files
+separately in the PR description.
+
+If a planned change is likely to exceed any of these limits, split the task
+before implementation. If implementation reveals that a limit will be exceeded,
+stop and ask whether to split the remaining work or continue with an explicitly
+larger PR.
+
+Large PRs are allowed only with explicit pre-approval and a stated reason in the
+issue or PR. Acceptable reasons include:
+
+- Mechanical rename or migration where splitting would create duplicate churn
+- Tightly coupled migration where partial slices would leave confusing dead code
+- Emergency fix where delaying is riskier than reviewing a larger PR
+- User approval after seeing the estimated size and at least one split option
+
+Before implementing an approved large PR, state the expected size, why it
+exceeds the budget, and at least one split alternative. The PR description must
+include a "Why this PR exceeds the review budget" section.
+
+Ambiguous approval such as "continue" is not enough to proceed with an
+over-budget PR. Ask whether to approve one larger PR despite exceeding the
+budget or split into the proposed sub-issues. Proceed as one large PR only after
+clear approval such as "approve larger PR."
+
+When a task exceeds the normal PR budget and is not explicitly approved as a
+large PR, decompose it into a parent issue plus native sub-issues before
+implementation. Each sub-issue should map to one reviewable PR, define its own
+scope, out-of-scope items, and verification, and leave `master` buildable,
+testable, deployable, and safe for normal users. Implement one sub-issue at a
+time unless explicitly asked to do otherwise.
+
+When a feature introduces a new persisted concept or schema change, split by
+architectural layer before splitting by user-visible workflow:
+
+1. Domain/docs plus persistence and service foundation, without user-visible UI
+2. Hook and UI integration using the committed foundation
+3. Follow-up polish or downstream feature integration, only when needed
+
+For UI-only work, split by user-visible workflow instead.
+
+Foundation PRs are allowed when they make a large feature reviewable. They may
+add inactive or not-yet-wired domain, persistence, service, or helper code when
+all of the following are true:
+
+- The foundation is tested directly
+- It does not expose partial user-facing behaviour
+- Any production behaviour change is safe no-op plumbing
+- The issue or PR names the follow-up sub-issue that will activate it
+
 ## TypeScript
 
 Strict mode. `interface` for object shapes, `type` for unions and aliases. Never use `any`. Use `unknown` at system boundaries and narrow explicitly.
