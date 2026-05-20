@@ -47,3 +47,14 @@ See `src/components/` structure in `@docs/architecture.md`.
 Feature components may contain feature-specific cards, empty states, labels, and
 layout sections directly. Extract a UI primitive only when styling or behavior
 is genuinely shared and remains business-agnostic.
+
+## Character Cards
+
+Story detail Character cards are feature-owned UI in `StoryDetail`. Keep cards
+fixed-height so the grid remains even as custom-property content varies. The
+card content should start at the top, with long names and custom-property
+previews truncated instead of expanding the card.
+
+Character dialogs use standard TreeTales dialog styling: a dim page overlay,
+white rounded dialog panel, title block, close action, and footer actions.
+Property reordering uses compact icon buttons beside each property row.

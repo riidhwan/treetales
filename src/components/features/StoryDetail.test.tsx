@@ -3,18 +3,43 @@ import {
   fireEvent,
   render,
   screen,
+  within,
   waitFor,
 } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { StoryDetail } from '@/components/features/StoryDetail'
-import type { Story } from '@/services/types'
+import type { StoryCharacterServices } from '@/hooks/useStoryCharacters'
+import type {
+  Character,
+  CreateCharacterInput,
+  Story,
+  UpdateCharacterInput,
+} from '@/services/types'
 
 function createStory(overrides: Partial<Story> = {}): Story {
   return {
     id: 'story-1',
     title: 'The Old Road',
     description: 'A choice in the woods',
+    createdAt: 100,
+    updatedAt: 100,
+    ...overrides,
+  }
+}
+
+function createCharacter(overrides: Partial<Character> = {}): Character {
+  return {
+    id: 'character-1',
+    storyId: 'story-1',
+    name: 'Mira',
+    gender: 'female',
+    properties: [
+      { key: 'age', value: '32' },
+      { key: 'description', value: 'A long history\nwith line breaks' },
+      { key: 'appearance', value: 'Silver hair' },
+      { key: 'relationship', value: 'Sister of Rowan' },
+    ],
     createdAt: 100,
     updatedAt: 100,
     ...overrides,
@@ -41,13 +66,60 @@ function createServices(options?: CreateServicesOptions) {
   }
 }
 
+function createCharacterServices(
+  characters: Character[] = [createCharacter()],
+): StoryCharacterServices {
+  let currentCharacters = characters
+
+  return {
+    createCharacter: vi.fn((input: CreateCharacterInput) => {
+      const character = createCharacter({
+        id: 'character-created',
+        ...input,
+      })
+      currentCharacters = [...currentCharacters, character]
+      return Promise.resolve(character)
+    }),
+    deleteCharacter: vi.fn((id: string) => {
+      const exists = currentCharacters.some((character) => character.id === id)
+      currentCharacters = currentCharacters.filter(
+        (character) => character.id !== id,
+      )
+      return Promise.resolve(exists)
+    }),
+    getCharactersByStoryId: vi.fn(() => Promise.resolve(currentCharacters)),
+    updateCharacter: vi.fn((id: string, input: UpdateCharacterInput) => {
+      const character = currentCharacters.find(
+        (currentCharacter) => currentCharacter.id === id,
+      )
+
+      if (!character) {
+        return Promise.resolve(undefined)
+      }
+
+      const updatedCharacter = {
+        ...character,
+        ...input,
+        updatedAt: 200,
+      }
+      currentCharacters = currentCharacters.map((currentCharacter) =>
+        currentCharacter.id === id ? updatedCharacter : currentCharacter,
+      )
+
+      return Promise.resolve(updatedCharacter)
+    }),
+  }
+}
+
 function renderDetail({
+  characterServices = createCharacterServices([]),
   onDeleted = vi.fn(),
   onEditStory = vi.fn(),
   onOpenDashboard = vi.fn(),
   onReadStory = vi.fn(),
   services = createServices(),
 }: {
+  readonly characterServices?: ReturnType<typeof createCharacterServices>
   readonly onDeleted?: () => void
   readonly onEditStory?: (storyId: string) => void
   readonly onOpenDashboard?: () => void
@@ -56,6 +128,7 @@ function renderDetail({
 } = {}) {
   return render(
     <StoryDetail
+      characterServices={characterServices}
       onDeleted={onDeleted}
       onEditStory={onEditStory}
       onOpenDashboard={onOpenDashboard}
@@ -106,6 +179,198 @@ describe('StoryDetail', () => {
     expect(screen.getByRole('button', { name: /read/i })).toBeTruthy()
     expect(screen.getByRole('button', { name: /edit/i })).toBeTruthy()
     expect(screen.getByRole('button', { name: /delete/i })).toBeTruthy()
+  })
+
+  it('shows a characters empty state for loaded stories', async () => {
+    const characterServices = createCharacterServices([])
+
+    renderDetail({ characterServices })
+
+    expect(await screen.findByRole('heading', { name: 'Story characters' }))
+      .toBeTruthy()
+    expect(await screen.findByText('No characters yet')).toBeTruthy()
+    expect(characterServices.getCharactersByStoryId).toHaveBeenCalledWith(
+      'story-1',
+    )
+  })
+
+  it('shows a scoped loading state while characters load', async () => {
+    const pendingCharacters = deferred<Character[]>()
+    const characterServices = {
+      ...createCharacterServices([]),
+      getCharactersByStoryId: vi.fn(() => pendingCharacters.promise),
+    }
+
+    renderDetail({ characterServices })
+
+    expect(await screen.findByText('Loading characters...')).toBeTruthy()
+
+    pendingCharacters.resolve([])
+  })
+
+  it('shows fixed character cards with truncated property previews', async () => {
+    const characterServices = createCharacterServices([createCharacter()])
+
+    renderDetail({ characterServices })
+
+    expect(await screen.findByRole('button', { name: 'View Mira' })).toBeTruthy()
+    expect(screen.getByText('Female')).toBeTruthy()
+    expect(screen.getByText('age')).toBeTruthy()
+    expect(screen.getByText('+1 more')).toBeTruthy()
+    expect(screen.queryByText('relationship')).toBeNull()
+  })
+
+  it('shows male character cards without a remaining-count indicator', async () => {
+    const characterServices = createCharacterServices([
+      createCharacter({
+        gender: 'male',
+        properties: [{ key: 'role', value: 'Guide' }],
+      }),
+    ])
+
+    renderDetail({ characterServices })
+
+    expect(await screen.findByRole('button', { name: 'View Mira' })).toBeTruthy()
+    expect(screen.getByText('Male')).toBeTruthy()
+    expect(screen.queryByText(/\+\d+ more/)).toBeNull()
+  })
+
+  it('opens character details with full plain-text values', async () => {
+    const characterServices = createCharacterServices([createCharacter()])
+
+    renderDetail({ characterServices })
+
+    fireEvent.click(await screen.findByRole('button', { name: 'View Mira' }))
+
+    const dialog = screen.getByRole('dialog', { name: 'Mira' })
+
+    expect(dialog).toBeTruthy()
+    expect(
+      within(dialog).getByText(/A long history\s+with line breaks/),
+    ).toBeTruthy()
+    expect(within(dialog).getByText('relationship')).toBeTruthy()
+  })
+
+  it('shows a no-properties fallback in character details', async () => {
+    const characterServices = createCharacterServices([
+      createCharacter({ properties: [] }),
+    ])
+
+    renderDetail({ characterServices })
+
+    fireEvent.click(await screen.findByRole('button', { name: 'View Mira' }))
+
+    const dialog = screen.getByRole('dialog', { name: 'Mira' })
+
+    expect(within(dialog).getByText('No custom properties yet.')).toBeTruthy()
+  })
+
+  it('creates a character from the story detail dialog', async () => {
+    const characterServices = createCharacterServices([])
+
+    renderDetail({ characterServices })
+
+    await screen.findByRole('heading', { name: 'Story characters' })
+    fireEvent.click(screen.getByRole('button', { name: /add character/i }))
+    fireEvent.change(screen.getByLabelText('Name'), {
+      target: { value: ' Mira ' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /add property/i }))
+    fireEvent.change(screen.getByLabelText('Key'), {
+      target: { value: ' age ' },
+    })
+    fireEvent.change(screen.getByLabelText('Value'), {
+      target: { value: ' 32 ' },
+    })
+    const characterForm = screen.getByLabelText('Name').closest('form')
+
+    if (!characterForm) {
+      throw new Error('Character form was not found.')
+    }
+
+    fireEvent.submit(characterForm)
+
+    await waitFor(() => {
+      expect(characterServices.createCharacter).toHaveBeenCalledWith({
+        storyId: 'story-1',
+        name: 'Mira',
+        gender: 'female',
+        properties: [{ key: 'age', value: '32' }],
+      })
+    })
+    expect(await screen.findByRole('dialog', { name: 'Mira' })).toBeTruthy()
+  })
+
+  it('edits and deletes a character from the detail dialog', async () => {
+    const characterServices = createCharacterServices([createCharacter()])
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+
+    renderDetail({ characterServices })
+
+    fireEvent.click(await screen.findByRole('button', { name: 'View Mira' }))
+    let dialog = screen.getByRole('dialog', { name: 'Mira' })
+    fireEvent.click(within(dialog).getByRole('button', { name: /^edit$/i }))
+    dialog = screen.getByRole('dialog', { name: 'Edit Mira' })
+    fireEvent.change(within(dialog).getByLabelText('Name'), {
+      target: { value: 'Mira Changed' },
+    })
+    fireEvent.click(within(dialog).getByRole('button', { name: /^save$/i }))
+
+    await waitFor(() => {
+      expect(characterServices.updateCharacter).toHaveBeenCalledWith(
+        'character-1',
+        expect.objectContaining({ name: 'Mira Changed' }),
+      )
+    })
+
+    dialog = await screen.findByRole('dialog', { name: 'Mira Changed' })
+    fireEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }))
+
+    await waitFor(() => {
+      expect(characterServices.deleteCharacter).toHaveBeenCalledWith(
+        'character-1',
+      )
+    })
+    expect(window.confirm).toHaveBeenCalledWith(
+      'Delete "Mira Changed"? This cannot be undone.',
+    )
+  })
+
+  it('reorders and removes character properties in the edit dialog', async () => {
+    const characterServices = createCharacterServices([createCharacter()])
+
+    renderDetail({ characterServices })
+
+    fireEvent.click(await screen.findByRole('button', { name: 'View Mira' }))
+    let dialog = screen.getByRole('dialog', { name: 'Mira' })
+    fireEvent.click(within(dialog).getByRole('button', { name: /^edit$/i }))
+    dialog = screen.getByRole('dialog', { name: 'Edit Mira' })
+
+    fireEvent.change(within(dialog).getByLabelText('Gender'), {
+      target: { value: 'male' },
+    })
+    fireEvent.click(
+      within(dialog).getByRole('button', { name: /move age down/i }),
+    )
+    fireEvent.click(
+      within(dialog).getByRole('button', { name: /move appearance up/i }),
+    )
+    fireEvent.click(within(dialog).getAllByRole('button', { name: /remove/i })[0])
+    fireEvent.click(within(dialog).getByRole('button', { name: /^save$/i }))
+
+    await waitFor(() => {
+      expect(characterServices.updateCharacter).toHaveBeenCalledWith(
+        'character-1',
+        expect.objectContaining({
+          gender: 'male',
+          properties: [
+            { key: 'appearance', value: 'Silver hair' },
+            { key: 'age', value: '32' },
+            { key: 'relationship', value: 'Sister of Rowan' },
+          ],
+        }),
+      )
+    })
   })
 
   it('shows a fallback when the story has no description', async () => {
