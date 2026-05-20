@@ -8,6 +8,18 @@ TreeTales is a branching story writing and reading app. This context names the s
 A user-authored branching narrative.
 _Avoid_: Book, tale, project
 
+**Character**:
+A person-like entity in a **Story**.
+_Avoid_: Cast member, persona
+
+**Character Gender**:
+A required **Character** classification of either male or female.
+_Avoid_: Sex, pronouns, free-form gender
+
+**Character Property**:
+An ordered key/value detail on a **Character**, such as age, appearance, or description.
+_Avoid_: Attribute, field, metadata
+
 **Chapter**:
 A single authored passage within a **Story**.
 _Avoid_: Node, page, scene
@@ -39,6 +51,10 @@ _Avoid_: Draft, chapter content
 ## Relationships
 
 - A **Story** has zero or more **Chapters**.
+- A **Story** has zero or more **Characters**.
+- A **Character** belongs to exactly one **Story**.
+- A **Character** has zero or more **Character Properties**.
+- A **Character Property** belongs to exactly one **Character**.
 - A **Chapter** belongs to exactly one **Story**.
 - A **Story** has zero or one **Intro Chapter**.
 - A **Chapter** has zero or one parent **Chapter**.
@@ -49,6 +65,9 @@ _Avoid_: Draft, chapter content
 
 > **Dev:** "When a reader opens a **Story**, should they start at any chapter?"
 > **Domain expert:** "No. They start at the **Intro Chapter**, then choose among its **Branches** as the story unfolds."
+>
+> **Dev:** "If the same **Character** appears across several **Branches**, should we create one per **Chapter**?"
+> **Domain expert:** "No. A **Character** belongs to the **Story**, even if they appear in many **Chapters**."
 
 ## Flagged ambiguities
 
@@ -59,3 +78,4 @@ _Avoid_: Draft, chapter content
 - "Reader Appearance" was originally reading-only — resolved: it can also apply to chapter authoring surfaces when those surfaces present **Chapter** document text.
 - "generate prompt" can sound like direct prose generation — resolved: use **Prompt Builder** for preparing copy-paste LLM prompts, not writing chapter content inside TreeTales.
 - "draft" can mean saved **Chapter** content or temporary scratch input — resolved: use **Rough Plot** for Prompt Builder scratch text and **Chapter** content for authored markdown.
+- "character" could mean a chapter-local appearance or a story-level entity — resolved: use **Character** for a story-level entity that can appear across many **Chapters**.
