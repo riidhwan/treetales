@@ -55,9 +55,9 @@ export function StoryEditor({
     )
   } else if (status === 'missing-story') {
     editorContent = (
-      <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
+      <section className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm">
         <h1 className="text-2xl font-bold">Story not found</h1>
-        <p className="mt-3 text-sm leading-6 text-stone-600">
+        <p className="mt-3 text-sm leading-6 text-tt-muted">
           This story may have been deleted or is unavailable in this browser.
         </p>
         <Button
@@ -86,11 +86,11 @@ export function StoryEditor({
         ) : null}
 
         <form
-          className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8"
+          className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm sm:p-8"
           onSubmit={handleSave}
         >
-          <div className="border-b border-stone-200 pb-5">
-            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+          <div className="border-b border-tt-line pb-5">
+            <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
               Story editor
             </p>
             <h1 className="mt-2 text-3xl font-bold">
@@ -99,7 +99,7 @@ export function StoryEditor({
           </div>
 
           <div className="mt-6 grid gap-5">
-            <label className="grid gap-2 text-sm font-medium text-stone-800">
+            <label className="grid gap-2 text-sm font-medium text-tt-ink">
               Title
               <TextInput
                 name="title"
@@ -107,7 +107,7 @@ export function StoryEditor({
                 value={title}
               />
             </label>
-            <label className="grid gap-2 text-sm font-medium text-stone-800">
+            <label className="grid gap-2 text-sm font-medium text-tt-ink">
               Description
               <TextArea
                 name="description"
@@ -139,7 +139,7 @@ export function StoryEditor({
   }
 
   return (
-    <main className="min-h-screen bg-stone-50 text-stone-950">
+    <main className="min-h-screen bg-tt-parchment text-tt-ink">
       <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
         <nav
           aria-label="Editor actions"
@@ -178,11 +178,11 @@ function ChapterSection({
   introChapter,
 }: ChapterSectionProps) {
   return (
-    <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-stone-200 pb-5">
+    <section className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm sm:p-8">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-tt-line pb-5">
         <div>
           <h2 className="text-xl font-semibold">Intro Chapter</h2>
-          <p className="mt-1 text-sm text-stone-600">
+          <p className="mt-1 text-sm text-tt-muted">
             The story starts here. Add branches from chapter pages.
           </p>
         </div>
@@ -208,9 +208,9 @@ function IntroChapterEmptyState({
   onCreateIntroChapter,
 }: IntroChapterEmptyStateProps) {
   return (
-    <div className="mt-6 rounded-lg border border-dashed border-stone-300 bg-stone-50 p-5">
+    <div className="mt-6 rounded-lg border border-dashed border-tt-line bg-tt-paper-deep/50 p-5">
       <h3 className="text-base font-semibold">Start with an intro chapter</h3>
-      <p className="mt-2 text-sm leading-6 text-stone-600">
+      <p className="mt-2 text-sm leading-6 text-tt-muted">
         Every story begins with one top-level chapter. Later chapters are added
         from the chapter they follow.
       </p>
@@ -236,11 +236,11 @@ function IntroChapterCard({
   onEditChapter,
 }: IntroChapterCardProps) {
   return (
-    <article className="mt-5 rounded-md border border-stone-200 p-4">
+    <article className="mt-5 rounded-md border border-tt-line bg-tt-paper-deep/35 p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="font-semibold">{introChapter.title}</h3>
-          <p className="mt-1 text-sm text-stone-600">Intro chapter</p>
+          <p className="mt-1 text-sm text-tt-muted">Intro chapter</p>
         </div>
         <Button onClick={() => onEditChapter(introChapter.id)} size="sm">
           <Edit3 aria-hidden="true" size={16} />

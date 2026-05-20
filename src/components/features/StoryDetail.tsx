@@ -74,9 +74,9 @@ export function StoryDetail({
     )
   } else if (status === 'missing-story') {
     detailContent = (
-      <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
+      <section className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm">
         <h1 className="text-2xl font-bold">Story not found</h1>
-        <p className="mt-3 text-sm leading-6 text-stone-600">
+        <p className="mt-3 text-sm leading-6 text-tt-muted">
           This story may have been deleted or is unavailable in this browser.
         </p>
         <Button className="mt-5" onClick={onOpenDashboard} size="sm">
@@ -94,14 +94,14 @@ export function StoryDetail({
           </Alert>
         ) : null}
 
-        <article className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
-          <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+        <article className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
             Story
           </p>
           <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
             {story.title || 'Untitled story'}
           </h1>
-          <p className="mt-4 text-sm leading-6 text-stone-600 sm:text-base">
+          <p className="mt-4 text-sm leading-6 text-tt-muted sm:text-base">
             {story.description || 'No description yet.'}
           </p>
 
@@ -134,7 +134,7 @@ export function StoryDetail({
   }
 
   return (
-    <main className="min-h-screen bg-stone-50 text-stone-950">
+    <main className="min-h-screen bg-tt-parchment text-tt-ink">
       <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
         <nav
           aria-label="Story detail actions"
@@ -167,9 +167,9 @@ function CharacterSection({
     charactersContent = <Alert className="mt-5">Loading characters...</Alert>
   } else if (characterDialog.characters.length === 0) {
     charactersContent = (
-      <div className="mt-5 rounded-lg border border-dashed border-stone-300 p-6 text-center">
+      <div className="mt-5 rounded-lg border border-dashed border-tt-line bg-tt-paper-deep/40 p-6 text-center">
         <h3 className="text-lg font-semibold">No characters yet</h3>
-        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-stone-600">
+        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-tt-muted">
           Add character cards for the people in this story.
         </p>
       </div>
@@ -190,10 +190,10 @@ function CharacterSection({
 
   return (
     <>
-      <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
+      <section className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm sm:p-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+            <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
               Characters
             </p>
             <h2 className="mt-2 text-2xl font-bold">Story characters</h2>
@@ -247,14 +247,14 @@ function CharacterCard({ character, onOpen }: CharacterCardProps) {
   return (
     <button
       aria-label={`View ${character.name}`}
-      className="flex h-52 flex-col items-stretch justify-start overflow-hidden rounded-lg border border-stone-200 bg-stone-50 p-4 text-left transition hover:border-emerald-300 hover:bg-emerald-50/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+      className="flex h-52 flex-col items-stretch justify-start overflow-hidden rounded-lg border border-tt-line bg-tt-paper-deep/60 p-4 text-left transition hover:border-tt-gold hover:bg-tt-gold-soft/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tt-gold"
       onClick={() => onOpen(character)}
       type="button"
     >
-      <span className="block truncate text-lg font-semibold text-stone-950">
+      <span className="block truncate text-lg font-semibold text-tt-ink">
         {character.name}
       </span>
-      <span className="mt-1 block text-sm font-medium text-stone-600">
+      <span className="mt-1 block text-sm font-medium text-tt-muted">
         {formatGender(character.gender)}
       </span>
       <span className="mt-4 grid gap-1">
@@ -263,14 +263,14 @@ function CharacterCard({ character, onOpen }: CharacterCardProps) {
             className="grid grid-cols-[minmax(0,0.45fr)_minmax(0,1fr)] gap-2 text-sm"
             key={`${property.key}-${index}`}
           >
-            <span className="truncate font-medium text-stone-700">
+            <span className="truncate font-medium text-tt-ink">
               {property.key}
             </span>
-            <span className="truncate text-stone-600">{property.value}</span>
+            <span className="truncate text-tt-muted">{property.value}</span>
           </span>
         ))}
         {character.properties.length > 3 ? (
-          <span className="mt-1 text-sm font-medium text-emerald-700">
+          <span className="mt-1 text-sm font-medium text-tt-moss">
             +{character.properties.length - 3} more
           </span>
         ) : null}
@@ -323,16 +323,16 @@ function CharacterDialog({
   const title = getCharacterDialogTitle(dialogState)
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-stone-950/40 px-4 py-6">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-tt-ink/45 px-4 py-6">
       <section
         aria-labelledby={titleId}
         aria-modal="true"
-        className="max-h-[calc(100vh-3rem)] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-5 shadow-xl sm:p-6"
+        className="max-h-[calc(100vh-3rem)] w-full max-w-2xl overflow-y-auto rounded-lg border border-tt-line bg-tt-paper p-5 shadow-xl sm:p-6"
         role="dialog"
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+            <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
               Character
             </p>
             <h2 className="mt-1 text-2xl font-bold" id={titleId}>
@@ -433,7 +433,7 @@ function CharacterForm({
       }}
     >
       <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_12rem]">
-        <label className="grid gap-2 text-sm font-medium text-stone-800">
+        <label className="grid gap-2 text-sm font-medium text-tt-ink">
           Name
           <TextInput
             onChange={(event) => onNameChange(event.target.value)}
@@ -441,10 +441,10 @@ function CharacterForm({
             value={draft.name}
           />
         </label>
-        <label className="grid gap-2 text-sm font-medium text-stone-800">
+        <label className="grid gap-2 text-sm font-medium text-tt-ink">
           Gender
           <select
-            className="min-h-11 rounded-md border border-stone-300 bg-white px-3 text-base outline-none transition focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
+            className="min-h-11 rounded-md border border-tt-line bg-tt-paper px-3 text-base text-tt-ink outline-none transition focus:border-tt-moss focus:ring-2 focus:ring-tt-gold-soft"
             onChange={(event) =>
               onGenderChange(event.target.value as CharacterGender)
             }
@@ -466,18 +466,18 @@ function CharacterForm({
         </div>
 
         {draft.properties.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-stone-300 p-4 text-sm text-stone-600">
+          <p className="rounded-lg border border-dashed border-tt-line p-4 text-sm text-tt-muted">
             No custom properties yet.
           </p>
         ) : (
           <div className="grid gap-3">
             {draft.properties.map((property, index) => (
               <div
-                className="grid gap-3 rounded-lg border border-stone-200 p-3"
+                className="grid gap-3 rounded-lg border border-tt-line bg-tt-paper-deep/40 p-3"
                 key={property.id}
               >
                 <div className="grid items-start gap-3 sm:grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)]">
-                  <label className="grid content-start gap-2 text-sm font-medium text-stone-800">
+                  <label className="grid content-start gap-2 text-sm font-medium text-tt-ink">
                     Key
                     <TextInput
                       onChange={(event) =>
@@ -489,7 +489,7 @@ function CharacterForm({
                       value={property.key}
                     />
                   </label>
-                  <label className="grid content-start gap-2 text-sm font-medium text-stone-800">
+                  <label className="grid content-start gap-2 text-sm font-medium text-tt-ink">
                     Value
                     <TextArea
                       className="min-h-24"
@@ -535,7 +535,7 @@ function CharacterForm({
         )}
 
         {isSaving ? (
-          <p className="text-sm text-stone-600">Saving character...</p>
+          <p className="text-sm text-tt-muted">Saving character...</p>
         ) : null}
       </section>
     </form>
@@ -551,14 +551,14 @@ function CharacterDetails({ character }: CharacterDetailsProps) {
     <div className="mt-5 grid gap-5">
       <dl className="grid gap-3 sm:grid-cols-2">
         <div>
-          <dt className="text-sm font-medium text-stone-600">Name</dt>
-          <dd className="mt-1 text-base font-semibold text-stone-950">
+          <dt className="text-sm font-medium text-tt-muted">Name</dt>
+          <dd className="mt-1 text-base font-semibold text-tt-ink">
             {character.name}
           </dd>
         </div>
         <div>
-          <dt className="text-sm font-medium text-stone-600">Gender</dt>
-          <dd className="mt-1 text-base font-semibold text-stone-950">
+          <dt className="text-sm font-medium text-tt-muted">Gender</dt>
+          <dd className="mt-1 text-base font-semibold text-tt-ink">
             {formatGender(character.gender)}
           </dd>
         </div>
@@ -567,20 +567,20 @@ function CharacterDetails({ character }: CharacterDetailsProps) {
       <section>
         <h3 className="text-lg font-semibold">Custom properties</h3>
         {character.properties.length === 0 ? (
-          <p className="mt-2 text-sm text-stone-600">
+          <p className="mt-2 text-sm text-tt-muted">
             No custom properties yet.
           </p>
         ) : (
           <dl className="mt-3 grid gap-3">
             {character.properties.map((property, index) => (
               <div
-                className="rounded-lg border border-stone-200 bg-stone-50 p-3"
+                className="rounded-lg border border-tt-line bg-tt-paper-deep/50 p-3"
                 key={`${property.key}-${index}`}
               >
-                <dt className="text-sm font-semibold text-stone-800">
+                <dt className="text-sm font-semibold text-tt-ink">
                   {property.key}
                 </dt>
-                <dd className="mt-1 whitespace-pre-wrap text-sm leading-6 text-stone-700">
+                <dd className="mt-1 whitespace-pre-wrap text-sm leading-6 text-tt-muted">
                   {property.value}
                 </dd>
               </div>
