@@ -92,6 +92,14 @@ Native sub-issues are the source of truth. Use this section only to explain the 
 
 Native blocked-by/blocking relationships are the source of truth. Summarize only when helpful.
 
+## Review Size
+
+Estimated files:
+Estimated changed lines:
+Architectural layers:
+Fits normal PR budget:
+Split plan:
+
 ## Completion Criteria
 
 What must be true before closing the parent.
@@ -123,6 +131,14 @@ What this issue must not touch.
 ## Dependencies
 
 Native blocked-by/blocking relationships are the source of truth. Summarize only when helpful.
+
+## Review Size
+
+Estimated files:
+Estimated changed lines:
+Architectural layers:
+Fits normal PR budget:
+Split plan:
 
 ## Verification
 
