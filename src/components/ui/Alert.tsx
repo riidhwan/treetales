@@ -5,10 +5,12 @@ import { cn } from '@/lib/utils'
 type AlertVariant = 'error' | 'neutral' | 'success'
 
 const VARIANT_CLASSES: Record<AlertVariant, string> = {
-  error: 'rounded-md border border-red-200 bg-red-50 px-4 py-3 text-red-800',
-  neutral: 'rounded-lg border border-stone-200 bg-white p-6 text-stone-600',
+  error:
+    'rounded-md border border-tt-oxblood/30 bg-tt-oxblood-soft px-4 py-3 text-tt-oxblood',
+  neutral:
+    'rounded-lg border border-tt-line bg-tt-paper p-6 text-tt-muted shadow-sm',
   success:
-    'rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800',
+    'rounded-md border border-tt-moss/25 bg-tt-moss-soft px-4 py-3 text-tt-moss-dark',
 }
 
 interface Props extends Readonly<HTMLAttributes<HTMLParagraphElement>> {

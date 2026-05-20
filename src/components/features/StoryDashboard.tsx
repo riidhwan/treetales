@@ -48,9 +48,9 @@ export function StoryDashboard({
     storiesContent = <Alert>Loading stories...</Alert>
   } else if (sortedStories.length === 0) {
     storiesContent = (
-      <section className="rounded-lg border border-dashed border-stone-300 bg-white p-8 text-center">
-        <h2 className="text-xl font-semibold">No stories yet</h2>
-        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-stone-600">
+      <section className="rounded-lg border border-dashed border-tt-line bg-tt-paper/80 p-8 text-center shadow-sm">
+        <h2 className="text-xl font-semibold text-tt-ink">No stories yet</h2>
+        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-tt-muted">
           Create a story with a title and description to start building a
           branching tale.
         </p>
@@ -76,22 +76,22 @@ export function StoryDashboard({
         {sortedStories.map((story) => (
           <button
             aria-label={`Open ${story.title}`}
-            className="group grid h-24 w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-lg border border-stone-200 bg-white px-4 text-left shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 sm:px-5"
+            className="group grid h-24 w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-lg border border-tt-line bg-tt-paper px-4 text-left shadow-sm transition hover:border-tt-gold hover:bg-tt-gold-soft/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tt-gold sm:px-5"
             key={story.id}
             onClick={() => onOpenStory(story.id)}
             type="button"
           >
             <span className="min-w-0">
-              <span className="block truncate text-lg font-semibold text-stone-950">
+              <span className="block truncate text-lg font-semibold text-tt-ink">
                 {story.title}
               </span>
-              <span className="mt-1 block truncate text-sm leading-6 text-stone-600">
+              <span className="mt-1 block truncate text-sm leading-6 text-tt-muted">
                 {story.description || 'No description yet.'}
               </span>
             </span>
             <ChevronRight
               aria-hidden="true"
-              className="text-stone-400 transition group-hover:text-emerald-700"
+              className="text-tt-muted/60 transition group-hover:text-tt-moss"
               size={20}
             />
           </button>
@@ -101,11 +101,11 @@ export function StoryDashboard({
   }
 
   return (
-    <main className="min-h-screen bg-stone-50 text-stone-950">
+    <main className="min-h-screen bg-tt-parchment text-tt-ink">
       <section className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-5 py-8 sm:px-8 lg:px-10">
-        <header className="flex flex-col gap-4 border-b border-stone-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <header className="flex flex-col gap-4 border-b border-tt-line pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+            <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
               TreeTales
             </p>
             <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
@@ -113,7 +113,7 @@ export function StoryDashboard({
             </h1>
           </div>
           <div className="flex flex-col items-start gap-3 sm:items-end">
-            <p className="max-w-xl text-sm leading-6 text-stone-600">
+            <p className="max-w-xl text-sm leading-6 text-tt-muted">
               Manage branching stories saved in this browser.
             </p>
             <Button onClick={() => setIsFormOpen(true)} variant="primary">
@@ -125,13 +125,13 @@ export function StoryDashboard({
 
         {isFormOpen ? (
           <form
-            className="grid gap-4 rounded-lg border border-stone-200 bg-white p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto] sm:items-end"
+            className="grid gap-4 rounded-lg border border-tt-line bg-tt-paper/85 p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto] sm:items-end"
             onSubmit={(event) => {
               event.preventDefault()
               void createStoryFromForm()
             }}
           >
-            <label className="grid gap-2 text-sm font-medium text-stone-800">
+            <label className="grid gap-2 text-sm font-medium text-tt-ink">
               Title
               <TextInput
                 name="title"
@@ -140,7 +140,7 @@ export function StoryDashboard({
                 value={title}
               />
             </label>
-            <label className="grid gap-2 text-sm font-medium text-stone-800">
+            <label className="grid gap-2 text-sm font-medium text-tt-ink">
               Description
               <TextInput
                 name="description"

@@ -1,6 +1,22 @@
 
 @import "tailwindcss";
 
+@theme {
+  --color-tt-parchment: #f3ecd9;
+  --color-tt-paper: #fffaf0;
+  --color-tt-paper-deep: #f8efd9;
+  --color-tt-ink: #221b16;
+  --color-tt-muted: #6f6258;
+  --color-tt-line: #d8c7a7;
+  --color-tt-moss: #3f5f45;
+  --color-tt-moss-dark: #2e4533;
+  --color-tt-moss-soft: #e5ecd8;
+  --color-tt-oxblood: #8f2f2d;
+  --color-tt-oxblood-soft: #f4ded8;
+  --color-tt-gold: #b9822f;
+  --color-tt-gold-soft: #f5e6bf;
+}
+
 @font-face {
   font-display: swap;
   font-family: "Cartisse";
@@ -300,6 +316,16 @@ body,
 }
 
 body {
+  background: var(--color-tt-parchment);
+  color: var(--color-tt-ink);
+  font-family:
+    "NV Jost",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
   margin: 0;
 }
 
