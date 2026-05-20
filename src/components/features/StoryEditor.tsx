@@ -86,19 +86,10 @@ export function StoryEditor({
         ) : null}
 
         <form
-          className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm sm:p-8"
+          className="border-b border-tt-line pb-6"
           onSubmit={handleSave}
         >
-          <div className="border-b border-tt-line pb-5">
-            <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
-              Story editor
-            </p>
-            <h1 className="mt-2 text-3xl font-bold">
-              {story?.title || 'Untitled story'}
-            </h1>
-          </div>
-
-          <div className="mt-6 grid gap-5">
+          <div className="grid gap-5">
             <label className="grid gap-2 text-sm font-medium text-tt-ink">
               Title
               <TextInput
@@ -141,24 +132,37 @@ export function StoryEditor({
   return (
     <main className="min-h-screen bg-tt-parchment text-tt-ink">
       <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
-        <nav
-          aria-label="Editor actions"
-          className="flex flex-wrap justify-between gap-3"
-        >
-          <Button onClick={onOpenDashboard} size="sm">
-            <Home aria-hidden="true" size={16} />
-            Dashboard
-          </Button>
-          <Button
-            className="disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={status === 'missing-story'}
-            onClick={() => onReadStory(storyId)}
-            size="sm"
+        <header className="border-b border-tt-line pb-6">
+          <nav
+            aria-label="Editor navigation"
+            className="flex flex-wrap justify-between gap-3"
           >
-            <BookOpen aria-hidden="true" size={16} />
-            Read
-          </Button>
-        </nav>
+            <Button onClick={onOpenDashboard} size="sm">
+              <Home aria-hidden="true" size={16} />
+              Dashboard
+            </Button>
+            <Button
+              className="disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={status === 'missing-story'}
+              onClick={() => onReadStory(storyId)}
+              size="sm"
+            >
+              <BookOpen aria-hidden="true" size={16} />
+              Read
+            </Button>
+          </nav>
+          <div className="mt-6">
+            <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
+              Story editor
+            </p>
+            <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
+              Edit Story
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-tt-muted sm:text-base">
+              {story?.title || 'Untitled story'}
+            </p>
+          </div>
+        </header>
 
         {editorContent}
       </section>
@@ -178,7 +182,7 @@ function ChapterSection({
   introChapter,
 }: ChapterSectionProps) {
   return (
-    <section className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm sm:p-8">
+    <section className="pb-6">
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-tt-line pb-5">
         <div>
           <h2 className="text-xl font-semibold">Intro Chapter</h2>

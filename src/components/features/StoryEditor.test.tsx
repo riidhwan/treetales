@@ -130,8 +130,9 @@ describe('StoryEditor', () => {
 
     renderEditor({ services })
 
-    expect(await screen.findByRole('heading', { name: 'The Old Road' }))
+    expect(await screen.findByRole('heading', { name: 'Edit Story' }))
       .toBeTruthy()
+    expect(screen.getByText('The Old Road')).toBeTruthy()
     expect(screen.getByLabelText('Title')).toHaveProperty(
       'value',
       'The Old Road',
@@ -188,7 +189,7 @@ describe('StoryEditor', () => {
 
     renderEditor({ services })
 
-    await screen.findByRole('heading', { name: 'The Old Road' })
+    await screen.findByRole('heading', { name: 'Edit Story' })
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: '  River Fork  ' },
     })
@@ -218,14 +219,13 @@ describe('StoryEditor', () => {
 
     renderEditor({ services })
 
-    await screen.findByRole('heading', { name: 'The Old Road' })
+    await screen.findByRole('heading', { name: 'Edit Story' })
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: 'Draft Title' },
     })
     fireEvent.click(screen.getByRole('button', { name: /save story/i }))
 
-    expect(await screen.findByRole('heading', { name: 'Saved Title' }))
-      .toBeTruthy()
+    expect(await screen.findByText('Saved Title')).toBeTruthy()
     expect(screen.getByLabelText('Title')).toHaveProperty(
       'value',
       'Saved Title',
@@ -241,7 +241,7 @@ describe('StoryEditor', () => {
 
     renderEditor({ services })
 
-    await screen.findByRole('heading', { name: 'The Old Road' })
+    await screen.findByRole('heading', { name: 'Edit Story' })
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: '   ' },
     })
@@ -302,7 +302,7 @@ describe('StoryEditor', () => {
 
     renderEditor({ services })
 
-    await screen.findByRole('heading', { name: 'The Old Road' })
+    await screen.findByRole('heading', { name: 'Edit Story' })
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: 'River Fork' },
     })
@@ -319,7 +319,7 @@ describe('StoryEditor', () => {
 
     renderEditor({ onOpenDashboard, onReadStory })
 
-    await screen.findByRole('heading', { name: 'The Old Road' })
+    await screen.findByRole('heading', { name: 'Edit Story' })
     fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
     fireEvent.click(screen.getByRole('button', { name: 'Read' }))
 
