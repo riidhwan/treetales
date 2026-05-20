@@ -13,6 +13,11 @@ import {
   getChaptersByStoryId,
 } from '@/services/chapterService'
 import {
+  createCharacter,
+  getCharacterById,
+  getCharactersByStoryId,
+} from '@/services/characterService'
+import {
   createStory,
   deleteStory,
   getStories,
@@ -93,6 +98,37 @@ describe('storyService', () => {
     await expect(getChapterById(chapter.id)).resolves.toBeUndefined()
     await expect(getChapterById(otherChapter.id)).resolves.toEqual(otherChapter)
     await expect(getChaptersByStoryId(story.id)).resolves.toEqual([])
+  })
+
+  it('deletes characters that belong to a deleted story', async () => {
+    const story = await createStory({
+      title: 'Branching',
+      description: 'One story',
+    })
+    const otherStory = await createStory({
+      title: 'Separate',
+      description: 'Another story',
+    })
+    const character = await createCharacter({
+      storyId: story.id,
+      name: 'Mira',
+      gender: 'female',
+      properties: [{ key: 'age', value: '32' }],
+    })
+    const otherCharacter = await createCharacter({
+      storyId: otherStory.id,
+      name: 'Tomas',
+      gender: 'male',
+      properties: [],
+    })
+
+    await expect(deleteStory(story.id)).resolves.toBe(true)
+
+    await expect(getCharacterById(character.id)).resolves.toBeUndefined()
+    await expect(getCharacterById(otherCharacter.id)).resolves.toEqual(
+      otherCharacter,
+    )
+    await expect(getCharactersByStoryId(story.id)).resolves.toEqual([])
   })
 
   it('returns undefined when updating a missing story', async () => {
