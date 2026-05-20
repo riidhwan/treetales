@@ -31,6 +31,10 @@ or variants are useful.
 - On mobile, long-form writing toolbars should keep secondary navigation terse
   and preserve essential save or create controls without relying on extra
   navigation.
+- Story detail management sections may use fixed-height responsive cards for
+  scan-heavy lists such as Characters. Keep card previews concise, truncate long
+  values, and open a focused dialog for full detail, creation, editing, and
+  destructive actions.
 
 ## Component Layers
 

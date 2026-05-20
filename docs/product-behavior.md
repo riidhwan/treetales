@@ -18,6 +18,36 @@
 - Story detail provides actions to read, edit, or delete the story.
 - Delete shows a confirmation dialog before removing the story and returning to
   the dashboard.
+- Story detail shows a Characters section below the story summary and actions.
+- Characters are Story-level entities, not Chapter-specific content.
+- A Character requires a non-empty name and a gender of either male or female.
+- Character gender is shown to users as Male or Female.
+- A Character can have zero or more custom properties. Each custom property is
+  an ordered key/value detail. Property keys and values are trimmed before
+  saving, rows with empty keys are ignored, and repeated keys are allowed.
+- Character custom property values are plain text. Long values can include line
+  breaks, but markdown syntax is not rendered.
+- Character cards use a fixed-height responsive list: one column on mobile and
+  two columns on wider screens. Cards show the Character name, gender, and up to
+  three ordered custom property previews with single-line truncated values.
+  Cards with more than three properties show a compact remaining-count
+  indicator.
+- Character cards are keyboard-accessible controls that open a read-only
+  Character detail dialog. The detail dialog shows all custom properties with
+  full plain-text values.
+- Character creation and editing happen in a focused dialog from the Story
+  detail page, not on a separate route. Property values use multiline inputs,
+  and property rows can be reordered with move up/down controls.
+- Closing or cancelling a Character create/edit dialog with unsaved changes asks
+  for confirmation before discarding changes.
+- Character deletion is available from the read-only Character detail dialog,
+  asks for confirmation, and permanently removes the Character and all of its
+  custom properties.
+- Character loading and mutation failures are scoped to the Characters section
+  or dialog. The loaded Story summary and Story actions remain available.
+- Creating, editing, or deleting a Character updates the parent Story's updated
+  time, so the Story is treated as recently changed on the dashboard.
+- Characters are sorted by creation order.
 
 ### Story Reader
 - User opens a story from story detail or the example-story empty state and
@@ -113,6 +143,7 @@
 - Prompt Builder keeps Rough Plot text only for the current page session. Rough
   Plot text is not saved with the Story or Chapter and does not affect
   unsaved-change warnings.
+- Prompt Builder does not use Story Characters as context.
 - If copying the generated prompt fails, Prompt Builder shows the generated
   prompt so the author can copy it manually.
 - Write with LLM is visible but disabled; direct LLM writing is a future feature.

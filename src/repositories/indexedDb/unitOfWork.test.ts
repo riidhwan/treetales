@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createIndexedDbChapterRepository } from '@/repositories/indexedDb/chapterRepository'
+import { createIndexedDbCharacterRepository } from '@/repositories/indexedDb/characterRepository'
 import {
+  CHARACTERS_STORE,
   CHAPTERS_STORE,
   STORIES_STORE,
   openDb,
@@ -9,19 +11,25 @@ import {
 } from '@/repositories/indexedDb/db'
 import { createIndexedDbStoryRepository } from '@/repositories/indexedDb/storyRepository'
 import { createIndexedDbRepositoryUnitOfWork } from '@/repositories/indexedDb/unitOfWork'
-import type { ChapterRepository, StoryRepository } from '@/repositories/types'
-import type { Chapter, Story } from '@/services/types'
+import type {
+  CharacterRepository,
+  ChapterRepository,
+  StoryRepository,
+} from '@/repositories/types'
+import type { Character, Chapter, Story } from '@/services/types'
 import {
   deleteTestDatabase,
   installFakeIndexedDb,
 } from '@/test/indexedDb'
 
 let chapters: ChapterRepository
+let characters: CharacterRepository
 let stories: StoryRepository
 
 beforeEach(() => {
   installFakeIndexedDb()
   chapters = createIndexedDbChapterRepository()
+  characters = createIndexedDbCharacterRepository()
   stories = createIndexedDbStoryRepository()
 })
 
@@ -35,15 +43,21 @@ describe('indexedDbRepositoryUnitOfWork', () => {
     const unitOfWork = createIndexedDbRepositoryUnitOfWork()
     const story = createStory({ id: 'story-1' })
     const chapter = createChapter({ id: 'chapter-1', storyId: story.id })
+    const character = createCharacter({
+      id: 'character-1',
+      storyId: story.id,
+    })
 
     await stories.insertStory(story)
     await chapters.insertChapter(chapter)
+    await characters.insertCharacter(character)
 
     await expect(
       unitOfWork.run(async (repositories) => {
         await repositories.chapters.deleteChapter(chapter.id, {
           unlinkedChildrenUpdatedAt: 250,
         })
+        await repositories.characters.deleteCharacter(character.id)
 
         return repositories.stories.deleteStory(story.id)
       }),
@@ -51,21 +65,30 @@ describe('indexedDbRepositoryUnitOfWork', () => {
 
     await expect(stories.findStoryById(story.id)).resolves.toBeUndefined()
     await expect(chapters.findChapterById(chapter.id)).resolves.toBeUndefined()
+    await expect(
+      characters.findCharacterById(character.id),
+    ).resolves.toBeUndefined()
   })
 
   it('rolls back multi-repository writes when the operation fails', async () => {
     const unitOfWork = createIndexedDbRepositoryUnitOfWork()
     const story = createStory({ id: 'story-1' })
     const chapter = createChapter({ id: 'chapter-1', storyId: story.id })
+    const character = createCharacter({
+      id: 'character-1',
+      storyId: story.id,
+    })
 
     await stories.insertStory(story)
     await chapters.insertChapter(chapter)
+    await characters.insertCharacter(character)
 
     await expect(
       unitOfWork.run(async (repositories) => {
         await repositories.chapters.deleteChapter(chapter.id, {
           unlinkedChildrenUpdatedAt: 250,
         })
+        await repositories.characters.deleteCharacter(character.id)
 
         throw new Error('stop before deleting the story')
       }),
@@ -73,6 +96,9 @@ describe('indexedDbRepositoryUnitOfWork', () => {
 
     await expect(stories.findStoryById(story.id)).resolves.toEqual(story)
     await expect(chapters.findChapterById(chapter.id)).resolves.toEqual(chapter)
+    await expect(characters.findCharacterById(character.id)).resolves.toEqual(
+      character,
+    )
   })
 
   it('rejects writes when a repository receives a readonly transaction', async () => {
@@ -80,14 +106,21 @@ describe('indexedDbRepositoryUnitOfWork', () => {
 
     try {
       const transaction = db.transaction(
-        [STORIES_STORE, CHAPTERS_STORE],
+        [STORIES_STORE, CHAPTERS_STORE, CHARACTERS_STORE],
         'readonly',
       )
       const done = transactionDone(transaction)
       const readonlyStories = createIndexedDbStoryRepository({ transaction })
       const readonlyChapters = createIndexedDbChapterRepository({ transaction })
+      const readonlyCharacters = createIndexedDbCharacterRepository({
+        transaction,
+      })
       const story = createStory({ id: 'story-1' })
       const chapter = createChapter({ id: 'chapter-1', storyId: story.id })
+      const character = createCharacter({
+        id: 'character-1',
+        storyId: story.id,
+      })
 
       await expect(readonlyStories.insertStory(story)).rejects.toThrow(
         'readonly IndexedDB transaction',
@@ -95,6 +128,9 @@ describe('indexedDbRepositoryUnitOfWork', () => {
       await expect(readonlyChapters.insertChapter(chapter)).rejects.toThrow(
         'readonly IndexedDB transaction',
       )
+      await expect(
+        readonlyCharacters.insertCharacter(character),
+      ).rejects.toThrow('readonly IndexedDB transaction')
       await done
     } finally {
       db.close()
@@ -133,6 +169,24 @@ function createChapter({
     title,
     content,
     parentChapterId,
+    createdAt,
+    updatedAt,
+  }
+}
+
+function createCharacter({
+  id,
+  storyId,
+  name = 'Mira',
+  createdAt = 100,
+  updatedAt = createdAt,
+}: Partial<Character> & Pick<Character, 'id' | 'storyId'>): Character {
+  return {
+    id,
+    storyId,
+    name,
+    gender: 'female',
+    properties: [],
     createdAt,
     updatedAt,
   }

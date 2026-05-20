@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { useChapterCreator } from '@/hooks/useChapterCreator'
 import { useChapterEditor } from '@/hooks/useChapterEditor'
 import { useStoryDashboard } from '@/hooks/useStoryDashboard'
+import { useStoryCharacters } from '@/hooks/useStoryCharacters'
 import { useStoryDetail } from '@/hooks/useStoryDetail'
 import { useStoryEditor } from '@/hooks/useStoryEditor'
 import { useStoryReader } from '@/hooks/useStoryReader'
@@ -188,6 +189,12 @@ describe('async feature hooks', () => {
           storyId: 'missing-story',
         }),
       )
+      const charactersView = renderHook(() =>
+        useStoryCharacters({
+          enabled: true,
+          storyId: 'missing-story',
+        }),
+      )
       const editorView = renderHook(() =>
         useStoryEditor({ storyId: 'missing-story' }),
       )
@@ -210,11 +217,13 @@ describe('async feature hooks', () => {
       await waitFor(() => {
         expect(dashboardView.result.current.isLoading).toBe(false)
         expect(detailView.result.current.status).toBe('missing-story')
+        expect(charactersView.result.current.isLoading).toBe(false)
         expect(editorView.result.current.status).toBe('missing-story')
         expect(creatorView.result.current.status).toBe('missing-story')
         expect(chapterEditorView.result.current.status).toBe('missing-story')
         expect(readerView.result.current.status).toBe('missing-story')
       })
+      expect(charactersView.result.current.characters).toEqual([])
     } finally {
       cleanup()
       await deleteTestDatabase()

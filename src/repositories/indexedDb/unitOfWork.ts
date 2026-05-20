@@ -3,11 +3,13 @@ import type {
   RepositoryUnitOfWorkContext,
 } from '@/repositories/types'
 import {
+  CHARACTERS_STORE,
   CHAPTERS_STORE,
   STORIES_STORE,
   openDb,
   transactionDone,
 } from '@/repositories/indexedDb/db'
+import { createIndexedDbCharacterRepository } from '@/repositories/indexedDb/characterRepository'
 import { createIndexedDbChapterRepository } from '@/repositories/indexedDb/chapterRepository'
 import { createIndexedDbStoryRepository } from '@/repositories/indexedDb/storyRepository'
 
@@ -22,16 +24,17 @@ async function run<T>(
 ): Promise<T> {
   const db = await openDb()
 
-  try {
-    const transaction = db.transaction(
-      [STORIES_STORE, CHAPTERS_STORE],
-      'readwrite',
-    )
+    try {
+      const transaction = db.transaction(
+        [STORIES_STORE, CHAPTERS_STORE, CHARACTERS_STORE],
+        'readwrite',
+      )
 
     try {
       const result = await operation({
         stories: createIndexedDbStoryRepository({ transaction }),
         chapters: createIndexedDbChapterRepository({ transaction }),
+        characters: createIndexedDbCharacterRepository({ transaction }),
       })
 
       await transactionDone(transaction)

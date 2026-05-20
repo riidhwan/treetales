@@ -21,7 +21,8 @@ content.
 
 Prompt Builder is a client-only authoring aid. It uses static feature-owned
 prompt templates and browser clipboard access; it does not call an LLM, require
-network access, or persist Rough Plot text in Story or Chapter records.
+network access, persist Rough Plot text in Story or Chapter records, or use
+Story Characters as context.
 
 ## Layer-First Structure
 
@@ -89,6 +90,7 @@ specific:
 |---|---|
 | `useStoryDashboard.ts` | Loads story summaries, creates stories/example content, deletes stories, and exposes dashboard form state |
 | `useStoryDetail.ts` | Loads one story for the story landing page and deletes it after confirmation |
+| `useStoryCharacters.ts` | Loads and manages Story-level Characters on the story landing page |
 | `useStoryEditor.ts` | Loads editor data, resolves the intro chapter, and saves story fields |
 | `useChapterEditor.ts` | Loads one chapter and saves chapter fields |
 | `useChapterCreator.ts` | Loads story or parent chapter context and creates intro chapters or branches from title + content |
@@ -127,12 +129,31 @@ Chapter {
   createdAt: number
   updatedAt: number
 }
+
+Character {
+  id: string
+  storyId: string     // FK → Story.id
+  name: string
+  gender: 'male' | 'female'
+  properties: CharacterProperty[] // ordered
+  createdAt: number
+  updatedAt: number
+}
+
+CharacterProperty {
+  key: string
+  value: string
+}
 ```
 
 Chapter content stays a plain `string` in persistence and service contracts. The
 reader and chapter authoring views interpret that string as markdown using
 common markdown, GFM extensions, and single-newline breaks; raw HTML is not
 rendered.
+
+Character properties are stored as an ordered array on the Character record.
+They have no identity or lifecycle outside their Character. Character property
+keys and values are plain text, not markdown.
 
 ## Services Layer (`src/services/`)
 
@@ -151,14 +172,18 @@ imports are migrated to the correctly named service modules.
 | `storyDb.ts` | Temporary compatibility re-export for existing Story imports |
 | `db.ts` | Temporary compatibility re-export for old IndexedDB imports |
 | `chapterService.ts` | Active Chapter service API |
+| `characterService.ts` | Active Character service API |
 | `chapterDb.ts` | Temporary compatibility re-export for existing Chapter imports |
 | `exampleStory.ts` | Creates or returns the built-in example story and its chapters |
 | `types.ts` | Shared service data shapes and create/update input contracts |
 
-Story and chapter services create records with `crypto.randomUUID()` ids and
+Story, chapter, and character services create records with `crypto.randomUUID()` ids and
 `Date.now()` timestamps. Updates preserve `createdAt` and refresh `updatedAt`.
-Deleting a story deletes all chapters for that story. Deleting a chapter clears
-that chapter id from the `parentChapterId` of direct branches in the same story.
+Creating, editing, or deleting a Character also refreshes the parent Story's
+`updatedAt`, because Characters are Story-owned authored content. Deleting a
+story deletes all chapters and characters for that story. Deleting a chapter
+clears that chapter id from the `parentChapterId` of direct branches in the same
+story.
 
 Chapter writes enforce basic graph integrity before committing:
 
@@ -200,12 +225,13 @@ Current storage-specific repository files include:
 | `indexedDb/db.ts` | Active IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
 | `indexedDb/storyRepository.ts` | Active IndexedDB Story persistence adapter |
 | `indexedDb/chapterRepository.ts` | Active IndexedDB Chapter persistence adapter with graph validation |
+| `indexedDb/characterRepository.ts` | Active IndexedDB Character persistence adapter |
 | `indexedDb/unitOfWork.ts` | Active IndexedDB unit-of-work boundary for multi-repository writes |
 
 Cross-record persistence effects should stay explicit at the service boundary.
 For example, Story deletion may coordinate a Story repository with a Chapter
-repository operation such as deleting all Chapters for a Story; it should not
-hide Chapter cleanup inside the Story repository.
+and Character repository operation such as deleting all Chapters and Characters
+for a Story; it should not hide related cleanup inside the Story repository.
 
 Multi-repository writes should run inside an explicit storage-specific
 unit-of-work boundary so related writes commit or fail together. The active
@@ -233,14 +259,17 @@ The schema is owned by the repository layer:
 
 - **`stories`** — keyed by `id`
 - **`chapters`** — keyed by `id`
+- **`characters`** — keyed by `id`
 - Chapter indexes on `storyId` and `parentChapterId`
+- Character index on `storyId`
 
-Deleting a story explicitly deletes its chapters through the service
-unit-of-work boundary. Deleting a chapter clears direct children's parent
-chapter reference instead of deleting descendants. Chapter write validation
-rejects missing stories, missing parents, parents from other stories,
-self-parenting, multiple intro chapters for one story, and cycles before
-committing a mutating chapter operation.
+Deleting a story explicitly deletes its chapters and characters through the
+service unit-of-work boundary. Deleting a chapter clears direct children's
+parent chapter reference instead of deleting descendants. Deleting a Character
+removes its embedded custom properties with it. Chapter write validation rejects
+missing stories, missing parents, parents from other stories, self-parenting,
+multiple intro chapters for one story, and cycles before committing a mutating
+chapter operation. Character writes reject missing stories before committing.
 
 Schema setup and forward upgrades live with the IndexedDB repository
 implementation. Repository operations may accept a transaction so standalone

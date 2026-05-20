@@ -4,7 +4,10 @@ import {
   CHAPTERS_STORE,
   CHAPTER_PARENT_ID_INDEX,
   CHAPTER_STORY_ID_INDEX,
+  CHARACTERS_STORE,
+  CHARACTER_STORY_ID_INDEX,
   DB_NAME,
+  DB_VERSION,
   STORIES_STORE,
   getStore,
   openDb,
@@ -32,9 +35,10 @@ describe('openDb', () => {
     const db = await openDb()
 
     expect(db.name).toBe(DB_NAME)
-    expect(db.version).toBe(2)
+    expect(db.version).toBe(DB_VERSION)
     expect(db.objectStoreNames.contains(STORIES_STORE)).toBe(true)
     expect(db.objectStoreNames.contains(CHAPTERS_STORE)).toBe(true)
+    expect(db.objectStoreNames.contains(CHARACTERS_STORE)).toBe(true)
 
     const transaction = db.transaction(CHAPTERS_STORE, 'readonly')
     const chaptersStore = transaction.objectStore(CHAPTERS_STORE)
@@ -45,6 +49,14 @@ describe('openDb', () => {
     expect(storyIdIndex.multiEntry).toBe(false)
     expect(parentChapterIdIndex.keyPath).toBe('parentChapterId')
     expect(parentChapterIdIndex.multiEntry).toBe(false)
+    transaction.commit()
+
+    const characterTransaction = db.transaction(CHARACTERS_STORE, 'readonly')
+    const charactersStore = characterTransaction.objectStore(CHARACTERS_STORE)
+    const characterStoryIdIndex = charactersStore.index(CHARACTER_STORY_ID_INDEX)
+
+    expect(characterStoryIdIndex.keyPath).toBe('storyId')
+    expect(characterStoryIdIndex.multiEntry).toBe(false)
 
     db.close()
   })
