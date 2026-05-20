@@ -67,6 +67,7 @@ export interface CharacterRepository {
 export interface RepositoryUnitOfWorkContext {
   readonly stories: StoryRepository
   readonly chapters: ChapterRepository
+  readonly characters: CharacterRepository
 }
 
 export interface RepositoryUnitOfWork {

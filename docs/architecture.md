@@ -155,7 +155,7 @@ keys and values are plain text, not markdown.
 
 ## Services Layer (`src/services/`)
 
-Application-facing story and chapter operations. No React state, no component
+Application-facing story, chapter, and character operations. No React state, no component
 caching — components call services directly and manage their own loading/error
 state. Services own generated domain fields such as `id`, `createdAt`, and
 `updatedAt`, then call repositories to persist the requested domain change.
@@ -171,13 +171,17 @@ imports are migrated to the correctly named service modules.
 | `db.ts` | Temporary compatibility re-export for old IndexedDB imports |
 | `chapterService.ts` | Active Chapter service API |
 | `chapterDb.ts` | Temporary compatibility re-export for existing Chapter imports |
+| `characterService.ts` | Active Character service API |
 | `exampleStory.ts` | Creates or returns the built-in example story and its chapters |
 | `types.ts` | Shared service data shapes and create/update input contracts |
 
-Story and chapter services create records with `crypto.randomUUID()` ids and
+Story, chapter, and character services create records with `crypto.randomUUID()` ids and
 `Date.now()` timestamps. Updates preserve `createdAt` and refresh `updatedAt`.
-Deleting a story deletes all chapters for that story. Deleting a chapter clears
-that chapter id from the `parentChapterId` of direct branches in the same story.
+Character service writes trim Character names and property key/value text, and
+drop custom properties with blank keys. Creating, updating, or deleting a
+Character refreshes the owning Story's `updatedAt`. Deleting a story deletes all
+chapters and characters for that story. Deleting a chapter clears that chapter id
+from the `parentChapterId` of direct branches in the same story.
 
 Chapter writes enforce basic graph integrity before committing:
 
@@ -231,7 +235,7 @@ Multi-repository writes should run inside an explicit storage-specific
 unit-of-work boundary so related writes commit or fail together. The active
 IndexedDB path exposes that boundary through
 `createIndexedDbRepositoryUnitOfWork()`, which opens one readwrite transaction
-and passes transaction-scoped story and chapter repositories to the service
+and passes transaction-scoped story, chapter, and character repositories to the service
 operation.
 
 Cross-repository service operations such as `deleteStory` should use the
@@ -257,8 +261,8 @@ The schema is owned by the repository layer:
 - Chapter indexes on `storyId` and `parentChapterId`
 - Character index on `storyId`
 
-Deleting a story explicitly deletes its chapters through the service
-unit-of-work boundary. Deleting a chapter clears direct children's parent
+Deleting a story explicitly deletes its chapters and characters through the
+service unit-of-work boundary. Deleting a chapter clears direct children's parent
 chapter reference instead of deleting descendants. Deleting a Character removes
 its embedded custom properties with it. Chapter write validation rejects missing
 stories, missing parents, parents from other stories, self-parenting, multiple

@@ -48,7 +48,7 @@ export async function updateStory(
 export async function deleteStory(id: string): Promise<boolean> {
   const unlinkedChildrenUpdatedAt = Date.now()
 
-  return repositoryUnitOfWork.run(async ({ stories, chapters }) => {
+  return repositoryUnitOfWork.run(async ({ stories, chapters, characters }) => {
     const story = await stories.findStoryById(id)
     if (!story) {
       return false
@@ -61,6 +61,8 @@ export async function deleteStory(id: string): Promise<boolean> {
         unlinkedChildrenUpdatedAt,
       })
     }
+
+    await characters.deleteCharactersByStoryId(id)
 
     return stories.deleteStory(id)
   })
