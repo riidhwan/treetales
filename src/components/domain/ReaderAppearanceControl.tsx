@@ -82,7 +82,7 @@ function ReaderAppearancePanel({
 }: ReaderAppearancePanelProps) {
   return (
     <div
-      className="fixed left-3 right-3 top-14 z-30 rounded-md border border-stone-200 bg-white p-3 text-stone-950 shadow-lg sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[22rem]"
+      className="fixed left-3 right-3 top-14 z-30 rounded-md border border-tt-line bg-tt-paper p-3 text-tt-ink shadow-lg sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[22rem]"
       id={panelId}
     >
       <div className="flex items-center justify-between gap-3">
@@ -100,7 +100,7 @@ function ReaderAppearancePanel({
 
       <section className="mt-3" aria-labelledby="reader-font-options-label">
         <h3
-          className="text-xs font-semibold uppercase text-stone-500"
+          className="text-xs font-semibold uppercase text-tt-muted"
           id="reader-font-options-label"
         >
           Font
@@ -109,7 +109,7 @@ function ReaderAppearancePanel({
           {READER_FONT_OPTIONS.map((fontOption) => (
             <button
               aria-pressed={readerAppearance.fontId === fontOption.id}
-              className="min-h-11 rounded-md border border-stone-200 px-3 text-left text-sm transition hover:bg-stone-50 aria-pressed:border-emerald-700 aria-pressed:bg-emerald-50 aria-pressed:text-emerald-900"
+              className="min-h-11 rounded-md border border-tt-line bg-tt-paper-deep/35 px-3 text-left text-sm transition hover:bg-tt-gold-soft/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tt-gold aria-pressed:border-tt-moss aria-pressed:bg-tt-moss-soft aria-pressed:text-tt-moss-dark"
               key={fontOption.id}
               onClick={() => onSelectReaderFont(fontOption.id)}
               style={{
@@ -126,12 +126,12 @@ function ReaderAppearancePanel({
       <section className="mt-4" aria-labelledby="reader-font-size-label">
         <div className="flex items-center justify-between gap-3">
           <h3
-            className="text-xs font-semibold uppercase text-stone-500"
+            className="text-xs font-semibold uppercase text-tt-muted"
             id="reader-font-size-label"
           >
             Font Size
           </h3>
-          <p className="min-w-12 text-right text-sm font-semibold text-stone-700">
+          <p className="min-w-12 text-right text-sm font-semibold text-tt-muted">
             {readerAppearance.fontSizePt} pt
           </p>
         </div>
