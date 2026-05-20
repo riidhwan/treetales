@@ -89,12 +89,12 @@ export function ChapterPromptBuilderControl({
 
       {isMenuOpen ? (
         <div
-          className="fixed left-3 right-3 top-14 z-30 rounded-md border border-stone-200 bg-white p-2 text-stone-950 shadow-lg sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-64"
+          className="fixed left-3 right-3 top-14 z-30 rounded-md border border-tt-line bg-tt-paper p-2 text-tt-ink shadow-lg sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-64"
           id={menuId}
           role="menu"
         >
           <button
-            className="flex min-h-10 w-full items-center rounded px-3 text-left text-sm font-semibold text-stone-800 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:text-stone-400 disabled:hover:bg-transparent"
+            className="flex min-h-10 w-full items-center rounded px-3 text-left text-sm font-semibold text-tt-ink transition hover:bg-tt-gold-soft/45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tt-gold disabled:cursor-not-allowed disabled:text-tt-muted/55 disabled:hover:bg-transparent"
             disabled={isPromptBuilderDisabled}
             onClick={openPromptBuilder}
             title={
@@ -107,7 +107,7 @@ export function ChapterPromptBuilderControl({
             Prompt Builder
           </button>
           <button
-            className="mt-1 flex min-h-10 w-full items-center justify-between gap-3 rounded px-3 text-left text-sm font-semibold text-stone-400"
+            className="mt-1 flex min-h-10 w-full items-center justify-between gap-3 rounded px-3 text-left text-sm font-semibold text-tt-muted/60"
             disabled
             title="Coming later"
             type="button"
@@ -119,16 +119,16 @@ export function ChapterPromptBuilderControl({
       ) : null}
 
       {isPromptBuilderOpen ? (
-        <div className="fixed inset-0 z-40 bg-stone-950/30 px-3 py-4 sm:px-6">
+        <div className="fixed inset-0 z-40 bg-tt-ink/35 px-3 py-4 sm:px-6">
           <section
             aria-labelledby={dialogTitleId}
             aria-modal="true"
-            className="mx-auto flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col rounded-md border border-stone-200 bg-white shadow-xl"
+            className="mx-auto flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col rounded-md border border-tt-line bg-tt-paper shadow-xl"
             role="dialog"
           >
-            <header className="flex items-center justify-between gap-3 border-b border-stone-200 px-4 py-3">
+            <header className="flex items-center justify-between gap-3 border-b border-tt-line px-4 py-3">
               <h2
-                className="text-base font-semibold text-stone-950"
+                className="text-base font-semibold text-tt-ink"
                 id={dialogTitleId}
               >
                 Prompt Builder
@@ -146,7 +146,7 @@ export function ChapterPromptBuilderControl({
 
             <div className="grid gap-4 overflow-y-auto p-4">
               <label className="grid gap-2">
-                <span className="text-sm font-semibold text-stone-800">
+                <span className="text-sm font-semibold text-tt-ink">
                   Rough plot
                 </span>
                 <TextArea
@@ -160,7 +160,7 @@ export function ChapterPromptBuilderControl({
 
               {fallbackPrompt ? (
                 <label className="grid gap-2">
-                  <span className="text-sm font-semibold text-stone-800">
+                  <span className="text-sm font-semibold text-tt-ink">
                     Generated prompt
                   </span>
                   <TextArea
@@ -174,7 +174,7 @@ export function ChapterPromptBuilderControl({
 
               {copyStatus ? (
                 <p
-                  className="text-sm font-medium text-stone-700"
+                  className="text-sm font-medium text-tt-muted"
                   role={fallbackPrompt ? 'alert' : 'status'}
                 >
                   {copyStatus}
@@ -182,7 +182,7 @@ export function ChapterPromptBuilderControl({
               ) : null}
             </div>
 
-            <footer className="flex justify-end border-t border-stone-200 px-4 py-3">
+            <footer className="flex justify-end border-t border-tt-line px-4 py-3">
               <Button onClick={() => void copyPrompt()} variant="primary">
                 <Copy aria-hidden="true" size={16} />
                 Copy prompt

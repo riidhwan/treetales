@@ -28,13 +28,13 @@ export function MobileInstallChoice({
     installStatus === 'pending' && !canInstallNatively
 
   return (
-    <main className="flex min-h-screen bg-stone-50 px-5 py-8 text-stone-950">
+    <main className="flex min-h-screen bg-tt-parchment px-5 py-8 text-tt-ink">
       <section className="mx-auto flex w-full max-w-md flex-col justify-center gap-6">
-        <header className="border-b border-stone-200 pb-5">
-          <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+        <header className="border-b border-tt-line pb-5">
+          <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
             TreeTales
           </p>
-          <p className="mt-3 text-sm leading-6 text-stone-600">
+          <p className="mt-3 text-sm leading-6 text-tt-muted">
             Add TreeTales to your home screen for a focused app experience, or
             continue in your mobile browser.
           </p>

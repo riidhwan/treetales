@@ -105,7 +105,7 @@ export function ChapterCreator({
   }
 
   return (
-    <main className="min-h-screen bg-stone-100 text-stone-950">
+    <main className="min-h-screen bg-tt-parchment text-tt-ink">
       <CreatorContent
         canCreate={canCreate}
         content={content}
@@ -366,14 +366,14 @@ interface MissingStateProps {
 
 function MissingState({ description, kicker, title }: MissingStateProps) {
   return (
-    <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
+    <section className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm">
       {kicker ? (
-        <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+        <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
           {kicker}
         </p>
       ) : null}
       <h1 className="text-2xl font-bold">{title}</h1>
-      <p className="mt-3 text-sm leading-6 text-stone-600">
+      <p className="mt-3 text-sm leading-6 text-tt-muted">
         {description}
       </p>
     </section>

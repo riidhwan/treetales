@@ -63,7 +63,7 @@ export function StoryReader({
   const isReadingChapter = Boolean(story && currentChapter)
 
   return (
-    <main className="min-h-screen bg-stone-100 text-stone-950">
+    <main className="min-h-screen bg-tt-parchment text-tt-ink">
       {isReadingChapter && story && currentChapter ? (
         <ReaderToolbar
           onEditChapter={() => onEditChapter(storyId, currentChapter.id)}
@@ -132,7 +132,7 @@ function ReaderToolbar({
   const [isAppearancePanelOpen, setIsAppearancePanelOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-20 border-b border-stone-200 bg-white/95 shadow-sm backdrop-blur">
+    <header className="sticky top-0 z-20 border-b border-tt-line bg-tt-paper/95 shadow-sm backdrop-blur">
       <nav
         aria-label="Reader actions"
         className="mx-auto flex w-full max-w-6xl items-center gap-2 px-3 py-2 sm:px-5"
@@ -229,9 +229,9 @@ function ReaderContent({
     )
   } else if (status === 'missing-story') {
     readerContent = (
-      <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
+      <section className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm">
         <h1 className="text-2xl font-bold">Story not found</h1>
-        <p className="mt-3 text-sm leading-6 text-stone-600">
+        <p className="mt-3 text-sm leading-6 text-tt-muted">
           This story may have been deleted or is unavailable in this browser.
         </p>
       </section>
@@ -244,8 +244,8 @@ function ReaderContent({
     )
   } else if (!currentChapter && story) {
     readerContent = (
-      <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+      <section className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm">
+        <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
           {story.title}
         </p>
         <h1 className="mt-2 text-2xl font-bold">
@@ -253,7 +253,7 @@ function ReaderContent({
             ? 'Chapter not found'
             : 'No chapters yet'}
         </h1>
-        <p className="mt-3 text-sm leading-6 text-stone-600">
+        <p className="mt-3 text-sm leading-6 text-tt-muted">
           {status === 'missing-chapter'
             ? 'This chapter is not part of the selected story.'
             : 'This story does not have any chapters to read yet.'}
@@ -264,10 +264,10 @@ function ReaderContent({
     readerContent = (
       <article
         aria-label="Chapter document"
-        className="mx-auto min-h-[calc(100vh-7rem)] w-full max-w-[52rem] border-stone-200 bg-white px-4 py-6 shadow-sm sm:min-h-[calc(100vh-10rem)] sm:border sm:px-8 sm:py-8 lg:px-8"
+        className="mx-auto min-h-[calc(100vh-7rem)] w-full max-w-[52rem] border-tt-line bg-tt-paper px-4 py-6 shadow-sm sm:min-h-[calc(100vh-10rem)] sm:border sm:px-8 sm:py-8 lg:px-8"
       >
         <header>
-          <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+          <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
             {story.title}
           </p>
           <div style={readerDocumentStyle}>
@@ -284,7 +284,7 @@ function ReaderContent({
           style={readerDocumentStyle}
         />
 
-        <footer className="border-t border-stone-200 pt-5">
+        <footer className="border-t border-tt-line pt-5">
           <NextChapterControls
             nextChapters={nextChapters}
             onCreateChildChapter={() =>
@@ -315,11 +315,11 @@ function NextChapterControls({
 }: NextChapterControlsProps) {
   return (
     <div>
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-500">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-tt-muted">
         What happens next?
       </h2>
       {nextChapters.length === 0 ? (
-        <p className="mt-3 inline-flex min-h-10 items-center rounded-md bg-stone-100 px-3 text-sm font-semibold text-stone-700">
+        <p className="mt-3 inline-flex min-h-10 items-center rounded-md bg-tt-paper-deep px-3 text-sm font-semibold text-tt-muted">
           The End
         </p>
       ) : (
