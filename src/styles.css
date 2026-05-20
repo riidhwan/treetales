@@ -316,8 +316,8 @@ body,
 }
 
 body {
-  background: #f3ecd9;
-  color: #221b16;
+  background: var(--color-tt-parchment);
+  color: var(--color-tt-ink);
   font-family:
     "NV Jost",
     ui-sans-serif,
