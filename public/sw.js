@@ -1,6 +1,6 @@
 /* global caches, fetch, self, URL */
 
-const CACHE_NAME = 'treetales-app-shell-v1'
+const CACHE_NAME = 'treetales-app-shell-v2'
 const APP_SHELL_URLS = [
   '/',
   '/manifest.json',
