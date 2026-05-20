@@ -4,7 +4,10 @@ import {
   CHAPTERS_STORE,
   CHAPTER_PARENT_ID_INDEX,
   CHAPTER_STORY_ID_INDEX,
+  CHARACTERS_STORE,
+  CHARACTER_STORY_ID_INDEX,
   DB_NAME,
+  DB_VERSION,
   STORIES_STORE,
   getStore,
   openDb,
@@ -32,9 +35,10 @@ describe('openDb', () => {
     const db = await openDb()
 
     expect(db.name).toBe(DB_NAME)
-    expect(db.version).toBe(2)
+    expect(db.version).toBe(DB_VERSION)
     expect(db.objectStoreNames.contains(STORIES_STORE)).toBe(true)
     expect(db.objectStoreNames.contains(CHAPTERS_STORE)).toBe(true)
+    expect(db.objectStoreNames.contains(CHARACTERS_STORE)).toBe(true)
 
     const transaction = db.transaction(CHAPTERS_STORE, 'readonly')
     const chaptersStore = transaction.objectStore(CHAPTERS_STORE)
@@ -45,6 +49,14 @@ describe('openDb', () => {
     expect(storyIdIndex.multiEntry).toBe(false)
     expect(parentChapterIdIndex.keyPath).toBe('parentChapterId')
     expect(parentChapterIdIndex.multiEntry).toBe(false)
+    transaction.commit()
+
+    const characterTransaction = db.transaction(CHARACTERS_STORE, 'readonly')
+    const charactersStore = characterTransaction.objectStore(CHARACTERS_STORE)
+    const characterStoryIdIndex = charactersStore.index(CHARACTER_STORY_ID_INDEX)
+
+    expect(characterStoryIdIndex.keyPath).toBe('storyId')
+    expect(characterStoryIdIndex.multiEntry).toBe(false)
 
     db.close()
   })
@@ -71,6 +83,21 @@ describe('openDb', () => {
     expect(child?.parentChapterId).toBe('chapter-root')
     expect('parentChapterIds' in (child ?? {})).toBe(false)
     await expect(transactionDone(transaction)).resolves.toBeUndefined()
+
+    db.close()
+  })
+
+  it('keeps existing character store and indexes during upgrades', async () => {
+    const versionTwoDb = await openVersionTwoDbWithCharacters()
+    versionTwoDb.close()
+
+    const db = await openDb()
+    const characterTransaction = db.transaction(CHARACTERS_STORE, 'readonly')
+    const charactersStore = characterTransaction.objectStore(CHARACTERS_STORE)
+    const characterStoryIdIndex = charactersStore.index(CHARACTER_STORY_ID_INDEX)
+
+    expect(characterStoryIdIndex.keyPath).toBe('storyId')
+    await expect(transactionDone(characterTransaction)).resolves.toBeUndefined()
 
     db.close()
   })
@@ -220,6 +247,38 @@ function openLegacyDb(): Promise<IDBDatabase> {
 
     request.onerror = () => {
       reject(request.error ?? new Error('Failed to open legacy test database.'))
+    }
+  })
+}
+
+function openVersionTwoDbWithCharacters(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 2)
+
+    request.onupgradeneeded = () => {
+      const db = request.result
+      db.createObjectStore(STORIES_STORE, { keyPath: 'id' })
+      const chaptersStore = db.createObjectStore(CHAPTERS_STORE, {
+        keyPath: 'id',
+      })
+      const charactersStore = db.createObjectStore(CHARACTERS_STORE, {
+        keyPath: 'id',
+      })
+
+      chaptersStore.createIndex(CHAPTER_STORY_ID_INDEX, 'storyId')
+      chaptersStore.createIndex(CHAPTER_PARENT_ID_INDEX, 'parentChapterId')
+      charactersStore.createIndex(CHARACTER_STORY_ID_INDEX, 'storyId')
+    }
+
+    request.onsuccess = () => {
+      resolve(request.result)
+    }
+
+    request.onerror = () => {
+      reject(
+        request.error ??
+          new Error('Failed to open version two test database.'),
+      )
     }
   })
 }

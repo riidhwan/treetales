@@ -1,6 +1,8 @@
 import type {
+  Character,
   Chapter,
   Story,
+  UpdateCharacterInput,
   UpdateChapterInput,
   UpdateStoryInput,
 } from '@/services/types'
@@ -44,6 +46,22 @@ export interface ChapterRepository {
     id: string,
     input: DeleteChapterRepositoryInput,
   ) => Promise<boolean>
+}
+
+export interface UpdateCharacterRepositoryInput extends UpdateCharacterInput {
+  readonly updatedAt: number
+}
+
+export interface CharacterRepository {
+  readonly insertCharacter: (character: Character) => Promise<void>
+  readonly findCharacterById: (id: string) => Promise<Character | undefined>
+  readonly findCharactersByStoryId: (storyId: string) => Promise<Character[]>
+  readonly updateCharacter: (
+    id: string,
+    input: UpdateCharacterRepositoryInput,
+  ) => Promise<Character | undefined>
+  readonly deleteCharacter: (id: string) => Promise<boolean>
+  readonly deleteCharactersByStoryId: (storyId: string) => Promise<void>
 }
 
 export interface RepositoryUnitOfWorkContext {

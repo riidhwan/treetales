@@ -1,11 +1,13 @@
-import type { Chapter, Story } from '@/services/types'
+import type { Character, Chapter, Story } from '@/services/types'
 
 export const DB_NAME = 'TreeTales'
-export const DB_VERSION = 2
+export const DB_VERSION = 3
 export const STORIES_STORE = 'stories'
 export const CHAPTERS_STORE = 'chapters'
+export const CHARACTERS_STORE = 'characters'
 export const CHAPTER_STORY_ID_INDEX = 'storyId'
 export const CHAPTER_PARENT_ID_INDEX = 'parentChapterId'
+export const CHARACTER_STORY_ID_INDEX = 'storyId'
 
 interface LegacyChapter extends Omit<Chapter, 'parentChapterId'> {
   parentChapterId?: string | null
@@ -15,6 +17,7 @@ interface LegacyChapter extends Omit<Chapter, 'parentChapterId'> {
 export interface TreeTalesSchema {
   stories: Story
   chapters: Chapter
+  characters: Character
 }
 
 export type StoreName = keyof TreeTalesSchema
@@ -54,6 +57,16 @@ export function openDb(): Promise<IDBDatabase> {
       }
 
       migrateChapterParents(chaptersStore)
+
+      const charactersStore = db.objectStoreNames.contains(CHARACTERS_STORE)
+        ? upgradeTransaction.objectStore(CHARACTERS_STORE)
+        : db.createObjectStore(CHARACTERS_STORE, {
+            keyPath: 'id',
+          })
+
+      if (!charactersStore.indexNames.contains(CHARACTER_STORY_ID_INDEX)) {
+        charactersStore.createIndex(CHARACTER_STORY_ID_INDEX, 'storyId')
+      }
     }
 
     request.onsuccess = () => {

@@ -16,6 +16,23 @@ export interface Chapter {
   updatedAt: number
 }
 
+export type CharacterGender = 'female' | 'male'
+
+export interface CharacterProperty {
+  key: string
+  value: string
+}
+
+export interface Character {
+  id: string
+  storyId: string
+  name: string
+  gender: CharacterGender
+  properties: CharacterProperty[]
+  createdAt: number
+  updatedAt: number
+}
+
 export interface CreateStoryInput {
   title: string
   description: string
@@ -37,4 +54,17 @@ export interface UpdateChapterInput {
   title?: string
   content?: string
   parentChapterId?: string | null
+}
+
+export interface CreateCharacterInput {
+  storyId: string
+  name: string
+  gender: CharacterGender
+  properties: CharacterProperty[]
+}
+
+export interface UpdateCharacterInput {
+  name?: string
+  gender?: CharacterGender
+  properties?: CharacterProperty[]
 }
