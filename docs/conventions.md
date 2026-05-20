@@ -501,33 +501,42 @@ vi.mock('@/lib/foo', async (orig) => {
 
 ### Route Component Tests
 
-Export the component from the route file (e.g. `export function Home()`), then render it directly. Standard mock setup:
+Route files export only `Route`, so do not export route components just to test
+them. Render exported page or feature components outside `src/routes` for UI
+behavior. Test route wiring separately only when the route owns meaningful
+loader, params, or search behavior:
 
 ```typescript
-// 1. Mock loader data
-const mockUseLoaderData = vi.hoisted(() => vi.fn())
+import { describe, expect, it } from 'vitest'
 
-vi.mock('@/router', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('@/router')>()
-    return {
-        ...actual,
-        Link: ({ children, className }: any) => <div className={className}>{children}</div>,
-        createFileRoute: () => () => ({ useLoaderData: mockUseLoaderData }),
-        // add useSearch / useNavigate only if the route uses them
-    }
+import { Route } from './stories.$storyId.read'
+
+interface ReaderSearch {
+    readonly chapterId?: string
+}
+
+describe('story reader route', () => {
+    it('normalizes search params', () => {
+        const validateSearch = Route.options.validateSearch
+
+        expect(validateSearch).toBeTypeOf('function')
+
+        if (typeof validateSearch !== 'function') {
+            throw new TypeError('Route validateSearch is not configured')
+        }
+
+        const validateReaderSearch = validateSearch as (
+            search: Record<string, unknown>,
+        ) => ReaderSearch
+
+        expect(validateReaderSearch({ chapterId: 'chapter-1' })).toEqual({
+            chapterId: 'chapter-1',
+        })
+        expect(validateReaderSearch({ chapterId: 1 })).toEqual({
+            chapterId: undefined,
+        })
+    })
 })
-
-// 2. Mock store with hoisted mutable state (reset fields in beforeEach)
-const mockStoreState = vi.hoisted(() => ({
-    items: {} as Record<string, any>,
-    _hasHydrated: true,
-    lastUpdatedAt: {} as Record<string, number>,
-}))
-vi.mock('@/store/useAppStore', () => ({
-    useAppStore: (selector: (s: any) => any) => selector(mockStoreState),
-}))
-
-// 3. In beforeEach: mockUseLoaderData.mockReturnValue({ ... }) + reset mockStoreState fields
 ```
 
 ### E2E Tests

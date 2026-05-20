@@ -41,16 +41,18 @@ There is currently no `src/store/`. Feature components and hooks own their
 loading, form, and error state locally. Add a store only when state is genuinely
 shared across unrelated route or feature boundaries.
 
-There is currently no `src/config.ts`. Add one only when tuneable constants are
-needed. Until then, keep isolated copy, labels, and one-off layout values close
-to the component or module that owns them.
+`src/config.ts` owns app-level tuneable constants that are likely to be adjusted
+over time or shared across feature boundaries. Current examples include Reader
+Appearance font options, size limits, defaults, and storage keys. Keep isolated
+copy, labels, and one-off layout values close to the component or module that
+owns them.
 
-## Optional `src/config.ts` — Tuneable Constants
+## `src/config.ts` — Tuneable Constants
 
-If introduced, `src/config.ts` should hold named constants for values that are
-likely to be adjusted over time or that would otherwise be buried inside a
-component. When adding a new magic number or threshold, prefer defining it there
-over inlining it if it meets any of these criteria:
+`src/config.ts` should hold named constants for values that are likely to be
+adjusted over time or that would otherwise be buried inside a component. When
+adding a new magic number or threshold, prefer defining it there over inlining it
+if it meets any of these criteria:
 
 - It controls user-facing behaviour (timing, counts, limits)
 - It might need tuning

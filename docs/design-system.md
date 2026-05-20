@@ -111,10 +111,11 @@ See `src/components/` structure in `@docs/architecture.md`.
 - `src/components/ui/` — Generic, reusable primitives currently including
   `Alert`, `Button`, `MarkdownContent`, `MarkdownEditor`, `TextArea`, and
   `TextInput`
+- `src/components/domain/` — Domain-language-aware, self-contained components
+  shared across feature surfaces without owning feature state or service calls,
+  currently including `ReaderAppearanceControl`
 - `src/components/features/` — Full feature composites currently including
   `StoryDashboard`, `StoryDetail`, `StoryEditor`, and `StoryReader`
-- `src/components/domain/` — Optional future layer for self-contained
-  business-aware components once a component is reused across features
 
 Feature components may contain feature-specific cards, empty states, labels, and
 layout sections directly. Extract a UI primitive only when styling or behavior
