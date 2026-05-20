@@ -28,7 +28,9 @@ Use when the user asks to create issues, break work down, plan a larger change, 
 3. Use native sub-issues for independently shippable slices. Keep tiny same-PR tasks as checklist items.
 4. Use native blocking relationships only for hard dependencies, not preference ordering.
 5. Add ADRs/docs in `Related Decisions` where applicable.
-6. Verify the issue graph after creation: parent/sub-issue links and blocked-by/blocking links.
+6. Create and link sub-issues sequentially, especially for large decompositions. GitHub can apply secondary rate limits when creating or mutating issue relationships too quickly.
+7. Keep issue-body `Slices` and `Dependencies` sections as human summaries only. Update them when the planned decomposition, dependency rationale, or completion criteria changes, but never use them as a substitute for native relationships.
+8. Verify the issue graph after creation: parent/sub-issue links and blocked-by/blocking links.
 
 ### Issue Work
 
@@ -37,7 +39,7 @@ Use when the user asks to implement, fix, review, branch, commit, push, or open 
 Before implementation:
 
 1. Inspect the target issue body, labels, state, comments, and checklist.
-2. Inspect the parent issue, if any.
+2. Inspect the parent issue, if any. A `404` from the parent endpoint means the issue has no native parent; do not treat that as a failure by itself.
 3. Inspect child/sub-issues if the target is a parent or belongs to a parent.
 4. Inspect native blocked-by/blocking relationships.
 5. Inspect linked PRs, branches, and recent commit context when visible.
@@ -62,6 +64,127 @@ Use blocked-by/blocking for "must happen first" relationships:
 - A parent can have dependency notes, but native blocking relationships should still identify the issues that create the dependency.
 
 Use both relationships when both are true.
+
+## Current GitHub CLI / API Playbook
+
+As of GitHub CLI 2.83.2, `gh issue` does not provide first-class sub-issue or dependency subcommands. Use `gh api` with the REST issue endpoints.
+
+Important identifiers:
+
+- Issue numbers are the human `#123` values used in URLs.
+- REST issue IDs are integer database IDs required by sub-issue and dependency bodies.
+- GraphQL node IDs are strings and are not accepted by the REST sub-issue endpoints.
+
+Inspect the target issue, including closing PR references exposed by `gh issue view`:
+
+```sh
+gh issue view ISSUE_NUMBER \
+  --json number,title,state,labels,assignees,milestone,body,comments,closedByPullRequestsReferences
+```
+
+Get an issue's REST integer ID:
+
+```sh
+gh api 'repos/{owner}/{repo}/issues/123' --jq '.id'
+```
+
+Create a new issue and capture the fields needed for relationship commands:
+
+```sh
+gh api 'repos/{owner}/{repo}/issues' \
+  -f title='Slice title' \
+  -f body='Issue body in the repository template format.' \
+  --jq '{number, id, html_url}'
+```
+
+Add an existing issue as a native sub-issue of parent `#PARENT_NUMBER`:
+
+```sh
+gh api -X POST 'repos/{owner}/{repo}/issues/PARENT_NUMBER/sub_issues' \
+  -H 'Accept: application/vnd.github+json' \
+  -F sub_issue_id=SUB_ISSUE_REST_ID
+```
+
+Move a sub-issue from another parent to this parent only when that is intentional:
+
+```sh
+gh api -X POST 'repos/{owner}/{repo}/issues/PARENT_NUMBER/sub_issues' \
+  -H 'Accept: application/vnd.github+json' \
+  -F sub_issue_id=SUB_ISSUE_REST_ID \
+  -F replace_parent=true
+```
+
+List native sub-issues for a parent:
+
+```sh
+gh api 'repos/{owner}/{repo}/issues/PARENT_NUMBER/sub_issues?per_page=100' \
+  --jq '.[] | {number, id, title, state, html_url}'
+```
+
+Get a child issue's native parent:
+
+```sh
+gh api 'repos/{owner}/{repo}/issues/CHILD_NUMBER/parent' \
+  --jq '{number, id, title, state, html_url}'
+```
+
+If this returns `404`, treat the child as having no native parent. If an expected parent is missing, stop and report the missing relationship.
+
+Remove a native sub-issue relationship:
+
+```sh
+gh api -X DELETE 'repos/{owner}/{repo}/issues/PARENT_NUMBER/sub_issue' \
+  -H 'Accept: application/vnd.github+json' \
+  -F sub_issue_id=SUB_ISSUE_REST_ID
+```
+
+Reorder a sub-issue under a parent:
+
+```sh
+gh api -X PATCH 'repos/{owner}/{repo}/issues/PARENT_NUMBER/sub_issues/priority' \
+  -H 'Accept: application/vnd.github+json' \
+  -F sub_issue_id=SUB_ISSUE_REST_ID \
+  -F after_id=PREVIOUS_SUB_ISSUE_REST_ID
+```
+
+Use `before_id=NEXT_SUB_ISSUE_REST_ID` instead of `after_id` when positioning before another sub-issue.
+
+Add a native blocked-by dependency, meaning `ISSUE_NUMBER` is blocked by `BLOCKING_ISSUE_REST_ID`:
+
+```sh
+gh api -X POST 'repos/{owner}/{repo}/issues/ISSUE_NUMBER/dependencies/blocked_by' \
+  -H 'Accept: application/vnd.github+json' \
+  -F issue_id=BLOCKING_ISSUE_REST_ID
+```
+
+List dependencies an issue is blocked by:
+
+```sh
+gh api 'repos/{owner}/{repo}/issues/ISSUE_NUMBER/dependencies/blocked_by?per_page=100' \
+  --jq '.[] | {number, id, title, state, html_url}'
+```
+
+List issues that an issue is blocking:
+
+```sh
+gh api 'repos/{owner}/{repo}/issues/ISSUE_NUMBER/dependencies/blocking?per_page=100' \
+  --jq '.[] | {number, id, title, state, html_url}'
+```
+
+Remove a native blocked-by dependency:
+
+```sh
+gh api -X DELETE 'repos/{owner}/{repo}/issues/ISSUE_NUMBER/dependencies/blocked_by/BLOCKING_ISSUE_REST_ID' \
+  -H 'Accept: application/vnd.github+json'
+```
+
+Operational notes:
+
+- After any relationship mutation, verify by reading both directions where possible: list the parent's sub-issues, get the child's parent, and list dependency endpoints for each issue involved.
+- For expected relationships, empty arrays from list endpoints mean the relationship is absent and must be created or reported.
+- For mutation commands, treat `403`, `404`, `410`, and `422` as failures unless the user explicitly asked to tolerate the missing relationship. Stop and report the exact operation that failed.
+- For cross-repository sub-issues, verify owner/repository constraints before mutating. The REST add-sub-issue endpoint requires the sub-issue to belong to the same repository owner as the parent issue, and cross-repository cases may need manual UI handling or a different API path.
+- Preserve issue metadata intentionally. When creating sub-issues, set or copy labels, assignees, milestones, issue type, and project fields only when the parent issue, repository policy, or user request calls for them; do not assume all parent metadata should be inherited.
 
 ## Templates
 
@@ -154,6 +277,6 @@ Before reporting completion for issue-backed work, check and state:
 - Whether all required native blocked-by/blocking relationships exist.
 - Whether linked ADRs/docs were followed or updated.
 - Whether any follow-up issue is needed.
-- Whether the parent issue can close, must stay open, or needs updated completion criteria.
+- Whether the parent issue can close, must stay open, or needs updated completion criteria. Before closing a parent, list all native sub-issues and verify they are closed or intentionally out of scope.
 
 Do not post issue completion comments while changes are only local and unpushed. Draft the exact comment for the user when useful.
