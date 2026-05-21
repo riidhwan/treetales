@@ -87,6 +87,13 @@ describe('StoryDashboard', () => {
       />,
     )
 
+    expect(screen.getByText('TreeTales')).toBeTruthy()
+    expect(
+      await screen.findByRole('heading', { name: 'Your stories' }),
+    ).toBeTruthy()
+    expect(
+      screen.queryByRole('heading', { name: 'Story dashboard' }),
+    ).toBeNull()
     expect(await screen.findByText('No stories yet')).toBeTruthy()
   })
 
