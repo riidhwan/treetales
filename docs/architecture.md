@@ -76,6 +76,12 @@ A component that calls feature hooks, owns workflows, or coordinates services
 belongs in `features/`. Generic HTML wrappers and styling primitives belong in
 `ui/`.
 
+Large feature composites may split feature-owned sections, cards, dialogs,
+forms, and helpers into a local subfolder under `components/features/` when
+those pieces remain owned by that feature. This kind of split is for local
+maintainability only; promote a component to `domain/` or `ui/` only when it
+matches those layer rules.
+
 Feature-owned Prompt Builder templates live beside the chapter authoring
 feature because they encode TreeTales authoring language, not generic
 interpolation behavior. Template placeholders use double braces such as
