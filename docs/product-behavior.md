@@ -110,9 +110,9 @@
   between writing and markdown preview in the same document column, creates
   either the intro chapter or a branch linked to the selected parent chapter,
   then opens the new chapter for editing.
-- Chapter creation keeps the create action reachable in a sticky toolbar and
-  may show lightweight writing metadata such as word count, but it does not bind
-  `Ctrl+S`/`Cmd+S` to the one-time create action.
+- Chapter creation keeps the commit action reachable in a sticky toolbar and
+  uses the same Save/Saving action language as chapter editing, but it does not
+  bind `Ctrl+S`/`Cmd+S` to the one-time creation action.
 - Chapter creation and chapter editing expose an icon-only Writing Assist
   toolbar action. Writing Assist opens a menu with Prompt Builder and a disabled
   Write with LLM option.
@@ -129,9 +129,9 @@
 - If copying the generated prompt fails, Prompt Builder shows the generated
   prompt so the author can copy it manually.
 - Write with LLM is visible but disabled; direct LLM writing is a future feature.
-- Chapter creation uses draft-oriented status language before a chapter exists,
-  such as empty, not-created, creating, and failure states rather than saved
-  states.
+- Chapter creation uses draft-oriented unavailable and failure states before a
+  chapter exists, while the toolbar commit action keeps Save/Saving language
+  consistent with chapter editing.
 - If the user changes the draft title or content before creating the chapter,
   leaving the chapter creation page asks for confirmation before discarding the
   draft.

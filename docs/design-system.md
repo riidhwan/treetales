@@ -37,7 +37,7 @@ On mobile, story-management screens keep the same workbench hierarchy instead
 of adding sticky bottom actions. Stack the page title and description above a
 full-width primary page action, then place content below. Reserve sticky
 toolbars and fixed controls for reader and chapter authoring surfaces where
-navigation or Save/Create access must remain persistent.
+navigation or Save access must remain persistent.
 
 The style revamp should rely on typography, color, spacing, paper-like
 surfaces, borders, icons, and small CSS-only literary details rather than large
@@ -93,12 +93,11 @@ document typography.
   bottom control and writing metadata such as word count in a quiet fixed
   bottom-right position.
 - On mobile, long-form writing toolbars should keep secondary navigation terse
-  and preserve essential save or create controls without relying on extra
-  navigation.
+  and preserve essential Save controls without relying on extra navigation.
 - Reader toolbar actions stay icon-only with accessible labels and titles so
   reading chrome remains minimal. Chapter writing and creation keep explicit
-  text labels on the primary Save or Create action because those actions commit
-  user work; secondary writing actions may stay compact and icon-led.
+  text labels on the primary Save action because it commits user work; secondary
+  writing actions may stay compact and icon-led.
 - Reader Branch choices are narrative navigation and should look like
   story-choice rows rather than generic app buttons. The Add Branch action is
   an authoring command and remains a normal app button placed below the Branch
