@@ -32,11 +32,10 @@ function StoryEditorRoute() {
           to: '/',
         })
       }
-      onReadStory={(selectedStoryId) =>
+      onOpenStory={(selectedStoryId) =>
         void navigate({
-          to: '/stories/$storyId/read',
+          to: '/stories/$storyId',
           params: { storyId: selectedStoryId },
-          search: { chapterId: undefined },
         })
       }
       storyId={storyId}

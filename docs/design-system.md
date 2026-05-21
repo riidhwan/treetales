@@ -242,9 +242,16 @@ just to fill space.
 Story editing is metadata management, not document editing. Keep Story title
 and description editing in a conventional form rather than using the inline
 document-title pattern from Chapter writing. Avoid presenting the same Story
-title as both the dominant page heading and the editable field label/value; use
-the page header for "Edit Story" context and let the form own the editable
-title.
+title as both the dominant page heading and the editable field label/value.
+Keep page-level context to the Story editor label and let the form own the
+editable title.
+
+The Story editor uses story-management chrome, but its top navigation returns
+to the Story detail page rather than the dashboard. Keep that top bar focused
+on the single Story return action; do not add a Read action there. The form may
+use a bounded paper panel because it owns editable fields and the save command,
+while the Intro Chapter section remains a simple unframed workbench section
+below it.
 
 ## Character Cards
 
