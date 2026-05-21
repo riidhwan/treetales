@@ -2,6 +2,7 @@ import { BookOpen, ChevronLeft, Edit3, Home, Plus, Trash2 } from 'lucide-react'
 import { useId } from 'react'
 
 import { CharacterSection } from '@/components/features/storyDetail/CharacterSection'
+import { MANAGEMENT_DISPLAY_FONT } from '@/components/features/storyDetail/constants'
 import {
   type StoryCharacterServices,
   useStoryCharacters,
@@ -12,8 +13,6 @@ import {
 } from '@/hooks/useStoryDetail'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
-
-const MANAGEMENT_DISPLAY_FONT = '"NV Garamond", Georgia, serif'
 
 interface Props {
   readonly characterServices?: StoryCharacterServices

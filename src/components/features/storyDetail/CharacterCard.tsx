@@ -1,7 +1,6 @@
+import { MANAGEMENT_DISPLAY_FONT } from '@/components/features/storyDetail/constants'
 import { formatGender } from '@/components/features/storyDetail/characterDisplay'
 import type { Character } from '@/services/types'
-
-const MANAGEMENT_DISPLAY_FONT = '"NV Garamond", Georgia, serif'
 
 interface Props {
   readonly character: Character
