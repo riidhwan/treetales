@@ -25,6 +25,7 @@ export type ChapterEditorStatus =
   | 'ready'
   | 'missing-story'
   | 'missing-chapter'
+  | 'error'
 
 interface UseChapterEditorOptions {
   readonly chapterId: string
@@ -124,10 +125,12 @@ export function useChapterEditor({
         setStatus('ready')
       } catch (error) {
         if (isCurrent) {
+          setChapter(undefined)
+          setStory(undefined)
           setErrorMessage(getErrorMessage(error))
           setParentChapter(undefined)
           setParentChapterUnavailable(false)
-          setStatus('ready')
+          setStatus('error')
         }
       }
     }

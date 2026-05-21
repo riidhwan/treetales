@@ -111,6 +111,13 @@ specific:
 Hooks depend on the service layer through small service interfaces with default
 implementations. Tests can pass fake services without touching IndexedDB.
 
+Async feature hook statuses should keep `ready` reserved for a successfully
+resolved expected load path. Expected absence uses explicit missing statuses,
+such as `missing-story` or `missing-chapter`. Unrecoverable load exceptions use
+an explicit `error` status with a displayable `errorMessage`; recoverable
+secondary context failures may use feature-specific unavailable flags when the
+primary feature data still loaded successfully.
+
 ## Shared Utilities (`src/lib/`)
 
 `src/lib/` contains pure helpers and system-boundary normalizers:

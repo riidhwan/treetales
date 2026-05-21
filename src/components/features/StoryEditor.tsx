@@ -70,6 +70,23 @@ export function StoryEditor({
         </Button>
       </section>
     )
+  } else if (status === 'error') {
+    editorContent = (
+      <section className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm">
+        <h1 className="text-2xl font-bold">Story unavailable</h1>
+        <Alert className="mt-4" role="alert" variant="error">
+          {errorMessage}
+        </Alert>
+        <Button
+          className="mt-5"
+          onClick={onOpenDashboard}
+          size="sm"
+        >
+          <Home aria-hidden="true" size={16} />
+          Dashboard
+        </Button>
+      </section>
+    )
   } else {
     editorContent = (
       <>
@@ -143,7 +160,7 @@ export function StoryEditor({
             </Button>
             <Button
               className="disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={status === 'missing-story'}
+              disabled={status !== 'ready'}
               onClick={() => onReadStory(storyId)}
               size="sm"
             >
