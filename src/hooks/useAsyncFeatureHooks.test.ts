@@ -139,6 +139,7 @@ describe('async feature hooks', () => {
     })
     expect(result.current.errorMessage).toBe('Could not load story.')
     expect(result.current.story).toBeUndefined()
+    expect(result.current.introChapter).toBeUndefined()
     expect(result.current.canSave).toBe(false)
   })
 
@@ -569,6 +570,7 @@ describe('async feature hooks', () => {
     })
     expect(result.current.errorMessage).toBe('Could not load chapter.')
     expect(result.current.chapter).toBeUndefined()
+    expect(result.current.story).toBeUndefined()
     expect(result.current.canSave).toBe(false)
   })
 
