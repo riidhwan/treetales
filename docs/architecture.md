@@ -82,6 +82,12 @@ those pieces remain owned by that feature. This kind of split is for local
 maintainability only; promote a component to `domain/` or `ui/` only when it
 matches those layer rules.
 
+`src/components/features/chapterWriting/` owns the shared Chapter authoring
+workflow composition used by Chapter creation and Chapter editing. It wires
+shared writing-surface presentation, Reader Appearance, Prompt Builder toolbar
+access, guarded navigation, and unavailable-state presentation while leaving the
+creation and editing hooks separate.
+
 Feature-owned Prompt Builder templates live beside the chapter authoring
 feature because they encode TreeTales authoring language, not generic
 interpolation behavior. Template placeholders use double braces such as

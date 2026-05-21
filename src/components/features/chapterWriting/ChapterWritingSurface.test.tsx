@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   ChapterWritingSurface,
   countMarkdownWords,
-} from '@/components/features/ChapterWritingSurface'
+} from '@/components/features/chapterWriting'
 
 describe('countMarkdownWords', () => {
   afterEach(() => {

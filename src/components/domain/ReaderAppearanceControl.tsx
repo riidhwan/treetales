@@ -1,9 +1,10 @@
-import { useId } from 'react'
 import { Minus, Plus, RotateCcw, Type } from 'lucide-react'
 
 import { READER_FONT_OPTIONS, type ReaderFontId } from '@/config'
 import type { ReaderAppearance } from '@/hooks/useReaderAppearance'
 import { Button } from '@/components/ui/Button'
+
+const READER_APPEARANCE_PANEL_ID = 'reader-appearance-panel'
 
 interface Props {
   readonly canDecreaseFontSize: boolean
@@ -28,12 +29,10 @@ export function ReaderAppearanceControl({
   onSelectReaderFont,
   readerAppearance,
 }: Props) {
-  const panelId = useId()
-
   return (
     <div className="relative">
       <Button
-        aria-controls={panelId}
+        aria-controls={READER_APPEARANCE_PANEL_ID}
         aria-expanded={isPanelOpen}
         aria-label="Reader Appearance"
         className="px-3"
@@ -51,7 +50,7 @@ export function ReaderAppearanceControl({
           onIncreaseFontSize={onIncreaseFontSize}
           onResetReaderAppearance={onResetReaderAppearance}
           onSelectReaderFont={onSelectReaderFont}
-          panelId={panelId}
+          panelId={READER_APPEARANCE_PANEL_ID}
           readerAppearance={readerAppearance}
         />
       ) : null}

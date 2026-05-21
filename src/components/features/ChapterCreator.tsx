@@ -1,20 +1,17 @@
-import { useEffect, useState } from 'react'
-import type { ReactNode, SyntheticEvent } from 'react'
-import { ArrowLeft, Home, Save } from 'lucide-react'
+import { useState } from 'react'
+import type { SyntheticEvent } from 'react'
+import { Save } from 'lucide-react'
 
 import {
   type ChapterCreatorServices,
   useChapterCreator,
 } from '@/hooks/useChapterCreator'
 import {
-  type ChapterWritingMode,
-  ChapterWritingSurface,
-} from '@/components/features/ChapterWritingSurface'
-import { ChapterPromptBuilderControl } from '@/components/features/ChapterPromptBuilderControl'
-import { ReaderAppearanceControl } from '@/components/domain/ReaderAppearanceControl'
-import { useReaderAppearance } from '@/hooks/useReaderAppearance'
+  ChapterWritingMissingState,
+  ChapterWritingUnavailableLayout,
+  ChapterWritingWorkflow,
+} from '@/components/features/chapterWriting'
 import { Alert } from '@/components/ui/Alert'
-import { Button } from '@/components/ui/Button'
 
 interface Props {
   readonly onChapterCreated: (storyId: string, chapterId: string) => void
@@ -47,41 +44,13 @@ export function ChapterCreator({
     story,
     title,
   } = useChapterCreator({ parentChapterId, services, storyId })
-  const {
-    canDecreaseFontSize,
-    canIncreaseFontSize,
-    decreaseFontSize,
-    increaseFontSize,
-    readerAppearance,
-    resetReaderAppearance,
-    selectedFontFamily,
-    setReaderFont,
-  } = useReaderAppearance()
   const isIntroChapter = !parentChapterId
-  const [editorMode, setEditorMode] = useState<ChapterWritingMode>('write')
-  const [isAppearancePanelOpen, setIsAppearancePanelOpen] = useState(false)
   const [hasTouchedTitle, setHasTouchedTitle] = useState(false)
   const hasDraftChanges = status === 'ready' && (title !== '' || content !== '')
   const titleError =
     title.trim().length === 0 && (hasTouchedTitle || title.length > 0)
       ? 'Chapter title is required.'
       : undefined
-
-  useEffect(() => {
-    function handleBeforeUnload(event: BeforeUnloadEvent) {
-      if (!hasDraftChanges) {
-        return
-      }
-
-      event.preventDefault()
-    }
-
-    window.addEventListener('beforeunload', handleBeforeUnload)
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
-    }
-  }, [hasDraftChanges])
 
   function handleCreate(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -95,64 +64,23 @@ export function ChapterCreator({
       .catch(() => undefined)
   }
 
-  function confirmNavigation(navigate: () => void) {
-    if (
-      !hasDraftChanges ||
-      window.confirm('Discard this chapter draft?')
-    ) {
-      navigate()
-    }
-  }
-
   return (
     <main className="min-h-screen bg-tt-parchment text-tt-ink">
       <CreatorContent
         canCreate={canCreate}
         content={content}
-        editorMode={editorMode}
         errorMessage={errorMessage}
+        hasDraftChanges={hasDraftChanges}
         introChapterTitle={introChapter?.title}
         isCreating={isCreating}
         isIntroChapter={isIntroChapter}
         onContentChange={setContent}
         onCreate={handleCreate}
-        onGoBack={() => confirmNavigation(onGoBack)}
-        onOpenDashboard={() => confirmNavigation(onOpenDashboard)}
-        onSelectMode={setEditorMode}
+        onGoBack={onGoBack}
+        onOpenDashboard={onOpenDashboard}
         onTitleBlur={() => setHasTouchedTitle(true)}
         onTitleChange={setTitle}
-        parentChapterTitle={parentChapter?.title}
-        readerAppearanceControl={
-          <ReaderAppearanceControl
-            canDecreaseFontSize={canDecreaseFontSize}
-            canIncreaseFontSize={canIncreaseFontSize}
-            isPanelOpen={isAppearancePanelOpen}
-            onDecreaseFontSize={decreaseFontSize}
-            onIncreaseFontSize={increaseFontSize}
-            onOpenChange={setIsAppearancePanelOpen}
-            onResetReaderAppearance={resetReaderAppearance}
-            onSelectReaderFont={setReaderFont}
-            readerAppearance={readerAppearance}
-          />
-        }
-        promptBuilderControl={
-          <ChapterPromptBuilderControl
-            chapterTitle={title}
-            draftContent={content}
-            parentChapter={
-              parentChapter
-                ? {
-                    content: parentChapter.content,
-                    title: parentChapter.title,
-                  }
-                : undefined
-            }
-            storyTitle={story?.title}
-            templateKind={isIntroChapter ? 'intro' : 'branch'}
-          />
-        }
-        readerFontFamily={selectedFontFamily}
-        readerFontSizePt={readerAppearance.fontSizePt}
+        parentChapter={parentChapter}
         status={status}
         storyTitle={story?.title}
         title={title}
@@ -165,8 +93,8 @@ export function ChapterCreator({
 interface CreatorContentProps {
   readonly canCreate: boolean
   readonly content: string
-  readonly editorMode: ChapterWritingMode
   readonly errorMessage?: string
+  readonly hasDraftChanges: boolean
   readonly introChapterTitle?: string
   readonly isCreating: boolean
   readonly isIntroChapter: boolean
@@ -174,14 +102,9 @@ interface CreatorContentProps {
   readonly onCreate: (event: SyntheticEvent<HTMLFormElement>) => void
   readonly onGoBack: () => void
   readonly onOpenDashboard: () => void
-  readonly onSelectMode: (mode: ChapterWritingMode) => void
   readonly onTitleBlur: () => void
   readonly onTitleChange: (title: string) => void
-  readonly parentChapterTitle?: string
-  readonly promptBuilderControl: ReactNode
-  readonly readerAppearanceControl: ReactNode
-  readonly readerFontFamily: string
-  readonly readerFontSizePt: number
+  readonly parentChapter?: ReturnType<typeof useChapterCreator>['parentChapter']
   readonly status: ReturnType<typeof useChapterCreator>['status']
   readonly storyTitle?: string
   readonly title: string
@@ -191,8 +114,8 @@ interface CreatorContentProps {
 function CreatorContent({
   canCreate,
   content,
-  editorMode,
   errorMessage,
+  hasDraftChanges,
   introChapterTitle,
   isCreating,
   isIntroChapter,
@@ -200,14 +123,9 @@ function CreatorContent({
   onCreate,
   onGoBack,
   onOpenDashboard,
-  onSelectMode,
   onTitleBlur,
   onTitleChange,
-  parentChapterTitle,
-  promptBuilderControl,
-  readerAppearanceControl,
-  readerFontFamily,
-  readerFontSizePt,
+  parentChapter,
   status,
   storyTitle,
   title,
@@ -215,71 +133,47 @@ function CreatorContent({
 }: CreatorContentProps) {
   if (status === 'ready') {
     return (
-      <>
-        {errorMessage ? (
-          <div className="mx-auto w-full max-w-5xl px-4 pt-4 sm:px-6">
-            <Alert role="alert" variant="error">
-              {errorMessage}
-            </Alert>
-          </div>
-        ) : null}
-
-        <ChapterWritingSurface
-          canSubmit={canCreate}
-          content={content}
-          contentPlaceholder="Write this chapter in markdown..."
-          isSubmitting={isCreating}
-          mode={editorMode}
-          navigationActions={
-            <Button
-              aria-label="Back"
-              className="px-3"
-              onClick={onGoBack}
-              size="sm"
-            >
-              <ArrowLeft aria-hidden="true" size={16} />
-            </Button>
-          }
-          onContentChange={onContentChange}
-          onModeChange={onSelectMode}
-          onSubmit={onCreate}
-          onTitleBlur={onTitleBlur}
-          onTitleChange={onTitleChange}
-          primaryActionIcon={<Save aria-hidden="true" size={16} />}
-          primaryActionLabel="Save"
-          readerFontFamily={readerFontFamily}
-          readerFontSizePt={readerFontSizePt}
-          secondaryActions={
-            <>
-              {readerAppearanceControl}
-              {promptBuilderControl}
-              <Button
-                aria-label="Dashboard"
-                className="px-3"
-                onClick={onOpenDashboard}
-                size="sm"
-              >
-                <Home aria-hidden="true" size={16} />
-              </Button>
-            </>
-          }
-          submittingActionLabel="Saving..."
-          title={title}
-          titleError={titleError}
-          titlePlaceholder="Untitled chapter"
-          toolbarContext={getToolbarContext({
-            isIntroChapter,
-            parentChapterTitle,
-            storyTitle,
-          })}
-        />
-      </>
+      <ChapterWritingWorkflow
+        canSubmit={canCreate}
+        content={content}
+        errorMessage={errorMessage}
+        hasNavigationWarning={hasDraftChanges}
+        isSubmitting={isCreating}
+        navigationWarningMessage="Discard this chapter draft?"
+        onContentChange={onContentChange}
+        onGoBack={onGoBack}
+        onOpenDashboard={onOpenDashboard}
+        onSubmit={onCreate}
+        onTitleBlur={onTitleBlur}
+        onTitleChange={onTitleChange}
+        primaryActionIcon={<Save aria-hidden="true" size={16} />}
+        primaryActionLabel="Save"
+        promptBuilder={{
+          parentChapter: parentChapter
+            ? {
+                content: parentChapter.content,
+                title: parentChapter.title,
+              }
+            : undefined,
+          storyTitle,
+          templateKind: isIntroChapter ? 'intro' : 'branch',
+        }}
+        submittingActionLabel="Saving..."
+        title={title}
+        titleError={titleError}
+        toolbarContext={getToolbarContext({
+          isIntroChapter,
+          parentChapterTitle: parentChapter?.title,
+          storyTitle,
+        })}
+      />
     )
   }
 
   if (status === 'loading') {
     return (
-      <UnavailableLayout
+      <ChapterWritingUnavailableLayout
+        actionsLabel="Chapter creation actions"
         onOpenDashboard={onOpenDashboard}
         onOpenPrevious={onGoBack}
         previousLabel={isIntroChapter ? 'Story Editor' : 'Parent Chapter'}
@@ -289,12 +183,13 @@ function CreatorContent({
             ? 'Loading story...'
             : 'Loading parent chapter...'}
         </Alert>
-      </UnavailableLayout>
+      </ChapterWritingUnavailableLayout>
     )
   }
 
   return (
-    <UnavailableLayout
+    <ChapterWritingUnavailableLayout
+      actionsLabel="Chapter creation actions"
       onOpenDashboard={onOpenDashboard}
       onOpenPrevious={onGoBack}
       previousLabel={isIntroChapter ? 'Story Editor' : 'Parent Chapter'}
@@ -305,7 +200,7 @@ function CreatorContent({
         status={status}
         storyTitle={storyTitle}
       />
-    </UnavailableLayout>
+    </ChapterWritingUnavailableLayout>
   )
 }
 
@@ -324,7 +219,7 @@ function ChapterCreationUnavailable({
 }: ChapterCreationUnavailableProps) {
   if (status === 'missing-story') {
     return (
-      <MissingState
+      <ChapterWritingMissingState
         description="This story may have been deleted or is unavailable in this browser."
         title="Story not found"
       />
@@ -333,7 +228,7 @@ function ChapterCreationUnavailable({
 
   if (status === 'missing-parent-chapter') {
     return (
-      <MissingState
+      <ChapterWritingMissingState
         description="This chapter is not part of the selected story."
         kicker={storyTitle}
         title="Parent chapter not found"
@@ -343,7 +238,7 @@ function ChapterCreationUnavailable({
 
   if (status === 'intro-chapter-exists') {
     return (
-      <MissingState
+      <ChapterWritingMissingState
         description="This story already has an intro chapter."
         kicker={storyTitle}
         title={introChapterTitle ?? 'Intro chapter exists'}
@@ -356,66 +251,6 @@ function ChapterCreationUnavailable({
       {errorMessage}
     </Alert>
   ) : null
-}
-
-interface MissingStateProps {
-  readonly description: string
-  readonly kicker?: string
-  readonly title: string
-}
-
-function MissingState({ description, kicker, title }: MissingStateProps) {
-  return (
-    <section className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm">
-      {kicker ? (
-        <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
-          {kicker}
-        </p>
-      ) : null}
-      <h1 className="text-2xl font-bold">{title}</h1>
-      <p className="mt-3 text-sm leading-6 text-tt-muted">
-        {description}
-      </p>
-    </section>
-  )
-}
-
-interface UnavailableLayoutProps {
-  readonly children: ReactNode
-  readonly onOpenDashboard: () => void
-  readonly onOpenPrevious: () => void
-  readonly previousLabel: string
-}
-
-function UnavailableLayout({
-  children,
-  onOpenDashboard,
-  onOpenPrevious,
-  previousLabel,
-}: UnavailableLayoutProps) {
-  return (
-    <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
-      <nav
-        aria-label="Chapter creation actions"
-        className="flex flex-wrap justify-between gap-3"
-      >
-        <Button onClick={onOpenPrevious} size="sm">
-          <ArrowLeft aria-hidden="true" size={16} />
-          {previousLabel}
-        </Button>
-        <Button
-          aria-label="Dashboard"
-          className="px-3"
-          onClick={onOpenDashboard}
-          size="sm"
-        >
-          <Home aria-hidden="true" size={16} />
-        </Button>
-      </nav>
-
-      {children}
-    </section>
-  )
 }
 
 interface ToolbarContextOptions {
