@@ -141,7 +141,7 @@ describe('HomeExperience', () => {
       window.localStorage.getItem(MOBILE_INSTALL_CHOICE_DISMISSED_KEY),
     ).toBe('true')
     expect(
-      await screen.findByRole('heading', { name: 'Story dashboard' }),
+      await screen.findByRole('heading', { name: 'Your stories' }),
     ).toBeTruthy()
   })
 
@@ -151,7 +151,7 @@ describe('HomeExperience', () => {
     renderHomeExperience()
 
     expect(
-      await screen.findByRole('heading', { name: 'Story dashboard' }),
+      await screen.findByRole('heading', { name: 'Your stories' }),
     ).toBeTruthy()
     expect(screen.queryByText(/add treetales to your home screen/i)).toBe(null)
   })
@@ -162,7 +162,7 @@ describe('HomeExperience', () => {
     renderHomeExperience()
 
     expect(
-      await screen.findByRole('heading', { name: 'Story dashboard' }),
+      await screen.findByRole('heading', { name: 'Your stories' }),
     ).toBeTruthy()
   })
 
@@ -235,7 +235,7 @@ describe('HomeExperience', () => {
       window.localStorage.getItem(MOBILE_INSTALL_CHOICE_DISMISSED_KEY),
     ).toBe('true')
     expect(
-      await screen.findByRole('heading', { name: 'Story dashboard' }),
+      await screen.findByRole('heading', { name: 'Your stories' }),
     ).toBeTruthy()
   })
 
@@ -263,7 +263,7 @@ describe('HomeExperience', () => {
         /installation was dismissed. you can try again or continue/i,
       ),
     ).toBeTruthy()
-    expect(screen.queryByRole('heading', { name: 'Story dashboard' })).toBe(
+    expect(screen.queryByRole('heading', { name: 'Your stories' })).toBe(
       null,
     )
   })

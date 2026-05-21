@@ -34,6 +34,12 @@ reserved secondary route actions, then let the page header focus on the current
 object's type, title, and primary actions. Avoid placing Dashboard navigation as
 the first content element inside the page body.
 
+The dashboard is the root library surface, so its top bar should carry the
+TreeTales brand identity rather than back navigation. The brand may include a
+compact logo or mark beside the name, using the bundled logo assets from
+`public/` when appropriate. Do not repeat the brand as a small eyebrow inside
+the dashboard page header when the top bar already owns that job.
+
 When a management page has exactly two page-level actions and one is clearly the
 primary path, keep the actions paired on one row when the viewport can fit them.
 Give the primary action more visual weight through width, fill, or placement,
@@ -184,13 +190,34 @@ spacing, hover states, and active states.
 The dashboard remains the usable story library, not a marketing landing page.
 Use a warm full-page background, a compact TreeTales header with a concise
 purpose statement, and saved **Story** rows that feel like shelf labels or paper
-slips rather than generic white cards. The new-story form should feel like an
-inline writing slip placed directly below the dashboard header, not a modal or
-competing standalone card. Empty states should invite authors into the product,
-with the example **Story** presented as the stronger first action when no
-stories exist. In the empty dashboard state, Add Example Story is the primary
-action and New Story is secondary; once saved **Stories** exist, New Story
-becomes the primary dashboard action.
+slips rather than generic white cards. Once the top bar owns the TreeTales
+brand, the dashboard page header should describe the user's collection, such as
+"Your stories", rather than repeating "TreeTales" or using scaffolding language
+like "Story dashboard". The new-story form should feel like an inline writing
+slip placed directly below the dashboard header, not a modal, full page, or
+competing standalone card. Treat the form as a bounded creation affordance with
+clear ownership by the page header; it should remain visually distinct from
+saved **Story** rows. Empty states should invite authors into the product, with
+the example **Story** presented as the stronger first action when no stories
+exist. In the empty dashboard state, Add Example Story is the primary action and
+New Story is secondary; pair them when space allows and stack only when narrow
+viewports need it. Do not duplicate New Story in the page header while the empty
+state is visible. Once saved **Stories** exist, New Story becomes the primary
+dashboard action.
+
+The empty dashboard state should remain a bounded paper-like empty state within
+the workbench column, not an unframed section or marketing hero. Use concise
+copy, a subtle border or dashed treatment, and the paired action priority above.
+
+Saved **Story** entries on the dashboard should remain compact bounded rows
+rather than expanding into large cards or grids. Use the story-management
+display voice for read-only **Story** titles, keep descriptions truncated for
+scanning, and reserve row-level controls for opening the Story detail page
+rather than adding Read, Edit, or Delete actions to every row.
+Use the row's right edge for a clear navigation affordance such as a chevron.
+Add compact right-edge metadata only when it is meaningful and already available
+without extra loading complexity; do not add decorative or placeholder metadata
+just to fill space.
 
 ## Story Editor
 
