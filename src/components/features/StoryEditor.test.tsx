@@ -75,13 +75,13 @@ function renderEditor({
   onCreateIntroChapter = vi.fn(),
   onEditChapter = vi.fn(),
   onOpenDashboard = vi.fn(),
-  onReadStory = vi.fn(),
+  onOpenStory = vi.fn(),
   services = createServices(),
 }: {
   readonly onCreateIntroChapter?: (storyId: string) => void
   readonly onEditChapter?: (storyId: string, chapterId: string) => void
   readonly onOpenDashboard?: () => void
-  readonly onReadStory?: (storyId: string) => void
+  readonly onOpenStory?: (storyId: string) => void
   readonly services?: ReturnType<typeof createServices>
 } = {}) {
   return render(
@@ -89,7 +89,7 @@ function renderEditor({
       onCreateIntroChapter={onCreateIntroChapter}
       onEditChapter={onEditChapter}
       onOpenDashboard={onOpenDashboard}
-      onReadStory={onReadStory}
+      onOpenStory={onOpenStory}
       services={services}
       storyId="story-1"
     />,
@@ -130,9 +130,8 @@ describe('StoryEditor', () => {
 
     renderEditor({ services })
 
-    expect(await screen.findByRole('heading', { name: 'Edit Story' }))
+    expect(await screen.findByRole('heading', { name: 'Story editor' }))
       .toBeTruthy()
-    expect(screen.getByText('The Old Road')).toBeTruthy()
     expect(screen.getByLabelText('Title')).toHaveProperty(
       'value',
       'The Old Road',
@@ -164,7 +163,7 @@ describe('StoryEditor', () => {
     await waitFor(() => {
       expect(screen.queryByRole('heading', { name: 'Forest Path' })).toBeNull()
     })
-    expect(screen.getByText('Intro chapter')).toBeTruthy()
+    expect(screen.getAllByText('Intro Chapter').length).toBeGreaterThan(0)
     expect(
       screen.queryByRole('button', { name: /add intro chapter/i }),
     ).toBeNull()
@@ -189,7 +188,7 @@ describe('StoryEditor', () => {
 
     renderEditor({ services })
 
-    await screen.findByRole('heading', { name: 'Edit Story' })
+    await screen.findByRole('heading', { name: 'Story editor' })
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: '  River Fork  ' },
     })
@@ -219,13 +218,13 @@ describe('StoryEditor', () => {
 
     renderEditor({ services })
 
-    await screen.findByRole('heading', { name: 'Edit Story' })
+    await screen.findByRole('heading', { name: 'Story editor' })
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: 'Draft Title' },
     })
     fireEvent.click(screen.getByRole('button', { name: /save story/i }))
 
-    expect(await screen.findByText('Saved Title')).toBeTruthy()
+    expect(await screen.findByDisplayValue('Saved Title')).toBeTruthy()
     expect(screen.getByLabelText('Title')).toHaveProperty(
       'value',
       'Saved Title',
@@ -241,7 +240,7 @@ describe('StoryEditor', () => {
 
     renderEditor({ services })
 
-    await screen.findByRole('heading', { name: 'Edit Story' })
+    await screen.findByRole('heading', { name: 'Story editor' })
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: '   ' },
     })
@@ -302,7 +301,7 @@ describe('StoryEditor', () => {
 
     renderEditor({ services })
 
-    await screen.findByRole('heading', { name: 'Edit Story' })
+    await screen.findByRole('heading', { name: 'Story editor' })
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: 'River Fork' },
     })
@@ -313,17 +312,14 @@ describe('StoryEditor', () => {
     )
   })
 
-  it('calls dashboard and read navigation callbacks', async () => {
-    const onOpenDashboard = vi.fn()
-    const onReadStory = vi.fn()
+  it('calls story navigation from the top bar', async () => {
+    const onOpenStory = vi.fn()
 
-    renderEditor({ onOpenDashboard, onReadStory })
+    renderEditor({ onOpenStory })
 
-    await screen.findByRole('heading', { name: 'Edit Story' })
-    fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Read' }))
+    await screen.findByRole('heading', { name: 'Story editor' })
+    fireEvent.click(screen.getByRole('button', { name: 'Story' }))
 
-    expect(onOpenDashboard).toHaveBeenCalled()
-    expect(onReadStory).toHaveBeenCalledWith('story-1')
+    expect(onOpenStory).toHaveBeenCalledWith('story-1')
   })
 })

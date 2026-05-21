@@ -98,6 +98,8 @@
 
 ### Story Editor
 - User opens a story in edit mode from story detail or after creating a story.
+- Story editor top navigation returns to the Story detail page. The editor does
+  not duplicate Story reading navigation.
 - Edit story title and description at the top.
 - Intro chapter panel below with a clear empty state when no intro exists.
 - When a story has no chapters, the editor offers an "Add Intro Chapter"
