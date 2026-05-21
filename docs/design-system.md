@@ -28,10 +28,50 @@ duplicating the same primary action in multiple places within the first
 viewport. Reader and chapter authoring screens remain document-first rather
 than adopting this workbench layout.
 
+Story-management detail pages should separate route-level navigation from page
+content. On mobile, use a slim top bar for back or Dashboard navigation and
+reserved secondary route actions, then let the page header focus on the current
+object's type, title, and primary actions. Avoid placing Dashboard navigation as
+the first content element inside the page body.
+
+When a management page has exactly two page-level actions and one is clearly the
+primary path, keep the actions paired on one row when the viewport can fit them.
+Give the primary action more visual weight through width, fill, or placement,
+and keep the secondary action available but subordinate. Stack only when the
+viewport is too narrow to keep both actions legible.
+
+When a section eyebrow already names the content type, do not repeat the same
+noun in the section heading immediately below it. Omit the heading when the
+eyebrow, action, and content make the section clear; add a heading only when it
+contributes distinct meaning.
+
+When a section-scoped action sits beside an unambiguous section label, prefer a
+concise visible verb such as "Add" over repeating the object noun. Keep
+page-level destructive and navigation actions explicit, and use explicit
+accessible labels when the visible label is shortened.
+
+For missing editable content on management pages, prefer an intentional empty
+affordance over passive placeholder text when there is a clear existing edit
+workflow. The affordance may navigate to the relevant edit page; it does not
+need to provide inline editing. Do not make a surface look actionable unless it
+actually opens the edit path.
+
 Management screens should not read as stacks of unrelated cards. Use unframed
-sections for page structure inside the workbench column, and reserve bordered
-cards for repeated items, dialogs, empty states, destructive confirmation areas,
-and other bounded objects.
+sections separated by vertical rhythm and subtle dividers for page structure
+inside the workbench column, and reserve bordered cards for repeated items,
+dialogs, empty states, destructive confirmation areas, and other bounded
+objects.
+
+Use a bounded Danger Zone for destructive actions that remove a top-level object
+or cascade-delete related content. Keep the panel after normal page content,
+state the consequence inside the panel, and separate the destructive command in
+a footer row within the same boundary. Danger styling should be clear but quiet
+until the user intentionally interacts.
+
+Management pages should keep the first viewport oriented around the constructive
+job: identifying the current object, primary navigation or editing actions, and
+normal content review or creation. Destructive actions may require scrolling as
+long as they remain discoverable at the bottom of the relevant page.
 
 On mobile, story-management screens keep the same workbench hierarchy instead
 of adding sticky bottom actions. Stack the page title and description above a
@@ -50,6 +90,13 @@ custom app font, while **Chapter** document text continues to follow Reader
 Appearance. Do not let app typography choices override user-selected Reader
 Appearance fonts for chapter titles, chapter content, write fields, or preview
 content.
+
+On story-management screens, read-only user-authored object names may use a
+restrained literary serif or display voice to distinguish content identity from
+interface chrome. This applies to headings such as Story titles and Character
+names, while labels, buttons, navigation, forms, and metadata remain in the app
+chrome font. Do not use Reader Appearance for these management headings; Reader
+Appearance owns **Chapter** document text only.
 
 Use bundled `NV Jost` as the app-chrome font before falling back to system
 sans-serif fonts. `NV Jost` may appear in app chrome even though it also remains
@@ -157,9 +204,12 @@ title.
 ## Character Cards
 
 Story detail Character cards are feature-owned UI in `StoryDetail`. Keep cards
-fixed-height so the grid remains even as custom-property content varies. The
-card content should start at the top, with long names and custom-property
-previews truncated instead of expanding the card.
+fixed-height in multi-column grids so the grid remains even as custom-property
+content varies. In single-column mobile lists, cards may use content-led height
+when that improves use of space, while still truncating long names and
+custom-property previews. Place compact metadata such as Character Gender in
+the card's upper-right area when space allows so the card uses both horizontal
+edges and the name remains the primary left-aligned anchor.
 
 Story detail treats Read and Edit as page-level navigation actions, so they
 belong in the story workbench header action area. Delete is a destructive
