@@ -186,8 +186,7 @@ describe('StoryDetail', () => {
 
     renderDetail({ characterServices })
 
-    expect(await screen.findByRole('heading', { name: 'Story characters' }))
-      .toBeTruthy()
+    expect(await screen.findByText('Characters')).toBeTruthy()
     expect(await screen.findByText('No characters yet')).toBeTruthy()
     expect(characterServices.getCharactersByStoryId).toHaveBeenCalledWith(
       'story-1',
@@ -270,7 +269,7 @@ describe('StoryDetail', () => {
 
     renderDetail({ characterServices })
 
-    await screen.findByRole('heading', { name: 'Story characters' })
+    await screen.findByText('Characters')
     fireEvent.click(screen.getByRole('button', { name: /add character/i }))
     fireEvent.change(screen.getByLabelText('Name'), {
       target: { value: ' Mira ' },
@@ -373,14 +372,20 @@ describe('StoryDetail', () => {
     })
   })
 
-  it('shows a fallback when the story has no description', async () => {
+  it('opens the story editor from an empty description affordance', async () => {
+    const onEditStory = vi.fn()
     const services = createServices({
       story: createStory({ description: '' }),
     })
 
-    renderDetail({ services })
+    renderDetail({ onEditStory, services })
 
-    expect(await screen.findByText('No description yet.')).toBeTruthy()
+    const emptySummary = await screen.findByRole('button', {
+      name: /no description yet - tap to add one/i,
+    })
+    fireEvent.click(emptySummary)
+
+    expect(onEditStory).toHaveBeenCalledWith('story-1')
   })
 
   it('shows a fallback when the story has no title', async () => {
@@ -423,7 +428,7 @@ describe('StoryDetail', () => {
       ),
     ).toBeTruthy()
 
-    fireEvent.click(screen.getAllByRole('button', { name: /dashboard/i })[1])
+    fireEvent.click(screen.getAllByRole('button', { name: /dashboard/i })[0])
 
     expect(onOpenDashboard).toHaveBeenCalled()
   })

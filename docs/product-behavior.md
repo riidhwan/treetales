@@ -15,12 +15,15 @@
 ### Story Detail
 - User opens an existing story from the dashboard and lands on the story detail page.
 - Story detail shows the story title and description.
+- When a Story has no description, Story detail shows an empty summary
+  affordance that opens the Story editor.
 - Story detail provides actions to read, edit, or delete the story.
 - Delete shows a confirmation dialog before removing the story and returning to
   the dashboard.
 - Story detail shows Story-level Character cards below the story summary.
-- Character cards use a fixed height, show the character name and gender, and
-  preview the first three custom properties with long keys and values
+- Character cards show the character name and gender, keep even heights in
+  multi-column grids, may use content-led height in single-column mobile lists,
+  and preview the first three custom properties with long keys and values
   truncated. When more than three custom properties exist, the card shows a
   remaining-count indicator.
 - Selecting a Character card opens a read-only detail dialog with the full

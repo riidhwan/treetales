@@ -379,6 +379,14 @@ Routine development happens on topic branches and merges to `master` through pul
 
 GitHub Issues are used for task tracking. Before implementation, check for an existing issue or create/draft one unless the change is truly tiny. Use `Closes #N` in PR bodies and commit messages for complete, verified issue-backed work that should close on merge or push. Use `Refs #N` only when the work is related but intentionally leaves the issue open.
 
+If a non-trivial change requires an issue and GitHub issue lookup or creation is
+unavailable, stop before implementation for new work and stop before opening a
+PR for completed work. Report the blocker to the user; do not continue by
+opening an untracked PR. PR bodies should contain real issue references only.
+Do not write "None" as a linked-issue substitute when an issue is required, and
+do not include agent/tooling failure notes such as failed issue creation
+attempts in PR descriptions.
+
 Use the local `github-issues` skill when creating or editing GitHub issues, decomposing work, starting issue-backed work, opening issue-backed PRs, managing blockers, or auditing issue relationships before handoff. The skill owns the operational checklists and issue templates.
 
 Large changes are work that spans multiple features, broad refactors, risky behaviour changes, persistence/data-flow changes, or thousands of lines of code. Use one parent issue for the end goal and native GitHub sub-issues for independently shippable slices. Do not rely only on textual `Refs #N` links when the sub-issue relationship is available. Each sub-issue must leave `master` buildable, testable, deployable, and safe for normal users. For tightly coupled migrations, inactive implementation slices are acceptable. For partial user-facing features that cannot safely ship yet, hide the incomplete behavior behind a feature flag that follows the feature flag rules below. Production behavior must switch in one coherent deployable sub-issue.

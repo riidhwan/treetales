@@ -1,7 +1,8 @@
-import { BookOpen, Edit3, Home, Trash2 } from 'lucide-react'
+import { BookOpen, ChevronLeft, Edit3, Home, Plus, Trash2 } from 'lucide-react'
 import { useId } from 'react'
 
 import { CharacterSection } from '@/components/features/storyDetail/CharacterSection'
+import { MANAGEMENT_DISPLAY_FONT } from '@/components/features/storyDetail/constants'
 import {
   type StoryCharacterServices,
   useStoryCharacters,
@@ -78,13 +79,29 @@ export function StoryDetail({
           </Alert>
         ) : null}
 
-        <article className="border-b border-tt-line pb-6">
+        <article className="border-b border-tt-line pb-9">
           <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
             Story summary
           </p>
-          <p className="mt-4 text-sm leading-6 text-tt-muted sm:text-base">
-            {story.description || 'No description yet.'}
-          </p>
+          {story.description ? (
+            <p className="mt-4 text-sm leading-6 text-tt-muted sm:text-base">
+              {story.description}
+            </p>
+          ) : (
+            <button
+              className="mt-5 flex min-h-20 w-full items-center justify-between gap-4 rounded-2xl border border-dashed border-tt-line bg-tt-paper/45 px-5 py-4 text-left text-sm text-tt-muted transition hover:border-tt-gold hover:bg-tt-gold-soft/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tt-gold sm:text-base"
+              onClick={() => onEditStory(story.id)}
+              type="button"
+            >
+              <span className="italic text-tt-muted/70">
+                No description yet - tap to add one.
+              </span>
+              <span className="inline-flex shrink-0 items-center gap-1 font-semibold text-tt-moss">
+                <Plus aria-hidden="true" size={18} />
+                Add
+              </span>
+            </button>
+          )}
         </article>
 
         <CharacterSection
@@ -102,54 +119,57 @@ export function StoryDetail({
 
   return (
     <main className="min-h-screen bg-tt-parchment text-tt-ink">
-      <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-8 sm:px-8">
+      <header className="border-b border-tt-line/70 bg-tt-paper/35">
+        <nav
+          aria-label="Story detail navigation"
+          className="mx-auto flex min-h-16 w-full max-w-3xl items-center justify-between px-5 sm:px-8"
+        >
+          <button
+            className="inline-flex min-h-10 items-center gap-2 rounded-md text-base font-medium text-tt-moss transition hover:text-tt-moss-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tt-gold"
+            onClick={onOpenDashboard}
+            type="button"
+          >
+            <ChevronLeft aria-hidden="true" size={22} />
+            Dashboard
+          </button>
+        </nav>
+      </header>
+
+      <section className="mx-auto flex w-full max-w-3xl flex-col gap-9 px-5 py-10 sm:px-8">
         {story ? (
-          <header className="border-b border-tt-line pb-6">
-            <nav aria-label="Story detail navigation">
-              <Button onClick={onOpenDashboard} size="sm">
-                <Home aria-hidden="true" size={16} />
-                Dashboard
-              </Button>
-            </nav>
-            <div className="mt-6 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <header className="border-b border-tt-line pb-9">
+            <div className="flex flex-col gap-7">
               <div className="min-w-0">
                 <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
                   Story
                 </p>
-                <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
+                <h1
+                  className="mt-3 text-5xl font-bold leading-none sm:text-6xl"
+                  style={{ fontFamily: MANAGEMENT_DISPLAY_FONT }}
+                >
                   {story.title || 'Untitled story'}
                 </h1>
               </div>
-              <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(8.25rem,0.34fr)] gap-3">
                 <Button
-                  className="w-full sm:w-auto"
+                  className="min-h-14 w-full rounded-xl text-base shadow-md"
                   onClick={() => onReadStory(story.id)}
                   variant="primary"
                 >
-                  <BookOpen aria-hidden="true" size={18} />
+                  <BookOpen aria-hidden="true" size={20} />
                   Read
                 </Button>
                 <Button
-                  className="w-full sm:w-auto"
+                  className="min-h-14 w-full rounded-xl bg-tt-paper text-base"
                   onClick={() => onEditStory(story.id)}
                 >
-                  <Edit3 aria-hidden="true" size={18} />
+                  <Edit3 aria-hidden="true" size={20} />
                   Edit
                 </Button>
               </div>
             </div>
           </header>
-        ) : (
-          <nav
-            aria-label="Story detail navigation"
-            className="flex flex-wrap justify-between gap-3"
-          >
-            <Button onClick={onOpenDashboard} size="sm">
-              <Home aria-hidden="true" size={16} />
-              Dashboard
-            </Button>
-          </nav>
-        )}
+        ) : null}
 
         {detailContent}
       </section>
@@ -167,23 +187,25 @@ function StoryMaintenanceSection({
   onDelete,
 }: StoryMaintenanceSectionProps) {
   return (
-    <section className="border-t border-tt-line pt-5">
-      <p className="text-sm font-semibold uppercase tracking-wide text-tt-muted">
-        Story maintenance
-      </p>
-      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="max-w-xl text-sm leading-6 text-tt-muted">
-          Delete this Story and all of its Chapters and Characters.
+    <section className="overflow-hidden rounded-3xl border border-tt-oxblood/25 bg-tt-oxblood-soft/25">
+      <div className="px-5 py-5 sm:px-7">
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-tt-oxblood">
+          Danger Zone
         </p>
+        <p className="mt-3 max-w-xl text-sm leading-6 text-tt-muted sm:text-base">
+          Deleting this Story will permanently remove all Chapters and
+          Characters. This cannot be undone.
+        </p>
+      </div>
+      <div className="border-t border-tt-oxblood/20 bg-tt-paper/35 px-5 py-4 sm:px-7">
         <Button
-          className="w-full sm:w-auto"
+          className="w-full border-0 bg-transparent text-base shadow-none hover:bg-tt-oxblood-soft/60 sm:min-h-12"
           disabled={isDeleting}
           onClick={onDelete}
-          size="sm"
           variant="danger"
         >
           <Trash2 aria-hidden="true" size={16} />
-          {isDeleting ? 'Deleting...' : 'Delete'}
+          {isDeleting ? 'Deleting...' : 'Delete Story'}
         </Button>
       </div>
     </section>

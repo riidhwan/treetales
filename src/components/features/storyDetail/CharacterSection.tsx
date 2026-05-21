@@ -43,17 +43,21 @@ export function CharacterSection({ characterDialog, titleId }: Props) {
 
   return (
     <>
-      <section className="pb-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <section className="border-b border-tt-line pb-9">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
               Characters
             </p>
-            <h2 className="mt-2 text-2xl font-bold">Story characters</h2>
           </div>
-          <Button onClick={characterDialog.openCreateDialog} variant="primary">
+          <Button
+            aria-label="Add Character"
+            className="rounded-full px-5"
+            onClick={characterDialog.openCreateDialog}
+            variant="primary"
+          >
             <Plus aria-hidden="true" size={18} />
-            Add Character
+            Add
           </Button>
         </div>
 
