@@ -234,7 +234,8 @@ Current storage-specific repository files include:
 
 | File | Responsibility |
 |---|---|
-| `indexedDb/db.ts` | Active IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
+| `indexedDb/db.ts` | Active IndexedDB connection, upgrade, low-level request helpers, and legacy parent migration |
+| `indexedDb/transaction.ts` | Provider-internal IndexedDB transaction lifecycle helper |
 | `indexedDb/storyRepository.ts` | Active IndexedDB Story persistence adapter |
 | `indexedDb/chapterRepository.ts` | Active IndexedDB Chapter persistence adapter with graph validation |
 | `indexedDb/characterRepository.ts` | Active IndexedDB Character persistence adapter |
@@ -248,9 +249,9 @@ hide Chapter cleanup inside the Story repository.
 Multi-repository writes should run inside an explicit storage-specific
 unit-of-work boundary so related writes commit or fail together. The active
 IndexedDB path exposes that boundary through
-`createIndexedDbRepositoryUnitOfWork()`, which opens one readwrite transaction
-and passes transaction-scoped story, chapter, and character repositories to the service
-operation.
+`createIndexedDbRepositoryUnitOfWork()`, which uses the provider-internal
+transaction helper to open one readwrite transaction and pass transaction-scoped
+story, chapter, and character repositories to the service operation.
 
 Cross-repository service operations such as `deleteStory` should use the
 unit-of-work boundary rather than opening storage transactions directly. Do not
@@ -285,7 +286,9 @@ operation. Character writes reject missing stories before committing.
 
 Schema setup and forward upgrades live with the IndexedDB repository
 implementation. Repository operations may accept a transaction so standalone
-operations and unit-of-work operations share the same adapter code.
+operations and unit-of-work operations share the same adapter code. Standalone
+repository operations open only the object stores they need through the
+provider-internal transaction helper.
 
 ## Test Helpers (`src/test/`)
 

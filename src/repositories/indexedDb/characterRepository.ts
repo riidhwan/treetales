@@ -8,21 +8,18 @@ import {
   CHARACTER_STORY_ID_INDEX,
   STORIES_STORE,
   abortTransaction,
-  assertTransactionSupportsMode,
-  openDb,
   requestToPromise,
   typedRequest,
-  transactionDone,
 } from '@/repositories/indexedDb/db'
 import type { StoreName } from '@/repositories/indexedDb/db'
+import {
+  type IndexedDbRepositoryOptions,
+  withIndexedDbTransaction,
+} from '@/repositories/indexedDb/transaction'
 import type { Character, Story } from '@/services/types'
 
-interface CharacterRepositoryOptions {
-  readonly transaction?: IDBTransaction
-}
-
 export function createIndexedDbCharacterRepository(
-  options: CharacterRepositoryOptions = {},
+  options: IndexedDbRepositoryOptions = {},
 ): CharacterRepository {
   return {
     insertCharacter: (character) => insertCharacter(options, character),
@@ -37,7 +34,7 @@ export function createIndexedDbCharacterRepository(
 }
 
 async function insertCharacter(
-  options: CharacterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   character: Character,
 ): Promise<void> {
   await withTransaction(
@@ -56,7 +53,7 @@ async function insertCharacter(
 }
 
 async function findCharacterById(
-  options: CharacterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   id: string,
 ): Promise<Character | undefined> {
   return withCharacterStore(options, 'readonly', (store) =>
@@ -65,7 +62,7 @@ async function findCharacterById(
 }
 
 async function findCharactersByStoryId(
-  options: CharacterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   storyId: string,
 ): Promise<Character[]> {
   return withCharacterStore(options, 'readonly', async (store) => {
@@ -80,7 +77,7 @@ async function findCharactersByStoryId(
 }
 
 async function updateCharacter(
-  options: CharacterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   id: string,
   input: UpdateCharacterRepositoryInput,
 ): Promise<Character | undefined> {
@@ -116,7 +113,7 @@ async function updateCharacter(
 }
 
 async function deleteCharacter(
-  options: CharacterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   id: string,
 ): Promise<boolean> {
   return withCharacterStore(options, 'readwrite', async (store) => {
@@ -135,7 +132,7 @@ async function deleteCharacter(
 }
 
 async function deleteCharactersByStoryId(
-  options: CharacterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   storyId: string,
 ): Promise<void> {
   await withCharacterStore(options, 'readwrite', async (store) => {
@@ -154,7 +151,7 @@ async function deleteCharactersByStoryId(
 }
 
 async function withCharacterStore<T>(
-  options: CharacterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   mode: IDBTransactionMode,
   operation: (store: IDBObjectStore) => Promise<T>,
 ): Promise<T> {
@@ -164,27 +161,12 @@ async function withCharacterStore<T>(
 }
 
 async function withTransaction<T>(
-  options: CharacterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   storeNames: readonly StoreName[],
   mode: IDBTransactionMode,
   operation: (transaction: IDBTransaction) => Promise<T>,
 ): Promise<T> {
-  if (options.transaction) {
-    assertTransactionSupportsMode(options.transaction, mode)
-    return operation(options.transaction)
-  }
-
-  const db = await openDb()
-
-  try {
-    const transaction = db.transaction([...storeNames], mode)
-    const result = await operation(transaction)
-    await transactionDone(transaction)
-
-    return result
-  } finally {
-    db.close()
-  }
+  return withIndexedDbTransaction(options, storeNames, mode, operation)
 }
 
 async function validateCharacterStory(

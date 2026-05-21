@@ -10,21 +10,18 @@ import {
   CHAPTER_STORY_ID_INDEX,
   STORIES_STORE,
   abortTransaction,
-  assertTransactionSupportsMode,
-  openDb,
   requestToPromise,
   typedRequest,
-  transactionDone,
 } from '@/repositories/indexedDb/db'
 import type { StoreName } from '@/repositories/indexedDb/db'
+import {
+  type IndexedDbRepositoryOptions,
+  withIndexedDbTransaction,
+} from '@/repositories/indexedDb/transaction'
 import type { Chapter, Story } from '@/services/types'
 
-interface ChapterRepositoryOptions {
-  readonly transaction?: IDBTransaction
-}
-
 export function createIndexedDbChapterRepository(
-  options: ChapterRepositoryOptions = {},
+  options: IndexedDbRepositoryOptions = {},
 ): ChapterRepository {
   return {
     insertChapter: (chapter) => insertChapter(options, chapter),
@@ -39,7 +36,7 @@ export function createIndexedDbChapterRepository(
 }
 
 async function insertChapter(
-  options: ChapterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   chapter: Chapter,
 ): Promise<void> {
   await withTransaction(
@@ -58,7 +55,7 @@ async function insertChapter(
 }
 
 async function findChapterById(
-  options: ChapterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   id: string,
 ): Promise<Chapter | undefined> {
   return withChapterStore(options, 'readonly', (store) =>
@@ -67,7 +64,7 @@ async function findChapterById(
 }
 
 async function findChaptersByStoryId(
-  options: ChapterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   storyId: string,
 ): Promise<Chapter[]> {
   return withChapterStore(options, 'readonly', async (store) => {
@@ -81,7 +78,7 @@ async function findChaptersByStoryId(
 }
 
 async function findIntroChapterByStoryId(
-  options: ChapterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   storyId: string,
 ): Promise<Chapter | undefined> {
   return withChapterStore(options, 'readonly', (store) =>
@@ -90,7 +87,7 @@ async function findIntroChapterByStoryId(
 }
 
 async function findChildChapters(
-  options: ChapterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   chapterId: string,
 ): Promise<Chapter[]> {
   return withChapterStore(options, 'readonly', async (store) => {
@@ -104,7 +101,7 @@ async function findChildChapters(
 }
 
 async function updateChapter(
-  options: ChapterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   id: string,
   input: UpdateChapterRepositoryInput,
 ): Promise<Chapter | undefined> {
@@ -143,7 +140,7 @@ async function updateChapter(
 }
 
 async function deleteChapter(
-  options: ChapterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   id: string,
   input: DeleteChapterRepositoryInput,
 ): Promise<boolean> {
@@ -191,7 +188,7 @@ async function deleteChapter(
 }
 
 async function withChapterStore<T>(
-  options: ChapterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   mode: IDBTransactionMode,
   operation: (store: IDBObjectStore) => Promise<T>,
 ): Promise<T> {
@@ -201,27 +198,12 @@ async function withChapterStore<T>(
 }
 
 async function withTransaction<T>(
-  options: ChapterRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   storeNames: readonly StoreName[],
   mode: IDBTransactionMode,
   operation: (transaction: IDBTransaction) => Promise<T>,
 ): Promise<T> {
-  if (options.transaction) {
-    assertTransactionSupportsMode(options.transaction, mode)
-    return operation(options.transaction)
-  }
-
-  const db = await openDb()
-
-  try {
-    const transaction = db.transaction([...storeNames], mode)
-    const result = await operation(transaction)
-    await transactionDone(transaction)
-
-    return result
-  } finally {
-    db.close()
-  }
+  return withIndexedDbTransaction(options, storeNames, mode, operation)
 }
 
 function findIntroChapter(
