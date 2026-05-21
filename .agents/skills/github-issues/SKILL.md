@@ -14,6 +14,8 @@ Use this skill for issue creation, issue decomposition, issue-backed implementat
 - Use native blocked-by/blocking relationships for real sequencing dependencies.
 - Do not substitute issue-body prose, checklists, or `Refs #N` links for native relationships when native relationships are needed.
 - If a required native relationship cannot be created, read, or verified through available GitHub tooling, stop and report the limitation. Include the exact relationship that must be created manually.
+- If repository policy requires an issue for the work and issue lookup or creation is unavailable, stop before implementation for new work and stop before opening a PR for completed work. Report the blocker to the user instead of creating an untracked non-trivial PR.
+- PR bodies should contain actual issue references only. Do not write "None" as a linked-issue substitute when an issue is required, and do not include agent/tooling failure notes such as failed issue creation attempts in PR descriptions.
 - Link ADRs and relevant docs from issues when they constrain the work. If none apply, say `None identified`.
 - Keep each sub-issue independently reviewable and able to leave `master` buildable, testable, deployable, and safe for normal users.
 
