@@ -188,33 +188,51 @@ spacing, hover states, and active states.
 ## Dashboard
 
 The dashboard remains the usable story library, not a marketing landing page.
-Use a warm full-page background, a compact TreeTales header with a concise
-purpose statement, and saved **Story** rows that feel like shelf labels or paper
-slips rather than generic white cards. Once the top bar owns the TreeTales
-brand, the dashboard page header should describe the user's collection, such as
-"Your stories", rather than repeating "TreeTales" or using scaffolding language
-like "Story dashboard". The new-story form should feel like an inline writing
-slip placed directly below the dashboard header, not a modal, full page, or
-competing standalone card. Treat the form as a bounded creation affordance with
-clear ownership by the page header; it should remain visually distinct from
-saved **Story** rows. Empty states should invite authors into the product, with
-the example **Story** presented as the stronger first action when no stories
-exist. In the empty dashboard state, Add Example Story is the primary action and
-New Story is secondary; pair them when space allows and stack only when narrow
-viewports need it. Do not duplicate New Story in the page header while the empty
-state is visible. Once saved **Stories** exist, New Story becomes the primary
-dashboard action.
+Use a warm full-page background, a compact TreeTales header, an editorial
+library marker such as "Your Library", and a collection heading such as "Your
+stories". The heading may split "Your" and "stories" across lines and give
+"stories" a restrained italic moss display treatment so the header reads with
+the rhythm of "Your Library / Your stories" without implying a single-Story
+workspace. The supporting dashboard copy may be more atmospheric than
+instructional, but controls and product labels should keep the established
+domain language.
+
+Once the top bar owns the TreeTales brand, the dashboard page header should
+describe the user's collection rather than repeating "TreeTales" or using
+scaffolding language like "Story dashboard". Do not add top-bar actions such as
+settings unless a real dashboard-level destination exists.
+
+When saved **Stories** exist, use a large full-width creation affordance instead
+of a small utility button. Its visible copy may be expressive, such as "Begin a
+new story" with a short italic line below it, but it still performs the same
+dashboard action: opening the new-story form. When opened from this affordance,
+the form should appear directly beneath it as an inline writing slip, not a
+modal, full page, or competing standalone card. Treat the form as a bounded
+creation affordance that remains visually distinct from saved **Story** rows.
+
+Empty states should invite authors into the product, with the example **Story**
+presented as the stronger first action when no stories exist. In the empty
+dashboard state, Add Example Story is the primary action and New Story is
+secondary; pair them when space allows and stack only when narrow viewports need
+it. Do not duplicate New Story in the page header while the empty state is
+visible. The large saved-library creation affordance is for non-empty
+dashboards only.
 
 The empty dashboard state should remain a bounded paper-like empty state within
 the workbench column, not an unframed section or marketing hero. Use concise
 copy, a subtle border or dashed treatment, and the paired action priority above.
 
 Saved **Story** entries on the dashboard should remain compact bounded rows
-rather than expanding into large cards or grids. Use the story-management
-display voice for read-only **Story** titles, keep descriptions truncated for
-scanning, and reserve row-level controls for opening the Story detail page
-rather than adding Read, Edit, or Delete actions to every row.
-Use the row's right edge for a clear navigation affordance such as a chevron.
+rather than expanding into large cards or grids. They may be softer and more
+tactile than generic list items, but should stay text-led: do not add
+thumbnails, generated artwork, branch counts, word counts, or other metadata
+unless that information already exists and has a clear scanning purpose. Use
+the story-management display voice for read-only **Story** titles, keep
+descriptions truncated for scanning, and reserve row-level controls for opening
+the Story detail page rather than adding Read, Edit, or Delete actions to every
+row. Use the row's right edge for a clear navigation affordance such as a
+chevron. Decorative left-edge row accents may provide visual rhythm, but they
+must not imply hidden Story state such as status, genre, recency, or progress.
 Add compact right-edge metadata only when it is meaningful and already available
 without extra loading complexity; do not add decorative or placeholder metadata
 just to fill space.

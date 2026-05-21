@@ -158,6 +158,25 @@ describe('StoryDashboard', () => {
     expect(screen.queryByRole('button', { name: /delete/i })).toBeNull()
   })
 
+  it('opens the story form from the saved-library create affordance', async () => {
+    const services = createServices([createStory({ id: 'story-7' })])
+
+    render(
+      <StoryDashboard
+        onEditStory={vi.fn()}
+        onOpenStory={vi.fn()}
+        onReadStory={vi.fn()}
+        services={services}
+      />,
+    )
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: /begin a new story/i }),
+    )
+
+    expect(screen.getByRole('form', { name: /new story/i })).toBeTruthy()
+  })
+
   it('renders empty descriptions', async () => {
     const services = createServices(
       [

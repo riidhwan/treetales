@@ -4,7 +4,7 @@
 
 ### Story Dashboard (Home)
 - User arrives at the home page and sees a list of their stories (or an empty state).
-- "New Story" button opens a form for title + description.
+- The dashboard story creation action opens a form for title + description.
 - After creating a story, user is redirected to the story editor.
 - Empty state offers an example story that creates a built-in branching story in
   this browser and opens it in the reader.
