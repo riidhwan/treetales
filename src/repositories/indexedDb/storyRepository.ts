@@ -5,20 +5,17 @@ import type {
 } from '@/repositories/types'
 import {
   STORIES_STORE,
-  assertTransactionSupportsMode,
-  openDb,
   requestToPromise,
   typedRequest,
-  transactionDone,
 } from '@/repositories/indexedDb/db'
+import {
+  type IndexedDbRepositoryOptions,
+  withIndexedDbTransaction,
+} from '@/repositories/indexedDb/transaction'
 import type { Story } from '@/services/types'
 
-interface StoryRepositoryOptions {
-  readonly transaction?: IDBTransaction
-}
-
 export function createIndexedDbStoryRepository(
-  options: StoryRepositoryOptions = {},
+  options: IndexedDbRepositoryOptions = {},
 ): StoryRepository {
   return {
     insertStory: (story) => insertStory(options, story),
@@ -30,7 +27,7 @@ export function createIndexedDbStoryRepository(
 }
 
 async function insertStory(
-  options: StoryRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   story: Story,
 ): Promise<void> {
   await withStoryStore(options, 'readwrite', async (store) => {
@@ -39,7 +36,7 @@ async function insertStory(
 }
 
 async function findStories(
-  options: StoryRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
 ): Promise<Story[]> {
   return withStoryStore(options, 'readonly', async (store) => {
     const stories = await requestToPromise(
@@ -51,7 +48,7 @@ async function findStories(
 }
 
 async function findStoryById(
-  options: StoryRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   id: string,
 ): Promise<Story | undefined> {
   return withStoryStore(options, 'readonly', (store) =>
@@ -60,7 +57,7 @@ async function findStoryById(
 }
 
 async function updateStory(
-  options: StoryRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   id: string,
   input: UpdateStoryRepositoryInput,
 ): Promise<Story | undefined> {
@@ -86,7 +83,7 @@ async function updateStory(
 }
 
 async function deleteStory(
-  options: StoryRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   id: string,
 ): Promise<boolean> {
   return withStoryStore(options, 'readwrite', async (store) => {
@@ -105,25 +102,11 @@ async function deleteStory(
 }
 
 async function withStoryStore<T>(
-  options: StoryRepositoryOptions,
+  options: IndexedDbRepositoryOptions,
   mode: IDBTransactionMode,
   operation: (store: IDBObjectStore) => Promise<T>,
 ): Promise<T> {
-  if (options.transaction) {
-    assertTransactionSupportsMode(options.transaction, mode)
-    return operation(options.transaction.objectStore(STORIES_STORE))
-  }
-
-  const db = await openDb()
-
-  try {
-    const transaction = db.transaction(STORIES_STORE, mode)
-    const store = transaction.objectStore(STORIES_STORE)
-    const result = await operation(store)
-    await transactionDone(transaction)
-
-    return result
-  } finally {
-    db.close()
-  }
+  return withIndexedDbTransaction(options, [STORIES_STORE], mode, (transaction) =>
+    operation(transaction.objectStore(STORIES_STORE)),
+  )
 }

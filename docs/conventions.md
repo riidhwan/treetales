@@ -258,9 +258,11 @@ Current repository files are:
 
 | File | Responsibility |
 |---|---|
-| `indexedDb/db.ts` | Active IndexedDB connection, upgrade, transaction helpers, and legacy parent migration |
+| `indexedDb/db.ts` | Active IndexedDB connection, upgrade, low-level request helpers, and legacy parent migration |
+| `indexedDb/transaction.ts` | Provider-internal IndexedDB transaction lifecycle helper |
 | `indexedDb/storyRepository.ts` | Active IndexedDB Story persistence adapter |
 | `indexedDb/chapterRepository.ts` | Active IndexedDB Chapter persistence adapter |
+| `indexedDb/characterRepository.ts` | Active IndexedDB Character persistence adapter |
 | `indexedDb/unitOfWork.ts` | Active IndexedDB unit-of-work boundary for multi-repository writes |
 
 Cross-record persistence effects should stay explicit at the service boundary.
@@ -283,7 +285,8 @@ same slice when the change is mechanical and contained.
 IndexedDB repositories may accept an `IDBTransaction` for unit-of-work
 operations rather than opening their own database connection. Standalone
 operations should open and close their own database connection through the
-provider helper.
+provider transaction helper, using only the object stores required by the
+operation.
 
 ## Optional Store (e.g. Zustand)
 
