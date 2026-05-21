@@ -237,7 +237,7 @@ function ReaderContent({
         </p>
       </section>
     )
-  } else if (errorMessage) {
+  } else if (status === 'error') {
     readerContent = (
       <Alert role="alert" variant="error">
         {errorMessage}

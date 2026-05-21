@@ -69,6 +69,12 @@ export function ChapterEditor({
         title="Chapter not found"
       />
     )
+  } else if (status === 'error') {
+    editorContent = (
+      <Alert role="alert" variant="error">
+        {errorMessage}
+      </Alert>
+    )
   } else {
     editorContent = (
       <ChapterWritingWorkflow

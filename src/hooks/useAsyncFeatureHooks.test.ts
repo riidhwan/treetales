@@ -122,6 +122,26 @@ describe('async feature hooks', () => {
     expect(result.current.story).toBeUndefined()
   })
 
+  it('marks the Story Editor errored when the story load fails', async () => {
+    const services = {
+      getIntroChapterByStoryId: vi.fn(() => Promise.resolve(undefined)),
+      getStoryById: vi.fn(() =>
+        Promise.reject(new Error('Could not load story.')),
+      ),
+      updateStory: vi.fn(),
+    }
+    const { result } = renderHook(() =>
+      useStoryEditor({ services, storyId: 'story-1' }),
+    )
+
+    await waitFor(() => {
+      expect(result.current.status).toBe('error')
+    })
+    expect(result.current.errorMessage).toBe('Could not load story.')
+    expect(result.current.story).toBeUndefined()
+    expect(result.current.canSave).toBe(false)
+  })
+
   it('does not save Story Editor or Chapter Editor forms when their current state is invalid', async () => {
     const storyServices = {
       getIntroChapterByStoryId: vi.fn(() => Promise.resolve(undefined)),
@@ -528,6 +548,30 @@ describe('async feature hooks', () => {
     expect(result.current.chapter).toBeUndefined()
   })
 
+  it('marks the Chapter Editor errored when the chapter load fails', async () => {
+    const services = {
+      getChapterById: vi.fn(() =>
+        Promise.reject(new Error('Could not load chapter.')),
+      ),
+      getStoryById: vi.fn(() => Promise.resolve(createStory())),
+      updateChapter: vi.fn(),
+    }
+    const { result } = renderHook(() =>
+      useChapterEditor({
+        chapterId: 'chapter-1',
+        services,
+        storyId: 'story-1',
+      }),
+    )
+
+    await waitFor(() => {
+      expect(result.current.status).toBe('error')
+    })
+    expect(result.current.errorMessage).toBe('Could not load chapter.')
+    expect(result.current.chapter).toBeUndefined()
+    expect(result.current.canSave).toBe(false)
+  })
+
   it('ignores Chapter Editor parent context that resolves after unmount', async () => {
     const pendingParent = deferred<Chapter | undefined>()
     const services = {
@@ -691,6 +735,29 @@ describe('async feature hooks', () => {
     expect(onSelectChapter).not.toHaveBeenCalled()
   })
 
+  it('marks the Story Reader errored when chapters fail to load', async () => {
+    const services = {
+      getChaptersByStoryId: vi.fn(() =>
+        Promise.reject(new Error('Could not load chapters.')),
+      ),
+      getNextChapters: vi.fn(() => Promise.resolve([])),
+      getStoryById: vi.fn(() => Promise.resolve(createStory())),
+    }
+    const { result } = renderHook(() =>
+      useStoryReader({
+        onSelectChapter: vi.fn(),
+        services,
+        storyId: 'story-1',
+      }),
+    )
+
+    await waitFor(() => {
+      expect(result.current.status).toBe('error')
+    })
+    expect(result.current.errorMessage).toBe('Could not load chapters.')
+    expect(result.current.currentChapter).toBeUndefined()
+  })
+
   it('does not duplicate the same next chapter in the Story Reader session path', async () => {
     const onSelectChapter = vi.fn()
     const nextChapter = createChapter({
@@ -789,6 +856,45 @@ describe('async feature hooks', () => {
     })
 
     view.rerender({ chapterId: secondChapter.id })
+    await waitFor(() => {
+      expect(view.result.current.currentChapter?.id).toBe(secondChapter.id)
+    })
+  })
+
+  it('resets the Story Reader path when directly opening an unvisited chapter', async () => {
+    const firstChapter = createChapter({
+      id: 'chapter-first',
+      title: 'First',
+    })
+    const secondChapter = createChapter({
+      id: 'chapter-second',
+      parentChapterId: firstChapter.id,
+      title: 'Second',
+    })
+    const services = {
+      getChaptersByStoryId: vi.fn(() =>
+        Promise.resolve([firstChapter, secondChapter]),
+      ),
+      getNextChapters: vi.fn(() => Promise.resolve([])),
+      getStoryById: vi.fn(() => Promise.resolve(createStory())),
+    }
+    const view = renderHook(
+      ({ chapterId }: { readonly chapterId?: string }) =>
+        useStoryReader({
+          chapterId,
+          onSelectChapter: vi.fn(),
+          services,
+          storyId: 'story-1',
+        }),
+      { initialProps: { chapterId: undefined as string | undefined } },
+    )
+
+    await waitFor(() => {
+      expect(view.result.current.currentChapter?.id).toBe(firstChapter.id)
+    })
+
+    view.rerender({ chapterId: secondChapter.id })
+
     await waitFor(() => {
       expect(view.result.current.currentChapter?.id).toBe(secondChapter.id)
     })

@@ -22,7 +22,7 @@ export const DEFAULT_STORY_EDITOR_SERVICES: StoryEditorServices = {
   updateStory,
 }
 
-export type EditorStatus = 'loading' | 'ready' | 'missing-story'
+export type EditorStatus = 'loading' | 'ready' | 'missing-story' | 'error'
 
 interface UseStoryEditorOptions {
   readonly services?: StoryEditorServices
@@ -44,7 +44,7 @@ export function useStoryEditor({
 
   const trimmedTitle = title.trim()
   const trimmedDescription = description.trim()
-  const canSave = trimmedTitle.length > 0 && !isSaving
+  const canSave = status === 'ready' && trimmedTitle.length > 0 && !isSaving
 
   useEffect(() => {
     let isCurrent = true
@@ -81,8 +81,10 @@ export function useStoryEditor({
         setStatus('ready')
       } catch (error) {
         if (isCurrent) {
+          setStory(undefined)
+          setIntroChapter(undefined)
           setErrorMessage(getErrorMessage(error))
-          setStatus('ready')
+          setStatus('error')
         }
       }
     }

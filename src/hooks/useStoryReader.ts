@@ -25,6 +25,7 @@ export type ReaderStatus =
   | 'ready'
   | 'missing-story'
   | 'missing-chapter'
+  | 'error'
 
 interface ReaderState {
   readonly chapters: Chapter[]
@@ -138,7 +139,7 @@ export function useStoryReader({
             chapters: [],
             errorMessage: getErrorMessage(error),
             nextChapters: [],
-            status: 'ready',
+            status: 'error',
           })
         }
       }
