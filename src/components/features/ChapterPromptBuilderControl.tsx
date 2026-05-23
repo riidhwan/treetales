@@ -1,12 +1,12 @@
 import { useId, useState } from 'react'
-import { Copy, Sparkles, X } from 'lucide-react'
+import { Copy, Sparkles } from 'lucide-react'
 
 import {
   type PromptBuilderTemplateKind,
   buildPromptBuilderPrompt,
 } from '@/components/features/promptBuilderTemplates'
 import { Button } from '@/components/ui/Button'
-import { IconButton } from '@/components/ui/IconButton'
+import { Dialog } from '@/components/ui/Dialog'
 import { TextArea } from '@/components/ui/TextArea'
 
 interface ParentChapterContext {
@@ -120,75 +120,58 @@ export function ChapterPromptBuilderControl({
       ) : null}
 
       {isPromptBuilderOpen ? (
-        <div className="fixed inset-0 z-40 bg-tt-ink/35 px-3 py-4 sm:px-6">
-          <section
-            aria-labelledby={dialogTitleId}
-            aria-modal="true"
-            className="mx-auto flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col rounded-md border border-tt-line bg-tt-paper shadow-xl"
-            role="dialog"
-          >
-            <header className="flex items-center justify-between gap-3 border-b border-tt-line px-4 py-3">
-              <h2
-                className="text-base font-semibold text-tt-ink"
-                id={dialogTitleId}
-              >
-                Prompt Builder
-              </h2>
-              <IconButton
-                label="Close Prompt Builder"
-                onClick={() => setIsPromptBuilderOpen(false)}
-                size="xs"
-              >
-                <X aria-hidden="true" size={15} />
-              </IconButton>
-            </header>
+        <Dialog
+          bodyClassName="grid gap-4"
+          className="max-h-[calc(100vh-2rem)]"
+          closeLabel="Close Prompt Builder"
+          footer={
+            <Button onClick={() => void copyPrompt()} variant="primary">
+              <Copy aria-hidden="true" size={16} />
+              Copy prompt
+            </Button>
+          }
+          onClose={() => setIsPromptBuilderOpen(false)}
+          overlayClassName="z-40 bg-tt-ink/35 px-3 py-4 sm:px-6"
+          title="Prompt Builder"
+          titleClassName="text-base font-semibold"
+          titleId={dialogTitleId}
+        >
+          <label className="grid gap-2">
+            <span className="text-sm font-semibold text-tt-ink">
+              Rough plot
+            </span>
+            <TextArea
+              className="min-h-44"
+              name="roughPlot"
+              onChange={(event) => setRoughPlot(event.target.value)}
+              placeholder="Sketch the chapter beats, choices, tone, or ending you want..."
+              value={roughPlot}
+            />
+          </label>
 
-            <div className="grid gap-4 overflow-y-auto p-4">
-              <label className="grid gap-2">
-                <span className="text-sm font-semibold text-tt-ink">
-                  Rough plot
-                </span>
-                <TextArea
-                  className="min-h-44"
-                  name="roughPlot"
-                  onChange={(event) => setRoughPlot(event.target.value)}
-                  placeholder="Sketch the chapter beats, choices, tone, or ending you want..."
-                  value={roughPlot}
-                />
-              </label>
+          {fallbackPrompt ? (
+            <label className="grid gap-2">
+              <span className="text-sm font-semibold text-tt-ink">
+                Generated prompt
+              </span>
+              <TextArea
+                className="min-h-44 font-mono text-sm"
+                name="generatedPrompt"
+                readOnly
+                value={fallbackPrompt}
+              />
+            </label>
+          ) : null}
 
-              {fallbackPrompt ? (
-                <label className="grid gap-2">
-                  <span className="text-sm font-semibold text-tt-ink">
-                    Generated prompt
-                  </span>
-                  <TextArea
-                    className="min-h-44 font-mono text-sm"
-                    name="generatedPrompt"
-                    readOnly
-                    value={fallbackPrompt}
-                  />
-                </label>
-              ) : null}
-
-              {copyStatus ? (
-                <p
-                  className="text-sm font-medium text-tt-muted"
-                  role={fallbackPrompt ? 'alert' : 'status'}
-                >
-                  {copyStatus}
-                </p>
-              ) : null}
-            </div>
-
-            <footer className="flex justify-end border-t border-tt-line px-4 py-3">
-              <Button onClick={() => void copyPrompt()} variant="primary">
-                <Copy aria-hidden="true" size={16} />
-                Copy prompt
-              </Button>
-            </footer>
-          </section>
-        </div>
+          {copyStatus ? (
+            <p
+              className="text-sm font-medium text-tt-muted"
+              role={fallbackPrompt ? 'alert' : 'status'}
+            >
+              {copyStatus}
+            </p>
+          ) : null}
+        </Dialog>
       ) : null}
     </div>
   )

@@ -69,6 +69,7 @@ Current generic primitives include:
 
 - `Alert`
 - `Button`
+- `Dialog`
 - `Field`
 - `IconButton`
 - `MarkdownContent`
@@ -78,7 +79,6 @@ Current generic primitives include:
 
 Near-term primitive candidates include:
 
-- `Dialog`
 - `SegmentedControl`
 - `Toolbar`
 - `EmptyState`
@@ -128,12 +128,17 @@ experience mode rather than inventing one-off visual systems.
 
 ### Dialogs
 
-Dialog behavior should eventually be centralized in a shared primitive because
-modal focus management, overlays, title semantics, dismissal, and footer action
-layout must stay consistent.
+Use `Dialog` for repeated modal surfaces. The primitive owns the modal overlay,
+labelled dialog surface, title semantics, close action, Escape dismissal, focus
+return, basic focus containment, scroll boundary, and footer action layout.
 
 Feature-specific dialog content, such as Character forms or Prompt Builder
 content, remains feature-owned.
+
+`Dialog` requires a stable `titleId` from the owning component so tests and
+assistive technology can rely on the same labelled surface. Keep the dialog
+title specific to the user task; use the optional eyebrow only for compact
+context such as `Character`.
 
 ### Toolbars
 
