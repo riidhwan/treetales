@@ -15,6 +15,19 @@
   --color-tt-oxblood-soft: #f4ded8;
   --color-tt-gold: #b9822f;
   --color-tt-gold-soft: #f5e6bf;
+  --color-background-app: var(--color-tt-parchment);
+  --color-surface-paper: var(--color-tt-paper);
+  --color-surface-paper-deep: var(--color-tt-paper-deep);
+  --color-text-primary: var(--color-tt-ink);
+  --color-text-muted: var(--color-tt-muted);
+  --color-border-subtle: var(--color-tt-line);
+  --color-action-primary: var(--color-tt-moss);
+  --color-action-primary-hover: var(--color-tt-moss-dark);
+  --color-action-destructive: var(--color-tt-oxblood);
+  --color-state-destructive-soft: var(--color-tt-oxblood-soft);
+  --color-focus-ring: var(--color-tt-gold);
+  --color-highlight-soft: var(--color-tt-gold-soft);
+  --color-state-success-soft: var(--color-tt-moss-soft);
 }
 
 @font-face {
@@ -316,8 +329,8 @@ body,
 }
 
 body {
-  background: var(--color-tt-parchment);
-  color: var(--color-tt-ink);
+  background: var(--color-background-app);
+  color: var(--color-text-primary);
   font-family:
     "NV Jost",
     ui-sans-serif,

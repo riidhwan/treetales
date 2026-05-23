@@ -15,7 +15,7 @@ export function TextInput({
   return (
     <input
       className={cn(
-        'min-h-11 rounded-md border border-tt-line bg-tt-paper px-3 text-base text-tt-ink outline-none transition placeholder:text-tt-muted/65 focus:border-tt-moss focus:ring-2 focus:ring-tt-gold-soft',
+        'min-h-11 rounded-md border border-border-subtle bg-surface-paper px-3 text-base text-text-primary outline-none transition placeholder:text-text-muted/65 focus:border-action-primary focus:ring-2 focus:ring-highlight-soft',
         className,
       )}
       type={type}

@@ -11,11 +11,13 @@ interface Props {
 
 export function Field({ children, className, helpText, label }: Props) {
   return (
-    <label className={cn('grid gap-2 text-sm font-medium text-tt-ink', className)}>
+    <label
+      className={cn('grid gap-2 text-sm font-medium text-text-primary', className)}
+    >
       <span>{label}</span>
       {children}
       {helpText ? (
-        <span className="text-sm font-normal leading-5 text-tt-muted">
+        <span className="text-sm font-normal leading-5 text-text-muted">
           {helpText}
         </span>
       ) : null}

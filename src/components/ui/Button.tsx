@@ -6,15 +6,15 @@ type ButtonVariant = 'danger' | 'primary' | 'secondary'
 type ButtonSize = 'md' | 'sm'
 
 const BASE_CLASSES =
-  'inline-flex items-center justify-center gap-2 rounded-md text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tt-gold disabled:cursor-not-allowed disabled:opacity-60 [&>svg]:shrink-0'
+  'inline-flex items-center justify-center gap-2 rounded-md text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring disabled:cursor-not-allowed disabled:opacity-60 [&>svg]:shrink-0'
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   danger:
-    'border border-tt-oxblood/30 bg-tt-oxblood-soft/40 text-tt-oxblood hover:bg-tt-oxblood-soft',
+    'border border-action-destructive/30 bg-state-destructive-soft/40 text-action-destructive hover:bg-state-destructive-soft',
   primary:
-    'border border-tt-moss-dark bg-tt-moss text-tt-paper shadow-sm hover:bg-tt-moss-dark disabled:border-tt-line disabled:bg-tt-line disabled:text-tt-muted',
+    'border border-action-primary-hover bg-action-primary text-surface-paper shadow-sm hover:bg-action-primary-hover disabled:border-border-subtle disabled:bg-border-subtle disabled:text-text-muted',
   secondary:
-    'border border-tt-line bg-tt-paper/70 text-tt-ink shadow-sm hover:border-tt-gold hover:bg-tt-gold-soft/50',
+    'border border-border-subtle bg-surface-paper/70 text-text-primary shadow-sm hover:border-focus-ring hover:bg-highlight-soft/50',
 }
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
