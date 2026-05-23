@@ -9,6 +9,7 @@ import type {
 } from '@/hooks/useStoryCharacters'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import type { Character, CharacterGender } from '@/services/types'
 
 interface Props {
@@ -71,9 +72,9 @@ export function CharacterDialog({
               {title}
             </h2>
           </div>
-          <Button aria-label="Close character dialog" onClick={onClose} size="sm">
+          <IconButton label="Close character dialog" onClick={onClose} size="sm">
             <X aria-hidden="true" size={16} />
-          </Button>
+          </IconButton>
         </div>
 
         {errorMessage ? (

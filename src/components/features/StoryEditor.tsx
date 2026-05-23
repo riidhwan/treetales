@@ -6,6 +6,7 @@ import {
 } from '@/hooks/useStoryEditor'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
+import { Field } from '@/components/ui/Field'
 import { TextArea } from '@/components/ui/TextArea'
 import { TextInput } from '@/components/ui/TextInput'
 import type { Chapter } from '@/services/types'
@@ -106,24 +107,22 @@ export function StoryEditor({
           onSubmit={handleSave}
         >
           <div className="grid gap-6">
-            <label className="grid gap-2 text-base font-medium text-tt-ink">
-              Title
+            <Field className="text-base" label="Title">
               <TextInput
                 className="min-h-14 rounded-xl px-4 text-lg"
                 name="title"
                 onChange={(event) => setTitle(event.target.value)}
                 value={title}
               />
-            </label>
-            <label className="grid gap-2 text-base font-medium text-tt-ink">
-              Description
+            </Field>
+            <Field className="text-base" label="Description">
               <TextArea
                 className="min-h-72 rounded-xl px-4 py-4"
                 name="description"
                 onChange={(event) => setDescription(event.target.value)}
                 value={description}
               />
-            </label>
+            </Field>
           </div>
 
           <div className="mt-6 flex flex-wrap gap-2">

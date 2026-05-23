@@ -2,13 +2,13 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
 
-type ButtonVariant = 'danger' | 'primary' | 'secondary'
-type ButtonSize = 'md' | 'sm'
+type IconButtonVariant = 'danger' | 'primary' | 'secondary'
+type IconButtonSize = 'md' | 'sm' | 'xs'
 
 const BASE_CLASSES =
-  'inline-flex items-center justify-center gap-2 rounded-md text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tt-gold disabled:cursor-not-allowed disabled:opacity-60 [&>svg]:shrink-0'
+  'inline-grid place-items-center rounded-md transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tt-gold disabled:cursor-not-allowed disabled:opacity-60 [&>svg]:shrink-0'
 
-const VARIANT_CLASSES: Record<ButtonVariant, string> = {
+const VARIANT_CLASSES: Record<IconButtonVariant, string> = {
   danger:
     'border border-tt-oxblood/30 bg-tt-oxblood-soft/40 text-tt-oxblood hover:bg-tt-oxblood-soft',
   primary:
@@ -17,35 +17,41 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
     'border border-tt-line bg-tt-paper/70 text-tt-ink shadow-sm hover:border-tt-gold hover:bg-tt-gold-soft/50',
 }
 
-const SIZE_CLASSES: Record<ButtonSize, string> = {
-  md: 'min-h-11 px-4',
-  sm: 'min-h-10 px-3',
+const SIZE_CLASSES: Record<IconButtonSize, string> = {
+  md: 'size-11',
+  sm: 'size-10',
+  xs: 'size-8',
 }
 
 interface Props extends Readonly<ButtonHTMLAttributes<HTMLButtonElement>> {
   readonly children: ReactNode
-  readonly size?: ButtonSize
-  readonly variant?: ButtonVariant
+  readonly label: string
+  readonly size?: IconButtonSize
+  readonly variant?: IconButtonVariant
 }
 
-export function Button({
+export function IconButton({
   children,
   className,
+  label,
   size = 'md',
+  title,
   type = 'button',
   variant = 'secondary',
   ...buttonProps
 }: Readonly<Props>) {
   return (
     <button
+      {...buttonProps}
+      aria-label={label}
       className={cn(
         BASE_CLASSES,
         SIZE_CLASSES[size],
         VARIANT_CLASSES[variant],
         className,
       )}
+      title={title ?? label}
       type={type}
-      {...buttonProps}
     >
       {children}
     </button>

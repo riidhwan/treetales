@@ -6,6 +6,7 @@ import {
   buildPromptBuilderPrompt,
 } from '@/components/features/promptBuilderTemplates'
 import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { TextArea } from '@/components/ui/TextArea'
 
 interface ParentChapterContext {
@@ -133,15 +134,13 @@ export function ChapterPromptBuilderControl({
               >
                 Prompt Builder
               </h2>
-              <Button
-                aria-label="Close Prompt Builder"
-                className="min-h-8 px-2"
+              <IconButton
+                label="Close Prompt Builder"
                 onClick={() => setIsPromptBuilderOpen(false)}
-                size="sm"
-                title="Close Prompt Builder"
+                size="xs"
               >
                 <X aria-hidden="true" size={15} />
-              </Button>
+              </IconButton>
             </header>
 
             <div className="grid gap-4 overflow-y-auto p-4">
