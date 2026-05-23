@@ -50,6 +50,14 @@ function createServices(options?: CreateServicesOptions) {
 
   return {
     getChaptersByStoryId: vi.fn(() => Promise.resolve(chapters)),
+    getIntroChapterByStoryId: vi.fn((storyId: string) =>
+      Promise.resolve(
+        chapters.find(
+          (chapter) =>
+            chapter.storyId === storyId && chapter.parentChapterId === null,
+        ),
+      ),
+    ),
     getNextChapters: vi.fn(() => Promise.resolve(nextChapters)),
     getStoryById: vi.fn(() => Promise.resolve(story)),
   }
@@ -58,6 +66,7 @@ function createServices(options?: CreateServicesOptions) {
 function renderReader({
   chapterId,
   onCreateChildChapter = vi.fn(),
+  onCreateIntroChapter = vi.fn(),
   onEditChapter = vi.fn(),
   onOpenStoryDetails = vi.fn(),
   onSelectChapter = vi.fn(),
@@ -68,6 +77,7 @@ function renderReader({
     storyId: string,
     parentChapterId: string,
   ) => void
+  readonly onCreateIntroChapter?: (storyId: string) => void
   readonly onEditChapter?: (storyId: string, chapterId: string) => void
   readonly onOpenStoryDetails?: (storyId: string) => void
   readonly onSelectChapter?: (chapterId: string) => void
@@ -77,6 +87,7 @@ function renderReader({
     <StoryReader
       chapterId={chapterId}
       onCreateChildChapter={onCreateChildChapter}
+      onCreateIntroChapter={onCreateIntroChapter}
       onEditChapter={onEditChapter}
       onOpenDashboard={vi.fn()}
       onOpenStoryDetails={onOpenStoryDetails}
@@ -102,6 +113,7 @@ function ControlledStoryReader({
     <StoryReader
       chapterId={chapterId}
       onCreateChildChapter={vi.fn()}
+      onCreateIntroChapter={vi.fn()}
       onEditChapter={vi.fn()}
       onOpenDashboard={vi.fn()}
       onOpenStoryDetails={vi.fn()}
@@ -132,6 +144,7 @@ function StorySwitchingReader({
     <StoryReader
       chapterId={chapterIdByStoryId[storyId]}
       onCreateChildChapter={vi.fn()}
+      onCreateIntroChapter={vi.fn()}
       onEditChapter={vi.fn()}
       onOpenDashboard={vi.fn()}
       onOpenStoryDetails={vi.fn()}
@@ -191,15 +204,24 @@ describe('StoryReader', () => {
     ).toBeTruthy()
   })
 
-  it('shows a no chapters state for an empty story', async () => {
+  it('shows an actionable no Intro Chapter state for an empty story', async () => {
+    const onCreateIntroChapter = vi.fn()
+    const onOpenStoryDetails = vi.fn()
     const services = createServices({ chapters: [] })
 
-    renderReader({ services })
+    renderReader({ onCreateIntroChapter, onOpenStoryDetails, services })
 
-    expect(await screen.findByText('No chapters yet')).toBeTruthy()
+    expect(await screen.findByText('No Intro Chapter yet')).toBeTruthy()
     expect(
-      screen.getByText('This story does not have any chapters to read yet.'),
+      screen.getByText(
+        'Add an Intro Chapter to give this Story a place to begin.',
+      ),
     ).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Add Intro Chapter' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Story Details' }))
+
+    expect(onCreateIntroChapter).toHaveBeenCalledWith('story-1')
+    expect(onOpenStoryDetails).toHaveBeenCalledWith('story-1')
   })
 
   it('does not show Parent Chapter for the intro chapter', async () => {
@@ -598,6 +620,7 @@ describe('StoryReader', () => {
     const chapters = [firstChapter, nextChapter]
     const services = {
       getChaptersByStoryId: vi.fn(() => Promise.resolve(chapters)),
+      getIntroChapterByStoryId: vi.fn(() => Promise.resolve(firstChapter)),
       getNextChapters: vi.fn((selectedChapterId: string) =>
         Promise.resolve(
           selectedChapterId === 'chapter-first' ? [nextChapter] : [],
@@ -656,6 +679,11 @@ describe('StoryReader', () => {
           selectedStoryId === 'story-1'
             ? [firstIntro, firstNext]
             : [secondIntro],
+        ),
+      ),
+      getIntroChapterByStoryId: vi.fn((selectedStoryId: string) =>
+        Promise.resolve(
+          selectedStoryId === 'story-1' ? firstIntro : secondIntro,
         ),
       ),
       getNextChapters: vi.fn((selectedChapterId: string) =>

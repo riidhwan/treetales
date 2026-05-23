@@ -1,4 +1,4 @@
-import { ChevronLeft, Edit3, Home, PlusCircle, Save } from 'lucide-react'
+import { ChevronLeft, Edit3, Home, Save } from 'lucide-react'
 
 import {
   type StoryEditorServices,
@@ -12,7 +12,6 @@ import { TextInput } from '@/components/ui/TextInput'
 import type { Chapter } from '@/services/types'
 
 interface Props {
-  readonly onCreateIntroChapter: (storyId: string) => void
   readonly onEditChapter: (storyId: string, chapterId: string) => void
   readonly onOpenDashboard: () => void
   readonly onOpenStory: (storyId: string) => void
@@ -21,7 +20,6 @@ interface Props {
 }
 
 export function StoryEditor({
-  onCreateIntroChapter,
   onEditChapter,
   onOpenDashboard,
   onOpenStory,
@@ -139,7 +137,6 @@ export function StoryEditor({
         </form>
 
         <ChapterSection
-          onCreateIntroChapter={() => onCreateIntroChapter(storyId)}
           onEditChapter={(chapterId) => onEditChapter(storyId, chapterId)}
           introChapter={introChapter}
         />
@@ -179,13 +176,11 @@ export function StoryEditor({
 }
 
 interface ChapterSectionProps {
-  readonly onCreateIntroChapter: () => void
   readonly onEditChapter: (chapterId: string) => void
   readonly introChapter?: Chapter
 }
 
 function ChapterSection({
-  onCreateIntroChapter,
   onEditChapter,
   introChapter,
 }: ChapterSectionProps) {
@@ -206,19 +201,13 @@ function ChapterSection({
           onEditChapter={onEditChapter}
         />
       ) : (
-        <IntroChapterEmptyState onCreateIntroChapter={onCreateIntroChapter} />
+        <IntroChapterEmptyState />
       )}
     </section>
   )
 }
 
-interface IntroChapterEmptyStateProps {
-  readonly onCreateIntroChapter: () => void
-}
-
-function IntroChapterEmptyState({
-  onCreateIntroChapter,
-}: IntroChapterEmptyStateProps) {
+function IntroChapterEmptyState() {
   return (
     <div className="mt-7 rounded-2xl border border-dashed border-border-subtle bg-surface-paper/45 p-5 sm:p-7">
       <h3 className="text-base font-semibold">Start with an intro chapter</h3>
@@ -226,14 +215,6 @@ function IntroChapterEmptyState({
         Every story begins with one top-level chapter. Later chapters are added
         from the chapter they follow.
       </p>
-      <Button
-        className="mt-5 min-h-12 rounded-xl"
-        onClick={onCreateIntroChapter}
-        variant="primary"
-      >
-        <PlusCircle aria-hidden="true" size={18} />
-        Add Intro Chapter
-      </Button>
     </div>
   )
 }

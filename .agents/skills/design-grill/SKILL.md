@@ -45,11 +45,23 @@ design assumptions from becoming product rules by accident.
    immediately.
 10. Offer a design decision record only when the decision crosses the threshold
    below. Use [DESIGN-DECISION-FORMAT.md](./DESIGN-DECISION-FORMAT.md).
+11. After completing an implementation that used this skill, summarize the
+    design impact in the final response. Include which existing components or
+    primitives were used, whether any new component or generic primitive was
+    created, which surface/pattern rules were applied, and whether any design
+    docs or implementation contracts changed.
 
 ## Asking Rules
 
 Ask one question at a time and wait for the answer before continuing. Every
 question must include your recommended answer and the reasoning for it.
+
+When the user asks broadly how to handle styling, layout, UI treatment, or
+interaction design, include the concrete recommended treatment by default. Do
+not wait for a follow-up before naming the surface, hierarchy, controls,
+responsive behavior, and notable states. Keep the answer scoped to the current
+decision and avoid recording route-specific implementation details in design
+docs unless they establish a reusable rule.
 
 Ask before proceeding when the work introduces or changes:
 

@@ -612,6 +612,7 @@ describe('async feature hooks', () => {
     const pendingStory = deferred<Story | undefined>()
     const storyServices = {
       getChaptersByStoryId: vi.fn(),
+      getIntroChapterByStoryId: vi.fn(),
       getNextChapters: vi.fn(),
       getStoryById: vi.fn(() => pendingStory.promise),
     }
@@ -633,6 +634,9 @@ describe('async feature hooks', () => {
     const pendingChapters = deferred<Chapter[]>()
     const chapterServices = {
       getChaptersByStoryId: vi.fn(() => pendingChapters.promise),
+      getIntroChapterByStoryId: vi.fn(() =>
+        Promise.resolve(createChapter()),
+      ),
       getNextChapters: vi.fn(),
       getStoryById: vi.fn(() => Promise.resolve(createStory())),
     }
@@ -655,9 +659,38 @@ describe('async feature hooks', () => {
       await pendingChapters.promise
     })
 
+    const pendingIntroChapter = deferred<Chapter | undefined>()
+    const introServices = {
+      getChaptersByStoryId: vi.fn(() => Promise.resolve([createChapter()])),
+      getIntroChapterByStoryId: vi.fn(() => pendingIntroChapter.promise),
+      getNextChapters: vi.fn(),
+      getStoryById: vi.fn(() => Promise.resolve(createStory())),
+    }
+    const introView = renderHook(() =>
+      useStoryReader({
+        onSelectChapter: vi.fn(),
+        services: introServices,
+        storyId: 'story-1',
+      }),
+    )
+
+    await waitFor(() => {
+      expect(introServices.getIntroChapterByStoryId).toHaveBeenCalled()
+    })
+
+    introView.unmount()
+
+    await act(async () => {
+      pendingIntroChapter.resolve(createChapter())
+      await pendingIntroChapter.promise
+    })
+
     const pendingNextChapters = deferred<Chapter[]>()
     const nextServices = {
       getChaptersByStoryId: vi.fn(() => Promise.resolve([createChapter()])),
+      getIntroChapterByStoryId: vi.fn(() =>
+        Promise.resolve(createChapter()),
+      ),
       getNextChapters: vi.fn(() => pendingNextChapters.promise),
       getStoryById: vi.fn(() => Promise.resolve(createStory())),
     }
@@ -691,6 +724,9 @@ describe('async feature hooks', () => {
     })
     const filterServices = {
       getChaptersByStoryId: vi.fn(() => Promise.resolve([createChapter()])),
+      getIntroChapterByStoryId: vi.fn(() =>
+        Promise.resolve(createChapter()),
+      ),
       getNextChapters: vi.fn(() =>
         Promise.resolve([sameStoryNext, otherStoryNext]),
       ),
@@ -714,6 +750,9 @@ describe('async feature hooks', () => {
     const onSelectChapter = vi.fn()
     const services = {
       getChaptersByStoryId: vi.fn(() => Promise.resolve([createChapter()])),
+      getIntroChapterByStoryId: vi.fn(() =>
+        Promise.resolve(createChapter()),
+      ),
       getNextChapters: vi.fn(() => Promise.resolve([])),
       getStoryById: vi.fn(() => Promise.resolve(createStory())),
     }
@@ -740,6 +779,9 @@ describe('async feature hooks', () => {
     const services = {
       getChaptersByStoryId: vi.fn(() =>
         Promise.reject(new Error('Could not load chapters.')),
+      ),
+      getIntroChapterByStoryId: vi.fn(() =>
+        Promise.resolve(createChapter()),
       ),
       getNextChapters: vi.fn(() => Promise.resolve([])),
       getStoryById: vi.fn(() => Promise.resolve(createStory())),
@@ -768,6 +810,9 @@ describe('async feature hooks', () => {
     const services = {
       getChaptersByStoryId: vi.fn(() =>
         Promise.resolve([createChapter(), nextChapter]),
+      ),
+      getIntroChapterByStoryId: vi.fn(() =>
+        Promise.resolve(createChapter()),
       ),
       getNextChapters: vi.fn(() => Promise.resolve([nextChapter])),
       getStoryById: vi.fn(() => Promise.resolve(createStory())),
@@ -812,6 +857,7 @@ describe('async feature hooks', () => {
       getChaptersByStoryId: vi.fn(() =>
         Promise.resolve([firstChapter, secondChapter, thirdChapter]),
       ),
+      getIntroChapterByStoryId: vi.fn(() => Promise.resolve(firstChapter)),
       getNextChapters: vi.fn((chapterId: string) => {
         if (chapterId === firstChapter.id) {
           return Promise.resolve([secondChapter])
@@ -876,6 +922,7 @@ describe('async feature hooks', () => {
       getChaptersByStoryId: vi.fn(() =>
         Promise.resolve([firstChapter, secondChapter]),
       ),
+      getIntroChapterByStoryId: vi.fn(() => Promise.resolve(firstChapter)),
       getNextChapters: vi.fn(() => Promise.resolve([])),
       getStoryById: vi.fn(() => Promise.resolve(createStory())),
     }

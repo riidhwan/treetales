@@ -176,7 +176,7 @@ function CreatorContent({
         actionsLabel="Chapter creation actions"
         onOpenDashboard={onOpenDashboard}
         onOpenPrevious={onGoBack}
-        previousLabel={isIntroChapter ? 'Story Editor' : 'Parent Chapter'}
+        previousLabel={isIntroChapter ? 'Story Reader' : 'Parent Chapter'}
       >
         <Alert className="shadow-sm">
           {isIntroChapter
@@ -192,7 +192,7 @@ function CreatorContent({
       actionsLabel="Chapter creation actions"
       onOpenDashboard={onOpenDashboard}
       onOpenPrevious={onGoBack}
-      previousLabel={isIntroChapter ? 'Story Editor' : 'Parent Chapter'}
+      previousLabel={isIntroChapter ? 'Story Reader' : 'Parent Chapter'}
     >
       <ChapterCreationUnavailable
         errorMessage={errorMessage}

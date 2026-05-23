@@ -108,6 +108,11 @@ unframed page structure with clear rhythm, not a stack of nested cards.
 The central Chapter Document surface. It has the highest readability standard
 and must not compete with Reader Appearance.
 
+**Document Empty State**:
+A missing or unavailable Chapter Document state shown inside Document Mode. It
+should preserve the Paper Document position and restraint while making the next
+step clear when one exists.
+
 **Bounded Object**:
 A repeated or self-contained object such as a Story row, Character card, empty
 state, or form panel. Borders and soft elevation are allowed, but bounded

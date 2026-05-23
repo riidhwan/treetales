@@ -72,13 +72,11 @@ function createServices(options?: CreateServicesOptions) {
 }
 
 function renderEditor({
-  onCreateIntroChapter = vi.fn(),
   onEditChapter = vi.fn(),
   onOpenDashboard = vi.fn(),
   onOpenStory = vi.fn(),
   services = createServices(),
 }: {
-  readonly onCreateIntroChapter?: (storyId: string) => void
   readonly onEditChapter?: (storyId: string, chapterId: string) => void
   readonly onOpenDashboard?: () => void
   readonly onOpenStory?: (storyId: string) => void
@@ -86,7 +84,6 @@ function renderEditor({
 } = {}) {
   return render(
     <StoryEditor
-      onCreateIntroChapter={onCreateIntroChapter}
       onEditChapter={onEditChapter}
       onOpenDashboard={onOpenDashboard}
       onOpenStory={onOpenStory}
@@ -169,18 +166,16 @@ describe('StoryEditor', () => {
     ).toBeNull()
   })
 
-  it('opens the dedicated intro chapter creation route', async () => {
-    const onCreateIntroChapter = vi.fn()
+  it('keeps intro chapter creation out of the story editor empty state', async () => {
     const services = createServices()
 
-    renderEditor({ onCreateIntroChapter, services })
+    renderEditor({ services })
 
     await screen.findByText('Start with an intro chapter')
-    fireEvent.click(
-      screen.getByRole('button', { name: /add intro chapter/i }),
-    )
 
-    expect(onCreateIntroChapter).toHaveBeenCalledWith('story-1')
+    expect(
+      screen.queryByRole('button', { name: /add intro chapter/i }),
+    ).toBeNull()
   })
 
   it('saves trimmed title and description values', async () => {
