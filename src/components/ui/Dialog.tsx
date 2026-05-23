@@ -112,7 +112,7 @@ export function Dialog({
   return (
     <div
       className={cn(
-        'fixed inset-0 z-50 grid place-items-center bg-tt-ink/45 px-4 py-6',
+        'fixed inset-0 z-50 grid place-items-center bg-text-primary/45 px-4 py-6',
         overlayClassName,
       )}
     >
@@ -120,7 +120,7 @@ export function Dialog({
         aria-labelledby={titleId}
         aria-modal="true"
         className={cn(
-          'flex max-h-[calc(100vh-3rem)] w-full flex-col overflow-hidden rounded-lg border border-tt-line bg-tt-paper shadow-xl',
+          'flex max-h-[calc(100vh-3rem)] w-full flex-col overflow-hidden rounded-lg border border-border-subtle bg-surface-paper shadow-xl',
           WIDTH_CLASSES[width],
           className,
         )}
@@ -128,16 +128,16 @@ export function Dialog({
         role="dialog"
         tabIndex={-1}
       >
-        <header className="flex items-start justify-between gap-4 border-b border-tt-line px-5 py-4 sm:px-6">
+        <header className="flex items-start justify-between gap-4 border-b border-border-subtle px-5 py-4 sm:px-6">
           <div>
             {eyebrow ? (
-              <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
+              <p className="text-sm font-semibold uppercase tracking-wide text-action-primary">
                 {eyebrow}
               </p>
             ) : null}
             <h2
               className={cn(
-                'text-2xl font-bold text-tt-ink',
+                'text-2xl font-bold text-text-primary',
                 eyebrow && 'mt-1',
                 titleClassName,
               )}
@@ -158,7 +158,7 @@ export function Dialog({
         {footer ? (
           <footer
             className={cn(
-              'flex flex-wrap justify-end gap-2 border-t border-tt-line px-5 py-4 sm:px-6',
+              'flex flex-wrap justify-end gap-2 border-t border-border-subtle px-5 py-4 sm:px-6',
               footerClassName,
             )}
           >

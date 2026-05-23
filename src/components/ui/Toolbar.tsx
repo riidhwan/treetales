@@ -25,7 +25,7 @@ export function Toolbar({
     <header
       {...headerProps}
       className={cn(
-        'sticky top-0 z-20 border-b border-tt-line bg-tt-paper/95 shadow-sm backdrop-blur',
+        'sticky top-0 z-20 border-b border-border-subtle bg-surface-paper/95 shadow-sm backdrop-blur',
         className,
       )}
     >
@@ -61,7 +61,7 @@ export function ToolbarContext({
   className,
 }: Readonly<ToolbarContextProps>) {
   return (
-    <p className={cn('truncate text-sm font-semibold text-tt-muted', className)}>
+    <p className={cn('truncate text-sm font-semibold text-text-muted', className)}>
       {children}
     </p>
   )

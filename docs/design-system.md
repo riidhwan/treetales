@@ -21,9 +21,11 @@ The first docs-first design-system direction is recorded in
 
 ## Theme Tokens
 
-TreeTales palette tokens are defined in `src/styles.css` and consumed through
-Tailwind utilities. Use these tokens instead of scattering arbitrary color
-values across JSX:
+TreeTales palette tokens and semantic color aliases are defined in
+`src/styles.css` and consumed through Tailwind utilities. Use these tokens
+instead of scattering arbitrary color values across JSX.
+
+Palette tokens carry the raw TreeTales color names:
 
 - `tt-parchment`
 - `tt-paper`
@@ -39,10 +41,29 @@ values across JSX:
 - `tt-gold`
 - `tt-gold-soft`
 
-Choose colors by the semantic roles in `docs/style-guide.md`. For now, the
-semantic roles are documented mappings to the existing `tt-*` palette. Add
-semantic CSS or Tailwind aliases only as part of a migration that consumes them
-in primitives at the same time.
+Semantic aliases carry the design roles from `docs/style-guide.md`:
+
+| Semantic role | Tailwind token |
+|---|---|
+| `background.app` | `background-app` |
+| `surface.paper` | `surface-paper` |
+| `surface.paperDeep` | `surface-paper-deep` |
+| `text.primary` | `text-primary` |
+| `text.muted` | `text-muted` |
+| `border.subtle` | `border-subtle` |
+| `action.primary` | `action-primary` |
+| `action.primaryHover` | `action-primary-hover` |
+| `action.destructive` | `action-destructive` |
+| `state.destructiveSoft` | `state-destructive-soft` |
+| `focus.ring` | `focus-ring` |
+| `highlight.soft` | `highlight-soft` |
+| `state.successSoft` | `state-success-soft` |
+
+Generic primitives should prefer semantic aliases when the role is clear, such
+as `bg-surface-paper`, `text-text-primary`, `border-border-subtle`,
+`bg-action-primary`, and `focus-visible:outline-focus-ring`. Feature-owned
+surfaces may still use palette tokens directly when a visual treatment has not
+settled into a reusable semantic role.
 
 Bundled `NV Jost` is the app-chrome font before system sans-serif fallbacks.
 Reader Appearance owns **Chapter Document** typography and must not be
