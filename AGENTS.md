@@ -36,7 +36,7 @@ This project uses Vitest with Testing Library dependencies available. Place test
 
 ## Instruction Loading
 
-`AGENTS.md` is the entry point, not the full instruction set. Read the relevant docs before changing covered areas: `docs/product-behavior.md` for user-facing flows, `docs/architecture.md` for shared data flow, stores, services, or routing, `docs/design-system.md` for UI and styling, and `docs/conventions.md` for broad refactors, tests, or verification choices.
+`AGENTS.md` is the entry point, not the full instruction set. Read the relevant docs before changing covered areas: `docs/product-behavior.md` for user-facing flows, `docs/architecture.md` for shared data flow, stores, services, or routing, `docs/design/style-guide.md` for UI/UX standards, `docs/design/implementation.md` for UI implementation and styling contracts, and `docs/conventions.md` for broad refactors, tests, or verification choices.
 
 Do not edit `docs/navigation-flow.md` by hand; it is generated. When navigation-derived documentation needs to change, update the source/generator as needed and run `npm run docs:navigation`.
 

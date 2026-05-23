@@ -1,9 +1,9 @@
-# Design System
+# Design Implementation
 
-TreeTales uses local UI primitives, Tailwind CSS utility classes, and custom
-TreeTales theme tokens. The visual and product language is defined in
-`docs/style-guide.md`; this document defines implementation contracts for
-turning that language into code.
+TreeTales implements the product language in `docs/design/style-guide.md` with
+local UI primitives, Tailwind CSS utility classes, and custom TreeTales theme
+tokens. This document defines the implementation contracts for turning that
+language into code.
 
 ## Approach
 
@@ -41,7 +41,7 @@ Palette tokens carry the raw TreeTales color names:
 - `tt-gold`
 - `tt-gold-soft`
 
-Semantic aliases carry the design roles from `docs/style-guide.md`:
+Semantic aliases carry the design roles from `docs/design/style-guide.md`:
 
 | Semantic role | Tailwind token |
 |---|---|
@@ -109,8 +109,8 @@ Near-term primitive candidates include:
 
 Defer generic `Surface`, `Card`, `StoryRow`, `CharacterCard`,
 `ChapterDocumentShell`, and `BranchChoiceList` until their semantics and reuse
-are clear. Surface names in `docs/style-guide.md` are design contracts first,
-not a requirement to create a single generic wrapper.
+are clear. Surface names in `docs/design/style-guide.md` are design contracts
+first, not a requirement to create a single generic wrapper.
 
 ## Dev Style Guide Route
 
@@ -122,7 +122,7 @@ parallel Storybook replacement.
 The route may show representative primitive states and static example content,
 but it must keep using the same local primitives and semantic tokens as product
 code. Do not introduce design treatments there that are not documented here or
-in `docs/style-guide.md`.
+in `docs/design/style-guide.md`.
 
 ## Primitive Contracts
 
@@ -189,7 +189,7 @@ sticky when persistent navigation or Save access is required. Management pages
 should not add sticky toolbars by default.
 
 Toolbar actions should use icons or compact labels according to
-`docs/style-guide.md`.
+`docs/design/style-guide.md`.
 
 Use `Toolbar` for repeated sticky action shells. The primitive owns the labelled
 navigation landmark, sticky paper surface, max-width content row, action
@@ -240,6 +240,6 @@ Run the narrowest relevant tests first. For route, store, service, or UI
 changes, also run the repository verification commands named in `AGENTS.md`
 unless the task explicitly narrows verification.
 
-For docs-only design-system changes with no source changes, `git diff --check`
-is sufficient unless the docs edit also changes generated documentation or
-introduces examples that need code validation.
+For docs-only design implementation changes with no source changes,
+`git diff --check` is sufficient unless the docs edit also changes generated
+documentation or introduces examples that need code validation.
