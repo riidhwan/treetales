@@ -494,7 +494,6 @@ describe('ChapterEditor', () => {
   it('confirms before leaving with unsaved changes', async () => {
     const onGoBack = vi.fn()
     const onOpenDashboard = vi.fn()
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false)
 
     renderChapterEditor({ onGoBack, onOpenDashboard })
 
@@ -504,14 +503,21 @@ describe('ChapterEditor', () => {
     })
 
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    let confirmation = await screen.findByRole('dialog', {
+      name: 'Discard Chapter Changes?',
+    })
+    fireEvent.click(within(confirmation).getByRole('button', { name: 'Cancel' }))
     fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
 
-    expect(confirmSpy).toHaveBeenCalledTimes(2)
     expect(onGoBack).not.toHaveBeenCalled()
     expect(onOpenDashboard).not.toHaveBeenCalled()
 
-    confirmSpy.mockReturnValue(true)
-    fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
+    confirmation = await screen.findByRole('dialog', {
+      name: 'Discard Chapter Changes?',
+    })
+    fireEvent.click(
+      within(confirmation).getByRole('button', { name: 'Discard Changes' }),
+    )
 
     expect(onOpenDashboard).toHaveBeenCalled()
   })

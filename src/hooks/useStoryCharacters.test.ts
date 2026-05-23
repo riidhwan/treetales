@@ -281,7 +281,6 @@ describe('useStoryCharacters', () => {
 
   it('asks before discarding unsaved edit changes', async () => {
     const services = createServices()
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
     const { result } = renderHook(() =>
       useStoryCharacters({
         enabled: true,
@@ -304,15 +303,23 @@ describe('useStoryCharacters', () => {
       result.current.requestCloseDialog()
     })
 
-    expect(window.confirm).toHaveBeenCalledWith(
-      'Discard unsaved character changes?',
-    )
+    expect(result.current.confirmationState.mode).toBe('discard-changes')
     expect(result.current.dialogState.mode).toBe('edit')
+
+    act(() => {
+      result.current.cancelConfirmation()
+    })
+    expect(result.current.confirmationState.mode).toBe('closed')
+
+    act(() => {
+      result.current.requestCloseDialog()
+      result.current.confirmDiscardChanges()
+    })
+    expect(result.current.dialogState.mode).toBe('closed')
   })
 
   it('deletes the selected character after confirmation', async () => {
     const services = createServices()
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const { result } = renderHook(() =>
       useStoryCharacters({
         enabled: true,
@@ -328,8 +335,13 @@ describe('useStoryCharacters', () => {
     act(() => {
       result.current.openViewDialog(result.current.characters[0])
     })
+    act(() => {
+      result.current.requestDeleteSelectedCharacter()
+    })
+    expect(result.current.confirmationState.mode).toBe('delete-character')
+
     await act(async () => {
-      await result.current.deleteSelectedCharacter()
+      await result.current.confirmDeleteSelectedCharacter()
     })
 
     expect(services.deleteCharacter).toHaveBeenCalledWith('character-1')
@@ -366,7 +378,6 @@ describe('useStoryCharacters', () => {
       deleteCharacter: vi.fn(() => Promise.resolve(false)),
       updateCharacter: vi.fn(() => Promise.resolve(undefined)),
     }
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const { result } = renderHook(() =>
       useStoryCharacters({
         enabled: true,
@@ -399,8 +410,11 @@ describe('useStoryCharacters', () => {
     act(() => {
       result.current.openViewDialog(result.current.characters[0])
     })
+    act(() => {
+      result.current.requestDeleteSelectedCharacter()
+    })
     await act(async () => {
-      await result.current.deleteSelectedCharacter()
+      await result.current.confirmDeleteSelectedCharacter()
     })
     expect(result.current.errorMessage).toBe('Character could not be found.')
   })

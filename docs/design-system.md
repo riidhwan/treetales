@@ -92,6 +92,7 @@ Current generic primitives include:
 
 - `Alert`
 - `Button`
+- `ConfirmationDialog`
 - `Dialog`
 - `Field`
 - `IconButton`
@@ -162,6 +163,12 @@ content, remains feature-owned.
 assistive technology can rely on the same labelled surface. Keep the dialog
 title specific to the user task; use the optional eyebrow only for compact
 context such as `Character`.
+
+Use `ConfirmationDialog` for repeated in-app confirmation flows that need a
+TreeTales surface instead of browser-native prompts. Feature components and
+hooks still own the business decision, such as which Story or Character is
+being deleted or which pending navigation will run after confirmation.
+Browser-owned `beforeunload` prompts remain browser-native.
 
 ### Toolbars
 

@@ -560,7 +560,6 @@ describe('ChapterCreator', () => {
   it('confirms before leaving with draft changes', async () => {
     const onOpenDashboard = vi.fn()
     const onGoBack = vi.fn()
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false)
 
     renderChapterCreator({ onGoBack, onOpenDashboard })
 
@@ -572,14 +571,21 @@ describe('ChapterCreator', () => {
     expect(screen.queryByRole('status')).toBeNull()
 
     fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
+    let confirmation = await screen.findByRole('dialog', {
+      name: 'Discard Chapter Changes?',
+    })
+    fireEvent.click(within(confirmation).getByRole('button', { name: 'Cancel' }))
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
 
-    expect(confirmSpy).toHaveBeenCalledTimes(2)
     expect(onGoBack).not.toHaveBeenCalled()
     expect(onOpenDashboard).not.toHaveBeenCalled()
 
-    confirmSpy.mockReturnValue(true)
-    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    confirmation = await screen.findByRole('dialog', {
+      name: 'Discard Chapter Changes?',
+    })
+    fireEvent.click(
+      within(confirmation).getByRole('button', { name: 'Discard Changes' }),
+    )
 
     expect(onGoBack).toHaveBeenCalled()
   })

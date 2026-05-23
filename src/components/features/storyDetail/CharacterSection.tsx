@@ -5,6 +5,7 @@ import { CharacterDialog } from '@/components/features/storyDetail/CharacterDial
 import type { useStoryCharacters } from '@/hooks/useStoryCharacters'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
+import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 
 type CharacterController = ReturnType<typeof useStoryCharacters>
 
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function CharacterSection({ characterDialog, titleId }: Props) {
+  const confirmationTitleId = `${titleId}-confirmation`
   let charactersContent: React.ReactNode
 
   if (characterDialog.isLoading) {
@@ -80,7 +82,7 @@ export function CharacterSection({ characterDialog, titleId }: Props) {
           isSaving={characterDialog.isSaving}
           onAddProperty={characterDialog.addProperty}
           onClose={characterDialog.requestCloseDialog}
-          onDelete={() => void characterDialog.deleteSelectedCharacter()}
+          onDelete={characterDialog.requestDeleteSelectedCharacter}
           onEdit={characterDialog.openEditDialog}
           onGenderChange={characterDialog.setGender}
           onMoveProperty={characterDialog.moveProperty}
@@ -89,6 +91,33 @@ export function CharacterSection({ characterDialog, titleId }: Props) {
           onRemoveProperty={characterDialog.removeProperty}
           onSave={() => void characterDialog.saveCharacter()}
           titleId={titleId}
+        />
+      ) : null}
+
+      {characterDialog.confirmationState.mode === 'discard-changes' ? (
+        <ConfirmationDialog
+          confirmLabel="Discard Changes"
+          message="Discard unsaved character changes?"
+          onCancel={characterDialog.cancelConfirmation}
+          onConfirm={characterDialog.confirmDiscardChanges}
+          title="Discard Character Changes?"
+          titleId={confirmationTitleId}
+          variant="danger"
+        />
+      ) : null}
+
+      {characterDialog.confirmationState.mode === 'delete-character' ? (
+        <ConfirmationDialog
+          confirmLabel={
+            characterDialog.isDeleting ? 'Deleting...' : 'Delete Character'
+          }
+          isConfirming={characterDialog.isDeleting}
+          message={`Delete "${characterDialog.confirmationState.character.name}"? This cannot be undone.`}
+          onCancel={characterDialog.cancelConfirmation}
+          onConfirm={() => void characterDialog.confirmDeleteSelectedCharacter()}
+          title="Delete Character?"
+          titleId={confirmationTitleId}
+          variant="danger"
         />
       ) : null}
     </>
