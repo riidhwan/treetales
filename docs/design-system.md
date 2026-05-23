@@ -62,8 +62,10 @@ Semantic aliases carry the design roles from `docs/style-guide.md`:
 Generic primitives should prefer semantic aliases when the role is clear, such
 as `bg-surface-paper`, `text-text-primary`, `border-border-subtle`,
 `bg-action-primary`, and `focus-visible:outline-focus-ring`. Feature-owned
-surfaces may still use palette tokens directly when a visual treatment has not
-settled into a reusable semantic role.
+surfaces should also use semantic aliases for settled app background, paper,
+text, border, focus, action, and destructive roles. They may still use palette
+tokens directly when a visual treatment has not settled into a reusable
+semantic role, such as a local accent stripe or expressive Library Mode detail.
 
 Bundled `NV Jost` is the app-chrome font before system sans-serif fallbacks.
 Reader Appearance owns **Chapter Document** typography and must not be

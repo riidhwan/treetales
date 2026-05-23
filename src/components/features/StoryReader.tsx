@@ -66,7 +66,7 @@ export function StoryReader({
   const isReadingChapter = Boolean(story && currentChapter)
 
   return (
-    <main className="min-h-screen bg-tt-parchment text-tt-ink">
+    <main className="min-h-screen bg-background-app text-text-primary">
       {isReadingChapter && story && currentChapter ? (
         <ReaderToolbar
           onEditChapter={() => onEditChapter(storyId, currentChapter.id)}
@@ -215,9 +215,9 @@ function ReaderContent({
     )
   } else if (status === 'missing-story') {
     readerContent = (
-      <section className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm">
+      <section className="rounded-lg border border-border-subtle bg-surface-paper p-6 shadow-sm">
         <h1 className="text-2xl font-bold">Story not found</h1>
-        <p className="mt-3 text-sm leading-6 text-tt-muted">
+        <p className="mt-3 text-sm leading-6 text-text-muted">
           This story may have been deleted or is unavailable in this browser.
         </p>
       </section>
@@ -230,8 +230,8 @@ function ReaderContent({
     )
   } else if (!currentChapter && story) {
     readerContent = (
-      <section className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
+      <section className="rounded-lg border border-border-subtle bg-surface-paper p-6 shadow-sm">
+        <p className="text-sm font-semibold uppercase tracking-wide text-action-primary">
           {story.title}
         </p>
         <h1 className="mt-2 text-2xl font-bold">
@@ -239,7 +239,7 @@ function ReaderContent({
             ? 'Chapter not found'
             : 'No chapters yet'}
         </h1>
-        <p className="mt-3 text-sm leading-6 text-tt-muted">
+        <p className="mt-3 text-sm leading-6 text-text-muted">
           {status === 'missing-chapter'
             ? 'This chapter is not part of the selected story.'
             : 'This story does not have any chapters to read yet.'}
@@ -250,10 +250,10 @@ function ReaderContent({
     readerContent = (
       <article
         aria-label="Chapter document"
-        className="mx-auto min-h-[calc(100vh-7rem)] w-full max-w-[52rem] border-tt-line bg-tt-paper px-4 py-6 shadow-sm sm:min-h-[calc(100vh-10rem)] sm:border sm:px-8 sm:py-8 lg:px-8"
+        className="mx-auto min-h-[calc(100vh-7rem)] w-full max-w-[52rem] border-border-subtle bg-surface-paper px-4 py-6 shadow-sm sm:min-h-[calc(100vh-10rem)] sm:border sm:px-8 sm:py-8 lg:px-8"
       >
         <header>
-          <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
+          <p className="text-sm font-semibold uppercase tracking-wide text-action-primary">
             {story.title}
           </p>
           <div style={readerDocumentStyle}>
@@ -270,7 +270,7 @@ function ReaderContent({
           style={readerDocumentStyle}
         />
 
-        <footer className="border-t border-tt-line pt-5">
+        <footer className="border-t border-border-subtle pt-5">
           <NextChapterControls
             nextChapters={nextChapters}
             onCreateChildChapter={() =>
@@ -301,18 +301,18 @@ function NextChapterControls({
 }: NextChapterControlsProps) {
   return (
     <div>
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-tt-muted">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted">
         What happens next?
       </h2>
       {nextChapters.length === 0 ? (
-        <p className="mt-3 inline-flex min-h-10 items-center rounded-md bg-tt-paper-deep px-3 text-sm font-semibold text-tt-muted">
+        <p className="mt-3 inline-flex min-h-10 items-center rounded-md bg-surface-paper-deep px-3 text-sm font-semibold text-text-muted">
           The End
         </p>
       ) : (
         <div className="mt-3 grid gap-2">
           {nextChapters.map((nextChapter) => (
             <button
-              className="group flex min-h-12 w-full items-center justify-between gap-3 rounded-md border border-tt-line bg-tt-paper-deep/35 px-4 py-3 text-left text-sm font-semibold text-tt-ink transition hover:border-tt-gold hover:bg-tt-gold-soft/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tt-gold"
+              className="group flex min-h-12 w-full items-center justify-between gap-3 rounded-md border border-border-subtle bg-surface-paper-deep/35 px-4 py-3 text-left text-sm font-semibold text-text-primary transition hover:border-focus-ring hover:bg-highlight-soft/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
               key={nextChapter.id}
               onClick={() => onSelectChapter(nextChapter)}
               type="button"
@@ -320,7 +320,7 @@ function NextChapterControls({
               <span>{nextChapter.title}</span>
               <ChevronRight
                 aria-hidden="true"
-                className="shrink-0 text-tt-muted transition group-hover:text-tt-moss"
+                className="shrink-0 text-text-muted transition group-hover:text-action-primary"
                 size={18}
               />
             </button>
