@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import type { ReactNode, SyntheticEvent } from 'react'
 import { ArrowLeft, Home } from 'lucide-react'
 
@@ -9,6 +9,7 @@ import {
 import { ChapterPromptBuilderControl } from '@/components/features/ChapterPromptBuilderControl'
 import { ReaderAppearanceControl } from '@/components/domain/ReaderAppearanceControl'
 import { Alert } from '@/components/ui/Alert'
+import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 import { IconButton } from '@/components/ui/IconButton'
 import { useReaderAppearance } from '@/hooks/useReaderAppearance'
 
@@ -82,6 +83,10 @@ export function ChapterWritingWorkflow({
   } = useReaderAppearance()
   const [editorMode, setEditorMode] = useState<ChapterWritingMode>('write')
   const [isAppearancePanelOpen, setIsAppearancePanelOpen] = useState(false)
+  const [pendingNavigation, setPendingNavigation] = useState<
+    (() => void) | undefined
+  >()
+  const navigationConfirmationTitleId = useId()
 
   useEffect(() => {
     function handleBeforeUnload(event: BeforeUnloadEvent) {
@@ -126,12 +131,22 @@ export function ChapterWritingWorkflow({
   }, [onSubmitShortcut])
 
   function confirmNavigation(navigate: () => void) {
-    if (
-      !hasNavigationWarning ||
-      window.confirm(navigationWarningMessage)
-    ) {
+    if (!hasNavigationWarning) {
       navigate()
+      return
     }
+
+    setPendingNavigation(() => navigate)
+  }
+
+  function cancelPendingNavigation() {
+    setPendingNavigation(undefined)
+  }
+
+  function confirmPendingNavigation() {
+    const navigate = pendingNavigation
+    setPendingNavigation(undefined)
+    navigate?.()
   }
 
   return (
@@ -207,6 +222,18 @@ export function ChapterWritingWorkflow({
         titlePlaceholder="Untitled chapter"
         toolbarContext={toolbarContext}
       />
+
+      {pendingNavigation ? (
+        <ConfirmationDialog
+          confirmLabel="Discard Changes"
+          message={navigationWarningMessage}
+          onCancel={cancelPendingNavigation}
+          onConfirm={confirmPendingNavigation}
+          title="Discard Chapter Changes?"
+          titleId={navigationConfirmationTitleId}
+          variant="danger"
+        />
+      ) : null}
     </>
   )
 }

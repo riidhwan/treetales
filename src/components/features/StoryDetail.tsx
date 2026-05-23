@@ -1,5 +1,5 @@
 import { BookOpen, ChevronLeft, Edit3, Home, Plus, Trash2 } from 'lucide-react'
-import { useId } from 'react'
+import { useId, useState } from 'react'
 
 import { CharacterSection } from '@/components/features/storyDetail/CharacterSection'
 import { MANAGEMENT_DISPLAY_FONT } from '@/components/features/storyDetail/constants'
@@ -13,6 +13,7 @@ import {
 } from '@/hooks/useStoryDetail'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
+import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 
 interface Props {
   readonly characterServices?: StoryCharacterServices
@@ -34,13 +35,15 @@ export function StoryDetail({
   storyId,
 }: Props) {
   const {
-    deleteStoryWithConfirmation,
+    deleteStory,
     errorMessage,
     isDeleting,
     status,
     story,
   } = useStoryDetail({ onDeleted, services, storyId })
   const characterTitleId = useId()
+  const storyDeleteTitleId = useId()
+  const [isStoryDeleteDialogOpen, setIsStoryDeleteDialogOpen] = useState(false)
   const characterDialog = useStoryCharacters({
     enabled: status === 'ready' && Boolean(story),
     services: characterServices,
@@ -111,7 +114,7 @@ export function StoryDetail({
 
         <StoryMaintenanceSection
           isDeleting={isDeleting}
-          onDelete={() => void deleteStoryWithConfirmation()}
+          onDelete={() => setIsStoryDeleteDialogOpen(true)}
         />
       </>
     )
@@ -173,6 +176,21 @@ export function StoryDetail({
 
         {detailContent}
       </section>
+
+      {story && isStoryDeleteDialogOpen ? (
+        <ConfirmationDialog
+          confirmLabel={isDeleting ? 'Deleting...' : 'Delete Story'}
+          isConfirming={isDeleting}
+          message={`Delete "${story.title}"? This cannot be undone.`}
+          onCancel={() => setIsStoryDeleteDialogOpen(false)}
+          onConfirm={() => {
+            void deleteStory()
+          }}
+          title="Delete Story?"
+          titleId={storyDeleteTitleId}
+          variant="danger"
+        />
+      ) : null}
     </main>
   )
 }

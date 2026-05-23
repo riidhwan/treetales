@@ -33,6 +33,11 @@ export type CharacterDialogState =
   | { readonly mode: 'create' }
   | { readonly character: Character; readonly mode: 'edit' }
 
+export type CharacterConfirmationState =
+  | { readonly mode: 'closed' }
+  | { readonly mode: 'discard-changes' }
+  | { readonly character: Character; readonly mode: 'delete-character' }
+
 export interface StoryCharacterServices {
   readonly createCharacter: (input: CreateCharacterInput) => Promise<Character>
   readonly deleteCharacter: (id: string) => Promise<boolean>
@@ -69,6 +74,10 @@ export function useStoryCharacters({
   const [dialogState, setDialogState] = useState<CharacterDialogState>({
     mode: 'closed',
   })
+  const [confirmationState, setConfirmationState] =
+    useState<CharacterConfirmationState>({
+      mode: 'closed',
+    })
   const [draft, setDraft] = useState<CharacterFormDraft>(createEmptyDraft())
   const [savedDraft, setSavedDraft] = useState<CharacterFormDraft>(
     createEmptyDraft(),
@@ -142,10 +151,8 @@ export function useStoryCharacters({
   }
 
   function requestCloseDialog() {
-    if (
-      hasUnsavedChanges &&
-      !window.confirm('Discard unsaved character changes?')
-    ) {
+    if (hasUnsavedChanges) {
+      setConfirmationState({ mode: 'discard-changes' })
       return
     }
 
@@ -153,7 +160,16 @@ export function useStoryCharacters({
   }
 
   function closeDialogWithoutConfirmation() {
+    setConfirmationState({ mode: 'closed' })
     setDialogState({ mode: 'closed' })
+  }
+
+  function cancelConfirmation() {
+    setConfirmationState({ mode: 'closed' })
+  }
+
+  function confirmDiscardChanges() {
+    closeDialogWithoutConfirmation()
   }
 
   function setName(name: string) {
@@ -265,33 +281,45 @@ export function useStoryCharacters({
     }
   }
 
-  async function deleteSelectedCharacter() {
+  function requestDeleteSelectedCharacter() {
+    if (dialogState.mode === 'closed' || dialogState.mode === 'create') {
+      return
+    }
+
+    setConfirmationState({
+      character: dialogState.character,
+      mode: 'delete-character',
+    })
+  }
+
+  async function confirmDeleteSelectedCharacter() {
     if (
-      dialogState.mode === 'closed' ||
-      dialogState.mode === 'create' ||
-      !window.confirm(
-        `Delete "${dialogState.character.name}"? This cannot be undone.`,
-      )
+      confirmationState.mode !== 'delete-character' ||
+      dialogState.mode === 'create'
     ) {
       return
     }
+
+    const characterToDelete = confirmationState.character
 
     setIsDeleting(true)
     setErrorMessage(undefined)
 
     try {
-      const wasDeleted = await services.deleteCharacter(dialogState.character.id)
+      const wasDeleted = await services.deleteCharacter(characterToDelete.id)
 
       if (!wasDeleted) {
         setErrorMessage('Character could not be found.')
+        setConfirmationState({ mode: 'closed' })
         return
       }
 
       setCharacters((currentCharacters) =>
         currentCharacters.filter(
-          (character) => character.id !== dialogState.character.id,
+          (character) => character.id !== characterToDelete.id,
         ),
       )
+      setConfirmationState({ mode: 'closed' })
       setDialogState({ mode: 'closed' })
     } catch (error) {
       setErrorMessage(getErrorMessage(error))
@@ -302,8 +330,11 @@ export function useStoryCharacters({
 
   return {
     addProperty,
+    cancelConfirmation,
     characters,
-    deleteSelectedCharacter,
+    confirmDeleteSelectedCharacter,
+    confirmDiscardChanges,
+    confirmationState,
     dialogState,
     draft,
     errorMessage,
@@ -315,6 +346,7 @@ export function useStoryCharacters({
     openCreateDialog,
     openEditDialog,
     openViewDialog,
+    requestDeleteSelectedCharacter,
     removeProperty,
     requestCloseDialog,
     saveCharacter,

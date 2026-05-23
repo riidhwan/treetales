@@ -73,12 +73,8 @@ export function useStoryDetail({
     }
   }, [services, storyId])
 
-  async function deleteStoryWithConfirmation() {
+  async function deleteStory() {
     if (!story) {
-      return
-    }
-
-    if (!window.confirm(`Delete "${story.title}"? This cannot be undone.`)) {
       return
     }
 
@@ -103,7 +99,7 @@ export function useStoryDetail({
   }
 
   return {
-    deleteStoryWithConfirmation,
+    deleteStory,
     errorMessage,
     isDeleting,
     status,

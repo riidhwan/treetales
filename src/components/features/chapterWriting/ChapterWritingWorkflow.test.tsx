@@ -78,7 +78,6 @@ describe('ChapterWritingWorkflow', () => {
   it('confirms guarded navigation and prevents beforeunload', () => {
     const onGoBack = vi.fn()
     const onOpenDashboard = vi.fn()
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false)
 
     renderWorkflow({
       hasNavigationWarning: true,
@@ -87,11 +86,18 @@ describe('ChapterWritingWorkflow', () => {
     })
 
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    expect(
+      screen.getByRole('dialog', { name: 'Discard Chapter Changes?' }),
+    ).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
     fireEvent.click(screen.getByRole('button', { name: 'Dashboard' }))
 
-    expect(confirmSpy).toHaveBeenCalledTimes(2)
     expect(onGoBack).not.toHaveBeenCalled()
     expect(onOpenDashboard).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Discard Changes' }))
+
+    expect(onOpenDashboard).toHaveBeenCalled()
 
     const unloadEvent = new Event('beforeunload', { cancelable: true })
     const preventDefault = vi.spyOn(unloadEvent, 'preventDefault')

@@ -324,7 +324,7 @@ describe('async feature hooks', () => {
       expect(absentView.result.current.status).toBe('missing-story')
     })
     await act(async () => {
-      await absentView.result.current.deleteStoryWithConfirmation()
+      await absentView.result.current.deleteStory()
     })
 
     expect(absentServices.deleteStory).not.toHaveBeenCalled()
@@ -333,7 +333,6 @@ describe('async feature hooks', () => {
       deleteStory: vi.fn(() => Promise.resolve(false)),
       getStoryById: vi.fn(() => Promise.resolve(createStory())),
     }
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const missingDeleteView = renderHook(() =>
       useStoryDetail({
         onDeleted: vi.fn(),
@@ -346,7 +345,7 @@ describe('async feature hooks', () => {
       expect(missingDeleteView.result.current.status).toBe('ready')
     })
     await act(async () => {
-      await missingDeleteView.result.current.deleteStoryWithConfirmation()
+      await missingDeleteView.result.current.deleteStory()
     })
 
     expect(missingDeleteView.result.current.status).toBe('missing-story')

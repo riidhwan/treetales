@@ -302,7 +302,6 @@ describe('StoryDetail', () => {
 
   it('edits and deletes a character from the detail dialog', async () => {
     const characterServices = createCharacterServices([createCharacter()])
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
 
     renderDetail({ characterServices })
 
@@ -324,15 +323,21 @@ describe('StoryDetail', () => {
 
     dialog = await screen.findByRole('dialog', { name: 'Mira Changed' })
     fireEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }))
+    const confirmation = await screen.findByRole('dialog', {
+      name: 'Delete Character?',
+    })
+    expect(confirmation.textContent).toContain(
+      'Delete "Mira Changed"? This cannot be undone.',
+    )
+    fireEvent.click(
+      within(confirmation).getByRole('button', { name: /delete character/i }),
+    )
 
     await waitFor(() => {
       expect(characterServices.deleteCharacter).toHaveBeenCalledWith(
         'character-1',
       )
     })
-    expect(window.confirm).toHaveBeenCalledWith(
-      'Delete "Mira Changed"? This cannot be undone.',
-    )
   })
 
   it('reorders and removes character properties in the edit dialog', async () => {
@@ -447,19 +452,24 @@ describe('StoryDetail', () => {
   it('deletes the story after confirmation and returns to the dashboard', async () => {
     const onDeleted = vi.fn()
     const services = createServices()
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
 
     renderDetail({ onDeleted, services })
 
     await screen.findByRole('heading', { name: 'The Old Road' })
     fireEvent.click(screen.getByRole('button', { name: /delete/i }))
+    const confirmation = await screen.findByRole('dialog', {
+      name: 'Delete Story?',
+    })
+    expect(confirmation.textContent).toContain(
+      'Delete "The Old Road"? This cannot be undone.',
+    )
+    fireEvent.click(
+      within(confirmation).getByRole('button', { name: /delete story/i }),
+    )
 
     await waitFor(() => {
       expect(services.deleteStory).toHaveBeenCalledWith('story-1')
     })
-    expect(window.confirm).toHaveBeenCalledWith(
-      'Delete "The Old Road"? This cannot be undone.',
-    )
     expect(onDeleted).toHaveBeenCalled()
   })
 
@@ -467,14 +477,19 @@ describe('StoryDetail', () => {
     const pendingDelete = deferred<boolean>()
     const services = createServices()
     services.deleteStory.mockReturnValue(pendingDelete.promise)
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
 
     renderDetail({ services })
 
     await screen.findByRole('heading', { name: 'The Old Road' })
     fireEvent.click(screen.getByRole('button', { name: /delete/i }))
+    const confirmation = await screen.findByRole('dialog', {
+      name: 'Delete Story?',
+    })
+    fireEvent.click(
+      within(confirmation).getByRole('button', { name: /delete story/i }),
+    )
 
-    expect(await screen.findByRole('button', { name: /deleting/i }))
+    expect(within(confirmation).getByRole('button', { name: /deleting/i }))
       .toBeTruthy()
 
     pendingDelete.resolve(true)
@@ -483,12 +498,15 @@ describe('StoryDetail', () => {
   it('keeps the story when deletion is cancelled', async () => {
     const onDeleted = vi.fn()
     const services = createServices()
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
 
     renderDetail({ onDeleted, services })
 
     await screen.findByRole('heading', { name: 'The Old Road' })
     fireEvent.click(screen.getByRole('button', { name: /delete/i }))
+    const confirmation = await screen.findByRole('dialog', {
+      name: 'Delete Story?',
+    })
+    fireEvent.click(within(confirmation).getByRole('button', { name: /cancel/i }))
 
     expect(services.deleteStory).not.toHaveBeenCalled()
     expect(onDeleted).not.toHaveBeenCalled()
@@ -498,12 +516,17 @@ describe('StoryDetail', () => {
     const onDeleted = vi.fn()
     const services = createServices()
     services.deleteStory.mockRejectedValue(new Error('Could not delete story.'))
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
 
     renderDetail({ onDeleted, services })
 
     await screen.findByRole('heading', { name: 'The Old Road' })
     fireEvent.click(screen.getByRole('button', { name: /delete/i }))
+    const confirmation = await screen.findByRole('dialog', {
+      name: 'Delete Story?',
+    })
+    fireEvent.click(
+      within(confirmation).getByRole('button', { name: /delete story/i }),
+    )
 
     expect((await screen.findByRole('alert')).textContent).toBe(
       'Could not delete story.',
