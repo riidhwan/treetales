@@ -2,7 +2,7 @@ import { Minus, Plus, RotateCcw, Type } from 'lucide-react'
 
 import { READER_FONT_OPTIONS, type ReaderFontId } from '@/config'
 import type { ReaderAppearance } from '@/hooks/useReaderAppearance'
-import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 
 const READER_APPEARANCE_PANEL_ID = 'reader-appearance-panel'
 
@@ -31,17 +31,15 @@ export function ReaderAppearanceControl({
 }: Props) {
   return (
     <div className="relative">
-      <Button
+      <IconButton
         aria-controls={READER_APPEARANCE_PANEL_ID}
         aria-expanded={isPanelOpen}
-        aria-label="Reader Appearance"
-        className="px-3"
+        label="Reader Appearance"
         onClick={() => onOpenChange(!isPanelOpen)}
         size="sm"
-        title="Reader Appearance"
       >
         <Type aria-hidden="true" size={16} />
-      </Button>
+      </IconButton>
       {isPanelOpen ? (
         <ReaderAppearancePanel
           canDecreaseFontSize={canDecreaseFontSize}
@@ -86,15 +84,13 @@ function ReaderAppearancePanel({
     >
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-sm font-semibold">Reader Appearance</h2>
-        <Button
-          aria-label="Reset Reader Appearance"
-          className="min-h-8 px-2"
+        <IconButton
+          label="Reset Reader Appearance"
           onClick={onResetReaderAppearance}
-          size="sm"
-          title="Reset Reader Appearance"
+          size="xs"
         >
           <RotateCcw aria-hidden="true" size={14} />
-        </Button>
+        </IconButton>
       </div>
 
       <section className="mt-3" aria-labelledby="reader-font-options-label">
@@ -135,24 +131,22 @@ function ReaderAppearancePanel({
           </p>
         </div>
         <div className="mt-2 flex items-center gap-2">
-          <Button
-            aria-label="Decrease Font Size"
-            className="flex-1"
+          <IconButton
             disabled={!canDecreaseFontSize}
+            label="Decrease Font Size"
             onClick={onDecreaseFontSize}
             size="sm"
           >
             <Minus aria-hidden="true" size={16} />
-          </Button>
-          <Button
-            aria-label="Increase Font Size"
-            className="flex-1"
+          </IconButton>
+          <IconButton
             disabled={!canIncreaseFontSize}
+            label="Increase Font Size"
             onClick={onIncreaseFontSize}
             size="sm"
           >
             <Plus aria-hidden="true" size={16} />
-          </Button>
+          </IconButton>
         </div>
       </section>
     </div>

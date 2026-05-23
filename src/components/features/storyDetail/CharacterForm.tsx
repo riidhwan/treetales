@@ -2,6 +2,8 @@ import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react'
 
 import type { CharacterFormDraft } from '@/hooks/useStoryCharacters'
 import { Button } from '@/components/ui/Button'
+import { Field } from '@/components/ui/Field'
+import { IconButton } from '@/components/ui/IconButton'
 import { TextArea } from '@/components/ui/TextArea'
 import { TextInput } from '@/components/ui/TextInput'
 import type { CharacterGender } from '@/services/types'
@@ -41,16 +43,14 @@ export function CharacterForm({
       }}
     >
       <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_12rem]">
-        <label className="grid gap-2 text-sm font-medium text-tt-ink">
-          Name
+        <Field label="Name">
           <TextInput
             onChange={(event) => onNameChange(event.target.value)}
             placeholder="Mira"
             value={draft.name}
           />
-        </label>
-        <label className="grid gap-2 text-sm font-medium text-tt-ink">
-          Gender
+        </Field>
+        <Field label="Gender">
           <select
             className="min-h-11 rounded-md border border-tt-line bg-tt-paper px-3 text-base text-tt-ink outline-none transition focus:border-tt-moss focus:ring-2 focus:ring-tt-gold-soft"
             onChange={(event) =>
@@ -61,7 +61,7 @@ export function CharacterForm({
             <option value="female">Female</option>
             <option value="male">Male</option>
           </select>
-        </label>
+        </Field>
       </div>
 
       <section className="grid gap-3">
@@ -85,8 +85,7 @@ export function CharacterForm({
                 key={property.id}
               >
                 <div className="grid items-start gap-3 sm:grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)]">
-                  <label className="grid content-start gap-2 text-sm font-medium text-tt-ink">
-                    Key
+                  <Field className="content-start" label="Key">
                     <TextInput
                       onChange={(event) =>
                         onPropertyChange(property.id, {
@@ -96,9 +95,8 @@ export function CharacterForm({
                       placeholder="age"
                       value={property.key}
                     />
-                  </label>
-                  <label className="grid content-start gap-2 text-sm font-medium text-tt-ink">
-                    Value
+                  </Field>
+                  <Field className="content-start" label="Value">
                     <TextArea
                       className="min-h-24"
                       onChange={(event) =>
@@ -109,25 +107,25 @@ export function CharacterForm({
                       placeholder="32"
                       value={property.value}
                     />
-                  </label>
+                  </Field>
                 </div>
                 <div className="flex flex-wrap justify-end gap-2">
-                  <Button
-                    aria-label={`Move ${property.key || 'property'} up`}
+                  <IconButton
                     disabled={index === 0}
+                    label={`Move ${property.key || 'property'} up`}
                     onClick={() => onMoveProperty(property.id, -1)}
                     size="sm"
                   >
                     <ArrowUp aria-hidden="true" size={16} />
-                  </Button>
-                  <Button
-                    aria-label={`Move ${property.key || 'property'} down`}
+                  </IconButton>
+                  <IconButton
                     disabled={index === draft.properties.length - 1}
+                    label={`Move ${property.key || 'property'} down`}
                     onClick={() => onMoveProperty(property.id, 1)}
                     size="sm"
                   >
                     <ArrowDown aria-hidden="true" size={16} />
-                  </Button>
+                  </IconButton>
                   <Button
                     onClick={() => onRemoveProperty(property.id)}
                     size="sm"

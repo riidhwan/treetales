@@ -7,6 +7,7 @@ import {
 } from '@/hooks/useStoryDashboard'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
+import { Field } from '@/components/ui/Field'
 import { TextInput } from '@/components/ui/TextInput'
 
 const DASHBOARD_DISPLAY_FONT = '"NV Garamond", Georgia, serif'
@@ -237,24 +238,22 @@ export function StoryDashboard({
               void createStoryFromForm()
             }}
           >
-            <label className="grid gap-2 text-sm font-medium text-tt-ink">
-              Title
+            <Field label="Title">
               <TextInput
                 name="title"
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder="Forest Gate"
                 value={title}
               />
-            </label>
-            <label className="grid gap-2 text-sm font-medium text-tt-ink">
-              Description
+            </Field>
+            <Field label="Description">
               <TextInput
                 name="description"
                 onChange={(event) => setDescription(event.target.value)}
                 placeholder="A short premise for the story"
                 value={description}
               />
-            </label>
+            </Field>
             <Button
               className="min-h-12 w-full rounded-xl sm:w-auto"
               disabled={!canCreate}
