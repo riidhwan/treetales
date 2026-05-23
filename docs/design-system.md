@@ -112,6 +112,18 @@ Defer generic `Surface`, `Card`, `StoryRow`, `CharacterCard`,
 are clear. Surface names in `docs/style-guide.md` are design contracts first,
 not a requirement to create a single generic wrapper.
 
+## Dev Style Guide Route
+
+`/__style-guide` is a dev-only maintainer route for inspecting the current local
+UI primitives, semantic token aliases, and surface-boundary language. It is not
+a product surface, is not linked from public navigation, and should not become a
+parallel Storybook replacement.
+
+The route may show representative primitive states and static example content,
+but it must keep using the same local primitives and semantic tokens as product
+code. Do not introduce design treatments there that are not documented here or
+in `docs/style-guide.md`.
+
 ## Primitive Contracts
 
 ### Buttons

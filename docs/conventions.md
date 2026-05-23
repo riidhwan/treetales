@@ -13,6 +13,12 @@ the approved budget, and where any large-PR approval is documented. If the
 actual size exceeds the approved plan, stop before opening the PR and ask
 whether to split or proceed.
 
+GitHub issue and PR bodies are remote reviewer-facing documents. They should
+reference only repository paths, GitHub URLs, uploaded images, CI artifacts, or
+other resources a reviewer can access from GitHub. Do not cite local-only paths
+such as `/tmp/...`, local screenshots, sandbox files, or machine-specific
+locations as evidence in issue or PR text.
+
 Non-trivial issues and PRs must include a `Review Size` section. For issues,
 include estimated files, estimated changed lines, architectural layers, whether
 the work fits the normal PR budget, and the split plan when needed. For PRs,

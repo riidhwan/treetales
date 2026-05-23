@@ -52,7 +52,7 @@ Commit history uses Conventional Commits, for example `docs: add architecture, p
 
 Never run `git commit` or `git push` unless the user explicitly asks. When committing, stage only files relevant to the requested change and follow recent commit history. Use a detailed body for non-trivial changes.
 
-For pull requests, include a concise description, linked issue, verification commands, and screenshots for UI changes. For complete, verified issue-backed work, use `Closes #N` so GitHub auto-closes the issue on merge; use `Refs #N` only when the PR is related but intentionally leaves the issue open. Routine development should use topic branches and PRs into `master`; direct pushes to `master` are for emergencies. Branch names should follow `type/short-kebab-description`, or `type/123-short-kebab-description` for issue-backed work.
+For pull requests, include a concise description, linked issue, verification commands, and screenshots for UI changes. GitHub issue and PR bodies are reviewer-facing remote documents: reference only repository paths, GitHub URLs, uploaded images, CI artifacts, or other reviewer-accessible resources. Do not cite local-only paths such as `/tmp/...`, local screenshots, sandbox files, or machine-specific locations as evidence in issue or PR text. For complete, verified issue-backed work, use `Closes #N` so GitHub auto-closes the issue on merge; use `Refs #N` only when the PR is related but intentionally leaves the issue open. Routine development should use topic branches and PRs into `master`; direct pushes to `master` are for emergencies. Branch names should follow `type/short-kebab-description`, or `type/123-short-kebab-description` for issue-backed work.
 
 ## GitHub Issues & Larger Work
 
