@@ -76,11 +76,11 @@ Current generic primitives include:
 - `MarkdownEditor`
 - `TextArea`
 - `TextInput`
+- `Toolbar`
 
 Near-term primitive candidates include:
 
 - `SegmentedControl`
-- `Toolbar`
 - `EmptyState`
 
 Defer generic `Surface`, `Card`, `StoryRow`, `CharacterCard`,
@@ -148,6 +148,16 @@ should not add sticky toolbars by default.
 
 Toolbar actions should use icons or compact labels according to
 `docs/style-guide.md`.
+
+Use `Toolbar` for repeated sticky action shells. The primitive owns the labelled
+navigation landmark, sticky paper surface, max-width content row, action
+grouping, and optional truncated context text. Feature components own which
+actions appear, their labels, workflow state, and any domain-specific menus or
+panels.
+
+Use `IconButton` for icon-only toolbar commands so accessible labels and titles
+stay consistent. Use compact text `Button` actions when the command needs
+visible text, such as the primary Save/Create action in Chapter authoring.
 
 ## Feature-Owned Surfaces
 

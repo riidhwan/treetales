@@ -17,7 +17,9 @@ import {
 import { useReaderAppearance } from '@/hooks/useReaderAppearance'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { MarkdownContent } from '@/components/ui/MarkdownContent'
+import { Toolbar } from '@/components/ui/Toolbar'
 import type { Chapter, Story } from '@/services/types'
 
 interface Props {
@@ -133,65 +135,48 @@ function ReaderToolbar({
   const [isAppearancePanelOpen, setIsAppearancePanelOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-20 border-b border-tt-line bg-tt-paper/95 shadow-sm backdrop-blur">
-      <nav
-        aria-label="Reader actions"
-        className="mx-auto flex w-full max-w-6xl items-center gap-2 px-3 py-2 sm:px-5"
-      >
-        {parentChapter ? (
-          <Button
-            aria-label="Parent Chapter"
-            className="px-3"
+    <Toolbar
+      label="Reader actions"
+      leading={
+        parentChapter ? (
+          <IconButton
+            label="Parent Chapter"
             onClick={onSelectParentChapter}
             size="sm"
-            title="Parent Chapter"
           >
             <CornerUpLeft aria-hidden="true" size={16} />
-          </Button>
-        ) : null}
-
-        <div className="flex-1" />
-
-        <Button
-          aria-label="Story Details"
-          className="px-3"
-          onClick={onOpenStoryDetails}
-          size="sm"
-          title="Story Details"
-        >
-          <BookOpen aria-hidden="true" size={16} />
-        </Button>
-        <ReaderAppearanceControl
-          canDecreaseFontSize={canDecreaseFontSize}
-          canIncreaseFontSize={canIncreaseFontSize}
-          isPanelOpen={isAppearancePanelOpen}
-          onDecreaseFontSize={onDecreaseFontSize}
-          onIncreaseFontSize={onIncreaseFontSize}
-          onOpenChange={setIsAppearancePanelOpen}
-          onResetReaderAppearance={onResetReaderAppearance}
-          onSelectReaderFont={onSelectReaderFont}
-          readerAppearance={readerAppearance}
-        />
-        <Button
-          aria-label="Edit Chapter"
-          className="px-3"
-          onClick={onEditChapter}
-          size="sm"
-          title="Edit Chapter"
-        >
-          <Edit3 aria-hidden="true" size={16} />
-        </Button>
-        <Button
-          aria-label="Dashboard"
-          className="px-3"
-          onClick={onOpenDashboard}
-          size="sm"
-          title="Dashboard"
-        >
-          <Home aria-hidden="true" size={16} />
-        </Button>
-      </nav>
-    </header>
+          </IconButton>
+        ) : null
+      }
+      trailing={
+        <>
+          <IconButton
+            label="Story Details"
+            onClick={onOpenStoryDetails}
+            size="sm"
+          >
+            <BookOpen aria-hidden="true" size={16} />
+          </IconButton>
+          <ReaderAppearanceControl
+            canDecreaseFontSize={canDecreaseFontSize}
+            canIncreaseFontSize={canIncreaseFontSize}
+            isPanelOpen={isAppearancePanelOpen}
+            onDecreaseFontSize={onDecreaseFontSize}
+            onIncreaseFontSize={onIncreaseFontSize}
+            onOpenChange={setIsAppearancePanelOpen}
+            onResetReaderAppearance={onResetReaderAppearance}
+            onSelectReaderFont={onSelectReaderFont}
+            readerAppearance={readerAppearance}
+          />
+          <IconButton label="Edit Chapter" onClick={onEditChapter} size="sm">
+            <Edit3 aria-hidden="true" size={16} />
+          </IconButton>
+          <IconButton label="Dashboard" onClick={onOpenDashboard} size="sm">
+            <Home aria-hidden="true" size={16} />
+          </IconButton>
+        </>
+      }
+    />
   )
 }
 
