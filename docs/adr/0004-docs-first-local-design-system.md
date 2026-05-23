@@ -10,8 +10,8 @@ character, not a broad multi-product design system.
 
 ## Consequences
 
-- `docs/style-guide.md` owns product and visual language.
-- `docs/design-system.md` owns implementation contracts for tokens,
+- `docs/design/style-guide.md` owns product and visual language.
+- `docs/design/implementation.md` owns implementation contracts for tokens,
   primitives, component boundaries, and verification.
 - Generic primitives should enforce repeated interaction patterns without
   absorbing Story, Chapter, Character, or Branch-specific surfaces.
