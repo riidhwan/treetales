@@ -20,9 +20,9 @@ export function CharacterSection({ characterDialog, titleId }: Props) {
     charactersContent = <Alert className="mt-5">Loading characters...</Alert>
   } else if (characterDialog.characters.length === 0) {
     charactersContent = (
-      <div className="mt-5 rounded-lg border border-dashed border-tt-line bg-tt-paper-deep/40 p-6 text-center">
+      <div className="mt-5 rounded-lg border border-dashed border-border-subtle bg-surface-paper-deep/40 p-6 text-center">
         <h3 className="text-lg font-semibold">No characters yet</h3>
-        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-tt-muted">
+        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-text-muted">
           Add character cards for the people in this story.
         </p>
       </div>
@@ -43,10 +43,10 @@ export function CharacterSection({ characterDialog, titleId }: Props) {
 
   return (
     <>
-      <section className="border-b border-tt-line pb-9">
+      <section className="border-b border-border-subtle pb-9">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
+            <p className="text-sm font-semibold uppercase tracking-wide text-action-primary">
               Characters
             </p>
           </div>

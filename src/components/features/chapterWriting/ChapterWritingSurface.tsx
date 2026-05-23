@@ -109,13 +109,13 @@ export function ChapterWritingSurface({
       <section className="mx-auto w-full max-w-5xl px-0 py-0 sm:px-6 sm:py-6 lg:py-10">
         <section
           aria-label="Chapter document"
-          className="mx-auto min-h-[calc(100vh-7rem)] w-full max-w-[52rem] border-tt-line bg-tt-paper px-2 py-5 shadow-sm sm:min-h-[calc(100vh-10rem)] sm:border sm:px-8 sm:py-8 lg:px-8"
+          className="mx-auto min-h-[calc(100vh-7rem)] w-full max-w-[52rem] border-border-subtle bg-surface-paper px-2 py-5 shadow-sm sm:min-h-[calc(100vh-10rem)] sm:border sm:px-8 sm:py-8 lg:px-8"
         >
           <label className="block px-2 sm:px-0" style={readerDocumentStyle}>
             <span className="sr-only">Title</span>
             <input
               aria-invalid={Boolean(titleError)}
-              className="w-full border-0 bg-transparent p-0 text-[1.875em] font-bold leading-tight text-tt-ink outline-none placeholder:text-tt-muted/55 focus:ring-0 sm:text-[2.25em]"
+              className="w-full border-0 bg-transparent p-0 text-[1.875em] font-bold leading-tight text-text-primary outline-none placeholder:text-text-muted/55 focus:ring-0 sm:text-[2.25em]"
               name="title"
               onBlur={onTitleBlur}
               onChange={(event) => onTitleChange(event.target.value)}
@@ -124,7 +124,7 @@ export function ChapterWritingSurface({
             />
           </label>
           {titleError ? (
-            <p className="mt-2 px-2 text-sm font-medium text-tt-oxblood sm:px-0">
+            <p className="mt-2 px-2 text-sm font-medium text-action-destructive sm:px-0">
               {titleError}
             </p>
           ) : null}
@@ -162,7 +162,7 @@ export function ChapterWritingSurface({
 
       <div
         aria-label="Editor mode"
-        className="fixed bottom-14 left-1/2 z-30 flex -translate-x-1/2 rounded-md border border-tt-line bg-tt-paper p-1 shadow-lg sm:bottom-4"
+        className="fixed bottom-14 left-1/2 z-30 flex -translate-x-1/2 rounded-md border border-border-subtle bg-surface-paper p-1 shadow-lg sm:bottom-4"
         role="group"
       >
         <ModeButton
@@ -181,7 +181,7 @@ export function ChapterWritingSurface({
         </ModeButton>
       </div>
 
-      <p className="fixed bottom-4 right-3 z-30 rounded-md border border-tt-line bg-tt-paper/95 px-2 py-1 text-xs font-medium text-tt-muted shadow-sm sm:right-5">
+      <p className="fixed bottom-4 right-3 z-30 rounded-md border border-border-subtle bg-surface-paper/95 px-2 py-1 text-xs font-medium text-text-muted shadow-sm sm:right-5">
         {wordCount} {wordCount === 1 ? 'word' : 'words'}
       </p>
     </form>
@@ -205,10 +205,10 @@ function ModeButton({
     <button
       aria-pressed={isSelected}
       className={cn(
-        'inline-flex min-h-8 items-center gap-1 rounded px-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tt-gold',
+        'inline-flex min-h-8 items-center gap-1 rounded px-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring',
         isSelected
-          ? 'bg-tt-gold-soft text-tt-moss-dark shadow-sm'
-          : 'text-tt-muted hover:bg-tt-paper-deep',
+          ? 'bg-highlight-soft text-action-primary-hover shadow-sm'
+          : 'text-text-muted hover:bg-surface-paper-deep',
       )}
       onClick={onClick}
       type="button"

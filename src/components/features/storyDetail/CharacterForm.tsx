@@ -52,7 +52,7 @@ export function CharacterForm({
         </Field>
         <Field label="Gender">
           <select
-            className="min-h-11 rounded-md border border-tt-line bg-tt-paper px-3 text-base text-tt-ink outline-none transition focus:border-tt-moss focus:ring-2 focus:ring-tt-gold-soft"
+            className="min-h-11 rounded-md border border-border-subtle bg-surface-paper px-3 text-base text-text-primary outline-none transition focus:border-action-primary focus:ring-2 focus:ring-highlight-soft"
             onChange={(event) =>
               onGenderChange(event.target.value as CharacterGender)
             }
@@ -74,14 +74,14 @@ export function CharacterForm({
         </div>
 
         {draft.properties.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-tt-line p-4 text-sm text-tt-muted">
+          <p className="rounded-lg border border-dashed border-border-subtle p-4 text-sm text-text-muted">
             No custom properties yet.
           </p>
         ) : (
           <div className="grid gap-3">
             {draft.properties.map((property, index) => (
               <div
-                className="grid gap-3 rounded-lg border border-tt-line bg-tt-paper-deep/40 p-3"
+                className="grid gap-3 rounded-lg border border-border-subtle bg-surface-paper-deep/40 p-3"
                 key={property.id}
               >
                 <div className="grid items-start gap-3 sm:grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)]">
@@ -141,7 +141,7 @@ export function CharacterForm({
         )}
 
         {isSaving ? (
-          <p className="text-sm text-tt-muted">Saving character...</p>
+          <p className="text-sm text-text-muted">Saving character...</p>
         ) : null}
       </section>
     </form>

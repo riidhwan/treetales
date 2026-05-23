@@ -59,9 +59,9 @@ export function StoryDetail({
     )
   } else if (status === 'missing-story') {
     detailContent = (
-      <section className="rounded-lg border border-tt-line bg-tt-paper p-6 shadow-sm">
+      <section className="rounded-lg border border-border-subtle bg-surface-paper p-6 shadow-sm">
         <h1 className="text-2xl font-bold">Story not found</h1>
-        <p className="mt-3 text-sm leading-6 text-tt-muted">
+        <p className="mt-3 text-sm leading-6 text-text-muted">
           This story may have been deleted or is unavailable in this browser.
         </p>
         <Button className="mt-5" onClick={onOpenDashboard} size="sm">
@@ -79,24 +79,24 @@ export function StoryDetail({
           </Alert>
         ) : null}
 
-        <article className="border-b border-tt-line pb-9">
-          <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
+        <article className="border-b border-border-subtle pb-9">
+          <p className="text-sm font-semibold uppercase tracking-wide text-action-primary">
             Story summary
           </p>
           {story.description ? (
-            <p className="mt-4 text-sm leading-6 text-tt-muted sm:text-base">
+            <p className="mt-4 text-sm leading-6 text-text-muted sm:text-base">
               {story.description}
             </p>
           ) : (
             <button
-              className="mt-5 flex min-h-20 w-full items-center justify-between gap-4 rounded-2xl border border-dashed border-tt-line bg-tt-paper/45 px-5 py-4 text-left text-sm text-tt-muted transition hover:border-tt-gold hover:bg-tt-gold-soft/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tt-gold sm:text-base"
+              className="mt-5 flex min-h-20 w-full items-center justify-between gap-4 rounded-2xl border border-dashed border-border-subtle bg-surface-paper/45 px-5 py-4 text-left text-sm text-text-muted transition hover:border-focus-ring hover:bg-highlight-soft/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring sm:text-base"
               onClick={() => onEditStory(story.id)}
               type="button"
             >
-              <span className="italic text-tt-muted/70">
+              <span className="italic text-text-muted/70">
                 No description yet - tap to add one.
               </span>
-              <span className="inline-flex shrink-0 items-center gap-1 font-semibold text-tt-moss">
+              <span className="inline-flex shrink-0 items-center gap-1 font-semibold text-action-primary">
                 <Plus aria-hidden="true" size={18} />
                 Add
               </span>
@@ -118,14 +118,14 @@ export function StoryDetail({
   }
 
   return (
-    <main className="min-h-screen bg-tt-parchment text-tt-ink">
-      <header className="border-b border-tt-line/70 bg-tt-paper/35">
+    <main className="min-h-screen bg-background-app text-text-primary">
+      <header className="border-b border-border-subtle/70 bg-surface-paper/35">
         <nav
           aria-label="Story detail navigation"
           className="mx-auto flex min-h-16 w-full max-w-3xl items-center justify-between px-5 sm:px-8"
         >
           <button
-            className="inline-flex min-h-10 items-center gap-2 rounded-md text-base font-medium text-tt-moss transition hover:text-tt-moss-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tt-gold"
+            className="inline-flex min-h-10 items-center gap-2 rounded-md text-base font-medium text-action-primary transition hover:text-action-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
             onClick={onOpenDashboard}
             type="button"
           >
@@ -137,10 +137,10 @@ export function StoryDetail({
 
       <section className="mx-auto flex w-full max-w-3xl flex-col gap-9 px-5 py-10 sm:px-8">
         {story ? (
-          <header className="border-b border-tt-line pb-9">
+          <header className="border-b border-border-subtle pb-9">
             <div className="flex flex-col gap-7">
               <div className="min-w-0">
-                <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
+                <p className="text-sm font-semibold uppercase tracking-wide text-action-primary">
                   Story
                 </p>
                 <h1
@@ -160,7 +160,7 @@ export function StoryDetail({
                   Read
                 </Button>
                 <Button
-                  className="min-h-14 w-full rounded-xl bg-tt-paper text-base"
+                  className="min-h-14 w-full rounded-xl bg-surface-paper text-base"
                   onClick={() => onEditStory(story.id)}
                 >
                   <Edit3 aria-hidden="true" size={20} />
@@ -187,19 +187,19 @@ function StoryMaintenanceSection({
   onDelete,
 }: StoryMaintenanceSectionProps) {
   return (
-    <section className="overflow-hidden rounded-3xl border border-tt-oxblood/25 bg-tt-oxblood-soft/25">
+    <section className="overflow-hidden rounded-3xl border border-action-destructive/25 bg-state-destructive-soft/25">
       <div className="px-5 py-5 sm:px-7">
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-tt-oxblood">
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-action-destructive">
           Danger Zone
         </p>
-        <p className="mt-3 max-w-xl text-sm leading-6 text-tt-muted sm:text-base">
+        <p className="mt-3 max-w-xl text-sm leading-6 text-text-muted sm:text-base">
           Deleting this Story will permanently remove all Chapters and
           Characters. This cannot be undone.
         </p>
       </div>
-      <div className="border-t border-tt-oxblood/20 bg-tt-paper/35 px-5 py-4 sm:px-7">
+      <div className="border-t border-action-destructive/20 bg-surface-paper/35 px-5 py-4 sm:px-7">
         <Button
-          className="w-full border-0 bg-transparent text-base shadow-none hover:bg-tt-oxblood-soft/60 sm:min-h-12"
+          className="w-full border-0 bg-transparent text-base shadow-none hover:bg-state-destructive-soft/60 sm:min-h-12"
           disabled={isDeleting}
           onClick={onDelete}
           variant="danger"
