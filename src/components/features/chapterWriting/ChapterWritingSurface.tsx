@@ -6,6 +6,7 @@ import { Eye, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { MarkdownContent } from '@/components/ui/MarkdownContent'
 import { TextArea } from '@/components/ui/TextArea'
+import { Toolbar, ToolbarContext } from '@/components/ui/Toolbar'
 import { cn } from '@/lib/utils'
 
 export type ChapterWritingMode = 'preview' | 'write'
@@ -87,16 +88,11 @@ export function ChapterWritingSurface({
 
   return (
     <form className="min-h-screen pb-24 sm:pb-20" onSubmit={onSubmit}>
-      <header className="sticky top-0 z-20 border-b border-tt-line bg-tt-paper/95 shadow-sm backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl items-center gap-2 px-3 py-2 sm:px-5">
-          {navigationActions}
-
-          <div className="min-w-0 flex-1 px-1">
-            <p className="truncate text-sm font-semibold text-tt-muted">
-              {toolbarContext}
-            </p>
-          </div>
-
+      <Toolbar
+        context={<ToolbarContext>{toolbarContext}</ToolbarContext>}
+        label="Chapter writing actions"
+        leading={navigationActions}
+        primary={
           <Button
             disabled={!canSubmit}
             size="sm"
@@ -106,10 +102,9 @@ export function ChapterWritingSurface({
             {primaryActionIcon}
             {isSubmitting ? submittingActionLabel : primaryActionLabel}
           </Button>
-
-          {secondaryActions}
-        </div>
-      </header>
+        }
+        trailing={secondaryActions}
+      />
 
       <section className="mx-auto w-full max-w-5xl px-0 py-0 sm:px-6 sm:py-6 lg:py-10">
         <section

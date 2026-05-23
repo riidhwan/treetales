@@ -8,8 +8,8 @@ import {
 } from '@/components/features/chapterWriting/ChapterWritingSurface'
 import { ChapterPromptBuilderControl } from '@/components/features/ChapterPromptBuilderControl'
 import { ReaderAppearanceControl } from '@/components/domain/ReaderAppearanceControl'
-import { Button } from '@/components/ui/Button'
 import { Alert } from '@/components/ui/Alert'
+import { IconButton } from '@/components/ui/IconButton'
 import { useReaderAppearance } from '@/hooks/useReaderAppearance'
 
 interface ParentChapterContext {
@@ -151,14 +151,13 @@ export function ChapterWritingWorkflow({
         isSubmitting={isSubmitting}
         mode={editorMode}
         navigationActions={
-          <Button
-            aria-label="Back"
-            className="px-3"
+          <IconButton
+            label="Back"
             onClick={() => confirmNavigation(onGoBack)}
             size="sm"
           >
             <ArrowLeft aria-hidden="true" size={16} />
-          </Button>
+          </IconButton>
         }
         onContentChange={onContentChange}
         onModeChange={setEditorMode}
@@ -193,14 +192,13 @@ export function ChapterWritingWorkflow({
               storyTitle={promptBuilder.storyTitle}
               templateKind={promptBuilder.templateKind}
             />
-            <Button
-              aria-label="Dashboard"
-              className="px-3"
+            <IconButton
+              label="Dashboard"
               onClick={() => confirmNavigation(onOpenDashboard)}
               size="sm"
             >
               <Home aria-hidden="true" size={16} />
-            </Button>
+            </IconButton>
           </>
         }
         submittingActionLabel={submittingActionLabel}
