@@ -32,4 +32,31 @@ describe('ConfirmationDialog', () => {
     expect(onCancel).toHaveBeenCalledTimes(1)
     expect(onConfirm).toHaveBeenCalledTimes(1)
   })
+
+  it('blocks cancellation and confirmation actions while confirming', () => {
+    const onCancel = vi.fn()
+    const onConfirm = vi.fn()
+
+    render(
+      <ConfirmationDialog
+        confirmLabel="Continue"
+        isConfirming
+        message="Continue with this action?"
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        title="Continue?"
+        titleId="confirmation-title"
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Close confirmation dialog' }),
+    )
+    fireEvent.keyDown(document, { key: 'Escape' })
+
+    expect(onCancel).not.toHaveBeenCalled()
+    expect(onConfirm).not.toHaveBeenCalled()
+  })
 })

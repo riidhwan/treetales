@@ -28,13 +28,19 @@ export function ConfirmationDialog({
   titleId,
   variant = 'primary',
 }: Props) {
+  function handleCancel() {
+    if (!isConfirming) {
+      onCancel()
+    }
+  }
+
   return (
     <Dialog
       bodyClassName="pb-6"
       closeLabel="Close confirmation dialog"
       footer={
         <>
-          <Button disabled={isConfirming} onClick={onCancel}>
+          <Button disabled={isConfirming} onClick={handleCancel}>
             {cancelLabel}
           </Button>
           <Button
@@ -49,7 +55,7 @@ export function ConfirmationDialog({
           </Button>
         </>
       }
-      onClose={onCancel}
+      onClose={handleCancel}
       title={title}
       titleId={titleId}
       width="md"
