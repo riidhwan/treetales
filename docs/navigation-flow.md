@@ -9,6 +9,7 @@ This document lists the current application URLs and the visible controls that c
 | URL | Page | Route file |
 | --- | --- | --- |
 | `/` | Home / Story Dashboard | `src/routes/index.tsx` |
+| `/__style-guide` | StyleGuidePage | `src/routes/[_]_style-guide.tsx` |
 | `/stories/$storyId` | Story Detail | `src/routes/stories.$storyId.index.tsx` |
 | `/stories/$storyId/chapters/$chapterId/children/new` | Branch Creator | `src/routes/stories.$storyId.chapters.$chapterId.children.new.tsx` |
 | `/stories/$storyId/chapters/$chapterId/edit` | Chapter Editor | `src/routes/stories.$storyId.chapters.$chapterId.edit.tsx` |
@@ -42,6 +43,17 @@ Runtime notes:
 - Story row buttons use browser-local story titles for their labels and open `/stories/$storyId`.
 - `New Story` only opens the creation form.
 
+### StyleGuidePage
+
+URL: `/__style-guide`
+
+| Control label | Component | Destination / behaviour |
+| --- | --- | --- |
+| Primary action | `StyleGuidePage` | No route-changing action detected |
+| Secondary action | `StyleGuidePage` | No route-changing action detected |
+| Delete | `StyleGuidePage` | No route-changing action detected |
+| Back to dashboard | `NotFoundPage` | `/` |
+
 ### Story Detail
 
 URL: `/stories/$storyId`
@@ -51,7 +63,15 @@ URL: `/stories/$storyId`
 | Dashboard | `StoryDetail` | `/` |
 | Read | `StoryDetail` | `/stories/$storyId/read` |
 | Edit | `StoryDetail` | `/stories/$storyId/edit` |
-| Deleting... / Delete | `StoryDetail` | Confirms and deletes the story |
+| Add Character | `CharacterSection` | No route-changing action detected |
+| `View ${character.name}` | `CharacterCard` | Calls `onOpen` |
+| Edit | `CharacterDialog` | Calls `onEdit` |
+| Deleting... / Delete | `CharacterDialog` | Calls `onDelete` |
+| Cancel | `CharacterDialog` | Calls `onClose` |
+| Saving... / Save | `CharacterDialog` | Calls `onSave` |
+| Add Property | `CharacterForm` | Calls `onAddProperty` |
+| Remove | `CharacterForm` | Calls `onRemoveProperty` |
+| Deleting... / Delete Story | `StoryMaintenanceSection` | Calls `onDelete` |
 
 Runtime notes:
 
@@ -63,11 +83,11 @@ URL: `/stories/$storyId/chapters/$chapterId/children/new`
 
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
-| Back | `CreatorContent` | Calls `onGoBack` |
-| Dashboard | `CreatorContent` | Calls `onOpenDashboard` |
-| Saving... / Save | `ChapterWritingSurface` | Submits the enclosing form |
-| Parent Chapter | `UnavailableLayout` | `/stories/$storyId/chapters/$chapterId/edit` |
-| Dashboard | `UnavailableLayout` | Calls `onOpenDashboard` |
+| submittingActionLabel / primaryActionLabel | `ChapterWritingSurface` | Submits the enclosing form |
+| Writing Assist | `ChapterPromptBuilderControl` | Calls `setIsMenuOpen` |
+| Copy prompt | `ChapterPromptBuilderControl` | Calls `copyPrompt` |
+| Parent Chapter | `ChapterWritingUnavailableLayout` | `/stories/$storyId/chapters/$chapterId/edit` |
+| Dashboard | `ChapterWritingUnavailableLayout` | `/` |
 
 Runtime notes:
 
@@ -79,9 +99,11 @@ URL: `/stories/$storyId/chapters/$chapterId/edit`
 
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
-| Back | `ChapterEditor` | Calls `onGoBack` |
-| Dashboard | `ChapterEditor` | `/` |
-| Saving... / Save | `ChapterWritingSurface` | Submits the enclosing form |
+| submittingActionLabel / primaryActionLabel | `ChapterWritingSurface` | Submits the enclosing form |
+| Writing Assist | `ChapterPromptBuilderControl` | Calls `setIsMenuOpen` |
+| Copy prompt | `ChapterPromptBuilderControl` | Calls `copyPrompt` |
+| Back | `ChapterWritingUnavailableLayout` | Calls `onOpenPrevious` |
+| Dashboard | `ChapterWritingUnavailableLayout` | `/` |
 
 Runtime notes:
 
@@ -93,15 +115,15 @@ URL: `/stories/$storyId/chapters/new`
 
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
-| Back | `CreatorContent` | Calls `onGoBack` |
-| Dashboard | `CreatorContent` | Calls `onOpenDashboard` |
-| Saving... / Save | `ChapterWritingSurface` | Submits the enclosing form |
-| Story Editor | `UnavailableLayout` | `/stories/$storyId/edit` |
-| Dashboard | `UnavailableLayout` | Calls `onOpenDashboard` |
+| submittingActionLabel / primaryActionLabel | `ChapterWritingSurface` | Submits the enclosing form |
+| Writing Assist | `ChapterPromptBuilderControl` | Calls `setIsMenuOpen` |
+| Copy prompt | `ChapterPromptBuilderControl` | Calls `copyPrompt` |
+| Story Reader | `ChapterWritingUnavailableLayout` | `/stories/$storyId/read` |
+| Dashboard | `ChapterWritingUnavailableLayout` | `/` |
 
 Runtime notes:
 
-- `Create Chapter` creates the intro chapter and then opens `/stories/$storyId/chapters/$chapterId/edit`.
+- `Create Chapter` creates the Intro Chapter and then opens `/stories/$storyId/read?chapterId=<new chapter id>`.
 
 ### Story Editor
 
@@ -111,14 +133,11 @@ URL: `/stories/$storyId/edit`
 | --- | --- | --- |
 | Dashboard | `StoryEditor` | `/` |
 | Saving... / Save Story | `StoryEditor` | Submits the enclosing form |
-| Read | `StoryEditor` | `/stories/$storyId/read` |
 | Edit | `IntroChapterCard` | `/stories/$storyId/chapters/$chapterId/edit` |
-| Add Intro Chapter | `IntroChapterEmptyState` | `/stories/$storyId/chapters/new` |
 
 Runtime notes:
 
 - `Save Story` persists title and description without changing routes.
-- `Add Intro Chapter` only appears when the story has no intro chapter.
 
 ### Story Reader
 
@@ -126,16 +145,14 @@ URL: `/stories/$storyId/read`
 
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
-| Parent Chapter | `ReaderToolbar` | Calls `onSelectParentChapter` |
-| Story Details | `ReaderToolbar` | `/stories/$storyId` |
-| Edit Chapter | `ReaderToolbar` | `/stories/$storyId/chapters/$chapterId/edit` |
-| Dashboard | `ReaderToolbar` | `/` |
-| {nextChapter.title} | `NextChapterControls` | Calls `onSelectChapter` |
+| Add Intro Chapter | `ReaderContent` | `/stories/$storyId/chapters/new` |
+| Story Details | `ReaderContent` | `/stories/$storyId` |
 | Add Branch | `NextChapterControls` | `/stories/$storyId/chapters/$chapterId/children/new` |
 
 Runtime notes:
 
 - `Parent Chapter` and branch choice buttons update the `chapterId` search parameter on the reader route.
+- `Add Intro Chapter` appears when the story has no Intro Chapter and opens `/stories/$storyId/chapters/new`.
 - Branch choice labels are chapter titles from browser-local persistence, so their labels are data-driven.
 - `The End` is an indicator, not a navigation control.
 

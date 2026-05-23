@@ -13,14 +13,13 @@ describe('intro chapter creator route', () => {
     expect(Route.options.loader).toBeUndefined()
   })
 
-  it('uses browser history for the intro chapter creation Back action', () => {
+  it('returns intro chapter creation to the reader', () => {
     const routeSource = readFileSync(
       resolve(process.cwd(), 'src/routes/stories.$storyId.chapters.new.tsx'),
       'utf8',
     )
 
-    expect(routeSource).toMatch(
-      /onGoBack=\{\(\) => router\.history\.back\(\)\}/,
-    )
+    expect(routeSource).toContain("to: '/stories/$storyId/read'")
+    expect(routeSource).toContain('search: { chapterId: selectedChapterId }')
   })
 })

@@ -106,7 +106,7 @@ specific:
 | `useStoryEditor.ts` | Loads editor data, resolves the intro chapter, and saves story fields |
 | `useChapterEditor.ts` | Loads one chapter and saves chapter fields |
 | `useChapterCreator.ts` | Loads story or parent chapter context and creates intro chapters or branches from title + content |
-| `useStoryReader.ts` | Loads reader data, tracks the selected chapter, and exposes navigation options |
+| `useStoryReader.ts` | Loads reader data, resolves the Intro Chapter when no Chapter is selected, tracks the selected chapter, and exposes navigation options |
 
 Hooks depend on the service layer through small service interfaces with default
 implementations. Tests can pass fake services without touching IndexedDB.

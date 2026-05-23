@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { getErrorMessage } from '@/lib/errors'
 import {
   getChaptersByStoryId,
+  getIntroChapterByStoryId,
   getNextChapters,
 } from '@/services/chapterService'
 import { getStoryById } from '@/services/storyService'
@@ -10,12 +11,16 @@ import type { Chapter, Story } from '@/services/types'
 
 export interface StoryReaderServices {
   readonly getChaptersByStoryId: (storyId: string) => Promise<Chapter[]>
+  readonly getIntroChapterByStoryId: (
+    storyId: string,
+  ) => Promise<Chapter | undefined>
   readonly getNextChapters: (chapterId: string) => Promise<Chapter[]>
   readonly getStoryById: (storyId: string) => Promise<Story | undefined>
 }
 
 export const DEFAULT_STORY_READER_SERVICES: StoryReaderServices = {
   getChaptersByStoryId,
+  getIntroChapterByStoryId,
   getNextChapters,
   getStoryById,
 }
@@ -104,7 +109,11 @@ export function useStoryReader({
 
         const selectedChapter = chapterId
           ? chapters.find((chapter) => chapter.id === chapterId)
-          : chapters[0]
+          : await services.getIntroChapterByStoryId(storyId)
+
+        if (!isCurrent) {
+          return
+        }
 
         if (!selectedChapter) {
           setReaderState({

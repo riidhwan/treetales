@@ -45,6 +45,7 @@ const RUNTIME_NOTES_BY_ROUTE = new Map([
     '/stories/$storyId/read',
     [
       '`Parent Chapter` and branch choice buttons update the `chapterId` search parameter on the reader route.',
+      '`Add Intro Chapter` appears when the story has no Intro Chapter and opens `/stories/$storyId/chapters/new`.',
       'Branch choice labels are chapter titles from browser-local persistence, so their labels are data-driven.',
       '`The End` is an indicator, not a navigation control.',
     ],
@@ -53,13 +54,12 @@ const RUNTIME_NOTES_BY_ROUTE = new Map([
     '/stories/$storyId/edit',
     [
       '`Save Story` persists title and description without changing routes.',
-      '`Add Intro Chapter` only appears when the story has no intro chapter.',
     ],
   ],
   [
     '/stories/$storyId/chapters/new',
     [
-      '`Create Chapter` creates the intro chapter and then opens `/stories/$storyId/chapters/$chapterId/edit`.',
+      '`Create Chapter` creates the Intro Chapter and then opens `/stories/$storyId/read?chapterId=<new chapter id>`.',
     ],
   ],
   [
@@ -766,13 +766,15 @@ function getActionNote(action, callbackTargets) {
 function normalizeRouteAction(routePath, action) {
   if (
     action.label === 'Parent Chapter / Story Editor' ||
-    action.label === 'Story Editor / Parent Chapter'
+    action.label === 'Story Editor / Parent Chapter' ||
+    action.label === 'Parent Chapter / Story Reader' ||
+    action.label === 'Story Reader / Parent Chapter'
   ) {
     if (routePath === '/stories/$storyId/chapters/new') {
       return {
         ...action,
-        destination: '/stories/$storyId/edit',
-        label: 'Story Editor',
+        destination: '/stories/$storyId/read',
+        label: 'Story Reader',
       }
     }
 

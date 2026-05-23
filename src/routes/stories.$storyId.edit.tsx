@@ -12,12 +12,6 @@ function StoryEditorRoute() {
 
   return (
     <StoryEditor
-      onCreateIntroChapter={(selectedStoryId) =>
-        void navigate({
-          to: '/stories/$storyId/chapters/new',
-          params: { storyId: selectedStoryId },
-        })
-      }
       onEditChapter={(selectedStoryId, selectedChapterId) =>
         void navigate({
           to: '/stories/$storyId/chapters/$chapterId/edit',

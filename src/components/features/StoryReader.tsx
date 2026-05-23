@@ -25,6 +25,7 @@ import type { Chapter, Story } from '@/services/types'
 interface Props {
   readonly chapterId?: string
   readonly onCreateChildChapter: (storyId: string, parentChapterId: string) => void
+  readonly onCreateIntroChapter: (storyId: string) => void
   readonly onEditChapter: (storyId: string, chapterId: string) => void
   readonly onOpenDashboard: () => void
   readonly onOpenStoryDetails: (storyId: string) => void
@@ -36,6 +37,7 @@ interface Props {
 export function StoryReader({
   chapterId,
   onCreateChildChapter,
+  onCreateIntroChapter,
   onEditChapter,
   onOpenDashboard,
   onOpenStoryDetails,
@@ -92,6 +94,8 @@ export function StoryReader({
           onCreateChildChapter={(parentChapterId) =>
             onCreateChildChapter(storyId, parentChapterId)
           }
+          onCreateIntroChapter={() => onCreateIntroChapter(storyId)}
+          onOpenStoryDetails={() => onOpenStoryDetails(storyId)}
           onSelectNextChapter={selectNextChapter}
           readerFontFamily={selectedFontFamily}
           readerFontSizePt={readerAppearance.fontSizePt}
@@ -185,6 +189,8 @@ interface ReaderContentProps {
   readonly errorMessage?: string
   readonly nextChapters: Chapter[]
   readonly onCreateChildChapter: (parentChapterId: string) => void
+  readonly onCreateIntroChapter: () => void
+  readonly onOpenStoryDetails: () => void
   readonly onSelectNextChapter: (chapter: Chapter) => void
   readonly readerFontFamily: string
   readonly readerFontSizePt: number
@@ -197,6 +203,8 @@ function ReaderContent({
   errorMessage,
   nextChapters,
   onCreateChildChapter,
+  onCreateIntroChapter,
+  onOpenStoryDetails,
   onSelectNextChapter,
   readerFontFamily,
   readerFontSizePt,
@@ -230,20 +238,32 @@ function ReaderContent({
     )
   } else if (!currentChapter && story) {
     readerContent = (
-      <section className="rounded-lg border border-border-subtle bg-surface-paper p-6 shadow-sm">
+      <section className="mx-auto min-h-[calc(100vh-7rem)] w-full max-w-[52rem] border-border-subtle bg-surface-paper px-4 py-6 shadow-sm sm:min-h-[calc(100vh-10rem)] sm:border sm:px-8 sm:py-8 lg:px-8">
         <p className="text-sm font-semibold uppercase tracking-wide text-action-primary">
           {story.title}
         </p>
         <h1 className="mt-2 text-2xl font-bold">
           {status === 'missing-chapter'
             ? 'Chapter not found'
-            : 'No chapters yet'}
+            : 'No Intro Chapter yet'}
         </h1>
         <p className="mt-3 text-sm leading-6 text-text-muted">
           {status === 'missing-chapter'
             ? 'This chapter is not part of the selected story.'
-            : 'This story does not have any chapters to read yet.'}
+            : 'Add an Intro Chapter to give this Story a place to begin.'}
         </p>
+        {status === 'missing-chapter' ? null : (
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button onClick={onCreateIntroChapter} variant="primary">
+              <PlusCircle aria-hidden="true" size={16} />
+              Add Intro Chapter
+            </Button>
+            <Button onClick={onOpenStoryDetails}>
+              <BookOpen aria-hidden="true" size={16} />
+              Story Details
+            </Button>
+          </div>
+        )}
       </section>
     )
   } else if (story && currentChapter) {

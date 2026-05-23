@@ -38,6 +38,12 @@
 ### Story Reader
 - User opens a story from story detail or the example-story empty state and
   lands on the first chapter.
+- When a Story has no Intro Chapter, opening the reader shows an empty state
+  with an "Add Intro Chapter" action that opens the dedicated Intro Chapter
+  creation page and a secondary action back to Story detail. The empty state
+  uses the heading "No Intro Chapter yet", the body "Add an Intro Chapter to
+  give this Story a place to begin.", the primary action "Add Intro Chapter",
+  and the secondary action "Story Details".
 - Chapter displays title and content rendered from markdown text. Supported
   markdown includes common markdown plus GFM tables, task lists,
   strikethrough, autolinks, and single-newline breaks. Raw HTML in chapter
@@ -101,9 +107,10 @@
 - Story editor top navigation returns to the Story detail page. The editor does
   not duplicate Story reading navigation.
 - Edit story title and description at the top.
-- Intro chapter panel below with a clear empty state when no intro exists.
-- When a story has no chapters, the editor offers an "Add Intro Chapter"
-  action that opens a separate intro chapter creation page.
+- Intro chapter panel below with a clear informational empty state when no intro
+  exists.
+- Intro Chapter creation starts from the Story Reader empty state, not from the
+  Story editor.
 - Once the introductory chapter exists, new chapters are added from an
   existing parent chapter page, not from the top-level story editor.
 - Each chapter can be edited (title + content) in a separate form view.
@@ -113,8 +120,10 @@
   and the markdown editor gets most of the available page space.
 - Chapter creation collects title and markdown content, lets the user toggle
   between writing and markdown preview in the same document column, creates
-  either the intro chapter or a branch linked to the selected parent chapter,
-  then opens the new chapter for editing.
+  either the intro chapter or a branch linked to the selected parent chapter.
+- After Intro Chapter creation from the Story Reader empty state, TreeTales
+  opens the Story Reader on the new Intro Chapter.
+- After Branch creation, TreeTales opens the new Branch for editing.
 - Chapter creation keeps the commit action reachable in a sticky toolbar and
   uses the same Save/Saving action language as chapter editing, but it does not
   bind `Ctrl+S`/`Cmd+S` to the one-time creation action.
@@ -145,8 +154,8 @@
 - Chapter creation uses the same title and content placeholders for intro
   chapters and branches: "Untitled chapter" and "Write this chapter in markdown...".
 - Branch creation provides a stable action back to the parent chapter and
-  a stable action back to the story editor. Intro chapter creation provides a
-  stable action back to the story editor. Parent/story context belongs in the
+  a stable action back to the story editor. Intro Chapter creation provides a
+  stable action back to the Story Reader. Parent/story context belongs in the
   toolbar rather than inside the document body.
 - Branch creation immediately links the new branch to the selected parent
   chapter.
