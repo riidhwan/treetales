@@ -133,7 +133,6 @@ URL: `/stories/$storyId/edit`
 | --- | --- | --- |
 | Dashboard | `StoryEditor` | `/` |
 | Saving... / Save Story | `StoryEditor` | Submits the enclosing form |
-| Edit | `IntroChapterCard` | `/stories/$storyId/chapters/$chapterId/edit` |
 
 Runtime notes:
 

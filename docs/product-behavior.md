@@ -106,9 +106,7 @@
 - User opens a story in edit mode from story detail or after creating a story.
 - Story editor top navigation returns to the Story detail page. The editor does
   not duplicate Story reading navigation.
-- Edit story title and description at the top.
-- Intro chapter panel below with a clear informational empty state when no intro
-  exists.
+- Story editor edits only Story title and description.
 - Intro Chapter creation starts from the Story Reader empty state, not from the
   Story editor.
 - Once the introductory chapter exists, new chapters are added from an

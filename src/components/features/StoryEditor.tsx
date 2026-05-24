@@ -1,4 +1,4 @@
-import { ChevronLeft, Edit3, Home, Save } from 'lucide-react'
+import { ChevronLeft, Home, Save } from 'lucide-react'
 
 import {
   type StoryEditorServices,
@@ -9,10 +9,8 @@ import { Button } from '@/components/ui/Button'
 import { Field } from '@/components/ui/Field'
 import { TextArea } from '@/components/ui/TextArea'
 import { TextInput } from '@/components/ui/TextInput'
-import type { Chapter } from '@/services/types'
 
 interface Props {
-  readonly onEditChapter: (storyId: string, chapterId: string) => void
   readonly onOpenDashboard: () => void
   readonly onOpenStory: (storyId: string) => void
   readonly services?: StoryEditorServices
@@ -20,7 +18,6 @@ interface Props {
 }
 
 export function StoryEditor({
-  onEditChapter,
   onOpenDashboard,
   onOpenStory,
   services,
@@ -34,7 +31,6 @@ export function StoryEditor({
     saveStory,
     setDescription,
     setTitle,
-    introChapter,
     status,
     successMessage,
     title,
@@ -135,11 +131,6 @@ export function StoryEditor({
             </Button>
           </div>
         </form>
-
-        <ChapterSection
-          onEditChapter={(chapterId) => onEditChapter(storyId, chapterId)}
-          introChapter={introChapter}
-        />
       </>
     )
   }
@@ -172,80 +163,5 @@ export function StoryEditor({
         {editorContent}
       </section>
     </main>
-  )
-}
-
-interface ChapterSectionProps {
-  readonly onEditChapter: (chapterId: string) => void
-  readonly introChapter?: Chapter
-}
-
-function ChapterSection({
-  onEditChapter,
-  introChapter,
-}: ChapterSectionProps) {
-  return (
-    <section className="pb-6">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border-subtle pb-5">
-        <div>
-          <h2 className="text-3xl font-bold sm:text-4xl">Intro Chapter</h2>
-          <p className="mt-3 text-sm leading-6 text-text-muted sm:text-base">
-            The story starts here. Add branches from chapter pages.
-          </p>
-        </div>
-      </div>
-
-      {introChapter ? (
-        <IntroChapterCard
-          introChapter={introChapter}
-          onEditChapter={onEditChapter}
-        />
-      ) : (
-        <IntroChapterEmptyState />
-      )}
-    </section>
-  )
-}
-
-function IntroChapterEmptyState() {
-  return (
-    <div className="mt-7 rounded-2xl border border-dashed border-border-subtle bg-surface-paper/45 p-5 sm:p-7">
-      <h3 className="text-base font-semibold">Start with an intro chapter</h3>
-      <p className="mt-2 text-sm leading-6 text-text-muted">
-        Every story begins with one top-level chapter. Later chapters are added
-        from the chapter they follow.
-      </p>
-    </div>
-  )
-}
-
-interface IntroChapterCardProps {
-  readonly introChapter: Chapter
-  readonly onEditChapter: (chapterId: string) => void
-}
-
-function IntroChapterCard({
-  introChapter,
-  onEditChapter,
-}: IntroChapterCardProps) {
-  return (
-    <article className="mt-7 rounded-2xl border border-border-subtle bg-surface-paper/55 p-5 shadow-sm sm:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="min-w-0">
-          <h3 className="truncate text-2xl font-bold">
-            {introChapter.title}
-          </h3>
-          <p className="mt-2 text-sm text-text-muted">Intro Chapter</p>
-        </div>
-        <Button
-          className="min-h-12 rounded-xl px-5 text-base"
-          onClick={() => onEditChapter(introChapter.id)}
-          size="sm"
-        >
-          <Edit3 aria-hidden="true" size={16} />
-          Edit
-        </Button>
-      </div>
-    </article>
   )
 }
