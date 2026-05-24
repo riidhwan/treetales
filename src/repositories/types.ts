@@ -15,6 +15,9 @@ export interface StoryRepository {
   readonly insertStory: (story: Story) => Promise<void>
   readonly findStories: () => Promise<Story[]>
   readonly findStoryById: (id: string) => Promise<Story | undefined>
+  readonly findStoryByBuiltInExampleStoryId: (
+    builtInExampleStoryId: string,
+  ) => Promise<Story | undefined>
   readonly updateStory: (
     id: string,
     input: UpdateStoryRepositoryInput,

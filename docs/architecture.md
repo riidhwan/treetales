@@ -63,6 +63,13 @@ not catalog copy. The built-in example Story remains seeded content owned by
 its service boundary unless localized seeded content becomes a separate feature.
 Static `public/manifest.json` install metadata also stays static until a
 manifest generation step is introduced.
+Built-in Example Story starter titles, descriptions, chapter content, source
+facts, and provenance display text are seeded content owned by the service
+boundary, not Copy Catalog entries. UI labels and errors around the Starter
+Section still belong in `src/copy/`.
+Starter catalog definitions are bundled code, so strict TypeScript types and
+focused service tests are the validation boundary. Add runtime validation only
+if starters become external or user-provided data.
 
 ## `src/config.ts` — Tuneable Constants
 
@@ -227,16 +234,56 @@ imports are migrated to the correctly named service modules.
 | `chapterService.ts` | Active Chapter service API |
 | `chapterDb.ts` | Temporary compatibility re-export for existing Chapter imports |
 | `characterService.ts` | Active Character service API |
-| `exampleStory.ts` | Creates or returns the built-in example story and its chapters |
+| `builtInExampleStories.ts` | Lists Built-in Example Story starters and creates or reuses Example Story Copies |
+| `exampleStory.ts` | Legacy single-example Story creation/reuse kept until the Starter Section replaces the old flow |
 | `types.ts` | Shared service data shapes and create/update input contracts |
 
 Story, chapter, and character services create records with `crypto.randomUUID()` ids and
 `Date.now()` timestamps. Updates preserve `createdAt` and refresh `updatedAt`.
+General Story updates edit title and description only; Example Story Copy
+starter identity and Story Provenance are set by copy creation and are not
+author-editable Story fields.
+Example Story Copies use generated local Story and Chapter ids; the persisted
+starter identity handles reuse and should not be reused as the Story id.
+Missing starter identity and Story Provenance on existing Story records should
+be treated as absent optional fields rather than rewritten into explicit null
+values by an IndexedDB migration.
+Starter chapter definitions may use stable catalog-local template ids so copy
+creation can map parent relationships onto generated local Chapter ids.
 Character service writes trim Character names and property key/value text, and
 drop custom properties with blank keys. Creating, updating, or deleting a
 Character refreshes the owning Story's `updatedAt`. Deleting a story deletes all
 chapters and characters for that story. Deleting a chapter clears that chapter id
 from the `parentChapterId` of direct branches in the same story.
+
+The Built-in Example Story service exposes starter summaries separately from
+copy creation. Starter summaries let Library Mode render the Starter Section
+without importing or previewing seeded chapter fixtures, while create-or-reuse
+operations own turning one selected starter into an editable Example Story Copy.
+The starter catalog foundation may coexist with the previous single example
+story flow until the Library Mode Starter Section integration replaces that
+user-facing path.
+The new starter catalog APIs can be added beside the existing
+`createExampleStory()` compatibility export until the Starter Section UI slice
+removes the old single-example flow.
+Example Story Copies remain Saved Stories in normal Story queries; Built-in
+Example Story starters are the separate catalog records shown by the Starter
+Section.
+Example Story Copy creation and reuse should run in one repository unit of work:
+find the existing copy by starter identity, or insert the Story and all Chapters
+for a new copy atomically.
+Reusing an existing Example Story Copy is not a Story mutation and should not
+refresh `updatedAt`.
+Unknown starter ids are expected absence, not persistence failures. The
+create-or-reuse operation should return a typed not-found result for an unknown
+Built-in Example Story and reserve thrown errors for unexpected failures.
+Successful create-or-reuse results should identify whether the operation
+created a fresh Example Story Copy or reused an existing one.
+Repository APIs should expose the starter-identity lookup needed for reuse, so
+services do not scan storage-shaped records themselves. The browser-local
+IndexedDB adapter may implement that lookup by reading Stories and filtering in
+the repository; add a dedicated storage index only when scale or query behavior
+requires it.
 
 Chapter writes enforce basic graph integrity before committing:
 

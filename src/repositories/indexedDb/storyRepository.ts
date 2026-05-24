@@ -21,6 +21,8 @@ export function createIndexedDbStoryRepository(
     insertStory: (story) => insertStory(options, story),
     findStories: () => findStories(options),
     findStoryById: (id) => findStoryById(options, id),
+    findStoryByBuiltInExampleStoryId: (builtInExampleStoryId) =>
+      findStoryByBuiltInExampleStoryId(options, builtInExampleStoryId),
     updateStory: (id, input) => updateStory(options, id, input),
     deleteStory: (id) => deleteStory(options, id),
   }
@@ -53,6 +55,17 @@ async function findStoryById(
 ): Promise<Story | undefined> {
   return withStoryStore(options, 'readonly', (store) =>
     requestToPromise(typedRequest<Story | undefined>(store.get(id))),
+  )
+}
+
+async function findStoryByBuiltInExampleStoryId(
+  options: IndexedDbRepositoryOptions,
+  builtInExampleStoryId: string,
+): Promise<Story | undefined> {
+  const stories = await findStories(options)
+
+  return stories.find(
+    (story) => story.builtInExampleStoryId === builtInExampleStoryId,
   )
 }
 

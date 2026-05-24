@@ -27,11 +27,13 @@ Each Built-in Example Story should include:
 - Source title
 - Author or collector when known
 - Publication year or source
-- U.S. public-domain basis
-- Short adaptation note
+- U.S. public-domain basis, retained as structured provenance review data
+- Short adaptation note, retained as structured provenance review data
 - User-visible Story Provenance text
 
-User-visible Story Provenance should be factual and non-legalistic. Use:
+User-visible Story Provenance should be authored in the starter catalog,
+captured on the Example Story Copy, and kept factual and non-legalistic. Use
+these patterns as guidance:
 
 - `Adapted from "{Source Work}" by {Author}, first published {year}.`
 - `Adapted from "{Source Work}", collected in {Collection}, first published {year}.`
@@ -48,6 +50,10 @@ translation chains. The initial set should use one source work from each
 approved author/source collection so the Starter Section has varied tone and
 premise.
 
+Built-in Example Stories should display in authored catalog order. Do not sort
+the Starter Section by title, publication year, or Source Work unless that
+editorial order is intentionally changed.
+
 Selected initial Source Works:
 
 - Frank R. Stockton, "The Bee-Man of Orn", from _The Bee-Man of Orn and Other
@@ -59,6 +65,17 @@ Selected initial Source Works:
   (1898), Project Gutenberg eBook #30400, available as a public-domain
   English-language source text. Do not use Mabel Dearmer's illustrations in the
   app unless illustration provenance is reviewed separately.
+
+The foundation implementation may introduce minimal starter fixtures for the
+selected Source Works to prove catalog and service behavior. Full TreeTales
+adaptations belong in the per-story content slices.
+Minimal foundation fixtures should not be exposed through the normal Library
+Mode UI before the Starter Section integration and content slices make the
+starter experience production-ready.
+Foundation tests should cover the starter catalog service, repository lookup,
+copy creation/reuse, generated local ids, and provenance persistence. Hook and
+UI tests belong with the Starter Section integration slice unless #182 changes
+user-facing behavior.
 
 Approved candidate source pools retained for future Built-in Example Stories:
 

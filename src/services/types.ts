@@ -2,8 +2,23 @@ export interface Story {
   id: string
   title: string
   description: string
+  builtInExampleStoryId?: string
+  storyProvenance?: StoryProvenance
   createdAt: number
   updatedAt: number
+}
+
+export interface StoryProvenance {
+  readonly sourceWorks: StoryProvenanceSourceWork[]
+  readonly adaptationNote: string
+  readonly displayText: string
+}
+
+export interface StoryProvenanceSourceWork {
+  readonly title: string
+  readonly author: string
+  readonly publication: string
+  readonly publicDomainBasis: string
 }
 
 export interface Chapter {
