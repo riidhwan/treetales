@@ -241,6 +241,10 @@ describe('useStoryCharacters', () => {
           { key: 'role', value: 'guide' },
         ],
       }),
+      createCharacter({
+        id: 'character-2',
+        name: 'Rowan',
+      }),
     ])
     const { result } = renderHook(() =>
       useStoryCharacters({
@@ -251,7 +255,7 @@ describe('useStoryCharacters', () => {
     )
 
     await waitFor(() => {
-      expect(result.current.characters).toHaveLength(1)
+      expect(result.current.characters).toHaveLength(2)
     })
 
     act(() => {
@@ -277,9 +281,11 @@ describe('useStoryCharacters', () => {
       properties: [{ key: 'role', value: 'guide' }],
     })
     expect(result.current.dialogState.mode).toBe('view')
+    expect(result.current.characters).toHaveLength(2)
+    expect(result.current.characters[1].name).toBe('Rowan')
   })
 
-  it('asks before discarding unsaved edit changes', async () => {
+  it('closes clean dialogs and asks before discarding unsaved changes', async () => {
     const services = createServices()
     const { result } = renderHook(() =>
       useStoryCharacters({
@@ -294,6 +300,22 @@ describe('useStoryCharacters', () => {
     })
 
     act(() => {
+      result.current.openViewDialog(result.current.characters[0])
+      result.current.requestCloseDialog()
+    })
+    expect(result.current.dialogState.mode).toBe('closed')
+
+    act(() => {
+      result.current.openCreateDialog()
+      result.current.setName('New Character')
+    })
+    act(() => {
+      result.current.requestCloseDialog()
+    })
+    expect(result.current.confirmationState.mode).toBe('discard-changes')
+
+    act(() => {
+      result.current.confirmDiscardChanges()
       result.current.openEditDialog(result.current.characters[0])
     })
     act(() => {
@@ -316,6 +338,38 @@ describe('useStoryCharacters', () => {
       result.current.confirmDiscardChanges()
     })
     expect(result.current.dialogState.mode).toBe('closed')
+  })
+
+  it('ignores invalid character delete requests', async () => {
+    const services = createServices()
+    const { result } = renderHook(() =>
+      useStoryCharacters({
+        enabled: true,
+        services,
+        storyId: 'story-1',
+      }),
+    )
+
+    await waitFor(() => {
+      expect(result.current.characters).toHaveLength(1)
+    })
+
+    act(() => {
+      result.current.requestDeleteSelectedCharacter()
+    })
+    expect(result.current.confirmationState.mode).toBe('closed')
+
+    act(() => {
+      result.current.openCreateDialog()
+      result.current.requestDeleteSelectedCharacter()
+    })
+    expect(result.current.confirmationState.mode).toBe('closed')
+
+    await act(async () => {
+      await result.current.confirmDeleteSelectedCharacter()
+    })
+
+    expect(services.deleteCharacter).not.toHaveBeenCalled()
   })
 
   it('deletes the selected character after confirmation', async () => {

@@ -64,10 +64,6 @@ export function ChapterPromptBuilderControl({
   }
 
   function openPromptBuilder() {
-    if (isPromptBuilderDisabled) {
-      return
-    }
-
     setCopyStatus(undefined)
     setFallbackPrompt(undefined)
     setIsMenuOpen(false)

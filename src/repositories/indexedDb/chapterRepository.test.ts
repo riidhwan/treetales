@@ -1,6 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createIndexedDbChapterRepository } from '@/repositories/indexedDb/chapterRepository'
+import {
+  CHAPTERS_STORE,
+  getStore,
+  openDb,
+  requestToPromise,
+  transactionDone,
+} from '@/repositories/indexedDb/db'
 import { createIndexedDbStoryRepository } from '@/repositories/indexedDb/storyRepository'
 import type {
   ChapterRepository,
@@ -180,6 +187,45 @@ describe('indexedDbChapterRepository', () => {
         createChapter({ id: 'chapter-second-intro', storyId: story.id }),
       ),
     ).rejects.toThrow('already has an intro chapter')
+  })
+
+  it('chooses the earliest intro chapter when legacy data contains duplicates', async () => {
+    const story = createStory({ id: 'story-1' })
+    const laterIntro = createChapter({
+      id: 'chapter-later',
+      storyId: story.id,
+      createdAt: 100,
+    })
+    const earliestIntro = createChapter({
+      id: 'chapter-earliest',
+      storyId: story.id,
+      createdAt: 50,
+    })
+    const sameTimeLaterById = createChapter({
+      id: 'chapter-z',
+      storyId: story.id,
+      createdAt: 50,
+    })
+    const child = createChapter({
+      id: 'chapter-child',
+      parentChapterId: laterIntro.id,
+      storyId: story.id,
+    })
+
+    await stories.insertStory(story)
+
+    const db = await openDb()
+    const { store, transaction } = getStore(db, CHAPTERS_STORE, 'readwrite')
+    await requestToPromise(store.add(laterIntro))
+    await requestToPromise(store.add(earliestIntro))
+    await requestToPromise(store.add(sameTimeLaterById))
+    await requestToPromise(store.add(child))
+    await transactionDone(transaction)
+    db.close()
+
+    await expect(chapters.findIntroChapterByStoryId(story.id)).resolves.toEqual(
+      earliestIntro,
+    )
   })
 
   it('rejects explicit undefined parent patches when they would create a second intro', async () => {

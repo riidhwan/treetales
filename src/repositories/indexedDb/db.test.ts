@@ -77,11 +77,16 @@ describe('openDb', () => {
     const emptyParent = await requestToPromise(
       typedRequest<Chapter | undefined>(chaptersStore.get('chapter-empty-parent')),
     )
+    const modern = await requestToPromise(
+      typedRequest<Chapter | undefined>(chaptersStore.get('chapter-modern')),
+    )
 
     expect(root?.parentChapterId).toBeNull()
     expect(emptyParent?.parentChapterId).toBeNull()
     expect(child?.parentChapterId).toBe('chapter-root')
+    expect(modern?.parentChapterId).toBe('chapter-root')
     expect('parentChapterIds' in (child ?? {})).toBe(false)
+    expect('parentChapterIds' in (modern ?? {})).toBe(false)
     await expect(transactionDone(transaction)).resolves.toBeUndefined()
 
     db.close()
@@ -238,6 +243,15 @@ function openLegacyDb(): Promise<IDBDatabase> {
         parentChapterIds: undefined,
         createdAt: 30,
         updatedAt: 30,
+      })
+      chaptersStore.add({
+        id: 'chapter-modern',
+        storyId: 'story-1',
+        title: 'Modern',
+        content: 'Continue',
+        parentChapterId: 'chapter-root',
+        createdAt: 40,
+        updatedAt: 40,
       })
     }
 

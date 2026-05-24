@@ -9,6 +9,7 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { ChapterEditor } from '@/components/features/ChapterEditor'
+import { ChapterEditorContent } from '@/components/features/ChapterEditor/ChapterEditorContent'
 import { READER_APPEARANCE_STORAGE_KEY } from '@/config'
 import type { Chapter, Story, UpdateChapterInput } from '@/services/types'
 
@@ -535,5 +536,29 @@ describe('ChapterEditor', () => {
     expect(screen.queryByRole('button', { name: 'Story Editor' })).toBeNull()
     expect(onOpenDashboard).toHaveBeenCalled()
     expect(onGoBack).toHaveBeenCalled()
+  })
+
+  it('uses a generic toolbar context when the story title is unavailable', () => {
+    render(
+      <ChapterEditorContent
+        canSave
+        chapter={createChapter()}
+        content=""
+        hasUnsavedChanges={false}
+        isSaving={false}
+        onContentChange={vi.fn()}
+        onGoBack={vi.fn()}
+        onOpenDashboard={vi.fn()}
+        onSave={vi.fn()}
+        onSaveShortcut={vi.fn()}
+        onTitleChange={vi.fn()}
+        parentChapter={undefined}
+        parentChapterUnavailable={false}
+        status="ready"
+        title="The Gate"
+      />,
+    )
+
+    expect(screen.getByText('Story')).toBeTruthy()
   })
 })
