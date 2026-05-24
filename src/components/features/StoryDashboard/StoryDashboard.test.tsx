@@ -262,7 +262,7 @@ describe('StoryDashboard', () => {
     ).toBeTruthy()
   })
 
-  it('opens the story form from the saved-library create affordance', async () => {
+  it('toggles the story form from the saved-library create affordance', async () => {
     const services = createServices([createStory({ id: 'story-7' })])
 
     render(
@@ -274,11 +274,19 @@ describe('StoryDashboard', () => {
       />,
     )
 
-    fireEvent.click(
-      await screen.findByRole('button', { name: /begin a new story/i }),
-    )
+    const newStoryButton = await screen.findByRole('button', {
+      name: /begin a new story/i,
+    })
+
+    fireEvent.click(newStoryButton)
 
     expect(screen.getByRole('form', { name: /new story/i })).toBeTruthy()
+    expect(newStoryButton.getAttribute('aria-expanded')).toBe('true')
+
+    fireEvent.click(newStoryButton)
+
+    expect(screen.queryByRole('form', { name: /new story/i })).toBeNull()
+    expect(newStoryButton.getAttribute('aria-expanded')).toBe('false')
   })
 
   it('renders empty descriptions', async () => {

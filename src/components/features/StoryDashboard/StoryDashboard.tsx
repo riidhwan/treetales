@@ -98,21 +98,26 @@ export function StoryDashboard({
           </div>
         </header>
 
-        <NewStoryCallToAction
-          isExpanded={isFormOpen}
-          isVisible={sortedStories.length > 0}
-          onOpen={() => setIsFormOpen(true)}
-        />
+        <div className="grid">
+          <NewStoryCallToAction
+            isExpanded={isFormOpen}
+            isVisible={sortedStories.length > 0}
+            onToggle={() =>
+              setIsFormOpen((currentIsFormOpen) => !currentIsFormOpen)
+            }
+          />
 
-        <NewStoryForm
-          canCreate={canCreate}
-          description={description}
-          isOpen={isFormOpen}
-          onCreateStory={createStoryFromForm}
-          onDescriptionChange={setDescription}
-          onTitleChange={setTitle}
-          title={title}
-        />
+          <NewStoryForm
+            canCreate={canCreate}
+            description={description}
+            isConnectedToCallToAction={sortedStories.length > 0}
+            isOpen={isFormOpen}
+            onCreateStory={createStoryFromForm}
+            onDescriptionChange={setDescription}
+            onTitleChange={setTitle}
+            title={title}
+          />
+        </div>
 
         {errorMessage ? (
           <Alert role="alert" variant="error">
