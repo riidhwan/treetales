@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 const MARKER = '<!-- treetales-ci-report -->'
 const MAX_FAILURES = 10
 const ARTIFACTS_DIR = process.env.CI_ARTIFACTS_DIR ?? 'artifacts'
+const COVERAGE_METRICS = ['statements', 'branches', 'functions', 'lines']
 
 const env = process.env
 
@@ -196,6 +197,7 @@ function buildCoverageRows(report) {
     const rows = Object.entries(report)
         .map(([file, metrics]) => ({ file, metrics }))
         .filter(({ file }) => file !== 'total')
+        .filter(({ metrics }) => !hasFullCoverage(metrics))
         .sort((left, right) => left.file.localeCompare(right.file))
         .map(({ file, metrics }) => formatCoverageRow(file, metrics))
 
@@ -203,6 +205,10 @@ function buildCoverageRows(report) {
         formatCoverageRow('Total', report.total),
         ...rows,
     ]
+}
+
+function hasFullCoverage(metrics) {
+    return COVERAGE_METRICS.every((metric) => metrics[metric]?.pct === 100)
 }
 
 function formatCoverageRow(file, metrics) {
