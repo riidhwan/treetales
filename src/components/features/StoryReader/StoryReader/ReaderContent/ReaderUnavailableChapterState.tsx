@@ -1,5 +1,6 @@
 import { BookOpen, PlusCircle } from 'lucide-react'
 
+import { ChapterDocumentShell } from '@/components/domain/ChapterDocumentShell'
 import { Button } from '@/components/ui/Button'
 import { storyReaderCopy } from '@/copy'
 import { useStoryReader } from '@/hooks/useStoryReader'
@@ -19,7 +20,7 @@ export function ReaderUnavailableChapterState({
   story,
 }: Props) {
   return (
-    <section className="mx-auto min-h-[calc(100vh-7rem)] w-full max-w-[52rem] border-border-subtle bg-surface-paper px-4 py-6 shadow-sm sm:min-h-[calc(100vh-10rem)] sm:border sm:px-8 sm:py-8 lg:px-8">
+    <ChapterDocumentShell>
       <p className="text-sm font-semibold uppercase tracking-wide text-action-primary">
         {story.title}
       </p>
@@ -45,6 +46,6 @@ export function ReaderUnavailableChapterState({
           </Button>
         </div>
       )}
-    </section>
+    </ChapterDocumentShell>
   )
 }
