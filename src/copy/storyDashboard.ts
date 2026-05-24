@@ -1,14 +1,14 @@
 export const storyDashboardCopy = {
   actions: {
-    addExampleStory: 'Add Example Story',
     beginNewStory: 'Begin a new story',
     createStory: 'Create Story',
     newStory: 'New Story',
+    openStarterStory: (starterTitle: string) => `Start ${starterTitle}`,
     openStory: (storyTitle: string) => `Open ${storyTitle}`,
   },
   empty: {
-    body: 'Start with an example or open a blank page for a branching tale of your own.',
-    title: 'No stories yet',
+    body: 'Create a blank Story when you are ready to branch out from the starters.',
+    title: 'No Saved Stories yet',
   },
   form: {
     label: 'New story',
@@ -30,4 +30,14 @@ export const storyDashboardCopy = {
     title: 'Begin a new story',
   },
   savedStoriesHeading: 'Saved stories',
+  starterSection: {
+    heading: 'Built-in Example Stories',
+    loadingAction: 'Opening...',
+    primaryIntro:
+      'Choose a starter to create an editable Example Story Copy in your library.',
+    secondaryIntro:
+      'Start another editable copy from a built-in branching Story.',
+    sourcePrefix: 'Source',
+    unavailable: 'That Built-in Example Story is unavailable.',
+  },
 } as const

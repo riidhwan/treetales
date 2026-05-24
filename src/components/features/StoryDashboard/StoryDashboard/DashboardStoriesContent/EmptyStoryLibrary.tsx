@@ -1,4 +1,4 @@
-import { Plus, Sparkles } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 import {
   DASHBOARD_DISPLAY_FONT,
@@ -8,29 +8,16 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { storyDashboardCopy } from '@/copy'
 
 interface Props {
-  readonly isCreatingExample: boolean
-  readonly onCreateExampleStory: () => Promise<unknown>
   readonly onOpenNewStoryForm: () => void
 }
 
 export function EmptyStoryLibrary({
-  isCreatingExample,
-  onCreateExampleStory,
   onOpenNewStoryForm,
 }: Props) {
   return (
     <EmptyState
       actions={(
-        <div className="mx-auto mt-6 grid max-w-md gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(8rem,0.5fr)]">
-          <Button
-            className="min-h-12 rounded-xl"
-            disabled={isCreatingExample}
-            onClick={() => void onCreateExampleStory()}
-            variant="primary"
-          >
-            <Sparkles aria-hidden="true" size={18} />
-            {storyDashboardCopy.actions.addExampleStory}
-          </Button>
+        <div className="mx-auto mt-6 grid max-w-xs gap-3">
           <Button className="min-h-12 rounded-xl" onClick={onOpenNewStoryForm}>
             <Plus aria-hidden="true" size={18} />
             {storyDashboardCopy.actions.newStory}

@@ -8,6 +8,10 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { StoryDashboard } from '@/components/features/StoryDashboard'
+import type {
+  BuiltInExampleStorySummary,
+  CreateOrReuseExampleStoryCopyResult,
+} from '@/services/builtInExampleStories'
 import type { CreateStoryInput, Story } from '@/services/types'
 
 function createStory(overrides: Partial<Story>): Story {
@@ -21,22 +25,84 @@ function createStory(overrides: Partial<Story>): Story {
   }
 }
 
+const starterStories: BuiltInExampleStorySummary[] = [
+  {
+    id: 'bee-man-of-orn',
+    title: 'The Bee-Man of Orn',
+    description:
+      'A wandering bee-keeper follows an old prophecy toward an unexpected identity.',
+    storyProvenance: {
+      sourceWorks: [
+        {
+          title: 'The Bee-Man of Orn',
+          author: 'Frank R. Stockton',
+          publication:
+            'The Bee-Man of Orn and Other Fanciful Tales, first published 1887',
+          publicDomainBasis:
+            'Project Gutenberg eBook #12067, public domain in the USA.',
+        },
+      ],
+      adaptationNote:
+        'Adapted into a branching TreeTales starter from the source premise.',
+      displayText:
+        'Adapted from "The Bee-Man of Orn" by Frank R. Stockton, first published 1887.',
+    },
+  },
+  {
+    id: 'magicians-gifts',
+    title: "The Magicians' Gifts",
+    description:
+      'Three gifts promise power, but each choice asks what kind of wisdom is worth keeping.',
+    storyProvenance: {
+      sourceWorks: [
+        {
+          title: "The Magicians' Gifts",
+          author: 'Juliana Horatia Ewing',
+          publication: 'Old-Fashioned Fairy Tales, first published 1880',
+          publicDomainBasis:
+            'Project Gutenberg eBook #15592, public domain in the USA.',
+        },
+      ],
+      adaptationNote:
+        'Adapted into a branching TreeTales starter from the source premise.',
+      displayText:
+        'Adapted from "The Magicians\' Gifts" by Juliana Horatia Ewing, first published 1880.',
+    },
+  },
+]
+
 function createServices(initialStories: Story[]) {
   let stories = [...initialStories]
 
   return {
-    createExampleStory: vi.fn(() => {
+    createOrReuseExampleStoryCopy: vi.fn((
+      builtInExampleStoryId: string,
+    ): Promise<CreateOrReuseExampleStoryCopyResult> => {
+      const starterStory = starterStories.find(
+        (starter) => starter.id === builtInExampleStoryId,
+      )
+
+      if (!starterStory) {
+        return Promise.resolve({ status: 'not-found' as const })
+      }
+
       const story = createStory({
-        id: 'example-story',
-        title: 'The Lantern Road',
-        description: 'An example branching tale',
+        id: `copy-${builtInExampleStoryId}`,
+        title: starterStory.title,
+        description: starterStory.description,
+        builtInExampleStoryId,
+        storyProvenance: starterStory.storyProvenance,
         createdAt: 400,
         updatedAt: 400,
       })
 
-      stories = [...stories, story]
+      stories = [
+        ...stories.filter((currentStory) => currentStory.id !== story.id),
+        story,
+      ]
 
       return Promise.resolve({
+        status: 'created' as const,
         chapters: [],
         story,
       })
@@ -55,6 +121,7 @@ function createServices(initialStories: Story[]) {
       return Promise.resolve(story)
     }),
     getStories: vi.fn(() => Promise.resolve(stories)),
+    listBuiltInExampleStories: vi.fn(() => starterStories),
   }
 }
 
@@ -75,7 +142,7 @@ describe('StoryDashboard', () => {
     vi.restoreAllMocks()
   })
 
-  it('shows an empty state when no stories exist', async () => {
+  it('shows prominent starter stories when no saved stories exist', async () => {
     const services = createServices([])
 
     render(
@@ -94,7 +161,22 @@ describe('StoryDashboard', () => {
     expect(
       screen.queryByRole('heading', { name: 'Story dashboard' }),
     ).toBeNull()
-    expect(await screen.findByText('No stories yet')).toBeTruthy()
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Built-in Example Stories',
+      }),
+    ).toBeTruthy()
+    expect(
+      screen.getByText(
+        'Choose a starter to create an editable Example Story Copy in your library.',
+      ),
+    ).toBeTruthy()
+    expect(screen.getByText('The Bee-Man of Orn')).toBeTruthy()
+    expect(screen.getByText("The Magicians' Gifts")).toBeTruthy()
+    expect(screen.getByText('No Saved Stories yet')).toBeTruthy()
+    expect(
+      screen.queryByRole('button', { name: /add example story/i }),
+    ).toBeNull()
   })
 
   it('shows a loading state while stories are loading', () => {
@@ -132,7 +214,7 @@ describe('StoryDashboard', () => {
     expect((await screen.findByRole('alert')).textContent).toBe(
       'Could not load stories.',
     )
-    expect(await screen.findByText('No stories yet')).toBeTruthy()
+    expect(await screen.findByText('No Saved Stories yet')).toBeTruthy()
   })
 
   it('lists stories and opens story details from rows', async () => {
@@ -149,6 +231,7 @@ describe('StoryDashboard', () => {
     )
 
     expect(await screen.findByText('The Old Road')).toBeTruthy()
+    expect(screen.getByText('The Bee-Man of Orn')).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: /open the old road/i }))
 
@@ -156,6 +239,27 @@ describe('StoryDashboard', () => {
     expect(screen.queryByRole('button', { name: /read/i })).toBeNull()
     expect(screen.queryByRole('button', { name: /edit/i })).toBeNull()
     expect(screen.queryByRole('button', { name: /delete/i })).toBeNull()
+  })
+
+  it('keeps starter stories below saved stories when saved stories exist', async () => {
+    const services = createServices([createStory({ id: 'story-7' })])
+
+    render(
+      <StoryDashboard
+        onEditStory={vi.fn()}
+        onOpenStory={vi.fn()}
+        onReadStory={vi.fn()}
+        services={services}
+      />,
+    )
+
+    expect(await screen.findByText('The Old Road')).toBeTruthy()
+    expect(screen.getByText('The Bee-Man of Orn')).toBeTruthy()
+    expect(
+      screen.getByText(
+        'Start another editable copy from a built-in branching Story.',
+      ),
+    ).toBeTruthy()
   })
 
   it('opens the story form from the saved-library create affordance', async () => {
@@ -252,7 +356,7 @@ describe('StoryDashboard', () => {
       />,
     )
 
-    await screen.findByText('No stories yet')
+    await screen.findByText('No Saved Stories yet')
     fireEvent.click(screen.getAllByRole('button', { name: /new story/i })[0])
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: 'River Fork' },
@@ -272,7 +376,7 @@ describe('StoryDashboard', () => {
     expect(await screen.findByText('River Fork')).toBeTruthy()
   })
 
-  it('creates the example story and opens the reader', async () => {
+  it('creates an example story copy from a starter and opens the reader', async () => {
     const onReadStory = vi.fn()
     const services = createServices([])
 
@@ -285,22 +389,63 @@ describe('StoryDashboard', () => {
       />,
     )
 
-    await screen.findByText('No stories yet')
+    await screen.findByText('No Saved Stories yet')
     fireEvent.click(
-      screen.getByRole('button', { name: /add example story/i }),
+      screen.getByRole('button', { name: /start the bee-man of orn/i }),
     )
 
     await waitFor(() => {
-      expect(services.createExampleStory).toHaveBeenCalled()
+      expect(services.createOrReuseExampleStoryCopy).toHaveBeenCalledWith(
+        'bee-man-of-orn',
+      )
     })
-    expect(onReadStory).toHaveBeenCalledWith('example-story')
-    expect(await screen.findByText('The Lantern Road')).toBeTruthy()
+    expect(onReadStory).toHaveBeenCalledWith('copy-bee-man-of-orn')
+    expect(await screen.findByText('Saved stories')).toBeTruthy()
+    expect(
+      screen.getAllByText('The Bee-Man of Orn').length,
+    ).toBeGreaterThanOrEqual(2)
   })
 
-  it('shows an example story creation failure message', async () => {
+  it('opens the reader when a starter reuses an existing example story copy', async () => {
+    const onReadStory = vi.fn()
     const services = createServices([])
-    services.createExampleStory.mockRejectedValue(
-      new Error('Could not add example story.'),
+    const reusedStory = createStory({
+      id: 'existing-copy',
+      title: 'The Bee-Man of Orn',
+      description:
+        'A wandering bee-keeper follows an old prophecy toward an unexpected identity.',
+      builtInExampleStoryId: 'bee-man-of-orn',
+      storyProvenance: starterStories[0].storyProvenance,
+    })
+    services.createOrReuseExampleStoryCopy.mockResolvedValue({
+      status: 'reused',
+      chapters: [],
+      story: reusedStory,
+    })
+
+    render(
+      <StoryDashboard
+        onEditStory={vi.fn()}
+        onOpenStory={vi.fn()}
+        onReadStory={onReadStory}
+        services={services}
+      />,
+    )
+
+    await screen.findByText('No Saved Stories yet')
+    fireEvent.click(
+      screen.getByRole('button', { name: /start the bee-man of orn/i }),
+    )
+
+    await waitFor(() => {
+      expect(onReadStory).toHaveBeenCalledWith('existing-copy')
+    })
+  })
+
+  it('shows a starter copy creation failure message', async () => {
+    const services = createServices([])
+    services.createOrReuseExampleStoryCopy.mockRejectedValue(
+      new Error('Could not open starter.'),
     )
 
     render(
@@ -312,14 +457,39 @@ describe('StoryDashboard', () => {
       />,
     )
 
-    await screen.findByText('No stories yet')
+    await screen.findByText('No Saved Stories yet')
     fireEvent.click(
-      screen.getByRole('button', { name: /add example story/i }),
+      screen.getByRole('button', { name: /start the bee-man of orn/i }),
     )
 
     expect((await screen.findByRole('alert')).textContent).toBe(
-      'Could not add example story.',
+      'Could not open starter.',
     )
+  })
+
+  it('shows unavailable state for an unknown starter result', async () => {
+    const services = createServices([])
+    services.createOrReuseExampleStoryCopy.mockResolvedValue({
+      status: 'not-found',
+    })
+
+    render(
+      <StoryDashboard
+        onEditStory={vi.fn()}
+        onOpenStory={vi.fn()}
+        onReadStory={vi.fn()}
+        services={services}
+      />,
+    )
+
+    await screen.findByText('No Saved Stories yet')
+    fireEvent.click(
+      screen.getByRole('button', { name: /start the bee-man of orn/i }),
+    )
+
+    expect(
+      await screen.findByText('That Built-in Example Story is unavailable.'),
+    ).toBeTruthy()
   })
 
   it('disables story creation when the title is blank', async () => {
@@ -334,7 +504,7 @@ describe('StoryDashboard', () => {
       />,
     )
 
-    await screen.findByText('No stories yet')
+    await screen.findByText('No Saved Stories yet')
     fireEvent.click(screen.getAllByRole('button', { name: /new story/i })[0])
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: '   ' },
@@ -363,7 +533,7 @@ describe('StoryDashboard', () => {
       />,
     )
 
-    await screen.findByText('No stories yet')
+    await screen.findByText('No Saved Stories yet')
     fireEvent.click(screen.getAllByRole('button', { name: /new story/i })[0])
     fireEvent.change(screen.getByLabelText('Title'), {
       target: { value: 'River Fork' },

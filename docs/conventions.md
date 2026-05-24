@@ -148,9 +148,10 @@ generation.
 Hooks may import catalog copy for display-facing success, failure, and status
 messages. Services must not import UI copy; they should return data or errors
 that presentation layers turn into user-facing messages. Keep Story, Chapter,
-Character, and Character Property content out of the Copy Catalog, including the
-built-in example Story unless localized seeded content becomes a distinct
-feature.
+Character, Character Property, and Built-in Example Story starter content out
+of the Copy Catalog unless localized seeded content becomes a distinct feature.
+Starter Section labels, statuses, and accessibility copy remain UI copy and
+belong in `src/copy/`.
 
 Tests should import catalog copy when they need to find controls or states.
 Keep literal text expectations only when exact wording is itself the behavior

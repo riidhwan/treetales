@@ -237,9 +237,10 @@ describe('async feature hooks', () => {
   it('ignores stale Story Dashboard loads and no-ops blank story creation', async () => {
     const pendingStories = deferred<Story[]>()
     const services = {
-      createExampleStory: vi.fn(),
+      createOrReuseExampleStoryCopy: vi.fn(),
       createStory: vi.fn(),
       getStories: vi.fn(() => pendingStories.promise),
+      listBuiltInExampleStories: vi.fn(() => []),
     }
     const view = renderHook(() =>
       useStoryDashboard({
@@ -262,9 +263,10 @@ describe('async feature hooks', () => {
         onEditStory: vi.fn(),
         onReadStory: vi.fn(),
         services: {
-          createExampleStory: vi.fn(),
+          createOrReuseExampleStoryCopy: vi.fn(),
           createStory: vi.fn(),
           getStories: vi.fn(() => pendingFailure.promise),
+          listBuiltInExampleStories: vi.fn(() => []),
         },
       }),
     )
@@ -277,9 +279,10 @@ describe('async feature hooks', () => {
     })
 
     const readyServices = {
-      createExampleStory: vi.fn(),
+      createOrReuseExampleStoryCopy: vi.fn(),
       createStory: vi.fn(),
       getStories: vi.fn(() => Promise.resolve([])),
+      listBuiltInExampleStories: vi.fn(() => []),
     }
     const { result } = renderHook(() =>
       useStoryDashboard({
