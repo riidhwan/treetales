@@ -66,6 +66,23 @@ Selected initial Source Works:
   English-language source text. Do not use Mabel Dearmer's illustrations in the
   app unless illustration provenance is reviewed separately.
 
+### The Bee-Man of Orn Adaptation
+
+Source review:
+
+- Source title: "The Bee-Man of Orn"
+- Author: Frank R. Stockton
+- Publication: _The Bee-Man of Orn and Other Fanciful Tales_, first published
+  1887
+- U.S. public-domain basis: Project Gutenberg eBook #12067, public domain in
+  the USA
+- User-visible Story Provenance: `Adapted from "The Bee-Man of Orn" by Frank R. Stockton, first published 1887.`
+
+Adaptation note: adapted into a branching TreeTales starter from the source
+premise. The main path follows the Bee-Man through the domain, mountain, dragon
+rescue, and magical return; alternate branches let him reject the prophecy,
+retreat from danger, or keep his old shape after the rescue.
+
 The foundation implementation may introduce minimal starter fixtures for the
 selected Source Works to prove catalog and service behavior. Full TreeTales
 adaptations belong in the per-story content slices.

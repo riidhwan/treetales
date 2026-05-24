@@ -12,7 +12,42 @@ import {
   listBuiltInExampleStories,
 } from '@/services/builtInExampleStories'
 import { deleteStory, getStories, getStoryById } from '@/services/storyService'
+import type { Chapter } from '@/services/types'
 import { deleteTestDatabase, installFakeIndexedDb } from '@/test/indexedDb'
+
+const BEE_MAN_ADAPTATION_NOTE =
+  'Adapted into a branching TreeTales starter from the source premise. The main path follows the Bee-Man through the domain, mountain, dragon rescue, and magical return; alternate branches let him reject the prophecy, retreat from danger, or keep his old shape after the rescue.'
+
+function createMockUuid(index: number): ReturnType<Crypto['randomUUID']> {
+  return `00000000-0000-4000-8000-${(index + 1).toString().padStart(12, '0')}`
+}
+
+function mockRandomUuids(count: number) {
+  const uuids = Array.from(
+    { length: count },
+    (_, index) => createMockUuid(index),
+  )
+
+  vi.spyOn(crypto, 'randomUUID').mockImplementation(() => {
+    const uuid = uuids.shift()
+
+    if (!uuid) {
+      throw new Error('No mocked UUIDs remaining.')
+    }
+
+    return uuid
+  })
+}
+
+function getChapterByTitle(chapters: readonly Chapter[], title: string) {
+  const chapter = chapters.find((candidate) => candidate.title === title)
+
+  if (!chapter) {
+    throw new Error(`Missing chapter: ${title}`)
+  }
+
+  return chapter
+}
 
 describe('builtInExampleStories', () => {
   beforeAll(() => {
@@ -48,8 +83,7 @@ describe('builtInExampleStories', () => {
               'Project Gutenberg eBook #12067, public domain in the USA.',
           },
         ],
-        adaptationNote:
-          'Adapted into a branching TreeTales starter from the source premise.',
+        adaptationNote: BEE_MAN_ADAPTATION_NOTE,
         displayText:
           'Adapted from "The Bee-Man of Orn" by Frank R. Stockton, first published 1887.',
       },
@@ -67,10 +101,7 @@ describe('builtInExampleStories', () => {
 
   it('creates an editable example story copy with generated local ids and provenance', async () => {
     vi.spyOn(Date, 'now').mockReturnValue(100)
-    vi.spyOn(crypto, 'randomUUID')
-      .mockReturnValueOnce('00000000-0000-4000-8000-000000000001')
-      .mockReturnValueOnce('00000000-0000-4000-8000-000000000002')
-      .mockReturnValueOnce('00000000-0000-4000-8000-000000000003')
+    mockRandomUuids(13)
 
     const result = await createOrReuseExampleStoryCopy('bee-man-of-orn')
 
@@ -97,45 +128,119 @@ describe('builtInExampleStories', () => {
               'Project Gutenberg eBook #12067, public domain in the USA.',
           },
         ],
-        adaptationNote:
-          'Adapted into a branching TreeTales starter from the source premise.',
+        adaptationNote: BEE_MAN_ADAPTATION_NOTE,
         displayText:
           'Adapted from "The Bee-Man of Orn" by Frank R. Stockton, first published 1887.',
       },
       createdAt: 100,
       updatedAt: 100,
     })
-    expect(result.chapters).toEqual([
-      {
-        id: '00000000-0000-4000-8000-000000000002',
-        storyId: result.story.id,
-        title: 'The Bee-Man and the Junior Sorcerer',
-        content:
-          'The Bee-Man keeps his hives outside Orn until a junior sorcerer arrives with news that his shape may not be his own.',
-        parentChapterId: null,
-        createdAt: 100,
-        updatedAt: 100,
-      },
-      {
-        id: '00000000-0000-4000-8000-000000000003',
-        storyId: result.story.id,
-        title: 'Toward the Great Wizard',
-        content:
-          'The road away from Orn promises answers, but every traveler seems to carry a different warning about what a true shape costs.',
-        parentChapterId: '00000000-0000-4000-8000-000000000002',
-        createdAt: 101,
-        updatedAt: 101,
-      },
-    ])
+    expect(result.chapters).toHaveLength(12)
+    expect(result.chapters[0]).toMatchObject({
+      id: '00000000-0000-4000-8000-000000000002',
+      storyId: result.story.id,
+      title: 'The Hive at Orn',
+      parentChapterId: null,
+      createdAt: 100,
+      updatedAt: 100,
+    })
+    expect(result.chapters[0].content).toContain('Junior Sorcerer')
+    expect(result.chapters.at(-1)).toMatchObject({
+      id: '00000000-0000-4000-8000-000000000013',
+      storyId: result.story.id,
+      title: 'Keep the Shape That Helped',
+      createdAt: 111,
+      updatedAt: 111,
+    })
     await expect(getStories()).resolves.toEqual([result.story])
+  })
+
+  it('creates the Bee-Man story with branches and multiple endings', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(100)
+    mockRandomUuids(13)
+
+    const result = await createOrReuseExampleStoryCopy('bee-man-of-orn')
+
+    if (result.status !== 'created') {
+      throw new Error('Expected created result.')
+    }
+
+    const intro = getChapterByTitle(result.chapters, 'The Hive at Orn')
+    const travelingHive = getChapterByTitle(
+      result.chapters,
+      'Carry the Traveling Hive',
+    )
+    const fairDomain = getChapterByTitle(
+      result.chapters,
+      'Search the Fair Domain',
+    )
+    const blackMountain = getChapterByTitle(
+      result.chapters,
+      'Enter the Black Mountain',
+    )
+    const returnChild = getChapterByTitle(
+      result.chapters,
+      'Return the Lost Child',
+    )
+
+    const branchTitlesByParentId = new Map<string, string[]>()
+
+    for (const chapter of result.chapters) {
+      if (!chapter.parentChapterId) {
+        continue
+      }
+
+      branchTitlesByParentId.set(chapter.parentChapterId, [
+        ...(branchTitlesByParentId.get(chapter.parentChapterId) ?? []),
+        chapter.title,
+      ])
+    }
+
+    expect(branchTitlesByParentId.get(intro.id)).toEqual([
+      'Carry the Traveling Hive',
+      'Stay with the Bees',
+    ])
+    expect(branchTitlesByParentId.get(travelingHive.id)).toEqual([
+      'Search the Fair Domain',
+      'Enter the Black Mountain',
+    ])
+    expect(branchTitlesByParentId.get(fairDomain.id)).toEqual([
+      'Follow the Lord of the Domain',
+      'Claim the Palace Shape',
+    ])
+    expect(branchTitlesByParentId.get(blackMountain.id)).toEqual([
+      'Throw the Hive at the Dragon',
+      'Turn Back from the Roar',
+    ])
+    expect(branchTitlesByParentId.get(returnChild.id)).toEqual([
+      'Accept the Fresh Start',
+      'Keep the Shape That Helped',
+    ])
+
+    const parentIds = new Set(
+      result.chapters
+        .map((chapter) => chapter.parentChapterId)
+        .filter((parentChapterId): parentChapterId is string =>
+          Boolean(parentChapterId),
+        ),
+    )
+    const endingTitles = result.chapters
+      .filter((chapter) => !parentIds.has(chapter.id))
+      .map((chapter) => chapter.title)
+
+    expect(endingTitles).toEqual([
+      'Stay with the Bees',
+      'Follow the Lord of the Domain',
+      'Claim the Palace Shape',
+      'Turn Back from the Roar',
+      'Accept the Fresh Start',
+      'Keep the Shape That Helped',
+    ])
   })
 
   it('reuses an existing example story copy without changing timestamps or duplicate chapters', async () => {
     vi.spyOn(Date, 'now').mockReturnValue(100)
-    vi.spyOn(crypto, 'randomUUID')
-      .mockReturnValueOnce('00000000-0000-4000-8000-000000000001')
-      .mockReturnValueOnce('00000000-0000-4000-8000-000000000002')
-      .mockReturnValueOnce('00000000-0000-4000-8000-000000000003')
+    mockRandomUuids(13)
 
     const created = await createOrReuseExampleStoryCopy('bee-man-of-orn')
     const reused = await createOrReuseExampleStoryCopy('bee-man-of-orn')
@@ -156,13 +261,7 @@ describe('builtInExampleStories', () => {
   it('creates a fresh copy from the catalog after deleting the previous copy', async () => {
     let now = 100
     vi.spyOn(Date, 'now').mockImplementation(() => now)
-    vi.spyOn(crypto, 'randomUUID')
-      .mockReturnValueOnce('00000000-0000-4000-8000-000000000001')
-      .mockReturnValueOnce('00000000-0000-4000-8000-000000000002')
-      .mockReturnValueOnce('00000000-0000-4000-8000-000000000003')
-      .mockReturnValueOnce('00000000-0000-4000-8000-000000000004')
-      .mockReturnValueOnce('00000000-0000-4000-8000-000000000005')
-      .mockReturnValueOnce('00000000-0000-4000-8000-000000000006')
+    mockRandomUuids(26)
     const created = await createOrReuseExampleStoryCopy('bee-man-of-orn')
 
     if (created.status !== 'created') {
@@ -180,7 +279,7 @@ describe('builtInExampleStories', () => {
       throw new Error('Expected recreated result.')
     }
 
-    expect(recreated.story.id).toBe('00000000-0000-4000-8000-000000000004')
+    expect(recreated.story.id).toBe('00000000-0000-4000-8000-000000000014')
     expect(recreated.story.createdAt).toBe(500)
     expect(recreated.story.builtInExampleStoryId).toBe('bee-man-of-orn')
     await expect(getStoryById(created.story.id)).resolves.toBeUndefined()
