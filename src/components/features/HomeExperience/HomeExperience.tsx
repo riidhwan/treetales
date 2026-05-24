@@ -1,6 +1,7 @@
-import { HomeExperienceContent } from '@/components/features/HomeExperience/HomeExperienceContent'
 import { useMobileInstallChoice } from '@/hooks/useMobileInstallChoice'
 import type { StoryDashboardServices } from '@/hooks/useStoryDashboard'
+
+import { HomeExperienceContent } from './HomeExperience/HomeExperienceContent'
 
 interface Props {
   readonly onEditStory: (storyId: string) => void

@@ -1,8 +1,8 @@
 import { Alert } from '@/components/ui/Alert'
 import type { Story } from '@/services/types'
 
-import { EmptyStoryLibrary } from '@/components/features/StoryDashboard/EmptyStoryLibrary'
-import { SavedStoryList } from '@/components/features/StoryDashboard/SavedStoryList'
+import { EmptyStoryLibrary } from './DashboardStoriesContent/EmptyStoryLibrary'
+import { SavedStoryList } from './DashboardStoriesContent/SavedStoryList'
 
 interface Props {
   readonly isCreatingExample: boolean

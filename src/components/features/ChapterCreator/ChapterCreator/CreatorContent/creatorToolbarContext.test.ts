@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { getToolbarContext } from '@/components/features/ChapterCreator/creatorToolbarContext'
+import { getToolbarContext } from './creatorToolbarContext'
 
 describe('getToolbarContext', () => {
   it('uses a generic story title when the story title is unavailable', () => {

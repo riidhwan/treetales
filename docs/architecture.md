@@ -85,6 +85,14 @@ missing, error, empty, unavailable, and ready states, into named component files
 inside the owning module instead of building those branches inline in the
 exported feature component.
 
+Feature modules use nested private directories for subcomponents whose props or
+lifecycle are owned by a specific feature-local parent component. The parent
+file stays in its owning directory, the child directory uses the parent
+component name, and nested barrels are avoided unless an internal workflow grows
+large enough to need one. Route-level feature children sit under the exported
+feature component's same-named directory. These directories are ownership
+boundaries inside one feature module, not new public import boundaries.
+
 Shared feature-layer workflows live under
 `src/components/features/shared/<PascalCaseModule>/` so their shared ownership
 is visible in the path. These modules still belong to the feature layer and must

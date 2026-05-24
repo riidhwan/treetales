@@ -1,6 +1,7 @@
-import { CharacterCard } from '@/components/features/StoryDetail/CharacterCard'
 import { Alert } from '@/components/ui/Alert'
 import type { useStoryCharacters } from '@/hooks/useStoryCharacters'
+
+import { CharacterCard } from './CharacterCard'
 
 type CharacterController = ReturnType<typeof useStoryCharacters>
 

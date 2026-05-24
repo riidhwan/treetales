@@ -1,9 +1,6 @@
 import { ChevronLeft } from 'lucide-react'
 import { useId, useState } from 'react'
 
-import { StoryDeleteDialog } from '@/components/features/StoryDetail/StoryDeleteDialog'
-import { StoryDetailContent } from '@/components/features/StoryDetail/StoryDetailContent'
-import { StoryDetailHeader } from '@/components/features/StoryDetail/StoryDetailHeader'
 import {
   type StoryCharacterServices,
   useStoryCharacters,
@@ -12,6 +9,10 @@ import {
   type StoryDetailServices,
   useStoryDetail,
 } from '@/hooks/useStoryDetail'
+
+import { StoryDeleteDialog } from './StoryDetail/StoryDeleteDialog'
+import { StoryDetailContent } from './StoryDetail/StoryDetailContent'
+import { StoryDetailHeader } from './StoryDetail/StoryDetailHeader'
 
 interface Props {
   readonly characterServices?: StoryCharacterServices

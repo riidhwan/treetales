@@ -2,14 +2,15 @@ import {
   type StoryDashboardServices,
   useStoryDashboard,
 } from '@/hooks/useStoryDashboard'
+import { Alert } from '@/components/ui/Alert'
+
 import {
   DASHBOARD_DISPLAY_FONT,
   DASHBOARD_ITALIC_FONT,
-} from '@/components/features/StoryDashboard/dashboardDisplay'
-import { DashboardStoriesContent } from '@/components/features/StoryDashboard/DashboardStoriesContent'
-import { NewStoryCallToAction } from '@/components/features/StoryDashboard/NewStoryCallToAction'
-import { NewStoryForm } from '@/components/features/StoryDashboard/NewStoryForm'
-import { Alert } from '@/components/ui/Alert'
+} from './StoryDashboard/dashboardDisplay'
+import { DashboardStoriesContent } from './StoryDashboard/DashboardStoriesContent'
+import { NewStoryCallToAction } from './StoryDashboard/NewStoryCallToAction'
+import { NewStoryForm } from './StoryDashboard/NewStoryForm'
 
 interface Props {
   readonly onEditStory: (storyId: string) => void

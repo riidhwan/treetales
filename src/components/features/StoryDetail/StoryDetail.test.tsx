@@ -9,7 +9,7 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { StoryDetail } from '@/components/features/StoryDetail'
-import { StoryDetailContent } from '@/components/features/StoryDetail/StoryDetailContent'
+import { StoryDetailContent } from '@/components/features/StoryDetail/StoryDetail/StoryDetailContent'
 import type {
   StoryCharacterServices,
   useStoryCharacters,

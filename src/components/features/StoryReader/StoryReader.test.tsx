@@ -9,7 +9,7 @@ import { useState } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { StoryReader } from '@/components/features/StoryReader'
-import { ReaderContent } from '@/components/features/StoryReader/ReaderContent'
+import { ReaderContent } from '@/components/features/StoryReader/StoryReader/ReaderContent'
 import { READER_APPEARANCE_STORAGE_KEY } from '@/config'
 import type { StoryReaderServices } from '@/hooks/useStoryReader'
 import type { Chapter, Story } from '@/services/types'

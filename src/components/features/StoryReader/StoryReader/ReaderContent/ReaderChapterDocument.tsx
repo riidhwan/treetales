@@ -1,8 +1,9 @@
 import type { CSSProperties } from 'react'
 
-import { NextChapterControls } from '@/components/features/StoryReader/NextChapterControls'
 import { MarkdownContent } from '@/components/ui/MarkdownContent'
 import type { Chapter, Story } from '@/services/types'
+
+import { NextChapterControls } from './ReaderChapterDocument/NextChapterControls'
 
 interface Props {
   readonly currentChapter: Chapter

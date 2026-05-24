@@ -2,7 +2,7 @@ import { Plus, Sparkles } from 'lucide-react'
 
 import {
   DASHBOARD_DISPLAY_FONT,
-} from '@/components/features/StoryDashboard/dashboardDisplay'
+} from '@/components/features/StoryDashboard/StoryDashboard/dashboardDisplay'
 import { Button } from '@/components/ui/Button'
 
 interface Props {

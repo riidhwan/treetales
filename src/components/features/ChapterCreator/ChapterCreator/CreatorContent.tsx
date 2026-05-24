@@ -1,14 +1,15 @@
 import { Save } from 'lucide-react'
 import type { SyntheticEvent } from 'react'
 
-import { ChapterCreationUnavailable } from '@/components/features/ChapterCreator/ChapterCreationUnavailable'
-import { getToolbarContext } from '@/components/features/ChapterCreator/creatorToolbarContext'
 import {
   ChapterWritingUnavailableLayout,
   ChapterWritingWorkflow,
 } from '@/components/features/shared/ChapterWriting'
 import { Alert } from '@/components/ui/Alert'
 import { useChapterCreator } from '@/hooks/useChapterCreator'
+
+import { ChapterCreationUnavailable } from './CreatorContent/ChapterCreationUnavailable'
+import { getToolbarContext } from './CreatorContent/creatorToolbarContext'
 
 interface Props {
   readonly canCreate: boolean

@@ -175,6 +175,45 @@ Feature-owned tests, helpers, constants, templates, and private subcomponents
 stay inside the owning feature module. Do not leave feature-owned files flat
 under `src/components/features/`.
 
+Private subcomponents may live in nested directories when one feature-local
+component clearly owns their props or lifecycle. Name the nested directory after
+the owning parent component, keep the parent file in its owning directory, and
+place the private child files under that same-named directory:
+
+```text
+src/components/features/StoryDetail/
+├── StoryDetail.tsx
+├── StoryDetail/
+│   ├── StoryDetailHeader.tsx
+│   ├── StoryDetailContent.tsx
+│   └── StoryDetailContent/
+│       ├── CharacterSection.tsx
+│       └── CharacterSection/
+│           └── CharacterListContent.tsx
+└── index.ts
+```
+
+Use this for private sub-sections or workflows, not as a general grouping
+mechanism. Route-level feature children are private to the exported feature
+component unless they are intentionally imported outside that feature module, so
+they belong under the exported feature component's same-named directory.
+
+Nested private directories do not get an `index.ts` by default. Import downward
+from the owning parent with a relative path:
+
+```typescript
+import { CharacterListContent } from './CharacterSection/CharacterListContent'
+```
+
+Do not use parent traversal such as `../CharacterCard` from a nested child.
+When a nested child imports outside its current directory or ownership subtree,
+use the `@/*` path alias. Keep child component `Props` interfaces private; if a
+props shape needs to be imported by another file, reconsider whether the child
+is still purely private to the parent section. Tests for directly tested nested
+children live beside the child file; broader feature tests may import a private
+component by its direct file path when they intentionally exercise that internal
+presentation boundary.
+
 Shared feature-layer workflows that are intentionally reused by multiple
 feature modules live under `src/components/features/shared/<PascalCaseModule>/`.
 This path is reserved for named TreeTales workflows, not miscellaneous shared

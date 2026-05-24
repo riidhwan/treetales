@@ -1,11 +1,12 @@
 import { Plus } from 'lucide-react'
 
-import { CharacterConfirmationDialog } from '@/components/features/StoryDetail/CharacterConfirmationDialog'
-import { CharacterDialogSlot } from '@/components/features/StoryDetail/CharacterDialogSlot'
-import { CharacterListContent } from '@/components/features/StoryDetail/CharacterListContent'
 import type { useStoryCharacters } from '@/hooks/useStoryCharacters'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
+
+import { CharacterConfirmationDialog } from './CharacterSection/CharacterConfirmationDialog'
+import { CharacterDialogSlot } from './CharacterSection/CharacterDialogSlot'
+import { CharacterListContent } from './CharacterSection/CharacterListContent'
 
 type CharacterController = ReturnType<typeof useStoryCharacters>
 

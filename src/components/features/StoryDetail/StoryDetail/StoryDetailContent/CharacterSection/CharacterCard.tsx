@@ -1,6 +1,7 @@
-import { MANAGEMENT_DISPLAY_FONT } from '@/components/features/StoryDetail/constants'
-import { formatGender } from '@/components/features/StoryDetail/characterDisplay'
 import type { Character } from '@/services/types'
+
+import { MANAGEMENT_DISPLAY_FONT } from '@/components/features/StoryDetail/StoryDetail/constants'
+import { formatGender } from './characterDisplay'
 
 interface Props {
   readonly character: Character

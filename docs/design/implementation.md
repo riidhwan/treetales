@@ -93,6 +93,13 @@ module. Shared feature-layer workflows use
 `src/components/features/shared/<PascalCaseModule>/` to make cross-feature
 ownership visible.
 
+Feature-owned private subcomponents may be nested under a directory named after
+their owning parent component when that parent owns their props or lifecycle.
+Keep the parent file in its owning directory, put route-level feature children
+under the exported feature component's same-named directory, avoid nested
+`index.ts` files by default, and use the nested path to communicate ownership
+rather than to create a new public module.
+
 When a feature has materially different visual states, keep the exported
 feature component focused on hook wiring and composition. Put loading, missing,
 error, empty, unavailable, and ready presentations into named component files
