@@ -3,8 +3,8 @@ import type { SyntheticEvent } from 'react'
 import { useStoryEditor } from '@/hooks/useStoryEditor'
 import { Alert } from '@/components/ui/Alert'
 
-import { StoryEditorReadyState } from '@/components/features/StoryEditor/StoryEditorReadyState'
-import { StoryEditorUnavailableState } from '@/components/features/StoryEditor/StoryEditorUnavailableState'
+import { StoryEditorReadyState } from './StoryEditorContent/StoryEditorReadyState'
+import { StoryEditorUnavailableState } from './StoryEditorContent/StoryEditorUnavailableState'
 
 interface Props {
   readonly canSave: boolean

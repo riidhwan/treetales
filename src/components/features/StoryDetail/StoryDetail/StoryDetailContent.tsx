@@ -1,11 +1,12 @@
-import { CharacterSection } from '@/components/features/StoryDetail/CharacterSection'
-import { MissingStoryDetail } from '@/components/features/StoryDetail/MissingStoryDetail'
-import { StoryMaintenanceSection } from '@/components/features/StoryDetail/StoryMaintenanceSection'
-import { StorySummary } from '@/components/features/StoryDetail/StorySummary'
 import { Alert } from '@/components/ui/Alert'
 import type { useStoryCharacters } from '@/hooks/useStoryCharacters'
 import { useStoryDetail } from '@/hooks/useStoryDetail'
 import type { Story } from '@/services/types'
+
+import { CharacterSection } from './StoryDetailContent/CharacterSection'
+import { MissingStoryDetail } from './StoryDetailContent/MissingStoryDetail'
+import { StoryMaintenanceSection } from './StoryDetailContent/StoryMaintenanceSection'
+import { StorySummary } from './StoryDetailContent/StorySummary'
 
 interface Props {
   readonly characterDialog: ReturnType<typeof useStoryCharacters>

@@ -9,7 +9,7 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { ChapterEditor } from '@/components/features/ChapterEditor'
-import { ChapterEditorContent } from '@/components/features/ChapterEditor/ChapterEditorContent'
+import { ChapterEditorContent } from '@/components/features/ChapterEditor/ChapterEditor/ChapterEditorContent'
 import { READER_APPEARANCE_STORAGE_KEY } from '@/config'
 import type { Chapter, Story, UpdateChapterInput } from '@/services/types'
 

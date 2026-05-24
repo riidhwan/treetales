@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import type { SyntheticEvent } from 'react'
 
-import { CreatorContent } from '@/components/features/ChapterCreator/CreatorContent'
 import {
   type ChapterCreatorServices,
   useChapterCreator,
 } from '@/hooks/useChapterCreator'
+
+import { CreatorContent } from './ChapterCreator/CreatorContent'
 
 interface Props {
   readonly onChapterCreated: (storyId: string, chapterId: string) => void

@@ -7,7 +7,7 @@ import {
 } from '@/components/features/shared/ChapterWriting'
 import { useChapterEditor } from '@/hooks/useChapterEditor'
 
-import { ChapterEditorUnavailableState } from '@/components/features/ChapterEditor/ChapterEditorUnavailableState'
+import { ChapterEditorUnavailableState } from './ChapterEditorContent/ChapterEditorUnavailableState'
 
 interface Props {
   readonly canSave: boolean

@@ -1,10 +1,11 @@
 import { Download, ExternalLink } from 'lucide-react'
 
+import { Button } from '@/components/ui/Button'
+
 import {
   InstallStatusMessages,
   type InstallStatus,
-} from '@/components/features/MobileInstallChoice/InstallStatusMessages'
-import { Button } from '@/components/ui/Button'
+} from './MobileInstallChoice/InstallStatusMessages'
 
 interface Props {
   readonly canInstallNatively: boolean

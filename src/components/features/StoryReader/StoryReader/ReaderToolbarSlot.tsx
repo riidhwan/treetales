@@ -1,7 +1,8 @@
 import type { ReaderFontId } from '@/config'
-import { ReaderToolbar } from '@/components/features/StoryReader/ReaderToolbar'
 import { useReaderAppearance } from '@/hooks/useReaderAppearance'
 import type { Chapter, Story } from '@/services/types'
+
+import { ReaderToolbar } from './ReaderToolbarSlot/ReaderToolbar'
 
 interface Props {
   readonly canDecreaseFontSize: boolean

@@ -1,5 +1,6 @@
-import { formatGender } from '@/components/features/StoryDetail/characterDisplay'
 import type { Character } from '@/services/types'
+
+import { formatGender } from './characterDisplay'
 
 interface Props {
   readonly character: Character

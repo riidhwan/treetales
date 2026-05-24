@@ -1,7 +1,8 @@
 import { BookOpen, Edit3 } from 'lucide-react'
 
-import { MANAGEMENT_DISPLAY_FONT } from '@/components/features/StoryDetail/constants'
 import { Button } from '@/components/ui/Button'
+
+import { MANAGEMENT_DISPLAY_FONT } from './constants'
 import type { Story } from '@/services/types'
 
 interface Props {

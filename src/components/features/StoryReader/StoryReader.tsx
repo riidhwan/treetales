@@ -1,10 +1,11 @@
-import { ReaderContent } from '@/components/features/StoryReader/ReaderContent'
-import { ReaderToolbarSlot } from '@/components/features/StoryReader/ReaderToolbarSlot'
 import {
   type StoryReaderServices,
   useStoryReader,
 } from '@/hooks/useStoryReader'
 import { useReaderAppearance } from '@/hooks/useReaderAppearance'
+
+import { ReaderContent } from './StoryReader/ReaderContent'
+import { ReaderToolbarSlot } from './StoryReader/ReaderToolbarSlot'
 
 interface Props {
   readonly chapterId?: string

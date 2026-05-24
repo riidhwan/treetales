@@ -1,5 +1,6 @@
-import { CharacterDialog } from '@/components/features/StoryDetail/CharacterDialog'
 import type { useStoryCharacters } from '@/hooks/useStoryCharacters'
+
+import { CharacterDialog } from './CharacterDialog'
 
 type CharacterController = ReturnType<typeof useStoryCharacters>
 

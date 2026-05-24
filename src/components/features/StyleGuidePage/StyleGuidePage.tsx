@@ -1,4 +1,4 @@
-import { StyleGuideContent } from '@/components/features/StyleGuidePage/StyleGuideContent'
+import { StyleGuideContent } from './StyleGuidePage/StyleGuideContent'
 
 interface Props {
   readonly isEnabled?: boolean

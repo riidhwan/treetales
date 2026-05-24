@@ -4,7 +4,7 @@ import {
   DASHBOARD_DISPLAY_FONT,
   DASHBOARD_ITALIC_FONT,
   getStoryRowAccentClass,
-} from '@/components/features/StoryDashboard/dashboardDisplay'
+} from '@/components/features/StoryDashboard/StoryDashboard/dashboardDisplay'
 import type { Story } from '@/services/types'
 
 interface Props {

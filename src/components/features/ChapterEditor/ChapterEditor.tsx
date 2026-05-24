@@ -4,7 +4,8 @@ import {
   type ChapterEditorServices,
   useChapterEditor,
 } from '@/hooks/useChapterEditor'
-import { ChapterEditorContent } from '@/components/features/ChapterEditor/ChapterEditorContent'
+
+import { ChapterEditorContent } from './ChapterEditor/ChapterEditorContent'
 
 interface Props {
   readonly chapterId: string

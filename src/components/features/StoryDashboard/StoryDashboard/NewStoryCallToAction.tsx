@@ -3,7 +3,7 @@ import { ArrowRight, Plus } from 'lucide-react'
 import {
   DASHBOARD_DISPLAY_FONT,
   DASHBOARD_ITALIC_FONT,
-} from '@/components/features/StoryDashboard/dashboardDisplay'
+} from './dashboardDisplay'
 
 interface Props {
   readonly isExpanded: boolean

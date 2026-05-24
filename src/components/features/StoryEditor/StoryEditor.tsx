@@ -5,7 +5,8 @@ import {
   type StoryEditorServices,
   useStoryEditor,
 } from '@/hooks/useStoryEditor'
-import { StoryEditorContent } from '@/components/features/StoryEditor/StoryEditorContent'
+
+import { StoryEditorContent } from './StoryEditor/StoryEditorContent'
 
 interface Props {
   readonly onOpenDashboard: () => void

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { ChapterCreationUnavailable } from '@/components/features/ChapterCreator/ChapterCreationUnavailable'
+import { ChapterCreationUnavailable } from './ChapterCreationUnavailable'
 
 describe('ChapterCreationUnavailable', () => {
   it('uses a fallback title when the existing intro chapter title is unavailable', () => {

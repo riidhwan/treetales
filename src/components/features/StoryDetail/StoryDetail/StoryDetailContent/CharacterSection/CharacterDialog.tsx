@@ -1,8 +1,5 @@
 import { Edit3, Save, Trash2 } from 'lucide-react'
 
-import { CharacterDetails } from '@/components/features/StoryDetail/CharacterDetails'
-import { CharacterForm } from '@/components/features/StoryDetail/CharacterForm'
-import { getCharacterDialogTitle } from '@/components/features/StoryDetail/characterDisplay'
 import type {
   CharacterDialogState,
   CharacterFormDraft,
@@ -11,6 +8,10 @@ import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
 import type { Character, CharacterGender } from '@/services/types'
+
+import { CharacterDetails } from './CharacterDetails'
+import { CharacterForm } from './CharacterForm'
+import { getCharacterDialogTitle } from './characterDisplay'
 
 interface Props {
   readonly dialogState: Exclude<CharacterDialogState, { mode: 'closed' }>

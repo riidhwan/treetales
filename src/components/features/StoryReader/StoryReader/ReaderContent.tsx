@@ -1,12 +1,13 @@
 import type { CSSProperties } from 'react'
 
-import { ReaderChapterDocument } from '@/components/features/StoryReader/ReaderChapterDocument'
-import { ReaderErrorState } from '@/components/features/StoryReader/ReaderErrorState'
-import { ReaderLoadingState } from '@/components/features/StoryReader/ReaderLoadingState'
-import { ReaderMissingStoryState } from '@/components/features/StoryReader/ReaderMissingStoryState'
-import { ReaderUnavailableChapterState } from '@/components/features/StoryReader/ReaderUnavailableChapterState'
 import { useStoryReader } from '@/hooks/useStoryReader'
 import type { Chapter, Story } from '@/services/types'
+
+import { ReaderChapterDocument } from './ReaderContent/ReaderChapterDocument'
+import { ReaderErrorState } from './ReaderContent/ReaderErrorState'
+import { ReaderLoadingState } from './ReaderContent/ReaderLoadingState'
+import { ReaderMissingStoryState } from './ReaderContent/ReaderMissingStoryState'
+import { ReaderUnavailableChapterState } from './ReaderContent/ReaderUnavailableChapterState'
 
 interface Props {
   readonly currentChapter?: Chapter
