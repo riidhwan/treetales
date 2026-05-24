@@ -28,18 +28,20 @@ export function StoryDashboard({
 }: Props) {
   const {
     canCreate,
-    createExampleStoryFromTemplate,
+    createOrReuseStarterStory,
     createStoryFromForm,
+    creatingStarterId,
     description,
     errorMessage,
-    isCreatingExample,
     isFormOpen,
     isLoading,
     setDescription,
     setIsFormOpen,
     setTitle,
     sortedStories,
+    starterStories,
     title,
+    unavailableStarterId,
   } = useStoryDashboard({
     onEditStory,
     onReadStory,
@@ -119,12 +121,14 @@ export function StoryDashboard({
         ) : null}
 
         <DashboardStoriesContent
-          isCreatingExample={isCreatingExample}
+          creatingStarterId={creatingStarterId}
           isLoading={isLoading}
-          onCreateExampleStory={createExampleStoryFromTemplate}
           onOpenNewStoryForm={() => setIsFormOpen(true)}
           onOpenStory={onOpenStory}
+          onOpenStarterStory={createOrReuseStarterStory}
+          starterStories={starterStories}
           stories={sortedStories}
+          unavailableStarterId={unavailableStarterId}
         />
       </section>
     </main>

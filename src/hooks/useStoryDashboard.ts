@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { getErrorMessage } from '@/lib/errors'
 import {
-  createExampleStory,
-  type ExampleStory,
-} from '@/services/exampleStory'
+  createOrReuseExampleStoryCopy,
+  listBuiltInExampleStories,
+  type BuiltInExampleStorySummary,
+  type CreateOrReuseExampleStoryCopyResult,
+} from '@/services/builtInExampleStories'
 import {
   createStory,
   getStories,
@@ -12,15 +14,19 @@ import {
 import type { CreateStoryInput, Story } from '@/services/types'
 
 export interface StoryDashboardServices {
-  readonly createExampleStory: () => Promise<ExampleStory>
+  readonly createOrReuseExampleStoryCopy: (
+    builtInExampleStoryId: string,
+  ) => Promise<CreateOrReuseExampleStoryCopyResult>
   readonly createStory: (input: CreateStoryInput) => Promise<Story>
   readonly getStories: () => Promise<Story[]>
+  readonly listBuiltInExampleStories: () => BuiltInExampleStorySummary[]
 }
 
 export const DEFAULT_STORY_DASHBOARD_SERVICES: StoryDashboardServices = {
-  createExampleStory,
+  createOrReuseExampleStoryCopy,
   createStory,
   getStories,
+  listBuiltInExampleStories,
 }
 
 interface UseStoryDashboardOptions {
@@ -35,11 +41,15 @@ export function useStoryDashboard({
   services = DEFAULT_STORY_DASHBOARD_SERVICES,
 }: UseStoryDashboardOptions) {
   const [stories, setStories] = useState<Story[]>([])
+  const [starterStories, setStarterStories] = useState<
+    BuiltInExampleStorySummary[]
+  >([])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
-  const [isCreatingExample, setIsCreatingExample] = useState(false)
+  const [creatingStarterId, setCreatingStarterId] = useState<string>()
+  const [unavailableStarterId, setUnavailableStarterId] = useState<string>()
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | undefined>()
 
@@ -66,9 +76,11 @@ export function useStoryDashboard({
       setErrorMessage(undefined)
 
       try {
+        const loadedStarterStories = services.listBuiltInExampleStories()
         const loadedStories = await services.getStories()
 
         if (isCurrent) {
+          setStarterStories(loadedStarterStories)
           setStories(loadedStories)
         }
       } catch (error) {
@@ -118,38 +130,48 @@ export function useStoryDashboard({
     }
   }
 
-  async function createExampleStoryFromTemplate() {
-    setIsCreatingExample(true)
+  async function createOrReuseStarterStory(builtInExampleStoryId: string) {
+    setCreatingStarterId(builtInExampleStoryId)
+    setUnavailableStarterId(undefined)
     setErrorMessage(undefined)
 
     try {
-      const exampleStory = await services.createExampleStory()
+      const result = await services.createOrReuseExampleStoryCopy(
+        builtInExampleStoryId,
+      )
+
+      if (result.status === 'not-found') {
+        setUnavailableStarterId(builtInExampleStoryId)
+        return
+      }
 
       setStories((currentStories) => [
-        ...currentStories.filter((story) => story.id !== exampleStory.story.id),
-        exampleStory.story,
+        ...currentStories.filter((story) => story.id !== result.story.id),
+        result.story,
       ])
-      onReadStory(exampleStory.story.id)
+      onReadStory(result.story.id)
     } catch (error) {
       setErrorMessage(getErrorMessage(error))
     } finally {
-      setIsCreatingExample(false)
+      setCreatingStarterId(undefined)
     }
   }
 
   return {
     canCreate,
-    createExampleStoryFromTemplate,
+    createOrReuseStarterStory,
     createStoryFromForm,
+    creatingStarterId,
     description,
     errorMessage,
-    isCreatingExample,
     isFormOpen,
     isLoading,
     setDescription,
     setIsFormOpen,
     setTitle,
     sortedStories,
+    starterStories,
     title,
+    unavailableStarterId,
   }
 }

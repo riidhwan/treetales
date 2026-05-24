@@ -235,7 +235,7 @@ imports are migrated to the correctly named service modules.
 | `chapterDb.ts` | Temporary compatibility re-export for existing Chapter imports |
 | `characterService.ts` | Active Character service API |
 | `builtInExampleStories.ts` | Lists Built-in Example Story starters and creates or reuses Example Story Copies |
-| `exampleStory.ts` | Legacy single-example Story creation/reuse kept until the Starter Section replaces the old flow |
+| `exampleStory.ts` | Legacy single-example Story creation/reuse retained outside the dashboard while remaining compatibility tests exist |
 | `types.ts` | Shared service data shapes and create/update input contracts |
 
 Story, chapter, and character services create records with `crypto.randomUUID()` ids and
@@ -260,12 +260,10 @@ The Built-in Example Story service exposes starter summaries separately from
 copy creation. Starter summaries let Library Mode render the Starter Section
 without importing or previewing seeded chapter fixtures, while create-or-reuse
 operations own turning one selected starter into an editable Example Story Copy.
-The starter catalog foundation may coexist with the previous single example
-story flow until the Library Mode Starter Section integration replaces that
-user-facing path.
-The new starter catalog APIs can be added beside the existing
-`createExampleStory()` compatibility export until the Starter Section UI slice
-removes the old single-example flow.
+The Library Mode Starter Section uses the starter catalog APIs instead of the
+previous single-example Story flow. The old `createExampleStory()` compatibility
+export may remain outside dashboard wiring until its service tests and any
+remaining compatibility needs are retired.
 Example Story Copies remain Saved Stories in normal Story queries; Built-in
 Example Story starters are the separate catalog records shown by the Starter
 Section.

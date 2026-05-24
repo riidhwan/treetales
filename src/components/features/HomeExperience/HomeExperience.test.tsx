@@ -31,9 +31,10 @@ interface TestBeforeInstallPromptEvent extends Event {
 
 function createServices(): StoryDashboardServices {
   return {
-    createExampleStory: vi.fn(),
+    createOrReuseExampleStoryCopy: vi.fn(),
     createStory: vi.fn(),
     getStories: vi.fn(() => Promise.resolve([])),
+    listBuiltInExampleStories: vi.fn(() => []),
   }
 }
 
