@@ -3,6 +3,8 @@ import sonarjs from 'eslint-plugin-sonarjs'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
+import { localRulesPlugin } from './eslint-local-rules.js'
+
 export default tseslint.config(
   {
     ignores: [
@@ -37,6 +39,16 @@ export default tseslint.config(
         ...globals.browser,
         ...globals.vitest,
       },
+    },
+  },
+  {
+    files: ['src/components/features/**/*.tsx'],
+    ignores: ['src/components/features/**/*.test.tsx'],
+    plugins: {
+      local: localRulesPlugin,
+    },
+    rules: {
+      'local/feature-component-props': 'error',
     },
   },
   {

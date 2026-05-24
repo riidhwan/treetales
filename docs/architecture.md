@@ -76,17 +76,26 @@ A component that calls feature hooks, owns workflows, or coordinates services
 belongs in `features/`. Generic HTML wrappers and styling primitives belong in
 `ui/`.
 
-Large feature composites may split feature-owned sections, cards, dialogs,
-forms, and helpers into a local subfolder under `components/features/` when
-those pieces remain owned by that feature. This kind of split is for local
-maintainability only; promote a component to `domain/` or `ui/` only when it
-matches those layer rules.
+Each route-composed feature now owns a PascalCase module directory under
+`components/features/`, even when the feature has only one component file. The
+module `index.ts` is the public import boundary; feature-owned tests, helpers,
+constants, templates, and private subcomponents stay inside the module.
+Feature modules should split materially different UI states, such as loading,
+missing, error, empty, unavailable, and ready states, into named component files
+inside the owning module instead of building those branches inline in the
+exported feature component.
 
-`src/components/features/chapterWriting/` owns the shared Chapter authoring
-workflow composition used by Chapter creation and Chapter editing. It wires
-shared writing-surface presentation, Reader Appearance, Prompt Builder toolbar
-access, guarded navigation, and unavailable-state presentation while leaving the
-creation and editing hooks separate.
+Shared feature-layer workflows live under
+`src/components/features/shared/<PascalCaseModule>/` so their shared ownership
+is visible in the path. These modules still belong to the feature layer and must
+own a named TreeTales workflow rather than becoming miscellaneous shared helper
+folders.
+
+`src/components/features/shared/ChapterWriting/` owns the shared Chapter
+authoring workflow composition used by Chapter creation and Chapter editing. It
+wires shared writing-surface presentation, Reader Appearance, Prompt Builder
+toolbar access, guarded navigation, and unavailable-state presentation while
+leaving the creation and editing hooks separate.
 
 Feature-owned Prompt Builder templates live beside the chapter authoring
 feature because they encode TreeTales authoring language, not generic

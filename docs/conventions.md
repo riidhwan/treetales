@@ -149,6 +149,50 @@ onSelect: (id: string, value: boolean) => void
 onFinished: () => void
 ```
 
+### Feature Component Modules
+
+Every route-composed feature component in `src/components/features/` lives in a
+PascalCase feature module directory, even when the module currently contains
+only one component:
+
+```text
+src/components/features/StoryDashboard/
+├── StoryDashboard.tsx
+├── StoryDashboard.test.tsx
+└── index.ts
+```
+
+The module `index.ts` is the public import boundary. Routes, tests, and other
+external consumers import the feature through the directory:
+
+```typescript
+import { StoryDashboard } from '@/components/features/StoryDashboard'
+```
+
+Feature-owned tests, helpers, constants, templates, and private subcomponents
+stay inside the owning feature module. Do not leave feature-owned files flat
+under `src/components/features/`.
+
+Shared feature-layer workflows that are intentionally reused by multiple
+feature modules live under `src/components/features/shared/<PascalCaseModule>/`.
+This path is reserved for named TreeTales workflows, not miscellaneous shared
+helpers. If shared code becomes business-agnostic, move it to `ui/`; if it is
+business-aware but does not own a feature workflow, consider `domain/`.
+
+Exported feature components should compose feature-local files instead of
+building materially different JSX branches through local variables or
+`if`/`else` chains. Extract loading, missing, error, empty, unavailable, and
+ready states into named components in their own files inside the feature module.
+The directory exists to make this split cheap even when a component starts with
+only one extracted state file. Small inline conditionals remain acceptable for
+attributes, labels, optional one-line adornments, and compact error or success
+messages.
+
+Repository linting enforces this boundary for feature `.tsx` files: prop
+interfaces must be named exactly `Props`, and a feature component file may not
+declare additional `*Props` interfaces. When a second props shape is needed,
+move that component into its own file in the same feature module.
+
 ## Hooks
 
 Organise the body in this order:
