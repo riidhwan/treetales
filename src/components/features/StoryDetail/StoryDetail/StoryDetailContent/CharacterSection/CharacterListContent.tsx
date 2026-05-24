@@ -13,14 +13,14 @@ interface Props {
 
 export function CharacterListContent({ characterDialog }: Props) {
   if (characterDialog.isLoading) {
-    return <Alert className="mt-5">{storyDetailCopy.character.loading}</Alert>
+    return <Alert className="mt-4">{storyDetailCopy.character.loading}</Alert>
   }
 
   if (characterDialog.characters.length === 0) {
     return (
       <EmptyState
         as="div"
-        className="mt-5"
+        className="mt-4"
         description={storyDetailCopy.character.empty.body}
         descriptionClassName="mx-auto mt-2 max-w-md"
         headingLevel={3}
@@ -31,7 +31,7 @@ export function CharacterListContent({ characterDialog }: Props) {
   }
 
   return (
-    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+    <div className="mt-4 grid gap-3 sm:grid-cols-2">
       {characterDialog.characters.map((character) => (
         <CharacterCard
           character={character}

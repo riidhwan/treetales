@@ -36,7 +36,7 @@ export function DashboardStoriesContent({
 
   if (stories.length === 0) {
     return (
-      <div className="grid gap-8">
+      <div className="grid gap-6">
         <StarterSection
           creatingStarterId={creatingStarterId}
           isProminent
@@ -50,7 +50,7 @@ export function DashboardStoriesContent({
   }
 
   return (
-    <div className="grid gap-8">
+    <div className="grid gap-6">
       <SavedStoryList onOpenStory={onOpenStory} stories={stories} />
       <StarterSection
         creatingStarterId={creatingStarterId}

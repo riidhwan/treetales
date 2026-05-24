@@ -22,14 +22,14 @@ export function StoryDetailHeader({
   }
 
   return (
-    <header className="border-b border-border-subtle pb-9">
-      <div className="flex flex-col gap-7">
+    <header className="border-b border-border-subtle pb-7">
+      <div className="flex flex-col gap-5">
         <div className="min-w-0">
-          <p className="text-sm font-semibold uppercase tracking-wide text-action-primary">
+          <p className="text-xs font-semibold uppercase tracking-wide text-action-primary">
             {commonCopy.actions.story}
           </p>
           <h1
-            className="mt-3 text-5xl font-bold leading-none sm:text-6xl"
+            className="mt-2 text-4xl font-bold leading-none sm:text-5xl"
             style={{ fontFamily: MANAGEMENT_DISPLAY_FONT }}
           >
             {story.title || storyDetailCopy.actions.untitledStory}
@@ -37,18 +37,18 @@ export function StoryDetailHeader({
         </div>
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(8.25rem,0.34fr)] gap-3">
           <Button
-            className="min-h-14 w-full rounded-xl text-base shadow-md"
+            className="min-h-12 w-full rounded-lg text-sm shadow-md"
             onClick={() => onReadStory(story.id)}
             variant="primary"
           >
-            <BookOpen aria-hidden="true" size={20} />
+            <BookOpen aria-hidden="true" size={18} />
             {storyDetailCopy.actions.read}
           </Button>
           <Button
-            className="min-h-14 w-full rounded-xl bg-surface-paper text-base"
+            className="min-h-12 w-full rounded-lg bg-surface-paper text-sm"
             onClick={() => onEditStory(story.id)}
           >
-            <Edit3 aria-hidden="true" size={20} />
+            <Edit3 aria-hidden="true" size={18} />
             {commonCopy.actions.edit}
           </Button>
         </div>

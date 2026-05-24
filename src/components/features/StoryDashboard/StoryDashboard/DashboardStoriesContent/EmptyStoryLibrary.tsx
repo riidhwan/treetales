@@ -17,18 +17,18 @@ export function EmptyStoryLibrary({
   return (
     <EmptyState
       actions={(
-        <div className="mx-auto mt-6 grid max-w-xs gap-3">
-          <Button className="min-h-12 rounded-xl" onClick={onOpenNewStoryForm}>
+        <div className="mx-auto mt-5 grid max-w-xs gap-3">
+          <Button className="min-h-11 rounded-lg" onClick={onOpenNewStoryForm}>
             <Plus aria-hidden="true" size={18} />
             {storyDashboardCopy.actions.newStory}
           </Button>
         </div>
       )}
-      className="rounded-[2rem] border border-dashed border-border-subtle bg-surface-paper/80 p-7 text-center shadow-sm sm:rounded-3xl sm:p-8"
+      className="rounded-2xl border border-dashed border-border-subtle bg-surface-paper/80 p-6 text-center shadow-sm sm:rounded-2xl"
       description={storyDashboardCopy.empty.body}
-      descriptionClassName="mx-auto mt-3 max-w-md text-base leading-7 text-text-muted"
+      descriptionClassName="mx-auto mt-2 max-w-md text-sm leading-6 text-text-muted"
       title={storyDashboardCopy.empty.title}
-      titleClassName="text-3xl font-bold leading-tight text-text-primary sm:text-4xl"
+      titleClassName="text-2xl font-bold leading-tight text-text-primary sm:text-3xl"
       titleStyle={{ fontFamily: DASHBOARD_DISPLAY_FONT }}
       variant="unstyled"
     />
