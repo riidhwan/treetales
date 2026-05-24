@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import { chapterWritingCopy } from '@/copy'
 import { getErrorMessage } from '@/lib/errors'
 import { getChapterById, updateChapter } from '@/services/chapterService'
 import { getStoryById } from '@/services/storyService'
@@ -170,7 +171,7 @@ export function useChapterEditor({
       setLastSavedContent(updatedChapter.content)
       setLastSavedTitle(updatedChapter.title)
       setTitle(updatedChapter.title)
-      setSuccessMessage('Chapter saved.')
+      setSuccessMessage(chapterWritingCopy.status.saved)
     } catch (error) {
       setErrorMessage(getErrorMessage(error))
     } finally {

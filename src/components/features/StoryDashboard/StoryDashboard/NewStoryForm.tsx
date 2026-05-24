@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Field } from '@/components/ui/Field'
 import { TextInput } from '@/components/ui/TextInput'
+import { commonCopy, storyDashboardCopy } from '@/copy'
 
 interface Props {
   readonly canCreate: boolean
@@ -29,26 +30,26 @@ export function NewStoryForm({
 
   return (
     <form
-      aria-label="New story"
+      aria-label={storyDashboardCopy.form.label}
       className="grid gap-4 rounded-[1.5rem] border border-border-subtle bg-surface-paper/75 p-5 shadow-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto] sm:items-end sm:p-6"
       onSubmit={(event) => {
         event.preventDefault()
         void onCreateStory()
       }}
     >
-      <Field label="Title">
+      <Field label={commonCopy.labels.title}>
         <TextInput
           name="title"
           onChange={(event) => onTitleChange(event.target.value)}
-          placeholder="Forest Gate"
+          placeholder={storyDashboardCopy.form.placeholders.title}
           value={title}
         />
       </Field>
-      <Field label="Description">
+      <Field label={commonCopy.labels.description}>
         <TextInput
           name="description"
           onChange={(event) => onDescriptionChange(event.target.value)}
-          placeholder="A short premise for the story"
+          placeholder={storyDashboardCopy.form.placeholders.description}
           value={description}
         />
       </Field>
@@ -59,7 +60,7 @@ export function NewStoryForm({
         variant="primary"
       >
         <Plus aria-hidden="true" size={18} />
-        Create Story
+        {storyDashboardCopy.actions.createStory}
       </Button>
     </form>
   )

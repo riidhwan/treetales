@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
+import { storyDetailCopy } from '@/copy'
 import { getErrorMessage } from '@/lib/errors'
 import {
   createCharacter,
@@ -264,7 +265,7 @@ export function useStoryCharacters({
       )
 
       if (!updatedCharacter) {
-        setErrorMessage('Character could not be found.')
+        setErrorMessage(storyDetailCopy.character.missing)
         return
       }
 
@@ -309,7 +310,7 @@ export function useStoryCharacters({
       const wasDeleted = await services.deleteCharacter(characterToDelete.id)
 
       if (!wasDeleted) {
-        setErrorMessage('Character could not be found.')
+        setErrorMessage(storyDetailCopy.character.missing)
         setConfirmationState({ mode: 'closed' })
         return
       }

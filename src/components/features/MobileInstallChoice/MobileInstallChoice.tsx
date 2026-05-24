@@ -1,6 +1,7 @@
 import { Download, ExternalLink } from 'lucide-react'
 
 import { Button } from '@/components/ui/Button'
+import { appCopy, mobileInstallChoiceCopy } from '@/copy'
 
 import {
   InstallStatusMessages,
@@ -28,11 +29,10 @@ export function MobileInstallChoice({
       <section className="mx-auto flex w-full max-w-md flex-col justify-center gap-6">
         <header className="border-b border-tt-line pb-5">
           <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
-            TreeTales
+            {appCopy.brand}
           </p>
           <p className="mt-3 text-sm leading-6 text-tt-muted">
-            Add TreeTales to your home screen for a focused app experience, or
-            continue in your mobile browser.
+            {mobileInstallChoiceCopy.body}
           </p>
         </header>
 
@@ -49,11 +49,11 @@ export function MobileInstallChoice({
             variant="primary"
           >
             <Download aria-hidden="true" size={18} />
-            Install App
+            {mobileInstallChoiceCopy.actions.installApp}
           </Button>
           <Button className="w-full" onClick={onContinue}>
             <ExternalLink aria-hidden="true" size={18} />
-            Continue to Mobile Site
+            {mobileInstallChoiceCopy.actions.continueToMobileSite}
           </Button>
         </div>
       </section>

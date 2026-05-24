@@ -7,6 +7,7 @@ import type {
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
+import { commonCopy, storyDetailCopy } from '@/copy'
 import type { Character, CharacterGender } from '@/services/types'
 
 import { CharacterDetails } from './CharacterDetails'
@@ -62,24 +63,24 @@ export function CharacterDialog({
         <>
           <Button onClick={() => onEdit(dialogState.character)}>
             <Edit3 aria-hidden="true" size={18} />
-            Edit
+            {commonCopy.actions.edit}
           </Button>
           <Button disabled={isDeleting} onClick={onDelete} variant="danger">
             <Trash2 aria-hidden="true" size={18} />
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            {isDeleting ? commonCopy.actions.deleting : commonCopy.actions.delete}
           </Button>
         </>
       ) : null}
       {isForm ? (
         <>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={onClose}>{commonCopy.actions.cancel}</Button>
           <Button
             disabled={draft.name.trim().length === 0 || isSaving}
             onClick={onSave}
             variant="primary"
           >
             <Save aria-hidden="true" size={18} />
-            {isSaving ? 'Saving...' : 'Save'}
+            {isSaving ? commonCopy.actions.saving : commonCopy.actions.save}
           </Button>
         </>
       ) : null}
@@ -88,8 +89,8 @@ export function CharacterDialog({
 
   return (
     <Dialog
-      closeLabel="Close character dialog"
-      eyebrow="Character"
+      closeLabel={storyDetailCopy.character.closeDialog}
+      eyebrow={storyDetailCopy.character.eyebrow}
       footer={footer}
       onClose={onClose}
       title={title}

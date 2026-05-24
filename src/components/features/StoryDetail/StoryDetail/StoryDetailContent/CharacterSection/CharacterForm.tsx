@@ -6,6 +6,7 @@ import { Field } from '@/components/ui/Field'
 import { IconButton } from '@/components/ui/IconButton'
 import { TextArea } from '@/components/ui/TextArea'
 import { TextInput } from '@/components/ui/TextInput'
+import { commonCopy, storyDetailCopy } from '@/copy'
 import type { CharacterGender } from '@/services/types'
 
 interface Props {
@@ -43,14 +44,14 @@ export function CharacterForm({
       }}
     >
       <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_12rem]">
-        <Field label="Name">
+        <Field label={storyDetailCopy.character.labels.name}>
           <TextInput
             onChange={(event) => onNameChange(event.target.value)}
-            placeholder="Mira"
+            placeholder={storyDetailCopy.character.placeholders.name}
             value={draft.name}
           />
         </Field>
-        <Field label="Gender">
+        <Field label={storyDetailCopy.character.labels.gender}>
           <select
             className="min-h-11 rounded-md border border-border-subtle bg-surface-paper px-3 text-base text-text-primary outline-none transition focus:border-action-primary focus:ring-2 focus:ring-highlight-soft"
             onChange={(event) =>
@@ -58,24 +59,26 @@ export function CharacterForm({
             }
             value={draft.gender}
           >
-            <option value="female">Female</option>
-            <option value="male">Male</option>
+            <option value="female">{storyDetailCopy.character.gender.female}</option>
+            <option value="male">{storyDetailCopy.character.gender.male}</option>
           </select>
         </Field>
       </div>
 
       <section className="grid gap-3">
         <div className="flex items-center justify-between gap-3">
-          <h3 className="text-lg font-semibold">Custom properties</h3>
+          <h3 className="text-lg font-semibold">
+            {storyDetailCopy.character.customProperties}
+          </h3>
           <Button onClick={onAddProperty} size="sm">
             <Plus aria-hidden="true" size={16} />
-            Add Property
+            {storyDetailCopy.character.addProperty}
           </Button>
         </div>
 
         {draft.properties.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border-subtle p-4 text-sm text-text-muted">
-            No custom properties yet.
+            {storyDetailCopy.character.noCustomProperties}
           </p>
         ) : (
           <div className="grid gap-3">
@@ -85,18 +88,24 @@ export function CharacterForm({
                 key={property.id}
               >
                 <div className="grid items-start gap-3 sm:grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)]">
-                  <Field className="content-start" label="Key">
+                  <Field
+                    className="content-start"
+                    label={storyDetailCopy.character.labels.key}
+                  >
                     <TextInput
                       onChange={(event) =>
                         onPropertyChange(property.id, {
                           key: event.target.value,
                         })
                       }
-                      placeholder="age"
+                      placeholder={storyDetailCopy.character.placeholders.key}
                       value={property.key}
                     />
                   </Field>
-                  <Field className="content-start" label="Value">
+                  <Field
+                    className="content-start"
+                    label={storyDetailCopy.character.labels.value}
+                  >
                     <TextArea
                       className="min-h-24"
                       onChange={(event) =>
@@ -104,7 +113,7 @@ export function CharacterForm({
                           value: event.target.value,
                         })
                       }
-                      placeholder="32"
+                      placeholder={storyDetailCopy.character.placeholders.value}
                       value={property.value}
                     />
                   </Field>
@@ -112,7 +121,7 @@ export function CharacterForm({
                 <div className="flex flex-wrap justify-end gap-2">
                   <IconButton
                     disabled={index === 0}
-                    label={`Move ${property.key || 'property'} up`}
+                    label={storyDetailCopy.character.moveUp(property.key)}
                     onClick={() => onMoveProperty(property.id, -1)}
                     size="sm"
                   >
@@ -120,7 +129,7 @@ export function CharacterForm({
                   </IconButton>
                   <IconButton
                     disabled={index === draft.properties.length - 1}
-                    label={`Move ${property.key || 'property'} down`}
+                    label={storyDetailCopy.character.moveDown(property.key)}
                     onClick={() => onMoveProperty(property.id, 1)}
                     size="sm"
                   >
@@ -132,7 +141,7 @@ export function CharacterForm({
                     variant="danger"
                   >
                     <Trash2 aria-hidden="true" size={16} />
-                    Remove
+                    {commonCopy.actions.remove}
                   </Button>
                 </div>
               </div>
@@ -141,7 +150,9 @@ export function CharacterForm({
         )}
 
         {isSaving ? (
-          <p className="text-sm text-text-muted">Saving character...</p>
+          <p className="text-sm text-text-muted">
+            {storyDetailCopy.actions.savingCharacter}
+          </p>
         ) : null}
       </section>
     </form>

@@ -5,6 +5,7 @@ import {
   ChapterWritingUnavailableLayout,
   ChapterWritingWorkflow,
 } from '@/components/features/shared/ChapterWriting'
+import { chapterWritingCopy, commonCopy } from '@/copy'
 import { useChapterEditor } from '@/hooks/useChapterEditor'
 
 import { ChapterEditorUnavailableState } from './ChapterEditorContent/ChapterEditorUnavailableState'
@@ -56,7 +57,7 @@ export function ChapterEditorContent({
         errorMessage={errorMessage}
         hasNavigationWarning={hasUnsavedChanges}
         isSubmitting={isSaving}
-        navigationWarningMessage="Discard unsaved chapter changes?"
+        navigationWarningMessage={chapterWritingCopy.editor.navigationWarning}
         onContentChange={onContentChange}
         onGoBack={onGoBack}
         onOpenDashboard={onOpenDashboard}
@@ -64,7 +65,7 @@ export function ChapterEditorContent({
         onSubmitShortcut={onSaveShortcut}
         onTitleChange={onTitleChange}
         primaryActionIcon={<Save aria-hidden="true" size={16} />}
-        primaryActionLabel="Save"
+        primaryActionLabel={commonCopy.actions.save}
         promptBuilder={{
           isDisabled: parentChapterUnavailable,
           parentChapter: parentChapter
@@ -73,28 +74,29 @@ export function ChapterEditorContent({
                 title: parentChapter.title,
               }
             : undefined,
-          promptBuilderDisabledReason: 'Parent Chapter unavailable',
+          promptBuilderDisabledReason:
+            chapterWritingCopy.promptBuilder.parentChapterUnavailable,
           storyTitle,
           templateKind: chapter?.parentChapterId ? 'branch' : 'intro',
         }}
-        submittingActionLabel="Saving..."
+        submittingActionLabel={commonCopy.actions.saving}
         title={title}
         titleError={
           title.trim().length === 0
-            ? 'Chapter title is required.'
+            ? chapterWritingCopy.fields.titleRequired
             : undefined
         }
-        toolbarContext={storyTitle ?? 'Story'}
+        toolbarContext={storyTitle ?? commonCopy.actions.story}
       />
     )
   }
 
   return (
     <ChapterWritingUnavailableLayout
-      actionsLabel="Chapter editor actions"
+      actionsLabel={chapterWritingCopy.editor.actionsLabel}
       onOpenDashboard={onOpenDashboard}
       onOpenPrevious={onGoBack}
-      previousLabel="Back"
+      previousLabel={commonCopy.actions.back}
     >
       <ChapterEditorUnavailableState
         errorMessage={errorMessage}

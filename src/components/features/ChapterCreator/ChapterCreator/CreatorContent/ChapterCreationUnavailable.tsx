@@ -1,5 +1,6 @@
 import { ChapterWritingMissingState } from '@/components/features/shared/ChapterWriting'
 import { Alert } from '@/components/ui/Alert'
+import { chapterWritingCopy, commonCopy } from '@/copy'
 import { useChapterCreator } from '@/hooks/useChapterCreator'
 
 interface Props {
@@ -18,8 +19,8 @@ export function ChapterCreationUnavailable({
   if (status === 'missing-story') {
     return (
       <ChapterWritingMissingState
-        description="This story may have been deleted or is unavailable in this browser."
-        title="Story not found"
+        description={commonCopy.messages.storyNotFound.body}
+        title={commonCopy.messages.storyNotFound.title}
       />
     )
   }
@@ -27,9 +28,9 @@ export function ChapterCreationUnavailable({
   if (status === 'missing-parent-chapter') {
     return (
       <ChapterWritingMissingState
-        description="This chapter is not part of the selected story."
+        description={chapterWritingCopy.creation.missingParentChapter.body}
         kicker={storyTitle}
-        title="Parent chapter not found"
+        title={chapterWritingCopy.creation.missingParentChapter.title}
       />
     )
   }
@@ -37,9 +38,12 @@ export function ChapterCreationUnavailable({
   if (status === 'intro-chapter-exists') {
     return (
       <ChapterWritingMissingState
-        description="This story already has an intro chapter."
+        description={chapterWritingCopy.existingIntroChapter.body}
         kicker={storyTitle}
-        title={introChapterTitle ?? 'Intro chapter exists'}
+        title={
+          introChapterTitle ??
+          chapterWritingCopy.existingIntroChapter.fallbackTitle
+        }
       />
     )
   }

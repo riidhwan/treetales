@@ -3,6 +3,8 @@ import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
+import { appCopy } from '@/copy'
+
 import appCss from '../styles.css?url'
 
 export const Route = createRootRoute({
@@ -16,11 +18,11 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TreeTales',
+        title: appCopy.head.title,
       },
       {
         name: 'description',
-        content: 'Write and read branching stories that live in your browser.',
+        content: appCopy.head.description,
       },
       {
         name: 'theme-color',
@@ -69,7 +71,7 @@ function RootDocument({ children }: RootDocumentProps) {
           }}
           plugins={[
             {
-              name: 'Tanstack Router',
+              name: appCopy.tools.tanstackRouter,
               render: <TanStackRouterDevtoolsPanel />,
             },
           ]}

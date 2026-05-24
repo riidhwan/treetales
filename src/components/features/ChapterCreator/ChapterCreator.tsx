@@ -5,6 +5,7 @@ import {
   type ChapterCreatorServices,
   useChapterCreator,
 } from '@/hooks/useChapterCreator'
+import { chapterWritingCopy } from '@/copy'
 
 import { CreatorContent } from './ChapterCreator/CreatorContent'
 
@@ -44,7 +45,7 @@ export function ChapterCreator({
   const hasDraftChanges = status === 'ready' && (title !== '' || content !== '')
   const titleError =
     title.trim().length === 0 && (hasTouchedTitle || title.length > 0)
-      ? 'Chapter title is required.'
+      ? chapterWritingCopy.fields.titleRequired
       : undefined
 
   function handleCreate(event: SyntheticEvent<HTMLFormElement>) {

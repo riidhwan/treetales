@@ -5,6 +5,7 @@ import type { ReaderFontId } from '@/config'
 import { ReaderAppearanceControl } from '@/components/domain/ReaderAppearanceControl'
 import { IconButton } from '@/components/ui/IconButton'
 import { Toolbar } from '@/components/ui/Toolbar'
+import { commonCopy, storyReaderCopy } from '@/copy'
 import { useReaderAppearance } from '@/hooks/useReaderAppearance'
 import type { Chapter } from '@/services/types'
 
@@ -41,11 +42,11 @@ export function ReaderToolbar({
 
   return (
     <Toolbar
-      label="Reader actions"
+      label={storyReaderCopy.toolbar.label}
       leading={
         parentChapter ? (
           <IconButton
-            label="Parent Chapter"
+            label={storyReaderCopy.actions.parentChapter}
             onClick={onSelectParentChapter}
             size="sm"
           >
@@ -56,7 +57,7 @@ export function ReaderToolbar({
       trailing={
         <>
           <IconButton
-            label="Story Details"
+            label={storyReaderCopy.actions.storyDetails}
             onClick={onOpenStoryDetails}
             size="sm"
           >
@@ -73,10 +74,18 @@ export function ReaderToolbar({
             onSelectReaderFont={onSelectReaderFont}
             readerAppearance={readerAppearance}
           />
-          <IconButton label="Edit Chapter" onClick={onEditChapter} size="sm">
+          <IconButton
+            label={storyReaderCopy.actions.editChapter}
+            onClick={onEditChapter}
+            size="sm"
+          >
             <Edit3 aria-hidden="true" size={16} />
           </IconButton>
-          <IconButton label="Dashboard" onClick={onOpenDashboard} size="sm">
+          <IconButton
+            label={commonCopy.actions.dashboard}
+            onClick={onOpenDashboard}
+            size="sm"
+          >
             <Home aria-hidden="true" size={16} />
           </IconButton>
         </>

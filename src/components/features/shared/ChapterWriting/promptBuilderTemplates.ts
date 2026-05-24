@@ -1,3 +1,5 @@
+import { promptBuilderCopy } from '@/copy'
+
 export type PromptBuilderTemplateKind = 'branch' | 'intro'
 
 interface PromptBuilderValues {
@@ -9,25 +11,9 @@ interface PromptBuilderValues {
   readonly storyTitle: string
 }
 
-const INTRO_CHAPTER_PROMPT_TEMPLATE = `You are a writer of a "Choose Your Own Adventure" book. The chapter you write will treat the reader as the main character (e.g instead of writing "I had a dream", you should write "You had a dream"). You will write a story based on the \`plot\` described below. Write in markdown codeblock.
-
-<plot>
-{{roughPlot}}
-</plot>`
-
-const BRANCH_CHAPTER_PROMPT_TEMPLATE = `You are a writer of a "Choose Your Own Adventure" book. The chapter you write will treat the reader as the main character (e.g instead of writing "I had a dream", you should write "You had a dream"). You will write a story based on the \`plot\` described below. Write in markdown codeblock.
-
-<previous_story note="this is just a reference of what happened before the plot">
-{{parentChapterContent}}
-</previous_story>
-
-<plot>
-{{roughPlot}}
-</plot>`
-
 const PROMPT_BUILDER_TEMPLATES: Record<PromptBuilderTemplateKind, string> = {
-  branch: BRANCH_CHAPTER_PROMPT_TEMPLATE,
-  intro: INTRO_CHAPTER_PROMPT_TEMPLATE,
+  branch: promptBuilderCopy.templates.branch,
+  intro: promptBuilderCopy.templates.intro,
 }
 
 /** Builds the copy-paste LLM prompt for the selected chapter authoring case. */

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button'
 import { Field } from '@/components/ui/Field'
 import { TextArea } from '@/components/ui/TextArea'
 import { TextInput } from '@/components/ui/TextInput'
+import { commonCopy, storyEditorCopy } from '@/copy'
 
 interface Props {
   readonly canSave: boolean
@@ -49,7 +50,7 @@ export function StoryEditorReadyState({
         onSubmit={onSave}
       >
         <div className="grid gap-6">
-          <Field className="text-base" label="Title">
+          <Field className="text-base" label={commonCopy.labels.title}>
             <TextInput
               className="min-h-14 rounded-xl px-4 text-lg"
               name="title"
@@ -57,7 +58,7 @@ export function StoryEditorReadyState({
               value={title}
             />
           </Field>
-          <Field className="text-base" label="Description">
+          <Field className="text-base" label={commonCopy.labels.description}>
             <TextArea
               className="min-h-72 rounded-xl px-4 py-4"
               name="description"
@@ -75,7 +76,9 @@ export function StoryEditorReadyState({
             variant="primary"
           >
             <Save aria-hidden="true" size={18} />
-            {isSaving ? 'Saving...' : 'Save Story'}
+            {isSaving
+              ? commonCopy.actions.saving
+              : storyEditorCopy.actions.saveStory}
           </Button>
         </div>
       </form>

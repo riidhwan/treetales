@@ -2,6 +2,7 @@ import type { SyntheticEvent } from 'react'
 
 import { useStoryEditor } from '@/hooks/useStoryEditor'
 import { Alert } from '@/components/ui/Alert'
+import { commonCopy, storyEditorCopy } from '@/copy'
 
 import { StoryEditorReadyState } from './StoryEditorContent/StoryEditorReadyState'
 import { StoryEditorUnavailableState } from './StoryEditorContent/StoryEditorUnavailableState'
@@ -34,15 +35,15 @@ export function StoryEditorContent({
   title,
 }: Props) {
   if (status === 'loading') {
-    return <Alert className="shadow-sm">Loading story...</Alert>
+    return <Alert className="shadow-sm">{commonCopy.messages.loadingStory}</Alert>
   }
 
   if (status === 'missing-story') {
     return (
       <StoryEditorUnavailableState
-        description="This story may have been deleted or is unavailable in this browser."
+        description={commonCopy.messages.storyNotFound.body}
         onOpenDashboard={onOpenDashboard}
-        title="Story not found"
+        title={commonCopy.messages.storyNotFound.title}
       />
     )
   }
@@ -52,7 +53,7 @@ export function StoryEditorContent({
       <StoryEditorUnavailableState
         errorMessage={errorMessage}
         onOpenDashboard={onOpenDashboard}
-        title="Story unavailable"
+        title={storyEditorCopy.status.unavailable}
       />
     )
   }

@@ -1,3 +1,5 @@
+import { chapterWritingCopy, commonCopy } from '@/copy'
+
 interface ToolbarContextOptions {
   readonly isIntroChapter: boolean
   readonly parentChapterTitle?: string
@@ -9,13 +11,15 @@ export function getToolbarContext({
   parentChapterTitle,
   storyTitle,
 }: ToolbarContextOptions) {
-  const contextStoryTitle = storyTitle ?? 'Story'
+  const contextStoryTitle = storyTitle ?? commonCopy.actions.story
 
   if (isIntroChapter) {
-    return `${contextStoryTitle} - Intro Chapter`
+    return chapterWritingCopy.toolbarContext.introChapter(contextStoryTitle)
   }
 
-  return `${contextStoryTitle} - Branch from ${
-    parentChapterTitle ?? 'selected chapter'
-  }`
+  return chapterWritingCopy.toolbarContext.branchFrom(
+    contextStoryTitle,
+    parentChapterTitle ??
+      chapterWritingCopy.toolbarContext.fallbackParentChapter,
+  )
 }

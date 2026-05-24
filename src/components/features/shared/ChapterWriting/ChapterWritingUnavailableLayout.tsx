@@ -2,6 +2,7 @@ import { ArrowLeft, Home } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/Button'
+import { commonCopy } from '@/copy'
 
 interface Props {
   readonly actionsLabel: string
@@ -29,7 +30,7 @@ export function ChapterWritingUnavailableLayout({
           {previousLabel}
         </Button>
         <Button
-          aria-label="Dashboard"
+          aria-label={commonCopy.actions.dashboard}
           className="px-3"
           onClick={onOpenDashboard}
           size="sm"

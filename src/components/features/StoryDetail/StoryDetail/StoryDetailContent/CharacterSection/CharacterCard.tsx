@@ -1,6 +1,7 @@
 import type { Character } from '@/services/types'
 
 import { MANAGEMENT_DISPLAY_FONT } from '@/components/features/StoryDetail/StoryDetail/constants'
+import { storyDetailCopy } from '@/copy'
 import { formatGender } from './characterDisplay'
 
 interface Props {
@@ -11,7 +12,7 @@ interface Props {
 export function CharacterCard({ character, onOpen }: Props) {
   return (
     <button
-      aria-label={`View ${character.name}`}
+      aria-label={storyDetailCopy.actions.viewCharacter(character.name)}
       className="flex min-h-44 flex-col items-stretch justify-start overflow-hidden rounded-3xl border border-border-subtle bg-surface-paper/60 p-5 text-left transition hover:border-focus-ring hover:bg-highlight-soft/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring sm:h-52"
       onClick={() => onOpen(character)}
       type="button"
@@ -41,7 +42,9 @@ export function CharacterCard({ character, onOpen }: Props) {
         ))}
         {character.properties.length > 3 ? (
           <span className="mt-1 text-sm font-semibold text-action-primary">
-            +{character.properties.length - 3} more
+            {storyDetailCopy.character.propertyCountMore(
+              character.properties.length - 3,
+            )}
           </span>
         ) : null}
       </span>

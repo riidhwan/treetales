@@ -4,6 +4,7 @@ import {
   DASHBOARD_DISPLAY_FONT,
 } from '@/components/features/StoryDashboard/StoryDashboard/dashboardDisplay'
 import { Button } from '@/components/ui/Button'
+import { storyDashboardCopy } from '@/copy'
 
 interface Props {
   readonly isCreatingExample: boolean
@@ -22,11 +23,10 @@ export function EmptyStoryLibrary({
         className="text-4xl font-bold leading-tight text-text-primary"
         style={{ fontFamily: DASHBOARD_DISPLAY_FONT }}
       >
-        No stories yet
+        {storyDashboardCopy.empty.title}
       </h2>
       <p className="mx-auto mt-3 max-w-md text-base leading-7 text-text-muted">
-        Start with an example or open a blank page for a branching tale of your
-        own.
+        {storyDashboardCopy.empty.body}
       </p>
       <div className="mx-auto mt-6 grid max-w-md gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(8rem,0.5fr)]">
         <Button
@@ -36,11 +36,11 @@ export function EmptyStoryLibrary({
           variant="primary"
         >
           <Sparkles aria-hidden="true" size={18} />
-          Add Example Story
+          {storyDashboardCopy.actions.addExampleStory}
         </Button>
         <Button className="min-h-12 rounded-xl" onClick={onOpenNewStoryForm}>
           <Plus aria-hidden="true" size={18} />
-          New Story
+          {storyDashboardCopy.actions.newStory}
         </Button>
       </div>
     </section>

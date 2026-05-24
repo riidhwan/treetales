@@ -1,6 +1,7 @@
 import { ChevronRight, PlusCircle } from 'lucide-react'
 
 import { Button } from '@/components/ui/Button'
+import { storyReaderCopy } from '@/copy'
 import type { Chapter } from '@/services/types'
 
 interface Props {
@@ -17,11 +18,11 @@ export function NextChapterControls({
   return (
     <div>
       <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted">
-        What happens next?
+        {storyReaderCopy.branch.heading}
       </h2>
       {nextChapters.length === 0 ? (
         <p className="mt-3 inline-flex min-h-10 items-center rounded-md bg-surface-paper-deep px-3 text-sm font-semibold text-text-muted">
-          The End
+          {storyReaderCopy.branch.terminal}
         </p>
       ) : (
         <div className="mt-3 grid gap-2">
@@ -49,7 +50,7 @@ export function NextChapterControls({
         variant="primary"
       >
         <PlusCircle aria-hidden="true" size={16} />
-        Add Branch
+        {storyReaderCopy.actions.addBranch}
       </Button>
     </div>
   )

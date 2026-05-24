@@ -3,6 +3,7 @@ import { Minus, Plus, RotateCcw, Type } from 'lucide-react'
 import { READER_FONT_OPTIONS, type ReaderFontId } from '@/config'
 import type { ReaderAppearance } from '@/hooks/useReaderAppearance'
 import { IconButton } from '@/components/ui/IconButton'
+import { readerAppearanceCopy } from '@/copy'
 
 const READER_APPEARANCE_PANEL_ID = 'reader-appearance-panel'
 
@@ -34,7 +35,7 @@ export function ReaderAppearanceControl({
       <IconButton
         aria-controls={READER_APPEARANCE_PANEL_ID}
         aria-expanded={isPanelOpen}
-        label="Reader Appearance"
+        label={readerAppearanceCopy.labels.trigger}
         onClick={() => onOpenChange(!isPanelOpen)}
         size="sm"
       >
@@ -83,9 +84,11 @@ function ReaderAppearancePanel({
       id={panelId}
     >
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold">Reader Appearance</h2>
+        <h2 className="text-sm font-semibold">
+          {readerAppearanceCopy.labels.trigger}
+        </h2>
         <IconButton
-          label="Reset Reader Appearance"
+          label={readerAppearanceCopy.actions.reset}
           onClick={onResetReaderAppearance}
           size="xs"
         >
@@ -98,7 +101,7 @@ function ReaderAppearancePanel({
           className="text-xs font-semibold uppercase text-tt-muted"
           id="reader-font-options-label"
         >
-          Font
+          {readerAppearanceCopy.labels.font}
         </h3>
         <div className="mt-2 grid grid-cols-2 gap-2">
           {READER_FONT_OPTIONS.map((fontOption) => (
@@ -124,16 +127,16 @@ function ReaderAppearancePanel({
             className="text-xs font-semibold uppercase text-tt-muted"
             id="reader-font-size-label"
           >
-            Font Size
+            {readerAppearanceCopy.labels.fontSize}
           </h3>
           <p className="min-w-12 text-right text-sm font-semibold text-tt-muted">
-            {readerAppearance.fontSizePt} pt
+            {readerAppearanceCopy.values.fontSize(readerAppearance.fontSizePt)}
           </p>
         </div>
         <div className="mt-2 flex items-center gap-2">
           <IconButton
             disabled={!canDecreaseFontSize}
-            label="Decrease Font Size"
+            label={readerAppearanceCopy.actions.decreaseFontSize}
             onClick={onDecreaseFontSize}
             size="sm"
           >
@@ -141,7 +144,7 @@ function ReaderAppearancePanel({
           </IconButton>
           <IconButton
             disabled={!canIncreaseFontSize}
-            label="Increase Font Size"
+            label={readerAppearanceCopy.actions.increaseFontSize}
             onClick={onIncreaseFontSize}
             size="sm"
           >

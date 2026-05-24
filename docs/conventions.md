@@ -107,6 +107,49 @@ otherwise act on the error. Do not use empty `.catch()` callbacks such as
 `.catch(() => undefined)` in app TypeScript; if a hook or service owns expected
 failures internally, call it with `void` at event-handler boundaries instead.
 
+## Copy Catalog
+
+TreeTales-owned UI copy lives in `src/copy/` as typed English constants. Organize
+copy by owning feature area, with `common.ts` for truly shared labels and
+commands. Each module should export one nested object named after the area, such
+as `storyReaderCopy` or `chapterWritingCopy`, instead of many standalone
+constants.
+
+Use catalog functions for dynamic complete sentences so punctuation, ordering,
+and future translation boundaries stay in one place:
+
+```typescript
+export const storyDetailCopy = {
+    deleteDialog: {
+        message: (storyTitle: string) =>
+            `Delete "${storyTitle}"? This cannot be undone.`,
+    },
+} as const
+```
+
+Accessibility-only text belongs in the Copy Catalog too, including `aria-label`,
+icon button labels, close labels, dialog labels, and toolbar landmark labels.
+Route/head metadata owned in TypeScript belongs in the catalog. Static
+`public/manifest.json` metadata stays static unless the project adds manifest
+generation.
+
+Hooks may import catalog copy for display-facing success, failure, and status
+messages. Services must not import UI copy; they should return data or errors
+that presentation layers turn into user-facing messages. Keep Story, Chapter,
+Character, and Character Property content out of the Copy Catalog, including the
+built-in example Story unless localized seeded content becomes a distinct
+feature.
+
+Tests should import catalog copy when they need to find controls or states.
+Keep literal text expectations only when exact wording is itself the behavior
+being protected.
+
+Do not add a `t()`-style string-key lookup, runtime locale switching, translated
+bundles, or an i18n dependency until TreeTales has an actual multi-locale
+requirement. The Copy Catalog is a centralized ownership boundary for English
+copy that keeps future i18n feasible without adding runtime translation
+machinery now.
+
 ## Components
 
 Functional only. Every component has a `Props` interface named exactly `Props`, placed directly above the function:

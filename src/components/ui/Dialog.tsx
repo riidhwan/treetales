@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 
 import { IconButton } from '@/components/ui/IconButton'
+import { uiCopy } from '@/copy'
 import { cn } from '@/lib/utils'
 
 type DialogWidth = 'md' | 'lg'
@@ -40,7 +41,7 @@ export function Dialog({
   bodyClassName,
   children,
   className,
-  closeLabel = 'Close dialog',
+  closeLabel = uiCopy.dialog.closeLabel,
   eyebrow,
   footer,
   footerClassName,

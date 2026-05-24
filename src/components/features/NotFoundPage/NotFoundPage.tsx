@@ -1,15 +1,17 @@
 import { Home, PenLine } from 'lucide-react'
 
+import { appCopy, notFoundCopy } from '@/copy'
+
 export function NotFoundPage() {
   return (
     <main className="min-h-screen bg-tt-parchment text-tt-ink">
       <section className="mx-auto flex min-h-screen w-full max-w-4xl flex-col justify-center px-5 py-12 sm:px-8 lg:px-10">
         <div className="border-b border-tt-line pb-6">
           <p className="text-sm font-semibold uppercase tracking-wide text-tt-moss">
-            TreeTales
+            {appCopy.brand}
           </p>
           <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
-            Page not found
+            {notFoundCopy.heading}
           </h1>
         </div>
 
@@ -20,18 +22,17 @@ export function NotFoundPage() {
             </div>
             <div>
               <h2 className="text-xl font-semibold">
-                This branch does not exist.
+                {notFoundCopy.title}
               </h2>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-tt-muted">
-                The story path you opened is not available. Return to the
-                dashboard to choose an existing story or start a new one.
+                {notFoundCopy.body}
               </p>
               <a
                 className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-tt-moss-dark bg-tt-moss px-4 text-sm font-semibold text-tt-paper shadow-sm transition hover:bg-tt-moss-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tt-gold"
                 href="/"
               >
                 <Home aria-hidden="true" size={18} />
-                Back to dashboard
+                {notFoundCopy.action}
               </a>
             </div>
           </div>

@@ -13,6 +13,7 @@ import { MarkdownContent } from '@/components/ui/MarkdownContent'
 import { TextArea } from '@/components/ui/TextArea'
 import { TextInput } from '@/components/ui/TextInput'
 import { Toolbar, ToolbarContext } from '@/components/ui/Toolbar'
+import { styleGuideCopy } from '@/copy'
 
 import { NotFoundPage } from '@/components/features/NotFoundPage'
 
@@ -49,33 +50,6 @@ const TOKENS = [
   },
 ] as const
 
-const SURFACES = [
-  {
-    description: 'Full-page parchment field for the app shell.',
-    name: 'App Background',
-  },
-  {
-    description: 'Unframed rhythm for Library and Management Mode.',
-    name: 'Workbench',
-  },
-  {
-    description: 'Chapter title and content surface owned by Document Mode.',
-    name: 'Paper Document',
-  },
-  {
-    description: 'Repeated Story, Character, or form objects with a real boundary.',
-    name: 'Bounded Object',
-  },
-  {
-    description: 'Focused modal work with labelled task hierarchy.',
-    name: 'Dialog Surface',
-  },
-  {
-    description: 'Explicit destructive area with clear consequences.',
-    name: 'Danger Surface',
-  },
-] as const
-
 interface Props {
   readonly isEnabled: boolean
 }
@@ -90,25 +64,23 @@ export function StyleGuideContent({ isEnabled }: Props) {
       <Toolbar
         context={
           <ToolbarContext>
-            Dev style guide - local primitives and semantic tokens
+            {styleGuideCopy.toolbarContext}
           </ToolbarContext>
         }
-        label="Style guide"
+        label={styleGuideCopy.title}
       />
 
       <main className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:px-8">
         <header className="grid gap-4 border-b border-border-subtle pb-8">
           <p className="text-sm font-semibold uppercase tracking-wide text-action-primary">
-            Maintainer surface
+            {styleGuideCopy.header.kicker}
           </p>
           <div className="grid gap-3">
             <h1 className="text-4xl font-bold text-text-primary">
-              TreeTales Style Guide
+              {styleGuideCopy.header.title}
             </h1>
             <p className="max-w-3xl text-base leading-7 text-text-muted">
-              A dev-only check surface for the current local UI primitives,
-              semantic tokens, and documented component boundaries. It is not
-              linked from product navigation.
+              {styleGuideCopy.header.body}
             </p>
           </div>
         </header>
@@ -116,11 +88,10 @@ export function StyleGuideContent({ isEnabled }: Props) {
         <section aria-labelledby="tokens-heading" className="grid gap-4">
           <div className="grid gap-2">
             <h2 className="text-2xl font-bold" id="tokens-heading">
-              Semantic Tokens
+              {styleGuideCopy.tokens.title}
             </h2>
             <p className="text-sm leading-6 text-text-muted">
-              Generic primitives and settled feature surfaces should use these
-              role-based aliases before reaching for raw palette tokens.
+              {styleGuideCopy.tokens.body}
             </p>
           </div>
 
@@ -146,11 +117,10 @@ export function StyleGuideContent({ isEnabled }: Props) {
         <section aria-labelledby="primitives-heading" className="grid gap-4">
           <div className="grid gap-2">
             <h2 className="text-2xl font-bold" id="primitives-heading">
-              Local Primitives
+              {styleGuideCopy.primitives.title}
             </h2>
             <p className="text-sm leading-6 text-text-muted">
-              Shared UI belongs in `src/components/ui` only when it stays
-              business-agnostic and enforces repeated behavior.
+              {styleGuideCopy.primitives.body}
             </p>
           </div>
 
@@ -159,44 +129,52 @@ export function StyleGuideContent({ isEnabled }: Props) {
               <div className="flex flex-wrap gap-3">
                 <Button variant="primary">
                   <Check aria-hidden="true" size={18} />
-                  Primary action
+                  {styleGuideCopy.primitives.buttons.primary}
                 </Button>
-                <Button>Secondary action</Button>
+                <Button>{styleGuideCopy.primitives.buttons.secondary}</Button>
                 <Button variant="danger">
                   <Trash2 aria-hidden="true" size={18} />
-                  Delete
+                  {styleGuideCopy.primitives.buttons.delete}
                 </Button>
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <IconButton label="Edit chapter">
+                <IconButton label={styleGuideCopy.primitives.iconButtons.editChapter}>
                   <Edit3 aria-hidden="true" size={18} />
                 </IconButton>
-                <IconButton label="Read story" variant="primary">
+                <IconButton
+                  label={styleGuideCopy.primitives.iconButtons.readStory}
+                  variant="primary"
+                >
                   <BookOpen aria-hidden="true" size={18} />
                 </IconButton>
-                <IconButton label="Delete story" variant="danger">
+                <IconButton
+                  label={styleGuideCopy.primitives.iconButtons.deleteStory}
+                  variant="danger"
+                >
                   <Trash2 aria-hidden="true" size={18} />
                 </IconButton>
               </div>
 
               <div className="grid gap-3">
-                <Alert>Neutral state preserves the current experience mode.</Alert>
-                <Alert variant="success">Success state uses the moss soft role.</Alert>
-                <Alert variant="error">Error state uses restrained oxblood roles.</Alert>
+                <Alert>{styleGuideCopy.alerts.neutral}</Alert>
+                <Alert variant="success">
+                  {styleGuideCopy.alerts.success}
+                </Alert>
+                <Alert variant="error">{styleGuideCopy.alerts.error}</Alert>
               </div>
             </div>
 
             <form className="grid gap-4 rounded-md border border-border-subtle bg-surface-paper p-5 shadow-sm">
               <Field
-                helpText="Field wraps the label, help text, and control rhythm."
-                label="Story title"
+                helpText={styleGuideCopy.form.titleHelp}
+                label={styleGuideCopy.form.title}
               >
-                <TextInput defaultValue="The Glass Orchard" />
+                <TextInput defaultValue={styleGuideCopy.form.titleValue} />
               </Field>
-              <Field label="Story summary">
+              <Field label={styleGuideCopy.form.summary}>
                 <TextArea
-                  defaultValue="A quiet branching tale about a family orchard that remembers every choice."
+                  defaultValue={styleGuideCopy.form.summaryValue}
                   rows={5}
                 />
               </Field>
@@ -207,16 +185,15 @@ export function StyleGuideContent({ isEnabled }: Props) {
         <section aria-labelledby="surfaces-heading" className="grid gap-4">
           <div className="grid gap-2">
             <h2 className="text-2xl font-bold" id="surfaces-heading">
-              Surface Boundaries
+              {styleGuideCopy.surfaces.title}
             </h2>
             <p className="text-sm leading-6 text-text-muted">
-              Surface names are design contracts first. They do not imply a
-              generic wrapper component.
+              {styleGuideCopy.surfaces.body}
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {SURFACES.map((surface) => (
+            {styleGuideCopy.surfaces.items.map((surface) => (
               <article
                 className="min-h-32 rounded-md border border-border-subtle bg-surface-paper p-4 shadow-sm"
                 key={surface.name}
@@ -233,24 +210,16 @@ export function StyleGuideContent({ isEnabled }: Props) {
         <section aria-labelledby="document-heading" className="grid gap-4">
           <div className="grid gap-2">
             <h2 className="text-2xl font-bold" id="document-heading">
-              Document Preview
+              {styleGuideCopy.documentPreview.title}
             </h2>
             <p className="text-sm leading-6 text-text-muted">
-              Markdown rendering belongs to Chapter Document content, while app
-              chrome keeps the TreeTales interface typography.
+              {styleGuideCopy.documentPreview.body}
             </p>
           </div>
 
           <article className="rounded-md border border-border-subtle bg-surface-paper p-6 shadow-sm">
             <MarkdownContent
-              content={[
-                '# A Quiet Branch',
-                '',
-                'The path narrows, and the orchard keeps its own account.',
-                '',
-                '- Branch choices stay narrative before they become navigation.',
-                '- Reader Appearance owns this document typography in product flows.',
-              ].join('\n')}
+              content={styleGuideCopy.documentPreview.content.join('\n')}
             />
           </article>
         </section>

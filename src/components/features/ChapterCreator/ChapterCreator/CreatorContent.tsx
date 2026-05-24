@@ -6,6 +6,7 @@ import {
   ChapterWritingWorkflow,
 } from '@/components/features/shared/ChapterWriting'
 import { Alert } from '@/components/ui/Alert'
+import { chapterWritingCopy, commonCopy } from '@/copy'
 import { useChapterCreator } from '@/hooks/useChapterCreator'
 
 import { ChapterCreationUnavailable } from './CreatorContent/ChapterCreationUnavailable'
@@ -60,7 +61,7 @@ export function CreatorContent({
         errorMessage={errorMessage}
         hasNavigationWarning={hasDraftChanges}
         isSubmitting={isCreating}
-        navigationWarningMessage="Discard this chapter draft?"
+        navigationWarningMessage={chapterWritingCopy.creation.navigationWarning}
         onContentChange={onContentChange}
         onGoBack={onGoBack}
         onOpenDashboard={onOpenDashboard}
@@ -68,7 +69,7 @@ export function CreatorContent({
         onTitleBlur={onTitleBlur}
         onTitleChange={onTitleChange}
         primaryActionIcon={<Save aria-hidden="true" size={16} />}
-        primaryActionLabel="Save"
+        primaryActionLabel={commonCopy.actions.save}
         promptBuilder={{
           parentChapter: parentChapter
             ? {
@@ -79,7 +80,7 @@ export function CreatorContent({
           storyTitle,
           templateKind: isIntroChapter ? 'intro' : 'branch',
         }}
-        submittingActionLabel="Saving..."
+        submittingActionLabel={commonCopy.actions.saving}
         title={title}
         titleError={titleError}
         toolbarContext={getToolbarContext({
@@ -94,13 +95,19 @@ export function CreatorContent({
   if (status === 'loading') {
     return (
       <ChapterWritingUnavailableLayout
-        actionsLabel="Chapter creation actions"
+        actionsLabel={chapterWritingCopy.creation.actionsLabel}
         onOpenDashboard={onOpenDashboard}
         onOpenPrevious={onGoBack}
-        previousLabel={isIntroChapter ? 'Story Reader' : 'Parent Chapter'}
+        previousLabel={
+          isIntroChapter
+            ? chapterWritingCopy.actions.storyReader
+            : chapterWritingCopy.actions.parentChapter
+        }
       >
         <Alert className="shadow-sm">
-          {isIntroChapter ? 'Loading story...' : 'Loading parent chapter...'}
+          {isIntroChapter
+            ? commonCopy.messages.loadingStory
+            : chapterWritingCopy.creation.loadingParentChapter}
         </Alert>
       </ChapterWritingUnavailableLayout>
     )
@@ -108,10 +115,14 @@ export function CreatorContent({
 
   return (
     <ChapterWritingUnavailableLayout
-      actionsLabel="Chapter creation actions"
+      actionsLabel={chapterWritingCopy.creation.actionsLabel}
       onOpenDashboard={onOpenDashboard}
       onOpenPrevious={onGoBack}
-      previousLabel={isIntroChapter ? 'Story Reader' : 'Parent Chapter'}
+      previousLabel={
+        isIntroChapter
+          ? chapterWritingCopy.actions.storyReader
+          : chapterWritingCopy.actions.parentChapter
+      }
     >
       <ChapterCreationUnavailable
         errorMessage={errorMessage}
