@@ -3,6 +3,7 @@ import { Eye, Pencil } from 'lucide-react'
 
 import { MarkdownContent } from '@/components/ui/MarkdownContent'
 import { TextArea } from '@/components/ui/TextArea'
+import { commonCopy, uiCopy } from '@/copy'
 
 interface Props {
   readonly label: string
@@ -20,13 +21,13 @@ export function MarkdownEditor({ label, name, onChange, value }: Props) {
       <div className="relative">
         {isPreviewing ? (
           <section
-            aria-label={`${label} preview`}
+            aria-label={uiCopy.markdownEditor.previewLabel(label)}
             className="min-h-64 rounded-md border border-tt-line bg-tt-paper-deep/45 px-3 py-2"
           >
             <MarkdownContent
               className="space-y-4 pb-16"
               content={value}
-              emptyFallback="Nothing to preview yet."
+              emptyFallback={commonCopy.messages.nothingToPreview}
             />
           </section>
         ) : (
@@ -52,7 +53,7 @@ export function MarkdownEditor({ label, name, onChange, value }: Props) {
           ) : (
             <Eye aria-hidden="true" size={16} />
           )}
-          {isPreviewing ? 'Edit' : 'Preview'}
+          {isPreviewing ? commonCopy.actions.edit : commonCopy.actions.preview}
         </button>
       </div>
     </div>

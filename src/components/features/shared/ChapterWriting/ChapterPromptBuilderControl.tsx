@@ -8,6 +8,7 @@ import {
 import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
 import { TextArea } from '@/components/ui/TextArea'
+import { chapterWritingCopy, promptBuilderCopy } from '@/copy'
 
 interface ParentChapterContext {
   readonly content: string
@@ -29,7 +30,7 @@ export function ChapterPromptBuilderControl({
   draftContent,
   isPromptBuilderDisabled = false,
   parentChapter,
-  promptBuilderDisabledReason = 'Prompt Builder unavailable',
+  promptBuilderDisabledReason = promptBuilderCopy.defaultDisabledReason,
   storyTitle,
   templateKind,
 }: Props) {
@@ -42,12 +43,12 @@ export function ChapterPromptBuilderControl({
   const [roughPlot, setRoughPlot] = useState('')
 
   const prompt = buildPromptBuilderPrompt(templateKind, {
-    chapterTitle: chapterTitle.trim() || 'Untitled chapter',
+    chapterTitle: chapterTitle.trim() || chapterWritingCopy.fields.untitledChapter,
     draftContent,
     parentChapterContent: parentChapter?.content,
     parentChapterTitle: parentChapter?.title,
     roughPlot,
-    storyTitle: storyTitle?.trim() || 'Untitled story',
+    storyTitle: storyTitle?.trim() || promptBuilderCopy.fallbackValues.storyTitle,
   })
 
   async function copyPrompt() {
@@ -56,10 +57,10 @@ export function ChapterPromptBuilderControl({
 
     try {
       await navigator.clipboard.writeText(prompt)
-      setCopyStatus('Prompt copied.')
+      setCopyStatus(promptBuilderCopy.status.copied)
     } catch {
       setFallbackPrompt(prompt)
-      setCopyStatus('Could not copy prompt.')
+      setCopyStatus(promptBuilderCopy.status.copyFailed)
     }
   }
 
@@ -75,11 +76,11 @@ export function ChapterPromptBuilderControl({
       <Button
         aria-controls={menuId}
         aria-expanded={isMenuOpen}
-        aria-label="Writing Assist"
+        aria-label={promptBuilderCopy.actions.trigger}
         className="px-3"
         onClick={() => setIsMenuOpen((current) => !current)}
         size="sm"
-        title="Writing Assist"
+        title={promptBuilderCopy.actions.trigger}
       >
         <Sparkles aria-hidden="true" size={16} />
       </Button>
@@ -97,20 +98,22 @@ export function ChapterPromptBuilderControl({
             title={
               isPromptBuilderDisabled
                 ? promptBuilderDisabledReason
-                : 'Prompt Builder'
+                : promptBuilderCopy.menu.promptBuilder
             }
             type="button"
           >
-            Prompt Builder
+            {promptBuilderCopy.menu.promptBuilder}
           </button>
           <button
             className="mt-1 flex min-h-10 w-full items-center justify-between gap-3 rounded px-3 text-left text-sm font-semibold text-tt-muted/60"
             disabled
-            title="Coming later"
+            title={promptBuilderCopy.menu.comingLater}
             type="button"
           >
-            <span>Write with LLM</span>
-            <span className="text-xs font-medium">Coming later</span>
+            <span>{promptBuilderCopy.menu.writeWithLlm}</span>
+            <span className="text-xs font-medium">
+              {promptBuilderCopy.menu.comingLater}
+            </span>
           </button>
         </div>
       ) : null}
@@ -119,28 +122,28 @@ export function ChapterPromptBuilderControl({
         <Dialog
           bodyClassName="grid gap-4"
           className="max-h-[calc(100vh-2rem)]"
-          closeLabel="Close Prompt Builder"
+          closeLabel={promptBuilderCopy.titleCloseLabel}
           footer={
             <Button onClick={() => void copyPrompt()} variant="primary">
               <Copy aria-hidden="true" size={16} />
-              Copy prompt
+              {promptBuilderCopy.actions.copyPrompt}
             </Button>
           }
           onClose={() => setIsPromptBuilderOpen(false)}
           overlayClassName="z-40 bg-tt-ink/35 px-3 py-4 sm:px-6"
-          title="Prompt Builder"
+          title={promptBuilderCopy.title}
           titleClassName="text-base font-semibold"
           titleId={dialogTitleId}
         >
           <label className="grid gap-2">
             <span className="text-sm font-semibold text-tt-ink">
-              Rough plot
+              {promptBuilderCopy.fields.roughPlot}
             </span>
             <TextArea
               className="min-h-44"
               name="roughPlot"
               onChange={(event) => setRoughPlot(event.target.value)}
-              placeholder="Sketch the chapter beats, choices, tone, or ending you want..."
+              placeholder={promptBuilderCopy.fields.roughPlotPlaceholder}
               value={roughPlot}
             />
           </label>
@@ -148,7 +151,7 @@ export function ChapterPromptBuilderControl({
           {fallbackPrompt ? (
             <label className="grid gap-2">
               <span className="text-sm font-semibold text-tt-ink">
-                Generated prompt
+                {promptBuilderCopy.fields.generatedPrompt}
               </span>
               <TextArea
                 className="min-h-44 font-mono text-sm"

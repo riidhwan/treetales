@@ -2,6 +2,7 @@ import { Home } from 'lucide-react'
 
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
+import { commonCopy } from '@/copy'
 
 interface Props {
   readonly description?: string
@@ -31,7 +32,7 @@ export function StoryEditorUnavailableState({
       ) : null}
       <Button className="mt-5" onClick={onOpenDashboard} size="sm">
         <Home aria-hidden="true" size={16} />
-        Dashboard
+        {commonCopy.actions.dashboard}
       </Button>
     </section>
   )

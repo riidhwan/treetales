@@ -4,6 +4,7 @@ import {
   DASHBOARD_DISPLAY_FONT,
   DASHBOARD_ITALIC_FONT,
 } from './dashboardDisplay'
+import { storyDashboardCopy } from '@/copy'
 
 interface Props {
   readonly isExpanded: boolean
@@ -35,13 +36,13 @@ export function NewStoryCallToAction({
           className="block text-2xl font-bold leading-tight sm:text-3xl"
           style={{ fontFamily: DASHBOARD_DISPLAY_FONT }}
         >
-          Begin a new story
+          {storyDashboardCopy.newStoryCta.title}
         </span>
         <span
           className="mt-1 block text-base italic leading-6 text-surface-paper/75 sm:text-lg"
           style={{ fontFamily: DASHBOARD_ITALIC_FONT }}
         >
-          Branch it, shape it, make it yours
+          {storyDashboardCopy.newStoryCta.subtitle}
         </span>
       </span>
       <ArrowRight

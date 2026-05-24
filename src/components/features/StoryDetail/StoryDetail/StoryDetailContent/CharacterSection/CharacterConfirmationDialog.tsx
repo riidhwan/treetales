@@ -1,4 +1,5 @@
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
+import { commonCopy, storyDetailCopy } from '@/copy'
 import type { useStoryCharacters } from '@/hooks/useStoryCharacters'
 
 type CharacterController = ReturnType<typeof useStoryCharacters>
@@ -15,11 +16,11 @@ export function CharacterConfirmationDialog({
   if (characterDialog.confirmationState.mode === 'discard-changes') {
     return (
       <ConfirmationDialog
-        confirmLabel="Discard Changes"
-        message="Discard unsaved character changes?"
+        confirmLabel={storyDetailCopy.actions.discardChanges}
+        message={storyDetailCopy.character.discardDialog.message}
         onCancel={characterDialog.cancelConfirmation}
         onConfirm={characterDialog.confirmDiscardChanges}
-        title="Discard Character Changes?"
+        title={storyDetailCopy.character.discardDialog.title}
         titleId={titleId}
         variant="danger"
       />
@@ -30,13 +31,17 @@ export function CharacterConfirmationDialog({
     return (
       <ConfirmationDialog
         confirmLabel={
-          characterDialog.isDeleting ? 'Deleting...' : 'Delete Character'
+          characterDialog.isDeleting
+            ? commonCopy.actions.deleting
+            : storyDetailCopy.actions.deleteCharacter
         }
         isConfirming={characterDialog.isDeleting}
-        message={`Delete "${characterDialog.confirmationState.character.name}"? This cannot be undone.`}
+        message={storyDetailCopy.character.deleteDialog.message(
+          characterDialog.confirmationState.character.name,
+        )}
         onCancel={characterDialog.cancelConfirmation}
         onConfirm={() => void characterDialog.confirmDeleteSelectedCharacter()}
-        title="Delete Character?"
+        title={storyDetailCopy.character.deleteDialog.title}
         titleId={titleId}
         variant="danger"
       />

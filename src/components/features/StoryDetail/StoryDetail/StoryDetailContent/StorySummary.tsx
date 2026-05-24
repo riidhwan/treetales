@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react'
 
+import { storyDetailCopy } from '@/copy'
 import type { Story } from '@/services/types'
 
 interface Props {
@@ -11,7 +12,7 @@ export function StorySummary({ onEditStory, story }: Props) {
   return (
     <article className="border-b border-border-subtle pb-9">
       <p className="text-sm font-semibold uppercase tracking-wide text-action-primary">
-        Story summary
+        {storyDetailCopy.storySummary.title}
       </p>
       {story.description ? (
         <p className="mt-4 text-sm leading-6 text-text-muted sm:text-base">
@@ -24,11 +25,11 @@ export function StorySummary({ onEditStory, story }: Props) {
           type="button"
         >
           <span className="italic text-text-muted/70">
-            No description yet - tap to add one.
+            {storyDetailCopy.storySummary.empty}
           </span>
           <span className="inline-flex shrink-0 items-center gap-1 font-semibold text-action-primary">
             <Plus aria-hidden="true" size={18} />
-            Add
+            {storyDetailCopy.storySummary.add}
           </span>
         </button>
       )}

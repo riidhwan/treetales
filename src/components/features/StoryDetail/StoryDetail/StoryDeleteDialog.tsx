@@ -1,4 +1,5 @@
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
+import { commonCopy, storyDetailCopy } from '@/copy'
 
 interface Props {
   readonly isDeleting: boolean
@@ -23,14 +24,18 @@ export function StoryDeleteDialog({
 
   return (
     <ConfirmationDialog
-      confirmLabel={isDeleting ? 'Deleting...' : 'Delete Story'}
+      confirmLabel={
+        isDeleting
+          ? commonCopy.actions.deleting
+          : storyDetailCopy.actions.deleteStory
+      }
       isConfirming={isDeleting}
-      message={`Delete "${storyTitle}"? This cannot be undone.`}
+      message={storyDetailCopy.deleteDialog.message(storyTitle)}
       onCancel={onCancel}
       onConfirm={() => {
         void onConfirm()
       }}
-      title="Delete Story?"
+      title={storyDetailCopy.deleteDialog.title}
       titleId={titleId}
       variant="danger"
     />

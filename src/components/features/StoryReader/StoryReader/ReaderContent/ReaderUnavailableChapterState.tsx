@@ -1,6 +1,7 @@
 import { BookOpen, PlusCircle } from 'lucide-react'
 
 import { Button } from '@/components/ui/Button'
+import { storyReaderCopy } from '@/copy'
 import { useStoryReader } from '@/hooks/useStoryReader'
 import type { Story } from '@/services/types'
 
@@ -24,23 +25,23 @@ export function ReaderUnavailableChapterState({
       </p>
       <h1 className="mt-2 text-2xl font-bold">
         {status === 'missing-chapter'
-          ? 'Chapter not found'
-          : 'No Intro Chapter yet'}
+          ? storyReaderCopy.missingChapter.title
+          : storyReaderCopy.noIntroChapter.title}
       </h1>
       <p className="mt-3 text-sm leading-6 text-text-muted">
         {status === 'missing-chapter'
-          ? 'This chapter is not part of the selected story.'
-          : 'Add an Intro Chapter to give this Story a place to begin.'}
+          ? storyReaderCopy.missingChapter.body
+          : storyReaderCopy.noIntroChapter.body}
       </p>
       {status === 'missing-chapter' ? null : (
         <div className="mt-6 flex flex-wrap gap-3">
           <Button onClick={onCreateIntroChapter} variant="primary">
             <PlusCircle aria-hidden="true" size={16} />
-            Add Intro Chapter
+            {storyReaderCopy.actions.addIntroChapter}
           </Button>
           <Button onClick={onOpenStoryDetails}>
             <BookOpen aria-hidden="true" size={16} />
-            Story Details
+            {storyReaderCopy.actions.storyDetails}
           </Button>
         </div>
       )}

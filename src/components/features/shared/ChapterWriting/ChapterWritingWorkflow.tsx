@@ -11,6 +11,7 @@ import { ReaderAppearanceControl } from '@/components/domain/ReaderAppearanceCon
 import { Alert } from '@/components/ui/Alert'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 import { IconButton } from '@/components/ui/IconButton'
+import { chapterWritingCopy, commonCopy } from '@/copy'
 import { useReaderAppearance } from '@/hooks/useReaderAppearance'
 
 interface ParentChapterContext {
@@ -162,12 +163,12 @@ export function ChapterWritingWorkflow({
       <ChapterWritingSurface
         canSubmit={canSubmit}
         content={content}
-        contentPlaceholder="Write this chapter in markdown..."
+        contentPlaceholder={chapterWritingCopy.fields.contentPlaceholder}
         isSubmitting={isSubmitting}
         mode={editorMode}
         navigationActions={
           <IconButton
-            label="Back"
+            label={commonCopy.actions.back}
             onClick={() => confirmNavigation(onGoBack)}
             size="sm"
           >
@@ -208,7 +209,7 @@ export function ChapterWritingWorkflow({
               templateKind={promptBuilder.templateKind}
             />
             <IconButton
-              label="Dashboard"
+              label={commonCopy.actions.dashboard}
               onClick={() => confirmNavigation(onOpenDashboard)}
               size="sm"
             >
@@ -219,17 +220,17 @@ export function ChapterWritingWorkflow({
         submittingActionLabel={submittingActionLabel}
         title={title}
         titleError={titleError}
-        titlePlaceholder="Untitled chapter"
+        titlePlaceholder={chapterWritingCopy.fields.untitledChapter}
         toolbarContext={toolbarContext}
       />
 
       {pendingNavigation ? (
         <ConfirmationDialog
-          confirmLabel="Discard Changes"
+          confirmLabel={chapterWritingCopy.actions.discardChanges}
           message={navigationWarningMessage}
           onCancel={cancelPendingNavigation}
           onConfirm={confirmPendingNavigation}
-          title="Discard Chapter Changes?"
+          title={chapterWritingCopy.warningDialog.title}
           titleId={navigationConfirmationTitleId}
           variant="danger"
         />

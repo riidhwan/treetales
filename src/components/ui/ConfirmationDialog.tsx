@@ -2,6 +2,7 @@ import { AlertTriangle } from 'lucide-react'
 
 import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
+import { commonCopy, uiCopy } from '@/copy'
 
 type ConfirmationVariant = 'danger' | 'primary'
 
@@ -18,7 +19,7 @@ interface Props {
 }
 
 export function ConfirmationDialog({
-  cancelLabel = 'Cancel',
+  cancelLabel = commonCopy.actions.cancel,
   confirmLabel,
   isConfirming = false,
   message,
@@ -37,7 +38,7 @@ export function ConfirmationDialog({
   return (
     <Dialog
       bodyClassName="pb-6"
-      closeLabel="Close confirmation dialog"
+      closeLabel={uiCopy.confirmationDialog.closeLabel}
       footer={
         <>
           <Button disabled={isConfirming} onClick={handleCancel}>

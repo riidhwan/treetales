@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { MarkdownContent } from '@/components/ui/MarkdownContent'
 import { TextArea } from '@/components/ui/TextArea'
 import { Toolbar, ToolbarContext } from '@/components/ui/Toolbar'
+import { chapterWritingCopy, commonCopy } from '@/copy'
 
 export type ChapterWritingMode = 'preview' | 'write'
 
@@ -90,7 +91,7 @@ export function ChapterWritingSurface({
     <form className="min-h-screen pb-24 sm:pb-20" onSubmit={onSubmit}>
       <Toolbar
         context={<ToolbarContext>{toolbarContext}</ToolbarContext>}
-        label="Chapter writing actions"
+        label={chapterWritingCopy.surface.toolbarLabel}
         leading={navigationActions}
         primary={
           <Button
@@ -108,11 +109,11 @@ export function ChapterWritingSurface({
 
       <section className="mx-auto w-full max-w-5xl px-0 py-0 sm:px-6 sm:py-6 lg:py-10">
         <section
-          aria-label="Chapter document"
+          aria-label={chapterWritingCopy.surface.documentLabel}
           className="mx-auto min-h-[calc(100vh-7rem)] w-full max-w-[52rem] border-border-subtle bg-surface-paper px-2 py-5 shadow-sm sm:min-h-[calc(100vh-10rem)] sm:border sm:px-8 sm:py-8 lg:px-8"
         >
           <label className="block px-2 sm:px-0" style={readerDocumentStyle}>
-            <span className="sr-only">Title</span>
+            <span className="sr-only">{commonCopy.labels.title}</span>
             <input
               aria-invalid={Boolean(titleError)}
               className="w-full border-0 bg-transparent p-0 text-[1.875em] font-bold leading-tight text-text-primary outline-none placeholder:text-text-muted/55 focus:ring-0 sm:text-[2.25em]"
@@ -132,19 +133,19 @@ export function ChapterWritingSurface({
           <div className="mt-5 sm:mt-6">
             {mode === 'preview' ? (
               <section
-                aria-label="Content preview"
+                aria-label={chapterWritingCopy.surface.contentPreviewLabel}
                 className="min-h-[calc(100vh-18rem)] px-2 sm:px-0"
               >
                 <MarkdownContent
                   className="space-y-5"
                   content={content}
-                  emptyFallback="Nothing to preview yet."
+                  emptyFallback={commonCopy.messages.nothingToPreview}
                   style={readerDocumentStyle}
                 />
               </section>
             ) : (
               <label className="block">
-                <span className="sr-only">Content</span>
+                <span className="sr-only">{commonCopy.labels.content}</span>
                 <TextArea
                   ref={contentTextAreaRef}
                   className="min-h-[calc(100vh-15rem)] w-full resize-none overflow-hidden border-0 p-0 leading-8 shadow-none outline-none focus:border-transparent! focus:ring-0! sm:min-h-[calc(100vh-18rem)]"
@@ -161,20 +162,20 @@ export function ChapterWritingSurface({
       </section>
 
       <div
-        aria-label="Editor mode"
+        aria-label={chapterWritingCopy.surface.editorModeLabel}
         className="fixed bottom-14 left-1/2 z-30 flex -translate-x-1/2 rounded-md border border-border-subtle bg-surface-paper p-1 shadow-lg sm:bottom-4"
         role="group"
       >
         <ModeButton
           isSelected={mode === 'write'}
-          label="Write"
+          label={commonCopy.actions.write}
           onClick={() => onModeChange('write')}
         >
           <Pencil aria-hidden="true" size={15} />
         </ModeButton>
         <ModeButton
           isSelected={mode === 'preview'}
-          label="Preview"
+          label={commonCopy.actions.preview}
           onClick={() => onModeChange('preview')}
         >
           <Eye aria-hidden="true" size={15} />
@@ -182,7 +183,7 @@ export function ChapterWritingSurface({
       </div>
 
       <p className="fixed bottom-4 right-3 z-30 rounded-md border border-border-subtle bg-surface-paper/95 px-2 py-1 text-xs font-medium text-text-muted shadow-sm sm:right-5">
-        {wordCount} {wordCount === 1 ? 'word' : 'words'}
+        {chapterWritingCopy.surface.wordCount(wordCount)}
       </p>
     </form>
   )

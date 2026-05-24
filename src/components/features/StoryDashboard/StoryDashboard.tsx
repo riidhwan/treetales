@@ -3,6 +3,7 @@ import {
   useStoryDashboard,
 } from '@/hooks/useStoryDashboard'
 import { Alert } from '@/components/ui/Alert'
+import { appCopy, storyDashboardCopy } from '@/copy'
 
 import {
   DASHBOARD_DISPLAY_FONT,
@@ -59,7 +60,7 @@ export function StoryDashboard({
             className="text-3xl font-bold text-action-primary"
             style={{ fontFamily: DASHBOARD_DISPLAY_FONT }}
           >
-            TreeTales
+            {appCopy.brand}
           </p>
         </div>
       </header>
@@ -68,29 +69,29 @@ export function StoryDashboard({
         <header className="grid gap-7">
           <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-5">
             <p className="text-sm font-semibold uppercase leading-none text-focus-ring">
-              Your Library
+              {storyDashboardCopy.header.kicker}
             </p>
             <span className="h-px bg-border-subtle" />
           </div>
           <div className="max-w-2xl">
             <h1
-              aria-label="Your stories"
+              aria-label={storyDashboardCopy.header.ariaTitle}
               className="grid text-5xl font-bold leading-[0.95] text-text-primary sm:text-7xl"
               style={{ fontFamily: DASHBOARD_DISPLAY_FONT }}
             >
-              <span>Your</span>
+              <span>{storyDashboardCopy.header.titleFirstLine}</span>
               <span
                 className="font-bold italic text-action-primary"
                 style={{ fontFamily: DASHBOARD_ITALIC_FONT }}
               >
-                stories
+                {storyDashboardCopy.header.titleSecondLine}
               </span>
             </h1>
             <p
               className="mt-4 max-w-xl text-lg italic leading-7 text-text-muted sm:text-xl sm:leading-8"
               style={{ fontFamily: DASHBOARD_ITALIC_FONT }}
             >
-              Every branch, every choice, all your worlds right here.
+              {storyDashboardCopy.header.subtitle}
             </p>
           </div>
         </header>

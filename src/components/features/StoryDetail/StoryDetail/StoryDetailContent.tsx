@@ -1,4 +1,5 @@
 import { Alert } from '@/components/ui/Alert'
+import { commonCopy } from '@/copy'
 import type { useStoryCharacters } from '@/hooks/useStoryCharacters'
 import { useStoryDetail } from '@/hooks/useStoryDetail'
 import type { Story } from '@/services/types'
@@ -32,7 +33,7 @@ export function StoryDetailContent({
   story,
 }: Props) {
   if (status === 'loading') {
-    return <Alert className="shadow-sm">Loading story...</Alert>
+    return <Alert className="shadow-sm">{commonCopy.messages.loadingStory}</Alert>
   }
 
   if (status === 'error') {

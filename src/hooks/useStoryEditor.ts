@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import { storyEditorCopy } from '@/copy'
 import { getErrorMessage } from '@/lib/errors'
 import { getStoryById, updateStory } from '@/services/storyService'
 import type { Story, UpdateStoryInput } from '@/services/types'
@@ -105,7 +106,7 @@ export function useStoryEditor({
       setStory(updatedStory)
       setTitle(updatedStory.title)
       setDescription(updatedStory.description)
-      setSuccessMessage('Story saved.')
+      setSuccessMessage(storyEditorCopy.status.saved)
     } catch (error) {
       setErrorMessage(getErrorMessage(error))
     } finally {

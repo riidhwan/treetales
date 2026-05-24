@@ -1,4 +1,5 @@
 import { Alert } from '@/components/ui/Alert'
+import { storyDashboardCopy } from '@/copy'
 import type { Story } from '@/services/types'
 
 import { EmptyStoryLibrary } from './DashboardStoriesContent/EmptyStoryLibrary'
@@ -22,7 +23,7 @@ export function DashboardStoriesContent({
   stories,
 }: Props) {
   if (isLoading) {
-    return <Alert>Loading stories...</Alert>
+    return <Alert>{storyDashboardCopy.loading}</Alert>
   }
 
   if (stories.length === 0) {

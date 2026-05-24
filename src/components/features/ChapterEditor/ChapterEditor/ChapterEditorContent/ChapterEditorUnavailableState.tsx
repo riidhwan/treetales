@@ -1,5 +1,6 @@
 import { ChapterWritingMissingState } from '@/components/features/shared/ChapterWriting'
 import { Alert } from '@/components/ui/Alert'
+import { chapterWritingCopy, commonCopy } from '@/copy'
 import { useChapterEditor } from '@/hooks/useChapterEditor'
 
 interface Props {
@@ -14,14 +15,18 @@ export function ChapterEditorUnavailableState({
   storyTitle,
 }: Props) {
   if (status === 'loading') {
-    return <Alert className="shadow-sm">Loading chapter...</Alert>
+    return (
+      <Alert className="shadow-sm">
+        {chapterWritingCopy.editor.loadingChapter}
+      </Alert>
+    )
   }
 
   if (status === 'missing-story') {
     return (
       <ChapterWritingMissingState
-        description="This story may have been deleted or is unavailable in this browser."
-        title="Story not found"
+        description={commonCopy.messages.storyNotFound.body}
+        title={commonCopy.messages.storyNotFound.title}
       />
     )
   }
@@ -29,9 +34,9 @@ export function ChapterEditorUnavailableState({
   if (status === 'missing-chapter') {
     return (
       <ChapterWritingMissingState
-        description="This chapter is not part of the selected story."
+        description={chapterWritingCopy.editor.missingChapter.body}
         kicker={storyTitle}
-        title="Chapter not found"
+        title={chapterWritingCopy.editor.missingChapter.title}
       />
     )
   }

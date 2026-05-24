@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react'
 import type { useStoryCharacters } from '@/hooks/useStoryCharacters'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
+import { storyDetailCopy } from '@/copy'
 
 import { CharacterConfirmationDialog } from './CharacterSection/CharacterConfirmationDialog'
 import { CharacterDialogSlot } from './CharacterSection/CharacterDialogSlot'
@@ -24,17 +25,17 @@ export function CharacterSection({ characterDialog, titleId }: Props) {
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-action-primary">
-              Characters
+              {storyDetailCopy.character.heading}
             </p>
           </div>
           <Button
-            aria-label="Add Character"
+            aria-label={storyDetailCopy.actions.addCharacter}
             className="rounded-full px-5"
             onClick={characterDialog.openCreateDialog}
             variant="primary"
           >
             <Plus aria-hidden="true" size={18} />
-            Add
+            {storyDetailCopy.storySummary.add}
           </Button>
         </div>
 

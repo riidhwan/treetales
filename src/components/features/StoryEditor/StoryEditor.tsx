@@ -5,6 +5,7 @@ import {
   type StoryEditorServices,
   useStoryEditor,
 } from '@/hooks/useStoryEditor'
+import { storyEditorCopy } from '@/copy'
 
 import { StoryEditorContent } from './StoryEditor/StoryEditorContent'
 
@@ -43,7 +44,7 @@ export function StoryEditor({
     <main className="min-h-screen bg-background-app text-text-primary">
       <header className="border-b border-border-subtle/70 bg-surface-paper/35">
         <nav
-          aria-label="Story editor navigation"
+          aria-label={storyEditorCopy.navigation.label}
           className="mx-auto flex min-h-16 w-full max-w-3xl items-center justify-between px-5 sm:px-8"
         >
           <button
@@ -52,7 +53,7 @@ export function StoryEditor({
             type="button"
           >
             <ChevronLeft aria-hidden="true" size={22} />
-            Story
+            {storyEditorCopy.navigation.story}
           </button>
         </nav>
       </header>
@@ -60,7 +61,7 @@ export function StoryEditor({
       <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-5 py-10 sm:px-8">
         <header>
           <h1 className="text-sm font-semibold uppercase tracking-wide text-action-primary">
-            Story editor
+            {storyEditorCopy.heading}
           </h1>
         </header>
 

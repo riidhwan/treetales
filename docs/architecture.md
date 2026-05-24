@@ -30,6 +30,7 @@ src/
 ├── routes/           # Thin TanStack Router file routes
 ├── components/       # See component layers below
 ├── hooks/            # Feature state/effects extracted from UI components
+├── copy/             # Typed TreeTales-owned English UI copy and prompt text
 ├── services/         # Application-facing story/chapter operations
 ├── repositories/     # Persistence adapters and storage-specific mapping
 ├── lib/              # Shared pure utilities and boundary helpers
@@ -43,9 +44,25 @@ shared across unrelated route or feature boundaries.
 
 `src/config.ts` owns app-level tuneable constants that are likely to be adjusted
 over time or shared across feature boundaries. Current examples include Reader
-Appearance font options, size limits, defaults, and storage keys. Keep isolated
-copy, labels, and one-off layout values close to the component or module that
-owns them.
+Appearance font options, size limits, defaults, and storage keys. Keep one-off
+layout values close to the component or module that owns them.
+
+`src/copy/` owns the typed English Copy Catalog for TreeTales-owned UI text,
+accessibility labels, route/head metadata owned in TypeScript, hook-owned
+display messages, and Prompt Builder templates. Copy modules are organized by
+feature area, plus shared common labels, and export nested `as const` objects
+with functions for complete dynamic sentences. Components and hooks may import
+from the Copy Catalog when they render or expose user-visible text.
+
+The Copy Catalog is not a runtime i18n system yet. It should not introduce
+locale switching, string-key lookup such as `t('story.reader.title')`, or a new
+dependency until TreeTales has translated locale bundles or runtime locale
+requirements. Services should stay free of UI copy. User-authored Story,
+Chapter, Character, and Character Property content remains persisted content,
+not catalog copy. The built-in example Story remains seeded content owned by
+its service boundary unless localized seeded content becomes a separate feature.
+Static `public/manifest.json` install metadata also stays static until a
+manifest generation step is introduced.
 
 ## `src/config.ts` — Tuneable Constants
 

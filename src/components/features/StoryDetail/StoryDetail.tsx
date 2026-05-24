@@ -9,6 +9,7 @@ import {
   type StoryDetailServices,
   useStoryDetail,
 } from '@/hooks/useStoryDetail'
+import { commonCopy, storyDetailCopy } from '@/copy'
 
 import { StoryDeleteDialog } from './StoryDetail/StoryDeleteDialog'
 import { StoryDetailContent } from './StoryDetail/StoryDetailContent'
@@ -53,7 +54,7 @@ export function StoryDetail({
     <main className="min-h-screen bg-background-app text-text-primary">
       <header className="border-b border-border-subtle/70 bg-surface-paper/35">
         <nav
-          aria-label="Story detail navigation"
+          aria-label={storyDetailCopy.navigation.label}
           className="mx-auto flex min-h-16 w-full max-w-3xl items-center justify-between px-5 sm:px-8"
         >
           <button
@@ -62,7 +63,7 @@ export function StoryDetail({
             type="button"
           >
             <ChevronLeft aria-hidden="true" size={22} />
-            Dashboard
+            {commonCopy.actions.dashboard}
           </button>
         </nav>
       </header>
