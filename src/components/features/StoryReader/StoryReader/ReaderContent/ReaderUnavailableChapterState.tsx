@@ -1,30 +1,22 @@
-import { BookOpen, PlusCircle } from 'lucide-react'
+import { PlusCircle } from 'lucide-react'
 
 import { ChapterDocumentShell } from '@/components/domain/ChapterDocumentShell'
 import { Button } from '@/components/ui/Button'
 import { storyReaderCopy } from '@/copy'
 import { useStoryReader } from '@/hooks/useStoryReader'
-import type { Story } from '@/services/types'
 
 interface Props {
   readonly onCreateIntroChapter: () => void
-  readonly onOpenStoryDetails: () => void
   readonly status: ReturnType<typeof useStoryReader>['status']
-  readonly story: Story
 }
 
 export function ReaderUnavailableChapterState({
   onCreateIntroChapter,
-  onOpenStoryDetails,
   status,
-  story,
 }: Props) {
   return (
     <ChapterDocumentShell>
-      <p className="text-sm font-semibold uppercase tracking-wide text-action-primary">
-        {story.title}
-      </p>
-      <h1 className="mt-2 text-2xl font-bold">
+      <h1 className="text-2xl font-bold">
         {status === 'missing-chapter'
           ? storyReaderCopy.missingChapter.title
           : storyReaderCopy.noIntroChapter.title}
@@ -39,10 +31,6 @@ export function ReaderUnavailableChapterState({
           <Button onClick={onCreateIntroChapter} variant="primary">
             <PlusCircle aria-hidden="true" size={16} />
             {storyReaderCopy.actions.addIntroChapter}
-          </Button>
-          <Button onClick={onOpenStoryDetails}>
-            <BookOpen aria-hidden="true" size={16} />
-            {storyReaderCopy.actions.storyDetails}
           </Button>
         </div>
       )}

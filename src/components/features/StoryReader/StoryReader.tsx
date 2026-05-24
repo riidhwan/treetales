@@ -83,7 +83,6 @@ export function StoryReader({
             onCreateChildChapter(storyId, parentChapterId)
           }
           onCreateIntroChapter={() => onCreateIntroChapter(storyId)}
-          onOpenStoryDetails={() => onOpenStoryDetails(storyId)}
           onSelectNextChapter={selectNextChapter}
           readerFontFamily={selectedFontFamily}
           readerFontSizePt={readerAppearance.fontSizePt}
