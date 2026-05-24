@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 
 import { IconButton } from '@/components/ui/IconButton'
@@ -110,7 +111,7 @@ export function Dialog({
     }
   }, [onClose])
 
-  return (
+  return createPortal(
     <div
       className={cn(
         'fixed inset-0 z-50 grid place-items-center bg-text-primary/45 px-4 py-6',
@@ -167,6 +168,7 @@ export function Dialog({
           </footer>
         ) : null}
       </section>
-    </div>
+    </div>,
+    document.body,
   )
 }

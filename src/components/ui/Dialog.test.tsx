@@ -48,6 +48,25 @@ describe('Dialog', () => {
     expect(screen.getByRole('button', { name: 'Save' })).toBeTruthy()
   })
 
+  it('renders outside the local component container', () => {
+    render(
+      <div data-testid="local-container">
+        <Dialog
+          onClose={() => undefined}
+          title="Prompt Builder"
+          titleId="prompt-title"
+        >
+          <p>Prompt content</p>
+        </Dialog>
+      </div>,
+    )
+
+    const dialog = screen.getByRole('dialog', { name: 'Prompt Builder' })
+
+    expect(screen.getByTestId('local-container').contains(dialog)).toBe(false)
+    expect(document.body.contains(dialog)).toBe(true)
+  })
+
   it('closes on Escape', () => {
     const onClose = vi.fn()
 
