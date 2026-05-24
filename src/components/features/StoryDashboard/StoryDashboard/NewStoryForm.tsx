@@ -31,7 +31,7 @@ export function NewStoryForm({
   return (
     <form
       aria-label={storyDashboardCopy.form.label}
-      className="grid gap-4 rounded-[1.5rem] border border-border-subtle bg-surface-paper/75 p-5 shadow-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto] sm:items-end sm:p-6"
+      className="grid gap-4 rounded-2xl border border-border-subtle bg-surface-paper/75 p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto] sm:items-end sm:rounded-xl"
       onSubmit={(event) => {
         event.preventDefault()
         void onCreateStory()
@@ -54,7 +54,7 @@ export function NewStoryForm({
         />
       </Field>
       <Button
-        className="min-h-12 w-full rounded-xl sm:w-auto"
+        className="min-h-11 w-full rounded-lg sm:w-auto"
         disabled={!canCreate}
         type="submit"
         variant="primary"

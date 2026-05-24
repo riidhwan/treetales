@@ -58,7 +58,7 @@ export function StoryDetail({
         previousLabel={commonCopy.actions.dashboard}
       />
 
-      <section className="mx-auto flex w-full max-w-3xl flex-col gap-9 px-5 py-10 sm:px-8">
+      <section className="mx-auto flex w-full max-w-3xl flex-col gap-7 px-5 py-8 sm:px-8">
         <StoryDetailHeader
           onEditStory={onEditStory}
           onReadStory={onReadStory}

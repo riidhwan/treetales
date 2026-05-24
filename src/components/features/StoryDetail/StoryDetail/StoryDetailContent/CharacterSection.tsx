@@ -21,20 +21,20 @@ export function CharacterSection({ characterDialog, titleId }: Props) {
 
   return (
     <>
-      <section className="border-b border-border-subtle pb-9">
+      <section className="border-b border-border-subtle pb-7">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-action-primary">
+            <p className="text-xs font-semibold uppercase tracking-wide text-action-primary">
               {storyDetailCopy.character.heading}
             </p>
           </div>
           <Button
             aria-label={storyDetailCopy.actions.addCharacter}
-            className="rounded-full px-5"
+            className="rounded-full px-4"
             onClick={characterDialog.openCreateDialog}
             variant="primary"
           >
-            <Plus aria-hidden="true" size={18} />
+            <Plus aria-hidden="true" size={16} />
             {storyDetailCopy.storySummary.add}
           </Button>
         </div>

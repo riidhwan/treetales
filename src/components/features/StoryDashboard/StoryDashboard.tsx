@@ -51,15 +51,15 @@ export function StoryDashboard({
   return (
     <main className="min-h-screen bg-background-app text-text-primary">
       <header>
-        <div className="mx-auto flex min-h-28 w-full max-w-4xl items-center gap-4 px-5 sm:px-8 lg:px-10">
+        <div className="mx-auto flex min-h-20 w-full max-w-4xl items-center gap-3 px-5 sm:min-h-24 sm:px-8 lg:px-10">
           <img
             alt=""
             aria-hidden="true"
-            className="size-14 rounded-2xl shadow-md"
+            className="size-11 rounded-xl shadow-md sm:size-12"
             src="/logo192.png"
           />
           <p
-            className="text-3xl font-bold text-action-primary"
+            className="text-2xl font-bold text-action-primary"
             style={{ fontFamily: DASHBOARD_DISPLAY_FONT }}
           >
             {appCopy.brand}
@@ -67,10 +67,10 @@ export function StoryDashboard({
         </div>
       </header>
 
-      <section className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-5 pb-14 pt-8 sm:gap-7 sm:px-8 lg:px-10">
-        <header className="grid gap-7 sm:gap-6">
-          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-5">
-            <p className="text-sm font-semibold uppercase leading-none text-focus-ring">
+      <section className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-5 pb-12 pt-5 sm:gap-6 sm:px-8 sm:pt-6 lg:px-10">
+        <header className="grid gap-5">
+          <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4">
+            <p className="text-xs font-semibold uppercase leading-none text-focus-ring">
               {storyDashboardCopy.header.kicker}
             </p>
             <span className="h-px bg-border-subtle" />
@@ -78,7 +78,7 @@ export function StoryDashboard({
           <div className="max-w-2xl">
             <h1
               aria-label={storyDashboardCopy.header.ariaTitle}
-              className="grid text-5xl font-bold leading-[0.95] text-text-primary sm:text-6xl"
+              className="grid text-4xl font-bold leading-[0.95] text-text-primary sm:text-5xl"
               style={{ fontFamily: DASHBOARD_DISPLAY_FONT }}
             >
               <span>{storyDashboardCopy.header.titleFirstLine}</span>
@@ -90,7 +90,7 @@ export function StoryDashboard({
               </span>
             </h1>
             <p
-              className="mt-4 max-w-xl text-lg italic leading-7 text-text-muted"
+              className="mt-3 max-w-xl text-base italic leading-6 text-text-muted"
               style={{ fontFamily: DASHBOARD_ITALIC_FONT }}
             >
               {storyDashboardCopy.header.subtitle}
