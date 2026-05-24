@@ -1,5 +1,7 @@
+import { ManagementTopBar } from '@/components/features/shared/ManagementTopBar'
 import type { ReaderFontId } from '@/config'
 import { useReaderAppearance } from '@/hooks/useReaderAppearance'
+import { storyReaderCopy } from '@/copy'
 import type { Chapter, Story } from '@/services/types'
 
 import { ReaderToolbar } from './ReaderToolbarSlot/ReaderToolbar'
@@ -39,8 +41,18 @@ export function ReaderToolbarSlot({
   readerAppearance,
   story,
 }: Props) {
-  if (!isReadingChapter || !story || !currentChapter) {
+  if (!story) {
     return null
+  }
+
+  if (!isReadingChapter || !currentChapter) {
+    return (
+      <ManagementTopBar
+        label={storyReaderCopy.toolbar.label}
+        onBack={onOpenStoryDetails}
+        previousLabel={storyReaderCopy.actions.storyDetails}
+      />
+    )
   }
 
   return (

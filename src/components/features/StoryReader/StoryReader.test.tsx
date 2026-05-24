@@ -218,6 +218,8 @@ describe('StoryReader', () => {
         'Add an Intro Chapter to give this Story a place to begin.',
       ),
     ).toBeTruthy()
+    expect(screen.getByRole('navigation', { name: 'Reader actions' }))
+      .toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Add Intro Chapter' }))
     fireEvent.click(screen.getByRole('button', { name: 'Story Details' }))
 
@@ -529,14 +531,20 @@ describe('StoryReader', () => {
   })
 
   it('shows a missing chapter state for an invalid chapter id', async () => {
+    const onOpenStoryDetails = vi.fn()
     const services = createServices()
 
-    renderReader({ chapterId: 'missing-chapter', services })
+    renderReader({ chapterId: 'missing-chapter', onOpenStoryDetails, services })
 
     expect(await screen.findByText('Chapter not found')).toBeTruthy()
     expect(
       screen.getByText('This chapter is not part of the selected story.'),
     ).toBeTruthy()
+    expect(screen.getByRole('navigation', { name: 'Reader actions' }))
+      .toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Story Details' }))
+
+    expect(onOpenStoryDetails).toHaveBeenCalledWith('story-1')
     expect(services.getNextChapters).not.toHaveBeenCalled()
   })
 
@@ -756,7 +764,6 @@ describe('StoryReader', () => {
         nextChapters={[]}
         onCreateChildChapter={vi.fn()}
         onCreateIntroChapter={vi.fn()}
-        onOpenStoryDetails={vi.fn()}
         onSelectNextChapter={vi.fn()}
         readerFontFamily="Readerly"
         readerFontSizePt={14}

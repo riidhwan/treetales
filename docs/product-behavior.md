@@ -52,10 +52,10 @@
   lands on the first chapter.
 - When a Story has no Intro Chapter, opening the reader shows an empty state
   with an "Add Intro Chapter" action that opens the dedicated Intro Chapter
-  creation page and a secondary action back to Story detail. The empty state
-  uses the heading "No Intro Chapter yet", the body "Add an Intro Chapter to
-  give this Story a place to begin.", the primary action "Add Intro Chapter",
-  and the secondary action "Story Details".
+  creation page. A slim toolbar above the empty state provides text-labelled
+  navigation back to Story detail. The empty state uses the heading "No Intro
+  Chapter yet", the body "Add an Intro Chapter to give this Story a place to
+  begin.", and the primary action "Add Intro Chapter".
 - Chapter displays title and content rendered from markdown text. Supported
   markdown includes common markdown plus GFM tables, task lists,
   strikethrough, autolinks, and single-newline breaks. Raw HTML in chapter

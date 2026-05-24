@@ -15,7 +15,6 @@ interface Props {
   readonly nextChapters: Chapter[]
   readonly onCreateChildChapter: (parentChapterId: string) => void
   readonly onCreateIntroChapter: () => void
-  readonly onOpenStoryDetails: () => void
   readonly onSelectNextChapter: (chapter: Chapter) => void
   readonly readerFontFamily: string
   readonly readerFontSizePt: number
@@ -29,7 +28,6 @@ export function ReaderContent({
   nextChapters,
   onCreateChildChapter,
   onCreateIntroChapter,
-  onOpenStoryDetails,
   onSelectNextChapter,
   readerFontFamily,
   readerFontSizePt,
@@ -57,9 +55,7 @@ export function ReaderContent({
     return (
       <ReaderUnavailableChapterState
         onCreateIntroChapter={onCreateIntroChapter}
-        onOpenStoryDetails={onOpenStoryDetails}
         status={status}
-        story={story}
       />
     )
   }
