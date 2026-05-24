@@ -40,6 +40,18 @@ Generated files, such as `src/routeTree.gen.ts` and
 `docs/navigation-flow.md`, are excluded from the changed-line limit. List
 generated files separately in the PR description.
 
+Non-logic prose/content blocks may be reported separately from the changed-line
+budget when they do not alter control flow, persistence shape, validation,
+navigation, permissions, or user obligations. UI copy, accessibility labels,
+Prompt Builder templates, legal/provenance wording, and tests count toward the
+changed-line budget unless the PR explicitly reports them as content-only and
+explains why they are not behaviour-relevant.
+
+Large built-in story content that is reported outside the changed-line budget
+still needs focused provenance review. Each Built-in Example Story should name
+its source title, author or collector when known, publication year or source,
+the basis for U.S. public-domain use, and a short adaptation note.
+
 If a planned change is likely to exceed any of these limits, split the task
 before implementation. If implementation reveals that a limit will be exceeded,
 stop and ask whether to split the remaining work or continue with an explicitly
