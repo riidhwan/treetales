@@ -343,25 +343,150 @@ Then the godfather reclaims the wish-power. Its effects vanish with it: the prin
             'Project Gutenberg eBook #30400, public domain in the USA.',
         },
       ],
-      adaptationNote:
-        'Adapted into a branching TreeTales starter from the source premise.',
+      adaptationNote: `Adapted into a branching TreeTales starter from the source premise. The main path follows Princess Petulant, Martin, the pine dwarfs, the conversation country, the rescue, and the Toymaker's two tops; alternate branches let the Princess practice patience, Martin become trapped by talk, or the children stay longer with the Toymaker.`,
       displayText:
         'Adapted from "The Wonderful Toymaker" by Evelyn Sharp, first published 1898.',
     },
     chapters: [
       {
         templateId: 'intro',
-        title: 'A Toy Fit for a Palace',
-        content:
-          'The Wonderful Toymaker arrives at the palace with a toy no one has seen before, and the nursery holds its breath.',
+        title: 'No Toy Will Do',
+        content: `Princess Petulant has every toy the royal nursery can hold, and none of them is new enough. She cries on the floor until the nurses sigh, the court whispers, and the King calls a council to ask why a well-dressed government cannot invent one more amusement.
+
+The Prime Minister suggests Martin, his quiet son, who would rather dream than become Prime Minister. Martin sits beside the Princess and promises to find a new toy if she promises not to scold him for running faster, growing quiet, or ending a game before she is ready.
+
+The Princess agrees at once. Martin gives himself four weeks and sets out toward the fairy places that most adults have forgotten how to find.`,
         parentTemplateId: null,
       },
       {
-        templateId: 'workshop',
-        title: 'Follow the Toymaker',
-        content:
-          'Past the palace gates, the Toymaker knows a road where toys are not made to flatter princes but to wake them up.',
+        templateId: 'ask-bobolink',
+        title: 'Ask the Purple Enchanter',
+        content: `Martin visits Bobolink, the Purple Enchanter, whose grove and throne and enormous toads are purple enough to unsettle even a brave child. Instead of flattering him, Martin says honestly that Bobolink seems to have become sunpurpled.
+
+The enchanter likes this more than compliments. He cannot reveal the Wonderful Toymaker's valley himself, because that secret belongs to the pine dwarfs, but he gives Martin a route made of turnings, counting, and one dizzy spin.
+
+If Martin can find the pine dwarfs and keep their kind of silence, he may still reach the Toymaker in time.`,
         parentTemplateId: 'intro',
+      },
+      {
+        templateId: 'wait-for-martin',
+        title: 'Wait Without Crying',
+        content: `Princess Petulant wants to cry before the first day has ended. Instead, she remembers her promises and chooses one old toy to repair, then another to give away, then another to turn into a game for the nursery page.
+
+Four weeks pass slowly, but not emptily. The palace grows quieter because the Princess is practicing the hardest game she knows: waiting without making everyone else wait on her temper.
+
+When Martin returns empty-handed in this path, she is disappointed but not cruel. Together they discover that an old toy can become new when two people agree on new rules.`,
+        parentTemplateId: 'intro',
+      },
+      {
+        templateId: 'pine-dwarfs',
+        title: 'The Pine Dwarfs Secret',
+        content: `After the hundred and first right turn, the fifty-second left turn, and seventeen spins, Martin finds himself in a pine wood so still that even a whisper seems like a guest.
+
+The pine dwarfs slide down the trunks like living cones. They tell him that the Toymaker lives beyond the waterfall, down the stream, and through the country where people make conversation. To pass safely, Martin must not speak one word until he reaches the valley.
+
+Martin is sure silence will be easy. The pine dwarfs sigh through the branches as though they have heard that confidence before.`,
+        parentTemplateId: 'ask-bobolink',
+      },
+      {
+        templateId: 'wrong-turnings',
+        title: 'Lose Count of the Turnings',
+        content: `Martin reaches the seventy-ninth turning, or perhaps the eighty-first, just as a market bell begins to ring and a cart spills apples across the road. By the time he helps gather them, the numbers have tangled beyond repair.
+
+He tries guessing. The guesses lead to a hill of wooden whistles, a meadow of sulking kites, and a door that opens only for people who have brought exact directions.
+
+Martin returns to the palace with no new toy, but he brings one useful truth: some quests fail when attention wanders, and a promise may need another attempt rather than another excuse.`,
+        parentTemplateId: 'ask-bobolink',
+      },
+      {
+        templateId: 'conversation-country',
+        title: 'The Country That Makes Conversation',
+        content: `Martin follows the stream into a noisy country where voices chatter from water, grass, flowers, and air. Questions buzz around his ears until he clamps both hands over them and runs.
+
+Then a friendly comma-fish lifts its bent back from the stream and greets him. Martin forgets the warning for one small answer, and the invisible voices cheer. He has spoken; now they can make conversation of him.
+
+The voices carry him into a glass palace where every chair, door, window, pony, knife, and sweet asks questions, tells stories, and refuses to be quiet.`,
+        parentTemplateId: 'pine-dwarfs',
+      },
+      {
+        templateId: 'keep-silent',
+        title: 'Hold the Silence',
+        content: `The voices grow clever. They ask Martin about cakes, kings, parties, his favorite sweets, and whether he thinks they are amusing. He nearly answers the fish in the stream, but the pine wood's silence is still fresh in him.
+
+He bows to the fish instead of speaking and keeps walking while the questions chase him. By dusk the voices thin, the stream widens, and the hills around the Toymaker's valley rise ahead.
+
+Martin reaches the valley alone, carrying no rescue story with him, but also no prison of chatter.`,
+        parentTemplateId: 'pine-dwarfs',
+      },
+      {
+        templateId: 'princess-rescue',
+        title: 'The Princess Stops Her Ears',
+        content: `When the four weeks end and Martin has not returned, Princess Petulant almost falls back into royal sobbing. A pine dwarf appears and tells her that Martin is trapped where noise is made into conversation.
+
+The Princess asks for help instead of another toy. With cotton wool from a kindly bird tucked into her ears, she runs beside the stream without answering a single question.
+
+At the glass palace she does not wait for the door. She throws a stone through the wall, climbs inside, and finds Martin with his head in his hands.`,
+        parentTemplateId: 'conversation-country',
+      },
+      {
+        templateId: 'made-into-conversation',
+        title: 'Become Conversation',
+        content: `Martin tries to endure the glass palace by accepting its gifts. A real pony tells him its entire childhood. A gold watch tells stories instead of time. A six-bladed knife repeats every complaint six times.
+
+When the voices ask him to be king of the palace, he answers once, then twice, then every hour. Soon his own words are caught up, polished, repeated, and sent back at him until even his thoughts begin to sound like interruptions.
+
+The Princess waits, but no message reaches her. In this ending, Martin learns too late that not every bright palace is a place where a quiet promise can survive.`,
+        parentTemplateId: 'conversation-country',
+      },
+      {
+        templateId: 'toymaker-valley',
+        title: 'The Valley of Toys',
+        content: `The children leave the glass palace hand in hand and climb to the hill above the Toymaker's valley. Below them, toys hang from trees, blossom from bushes, heap on rocks, and cover the ground in colors no nursery has ever imagined.
+
+The Wonderful Toymaker runs to meet them, young from thousands of years of making play. He is delighted at last to have visitors who can play with him instead of merely wanting something from him.
+
+He brings out two new tops: one that sings every sound in the world, and one that sings sounds found only in Fairyland.`,
+        parentTemplateId: 'princess-rescue',
+      },
+      {
+        templateId: 'choose-world-top',
+        title: 'Choose the World-Singing Top',
+        content: `Princess Petulant chooses the bright top that hums with birds, winds, quarrels, laughter, tears, and every ordinary noise she had once tried to drown with crying.
+
+When she brings it home, the court expects a toy that will keep her quiet. Instead, it teaches her to listen. She hears when the nurses are tired, when Martin wants silence, and when a game has become fun for only one person.
+
+The top never grows old, because the world keeps changing its song.`,
+        parentTemplateId: 'toymaker-valley',
+      },
+      {
+        templateId: 'choose-fairy-top',
+        title: 'Choose the Fairyland Top',
+        content: `Martin chooses the copper top that sings what cannot be described: the sound of a fairy path opening, of a dream deciding to become useful, of silence filled with hidden music.
+
+The Prime Minister is disappointed that the toy does not train Martin for office. Martin is not disappointed. He keeps the top near him and learns that dreaming is not the opposite of doing, if a dream can lead someone all the way home.
+
+Years later, people say he never became Prime Minister because he became something less predictable and much happier.`,
+        parentTemplateId: 'toymaker-valley',
+      },
+      {
+        templateId: 'stay-and-play',
+        title: 'Stay One More Game',
+        content: `The Toymaker asks the children to stay. There will be toys that do not break, races that never tire them, and unwholesome sweets that somehow do no harm.
+
+For one more game they agree. Then one more. At last the palace, the Queen, and all old promises feel distant, as if they belong to children in another tale.
+
+The valley is joyful, but it asks a price: if play never ends, it stops being a gift carried home and becomes another kind of forgetting.`,
+        parentTemplateId: 'toymaker-valley',
+      },
+      {
+        templateId: 'rocking-horses-home',
+        title: 'Ride the Rocking-Horses Home',
+        content: `The Toymaker is sad to see them leave, but he respects the promises that call them home. He gives them rocking-horses for the road, and the wooden horses race so fast that land feels almost like sky.
+
+At the palace gates the horses vanish. The Queen dries her tears, the King dismisses the useless council, and Martin and Princess Petulant spin their tops for the whole court.
+
+They never lose the gifts. The Princess learns to want without wounding, Martin learns that quietness can still be brave, and the kingdom becomes more playful than any council could have planned.`,
+        parentTemplateId: 'toymaker-valley',
       },
     ],
   },

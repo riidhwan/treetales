@@ -21,6 +21,9 @@ const BEE_MAN_ADAPTATION_NOTE =
 const MAGICIANS_GIFTS_ADAPTATION_NOTE =
   'Adapted into a branching TreeTales starter from the source premise. The main path follows the prince from christening gifts through misused wishes, failed counsel, remorse, self-command, and restoration; alternate branches let him learn earlier from wise counsel, cling to command, or choose humility after harm.'
 
+const WONDERFUL_TOYMAKER_ADAPTATION_NOTE =
+  "Adapted into a branching TreeTales starter from the source premise. The main path follows Princess Petulant, Martin, the pine dwarfs, the conversation country, the rescue, and the Toymaker's two tops; alternate branches let the Princess practice patience, Martin become trapped by talk, or the children stay longer with the Toymaker."
+
 function createMockUuid(index: number): ReturnType<Crypto['randomUUID']> {
   return `00000000-0000-4000-8000-${(index + 1).toString().padStart(12, '0')}`
 }
@@ -111,8 +114,29 @@ describe('builtInExampleStories', () => {
           'Adapted from "The Magicians\' Gifts" by Juliana Horatia Ewing, first published 1880.',
       },
     })
+    expect(starters[2]).toMatchObject({
+      id: 'wonderful-toymaker',
+      title: 'The Wonderful Toymaker',
+      description:
+        'A royal nursery, a strange craftsman, and a toy that may teach more than obedience.',
+      storyProvenance: {
+        sourceWorks: [
+          {
+            title: 'The Wonderful Toymaker',
+            author: 'Evelyn Sharp',
+            publication: 'All the Way to Fairyland, first published 1898',
+            publicDomainBasis:
+              'Project Gutenberg eBook #30400, public domain in the USA.',
+          },
+        ],
+        adaptationNote: WONDERFUL_TOYMAKER_ADAPTATION_NOTE,
+        displayText:
+          'Adapted from "The Wonderful Toymaker" by Evelyn Sharp, first published 1898.',
+      },
+    })
     expect('chapters' in starters[0]).toBe(false)
     expect('chapters' in starters[1]).toBe(false)
+    expect('chapters' in starters[2]).toBe(false)
   })
 
   it('returns not-found for an unknown starter id', async () => {
@@ -393,6 +417,147 @@ describe('builtInExampleStories', () => {
       'Stay Before Worse Is Done',
       'Lay Down the Crown',
       'The Godfather Returns',
+    ])
+  })
+
+  it('creates the Wonderful Toymaker story with generated ids and provenance', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(300)
+    mockRandomUuids(15)
+
+    const result = await createOrReuseExampleStoryCopy('wonderful-toymaker')
+
+    expect(result.status).toBe('created')
+
+    if (result.status !== 'created') {
+      throw new Error('Expected created result.')
+    }
+
+    expect(result.story).toEqual({
+      id: '00000000-0000-4000-8000-000000000001',
+      title: 'The Wonderful Toymaker',
+      description:
+        'A royal nursery, a strange craftsman, and a toy that may teach more than obedience.',
+      builtInExampleStoryId: 'wonderful-toymaker',
+      storyProvenance: {
+        sourceWorks: [
+          {
+            title: 'The Wonderful Toymaker',
+            author: 'Evelyn Sharp',
+            publication: 'All the Way to Fairyland, first published 1898',
+            publicDomainBasis:
+              'Project Gutenberg eBook #30400, public domain in the USA.',
+          },
+        ],
+        adaptationNote: WONDERFUL_TOYMAKER_ADAPTATION_NOTE,
+        displayText:
+          'Adapted from "The Wonderful Toymaker" by Evelyn Sharp, first published 1898.',
+      },
+      createdAt: 300,
+      updatedAt: 300,
+    })
+    expect(result.chapters).toHaveLength(14)
+    expect(result.chapters[0]).toMatchObject({
+      id: '00000000-0000-4000-8000-000000000002',
+      storyId: result.story.id,
+      title: 'No Toy Will Do',
+      parentChapterId: null,
+      createdAt: 300,
+      updatedAt: 300,
+    })
+    expect(result.chapters[0].content).toContain('Princess Petulant')
+    expect(result.chapters.at(-1)).toMatchObject({
+      id: '00000000-0000-4000-8000-000000000015',
+      storyId: result.story.id,
+      title: 'Ride the Rocking-Horses Home',
+      createdAt: 313,
+      updatedAt: 313,
+    })
+  })
+
+  it('creates the Wonderful Toymaker story with branches and multiple endings', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(300)
+    mockRandomUuids(15)
+
+    const result = await createOrReuseExampleStoryCopy('wonderful-toymaker')
+
+    if (result.status !== 'created') {
+      throw new Error('Expected created result.')
+    }
+
+    const intro = getChapterByTitle(result.chapters, 'No Toy Will Do')
+    const askBobolink = getChapterByTitle(
+      result.chapters,
+      'Ask the Purple Enchanter',
+    )
+    const pineDwarfs = getChapterByTitle(
+      result.chapters,
+      'The Pine Dwarfs Secret',
+    )
+    const conversationCountry = getChapterByTitle(
+      result.chapters,
+      'The Country That Makes Conversation',
+    )
+    const toymakerValley = getChapterByTitle(
+      result.chapters,
+      'The Valley of Toys',
+    )
+
+    const branchTitlesByParentId = new Map<string, string[]>()
+
+    for (const chapter of result.chapters) {
+      if (!chapter.parentChapterId) {
+        continue
+      }
+
+      branchTitlesByParentId.set(chapter.parentChapterId, [
+        ...(branchTitlesByParentId.get(chapter.parentChapterId) ?? []),
+        chapter.title,
+      ])
+    }
+
+    expect(branchTitlesByParentId.get(intro.id)).toEqual([
+      'Ask the Purple Enchanter',
+      'Wait Without Crying',
+    ])
+    expect(branchTitlesByParentId.get(askBobolink.id)).toEqual([
+      'The Pine Dwarfs Secret',
+      'Lose Count of the Turnings',
+    ])
+    expect(branchTitlesByParentId.get(pineDwarfs.id)).toEqual([
+      'The Country That Makes Conversation',
+      'Hold the Silence',
+    ])
+    expect(branchTitlesByParentId.get(conversationCountry.id)).toEqual([
+      'The Princess Stops Her Ears',
+      'Become Conversation',
+    ])
+    expect(branchTitlesByParentId.get(toymakerValley.id)).toEqual([
+      'Choose the World-Singing Top',
+      'Choose the Fairyland Top',
+      'Stay One More Game',
+      'Ride the Rocking-Horses Home',
+    ])
+
+    const parentIds = new Set(
+      result.chapters
+        .map((chapter) => chapter.parentChapterId)
+        .filter((parentChapterId): parentChapterId is string =>
+          Boolean(parentChapterId),
+        ),
+    )
+    const endingTitles = result.chapters
+      .filter((chapter) => !parentIds.has(chapter.id))
+      .map((chapter) => chapter.title)
+
+    expect(endingTitles).toEqual([
+      'Wait Without Crying',
+      'Lose Count of the Turnings',
+      'Hold the Silence',
+      'Become Conversation',
+      'Choose the World-Singing Top',
+      'Choose the Fairyland Top',
+      'Stay One More Game',
+      'Ride the Rocking-Horses Home',
     ])
   })
 
