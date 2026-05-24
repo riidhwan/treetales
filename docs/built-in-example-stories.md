@@ -100,6 +100,23 @@ misused wishes, failed counsel, remorse, self-command, and restoration;
 alternate branches let him learn earlier from wise counsel, cling to command,
 or choose humility after harm.
 
+### The Wonderful Toymaker Adaptation
+
+Source review:
+
+- Source title: "The Wonderful Toymaker"
+- Author: Evelyn Sharp
+- Publication: _All the Way to Fairyland_, first published 1898
+- U.S. public-domain basis: Project Gutenberg eBook #30400, public domain in
+  the USA
+- User-visible Story Provenance: `Adapted from "The Wonderful Toymaker" by Evelyn Sharp, first published 1898.`
+
+Adaptation note: adapted into a branching TreeTales starter from the source
+premise. The main path follows Princess Petulant, Martin, the pine dwarfs, the
+conversation country, the rescue, and the Toymaker's two tops; alternate
+branches let the Princess practice patience, Martin become trapped by talk, or
+the children stay longer with the Toymaker.
+
 The foundation implementation may introduce minimal starter fixtures for the
 selected Source Works to prove catalog and service behavior. Full TreeTales
 adaptations belong in the per-story content slices.
