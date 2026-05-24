@@ -161,6 +161,10 @@ content.
 
 - Mobile layouts should preserve the same mode hierarchy rather than inventing
   separate mobile products.
+- Desktop Library and Management Mode should increase usable density before
+  increasing display scale. Mobile-first layouts may stay structurally similar
+  on desktop, but desktop breakpoints should use calmer type, tighter object
+  proportions, and wider rhythm instead of simply enlarging mobile tiles.
 - Library and Management Mode stack content and actions when needed.
 - Document Mode should keep the Chapter Document readable and avoid grey side
   gutters on small screens.

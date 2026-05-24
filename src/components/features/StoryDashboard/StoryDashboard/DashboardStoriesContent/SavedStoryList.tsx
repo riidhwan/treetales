@@ -31,7 +31,7 @@ export function SavedStoryList({ onOpenStory, stories }: Props) {
         {stories.map((story, index) => (
           <button
             aria-label={storyDashboardCopy.actions.openStory(story.title)}
-            className="group relative grid min-h-28 w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-4 overflow-hidden rounded-[1.75rem] border border-border-subtle/70 bg-surface-paper/85 px-6 py-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-focus-ring hover:bg-surface-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring sm:px-8"
+            className="group relative grid min-h-28 w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-4 overflow-hidden rounded-[1.75rem] border border-border-subtle/70 bg-surface-paper/85 px-6 py-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-focus-ring hover:bg-surface-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring sm:min-h-24 sm:rounded-2xl"
             key={story.id}
             onClick={() => onOpenStory(story.id)}
             type="button"
@@ -42,7 +42,7 @@ export function SavedStoryList({ onOpenStory, stories }: Props) {
             />
             <span className="min-w-0 pl-1">
               <span
-                className="block truncate text-2xl font-bold leading-tight text-text-primary sm:text-3xl"
+                className="block truncate text-2xl font-bold leading-tight text-text-primary"
                 style={{ fontFamily: DASHBOARD_DISPLAY_FONT }}
               >
                 {story.title}

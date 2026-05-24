@@ -65,8 +65,8 @@ export function StoryDashboard({
         </div>
       </header>
 
-      <section className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-5 pb-14 pt-8 sm:px-8 lg:px-10">
-        <header className="grid gap-7">
+      <section className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-5 pb-14 pt-8 sm:gap-7 sm:px-8 lg:px-10">
+        <header className="grid gap-7 sm:gap-6">
           <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-5">
             <p className="text-sm font-semibold uppercase leading-none text-focus-ring">
               {storyDashboardCopy.header.kicker}
@@ -76,7 +76,7 @@ export function StoryDashboard({
           <div className="max-w-2xl">
             <h1
               aria-label={storyDashboardCopy.header.ariaTitle}
-              className="grid text-5xl font-bold leading-[0.95] text-text-primary sm:text-7xl"
+              className="grid text-5xl font-bold leading-[0.95] text-text-primary sm:text-6xl"
               style={{ fontFamily: DASHBOARD_DISPLAY_FONT }}
             >
               <span>{storyDashboardCopy.header.titleFirstLine}</span>
@@ -88,7 +88,7 @@ export function StoryDashboard({
               </span>
             </h1>
             <p
-              className="mt-4 max-w-xl text-lg italic leading-7 text-text-muted sm:text-xl sm:leading-8"
+              className="mt-4 max-w-xl text-lg italic leading-7 text-text-muted"
               style={{ fontFamily: DASHBOARD_ITALIC_FONT }}
             >
               {storyDashboardCopy.header.subtitle}
