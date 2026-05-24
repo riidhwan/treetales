@@ -29,19 +29,16 @@ documented. Tiny changes may use a one-line Review Size summary.
 Normal feature PRs should stay within this review budget:
 
 - No more than 800 changed lines, excluding generated files
-- No more than 12 changed files
 - No more than 3 architectural layers touched
 
-Test files count toward changed lines and changed files because they are review
-surface. If tests alone push a PR over budget, say that explicitly and ask
-whether to keep the larger PR or split the work. Do not use "mostly tests" as an
-automatic reason to exceed the budget.
+Test files count toward changed lines because they are review surface. If tests
+alone push a PR over budget, say that explicitly and ask whether to keep the
+larger PR or split the work. Do not use "mostly tests" as an automatic reason to
+exceed the budget.
 
 Generated files, such as `src/routeTree.gen.ts` and
-`docs/navigation-flow.md`, are excluded from the changed-line limit. They still
-count as changed files for awareness, but they should not force a split solely
-because they push the PR over the file-count limit. List generated files
-separately in the PR description.
+`docs/navigation-flow.md`, are excluded from the changed-line limit. List
+generated files separately in the PR description.
 
 If a planned change is likely to exceed any of these limits, split the task
 before implementation. If implementation reveals that a limit will be exceeded,

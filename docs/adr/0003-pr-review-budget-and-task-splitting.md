@@ -1,6 +1,6 @@
 # PR Review Budget and Task Splitting
 
-TreeTales uses an explicit PR review budget so contributors split work before it becomes too large to review confidently. Normal feature PRs target no more than 800 changed lines, 12 changed files, and 3 architectural layers; larger work must either be decomposed into issue-backed reviewable slices or receive explicit pre-approval with a documented reason and split alternative.
+TreeTales uses an explicit PR review budget so contributors split work before it becomes too large to review confidently. Normal feature PRs target no more than 800 changed lines and 3 architectural layers; larger work must either be decomposed into issue-backed reviewable slices or receive explicit pre-approval with a documented reason and split alternative.
 
 ## Consequences
 

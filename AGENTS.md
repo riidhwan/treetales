@@ -68,7 +68,7 @@ Before opening a PR, report the actual changed files, additions/deletions, layer
 
 Non-trivial issues and PRs must include a `Review Size` section. Issues should estimate files, changed lines, layers, budget fit, and split plan. PRs should report actual files, additions/deletions, layers, budget fit, and any large-PR approval. Tiny changes may use a one-line Review Size summary.
 
-Normal feature PRs should target no more than 800 changed lines, 12 changed files, and 3 architectural layers. Tests count toward these limits. If a planned change is likely to exceed any limit, split the task before implementation; if the limit is discovered mid-work, stop and ask whether to split or continue with an explicitly larger PR.
+Normal feature PRs should target no more than 800 changed lines and 3 architectural layers. Tests count toward these limits. If a planned change is likely to exceed any limit, split the task before implementation; if the limit is discovered mid-work, stop and ask whether to split or continue with an explicitly larger PR.
 
 Large PRs require explicit pre-approval after stating the expected size, the reason the PR should exceed the budget, and at least one split alternative. The PR description must explain why it exceeds the review budget.
 

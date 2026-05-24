@@ -75,6 +75,22 @@ describe('async feature hooks', () => {
       pendingStory.resolve(createStory())
       await pendingStory.promise
     })
+
+    const pendingFailure = deferred<Story | undefined>()
+    const failureServices = {
+      getStoryById: vi.fn(() => pendingFailure.promise),
+      updateStory: vi.fn(),
+    }
+    const failureView = renderHook(() =>
+      useStoryEditor({ services: failureServices, storyId: 'story-1' }),
+    )
+
+    failureView.unmount()
+
+    await act(async () => {
+      pendingFailure.reject(new Error('stale failure'))
+      await pendingFailure.promise.catch(() => undefined)
+    })
   })
 
   it('marks the Story Editor missing when save no longer finds the story', async () => {
@@ -240,6 +256,26 @@ describe('async feature hooks', () => {
       await pendingStories.promise
     })
 
+    const pendingFailure = deferred<Story[]>()
+    const failureView = renderHook(() =>
+      useStoryDashboard({
+        onEditStory: vi.fn(),
+        onReadStory: vi.fn(),
+        services: {
+          createExampleStory: vi.fn(),
+          createStory: vi.fn(),
+          getStories: vi.fn(() => pendingFailure.promise),
+        },
+      }),
+    )
+
+    failureView.unmount()
+
+    await act(async () => {
+      pendingFailure.reject(new Error('stale failure'))
+      await pendingFailure.promise.catch(() => undefined)
+    })
+
     const readyServices = {
       createExampleStory: vi.fn(),
       createStory: vi.fn(),
@@ -282,6 +318,25 @@ describe('async feature hooks', () => {
     await act(async () => {
       pendingStory.resolve(createStory())
       await pendingStory.promise
+    })
+
+    const pendingFailure = deferred<Story | undefined>()
+    const failureView = renderHook(() =>
+      useStoryDetail({
+        onDeleted: vi.fn(),
+        services: {
+          deleteStory: vi.fn(),
+          getStoryById: vi.fn(() => pendingFailure.promise),
+        },
+        storyId: 'story-1',
+      }),
+    )
+
+    failureView.unmount()
+
+    await act(async () => {
+      pendingFailure.reject(new Error('stale failure'))
+      await pendingFailure.promise.catch(() => undefined)
     })
 
     const absentServices = {

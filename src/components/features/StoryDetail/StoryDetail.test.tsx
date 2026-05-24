@@ -9,7 +9,11 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { StoryDetail } from '@/components/features/StoryDetail'
-import type { StoryCharacterServices } from '@/hooks/useStoryCharacters'
+import { StoryDetailContent } from '@/components/features/StoryDetail/StoryDetailContent'
+import type {
+  StoryCharacterServices,
+  useStoryCharacters,
+} from '@/hooks/useStoryCharacters'
 import type {
   Character,
   CreateCharacterInput,
@@ -207,6 +211,19 @@ describe('StoryDetail', () => {
     pendingCharacters.resolve([])
   })
 
+  it('shows scoped character load failures', async () => {
+    const characterServices = {
+      ...createCharacterServices([]),
+      getCharactersByStoryId: vi.fn(() =>
+        Promise.reject(new Error('Could not load characters.')),
+      ),
+    }
+
+    renderDetail({ characterServices })
+
+    expect(await screen.findByText('Could not load characters.')).toBeTruthy()
+  })
+
   it('shows fixed character cards with truncated property previews', async () => {
     const characterServices = createCharacterServices([createCharacter()])
 
@@ -298,6 +315,69 @@ describe('StoryDetail', () => {
       })
     })
     expect(await screen.findByRole('dialog', { name: 'Mira' })).toBeTruthy()
+  })
+
+  it('shows character creation failures inside the open dialog', async () => {
+    const characterServices = {
+      ...createCharacterServices([]),
+      createCharacter: vi.fn(() =>
+        Promise.reject(new Error('Could not create character.')),
+      ),
+    }
+
+    renderDetail({ characterServices })
+
+    await screen.findByText('Characters')
+    fireEvent.click(screen.getByRole('button', { name: /add character/i }))
+    const dialog = screen.getByRole('dialog', { name: 'Add Character' })
+    fireEvent.change(within(dialog).getByLabelText('Name'), {
+      target: { value: 'Mira' },
+    })
+    fireEvent.click(within(dialog).getByRole('button', { name: /^save$/i }))
+
+    expect((await within(dialog).findByRole('alert')).textContent).toBe(
+      'Could not create character.',
+    )
+  })
+
+  it('confirms before discarding unsaved character edits', async () => {
+    const characterServices = createCharacterServices([createCharacter()])
+
+    renderDetail({ characterServices })
+
+    fireEvent.click(await screen.findByRole('button', { name: 'View Mira' }))
+    let dialog = screen.getByRole('dialog', { name: 'Mira' })
+    fireEvent.click(within(dialog).getByRole('button', { name: /^edit$/i }))
+    dialog = screen.getByRole('dialog', { name: 'Edit Mira' })
+    fireEvent.change(within(dialog).getByLabelText('Name'), {
+      target: { value: 'Mira Changed' },
+    })
+    fireEvent.click(within(dialog).getByRole('button', { name: /cancel/i }))
+
+    let confirmation = await screen.findByRole('dialog', {
+      name: 'Discard Character Changes?',
+    })
+    expect(confirmation.textContent).toContain(
+      'Discard unsaved character changes?',
+    )
+    fireEvent.click(within(confirmation).getByRole('button', { name: /cancel/i }))
+
+    expect(screen.getByRole('dialog', { name: 'Edit Mira' })).toBeTruthy()
+
+    fireEvent.click(
+      within(screen.getByRole('dialog', { name: 'Edit Mira' })).getByRole(
+        'button',
+        { name: /cancel/i },
+      ),
+    )
+    confirmation = await screen.findByRole('dialog', {
+      name: 'Discard Character Changes?',
+    })
+    fireEvent.click(
+      within(confirmation).getByRole('button', { name: /discard changes/i }),
+    )
+
+    expect(screen.queryByRole('dialog', { name: 'Edit Mira' })).toBeNull()
   })
 
   it('edits and deletes a character from the detail dialog', async () => {
@@ -533,5 +613,21 @@ describe('StoryDetail', () => {
     )
     expect(onDeleted).not.toHaveBeenCalled()
     expect(screen.getByRole('heading', { name: 'The Old Road' })).toBeTruthy()
+  })
+
+  it('renders nothing when ready detail content has no story context', () => {
+    const view = render(
+      <StoryDetailContent
+        characterDialog={{} as ReturnType<typeof useStoryCharacters>}
+        characterTitleId="characters-title"
+        isDeleting={false}
+        onEditStory={vi.fn()}
+        onOpenDashboard={vi.fn()}
+        onOpenDeleteDialog={vi.fn()}
+        status="ready"
+      />,
+    )
+
+    expect(view.container.textContent).toBe('')
   })
 })

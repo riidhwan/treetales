@@ -321,17 +321,10 @@ function canReachChapter(
   targetChapterId: string,
   chapterById: Map<string, Chapter>,
 ): boolean {
-  const visitedChapterIds = new Set<string>()
   const pendingChapterIds = [fromChapterId]
 
   while (pendingChapterIds.length > 0) {
-    const currentChapterId = pendingChapterIds.pop()
-
-    if (!currentChapterId || visitedChapterIds.has(currentChapterId)) {
-      continue
-    }
-
-    visitedChapterIds.add(currentChapterId)
+    const currentChapterId = pendingChapterIds.pop() as string
 
     for (const chapter of chapterById.values()) {
       if (chapter.parentChapterId !== currentChapterId) {

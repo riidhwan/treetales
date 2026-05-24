@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { StoryReader } from '@/components/features/StoryReader'
+import { ReaderContent } from '@/components/features/StoryReader/ReaderContent'
 import { READER_APPEARANCE_STORAGE_KEY } from '@/config'
 import type { StoryReaderServices } from '@/hooks/useStoryReader'
 import type { Chapter, Story } from '@/services/types'
@@ -747,5 +748,22 @@ describe('StoryReader', () => {
         'Could not load chapters.',
       )
     })
+  })
+
+  it('renders nothing when ready reader content has no story context', () => {
+    const view = render(
+      <ReaderContent
+        nextChapters={[]}
+        onCreateChildChapter={vi.fn()}
+        onCreateIntroChapter={vi.fn()}
+        onOpenStoryDetails={vi.fn()}
+        onSelectNextChapter={vi.fn()}
+        readerFontFamily="Readerly"
+        readerFontSizePt={14}
+        status="ready"
+      />,
+    )
+
+    expect(view.container.textContent).toBe('')
   })
 })
