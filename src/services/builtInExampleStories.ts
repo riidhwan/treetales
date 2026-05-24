@@ -191,24 +191,140 @@ So the Bee-Man returns to Orn unchanged. Sometimes the rescued child visits and 
         },
       ],
       adaptationNote:
-        'Adapted into a branching TreeTales starter from the source premise.',
+        'Adapted into a branching TreeTales starter from the source premise. The main path follows the prince from christening gifts through misused wishes, failed counsel, remorse, self-command, and restoration; alternate branches let him learn earlier from wise counsel, cling to command, or choose humility after harm.',
       displayText:
         'Adapted from "The Magicians\' Gifts" by Juliana Horatia Ewing, first published 1880.',
     },
     chapters: [
       {
         templateId: 'intro',
-        title: 'The Three Bright Gifts',
-        content:
-          'The magicians set their gifts before the child, each one shining with a different promise for the years ahead.',
+        title: 'Three Gifts at the Cradle',
+        content: `At the christening of the king's eldest son, three magicians stand beside the cradle. One has been honored as godfather, while the other two hide their anger under smiles and dark sleeves.
+
+The godfather gives the child a dazzling promise: whatever the prince wishes for, he shall have. The jealous magicians bend the gift into danger. No wish can be recalled, and the prince will carry a hasty temper strong enough to speak before wisdom can stop him.
+
+The court laughs at the danger. The godfather leaves with a troubled face. Years later, the prince begins to learn that power is not the same thing as freedom.`,
         parentTemplateId: null,
       },
       {
-        templateId: 'choice',
-        title: 'Choose the Quiet Gift',
-        content:
-          'The quietest gift does not dazzle the room, but it changes how every future path can be understood.',
+        templateId: 'reckless-prince',
+        title: 'Wishes That Cannot Turn Back',
+        content: `As a child, the prince can summon rare toys, banish storms from a hunt, or make a stubborn door fly open with one impatient word. But every wish remains exactly as spoken, even when regret arrives a heartbeat later.
+
+Counsellors try to teach caution. One by one, they thwart him for his own good, and one by one his anger sends them where no apology can follow. The king begins to fear his son almost as much as he loves him.
+
+At last the court agrees that the godfather magician must be found. If the gift can be recalled, perhaps the prince can become only a prince again.`,
         parentTemplateId: 'intro',
+      },
+      {
+        templateId: 'ask-for-ordinary',
+        title: 'Ask for an Ordinary Blessing',
+        content: `Before the jealous magicians speak, the young godfather bends over the cradle and hesitates. In this path, the king notices his fear and asks for a smaller blessing: not command over the world, but the patience to learn before ruling it.
+
+The offended magicians grumble that such a gift is difficult to spoil. They add a spark of temper, but without boundless wishes the spark must meet ordinary consequences.
+
+The prince grows with arguments, apologies, lessons, and repairs. He never becomes the marvel his father expected, but the kingdom comes to prefer a ruler whose words are promises rather than spells.`,
+        parentTemplateId: 'intro',
+      },
+      {
+        templateId: 'wise-woman',
+        title: 'The Narrowest Road',
+        content: `Following a beggar's dream, the king takes the narrowest of seven roads and finds a wise woman beside a cave fire. She says the godfather cannot undo the jealous gifts, and that the prince must instead learn prudence and self-rule.
+
+She returns to court as guardian. Her patience is unshowy, but it holds where the courtiers failed. When anger rises, she gives the prince silence, distance, and tasks small enough for a proud heart to attempt.
+
+For a time the palace breathes more easily. Then the prince grows ashamed of being guided by an old woman and wishes for an adviser nearer his own age.`,
+        parentTemplateId: 'reckless-prince',
+      },
+      {
+        templateId: 'royal-command',
+        title: 'Rule by Wishing',
+        content: `The prince rejects the search for his godfather. If every desire becomes law, he reasons, then the only sensible plan is to desire more carefully and rule without interference.
+
+At first the court becomes astonishingly efficient. Roads are finished overnight, taxes collect themselves, and any minister who objects disappears before the second sentence.
+
+But no one dares bring unwelcome news. The prince's wishes grow lonely and brittle, and the kingdom learns that a ruler who can have anything may lose the one thing command cannot create: honest counsel.`,
+        parentTemplateId: 'reckless-prince',
+      },
+      {
+        templateId: 'young-adviser',
+        title: 'The Faithful Young Adviser',
+        content: `A young nobleman arrives the same day the prince wishes for a faithful adviser of his own age. He is able, discreet, and brave enough to disagree gently. The prince loves him for it, until one sharp hour when advice feels like accusation.
+
+"Hold your tongue forever," the prince cries, and the words strike like iron. His friend remains alive, loyal, and entirely unable to speak.
+
+The prince's grief is deeper than his pride. He sets out with the silent nobleman and his clever hound to find the godfather magician before another angry sentence harms someone he loves.`,
+        parentTemplateId: 'wise-woman',
+      },
+      {
+        templateId: 'keep-wise-woman',
+        title: 'Keep the Old Counsel',
+        content: `The prince feels the old shame rising when courtiers whisper that a grown heir should not need an old woman's hand at his sleeve. This time he waits before wishing.
+
+By morning he sees the trap clearly. His pride wants a splendid adviser; his kingdom needs the wise one already there. He asks the old woman to stay and gives her leave to contradict him before the full court.
+
+No magician appears to end the gift, but fewer wishes need ending. The prince becomes famous for a strange royal habit: when anger burns hottest, he lets an old woman speak first.`,
+        parentTemplateId: 'wise-woman',
+      },
+      {
+        templateId: 'forest-hermit',
+        title: 'The Hound at the Hermitage',
+        content: `The hound leads the prince and his silent friend to a forest hermit. The old man offers counsel instead of directions: remain, learn self-government, and stop hunting for a magic cure to a human fault.
+
+The prince refuses. He calls the hound away, but the animal sits at the hermit's feet and will not move. Coaxing fails. Force fails. Then rage breaks loose.
+
+The prince wishes the hound hanged, and the faithful creature vanishes from the path. A moment later the prince sees what his words have done.`,
+        parentTemplateId: 'young-adviser',
+      },
+      {
+        templateId: 'stay-with-hermit',
+        title: 'Stay Before Worse Is Done',
+        content: `When the hound refuses to leave the hermit, the prince feels fury gather in his throat. He clamps both hands over his mouth until the first terrible words pass unsaid.
+
+The hermit gives him no praise. Instead, he hands the prince a broom, a water jar, and a rule: no command spoken in anger may be obeyed, even by himself.
+
+Months of plain work teach what courtly flattery never could. The prince returns home with the hound alive, the nobleman still silent, and the first proof that a wish can be defeated before it becomes a sentence.`,
+        parentTemplateId: 'young-adviser',
+      },
+      {
+        templateId: 'glass-coffin',
+        title: 'The Glass Coffin',
+        content: `Carrying the hound's body, the prince enters a neighboring kingdom and meets a princess renowned for wisdom. He loves her almost at once, and his wish makes refusal impossible.
+
+At her counsel, he keeps the hound in a glass coffin as a daily warning. For a while love makes him careful. Then familiarity loosens his guard, and one quarrel becomes a storm.
+
+The princess begs him to remember the hound. Instead he wishes her beside it, and the glass coffin holds them both.`,
+        parentTemplateId: 'forest-hermit',
+      },
+      {
+        templateId: 'penitent-return',
+        title: 'Return to the Hermit',
+        content: `The prince can no longer pretend that finding the godfather is enough. With the silent nobleman beside him, he carries the glass coffin back to the forest and asks for the harder road.
+
+The hermit teaches him to live after remorse without making remorse another kind of selfishness. Each day the prince names what anger has cost and then practices one act of patience.
+
+When he returns to court, he stands beside the coffin and rules slowly. The kingdom sees sorrow in him, but also gentleness that was never there before.`,
+        parentTemplateId: 'glass-coffin',
+      },
+      {
+        templateId: 'give-up-crown',
+        title: 'Lay Down the Crown',
+        content: `After the princess falls, the prince refuses to return to court. If his words can bend lives until they break, he will not sit where every servant must tremble.
+
+He sends his signet home with the silent nobleman and remains in the forest, tending paths, copying books, and warning travelers about the danger of wanting too quickly.
+
+The gift is never recalled in triumph. Yet the prince harms no one else, and the kingdom remembers him as the heir who discovered that some power can only be governed by giving it up.`,
+        parentTemplateId: 'glass-coffin',
+      },
+      {
+        templateId: 'gift-recalled',
+        title: 'The Godfather Returns',
+        content: `When the prince has learned patience by daily practice rather than sudden shame, a man in a long black robe comes to him and calls him godson.
+
+The magician reveals that he was the wise woman and the hermit all along. He could recall his own gift, but not the temper placed by another, and so he waited until the prince had learned to master what magic could not remove.
+
+Then the godfather reclaims the wish-power. Its effects vanish with it: the princess rises, the hound stretches, the nobleman speaks, and the counsellors return from the sea to find their papers exactly where they left them.`,
+        parentTemplateId: 'penitent-return',
       },
     ],
   },

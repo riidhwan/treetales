@@ -18,6 +18,9 @@ import { deleteTestDatabase, installFakeIndexedDb } from '@/test/indexedDb'
 const BEE_MAN_ADAPTATION_NOTE =
   'Adapted into a branching TreeTales starter from the source premise. The main path follows the Bee-Man through the domain, mountain, dragon rescue, and magical return; alternate branches let him reject the prophecy, retreat from danger, or keep his old shape after the rescue.'
 
+const MAGICIANS_GIFTS_ADAPTATION_NOTE =
+  'Adapted into a branching TreeTales starter from the source premise. The main path follows the prince from christening gifts through misused wishes, failed counsel, remorse, self-command, and restoration; alternate branches let him learn earlier from wise counsel, cling to command, or choose humility after harm.'
+
 function createMockUuid(index: number): ReturnType<Crypto['randomUUID']> {
   return `00000000-0000-4000-8000-${(index + 1).toString().padStart(12, '0')}`
 }
@@ -88,7 +91,28 @@ describe('builtInExampleStories', () => {
           'Adapted from "The Bee-Man of Orn" by Frank R. Stockton, first published 1887.',
       },
     })
+    expect(starters[1]).toMatchObject({
+      id: 'magicians-gifts',
+      title: "The Magicians' Gifts",
+      description:
+        'Three gifts promise power, but each choice asks what kind of wisdom is worth keeping.',
+      storyProvenance: {
+        sourceWorks: [
+          {
+            title: "The Magicians' Gifts",
+            author: 'Juliana Horatia Ewing',
+            publication: 'Old-Fashioned Fairy Tales, first published 1880',
+            publicDomainBasis:
+              'Project Gutenberg eBook #15592, public domain in the USA.',
+          },
+        ],
+        adaptationNote: MAGICIANS_GIFTS_ADAPTATION_NOTE,
+        displayText:
+          'Adapted from "The Magicians\' Gifts" by Juliana Horatia Ewing, first published 1880.',
+      },
+    })
     expect('chapters' in starters[0]).toBe(false)
+    expect('chapters' in starters[1]).toBe(false)
   })
 
   it('returns not-found for an unknown starter id', async () => {
@@ -235,6 +259,140 @@ describe('builtInExampleStories', () => {
       'Turn Back from the Roar',
       'Accept the Fresh Start',
       'Keep the Shape That Helped',
+    ])
+  })
+
+  it('creates the Magicians Gifts story with generated ids and provenance', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(200)
+    mockRandomUuids(14)
+
+    const result = await createOrReuseExampleStoryCopy('magicians-gifts')
+
+    expect(result.status).toBe('created')
+
+    if (result.status !== 'created') {
+      throw new Error('Expected created result.')
+    }
+
+    expect(result.story).toEqual({
+      id: '00000000-0000-4000-8000-000000000001',
+      title: "The Magicians' Gifts",
+      description:
+        'Three gifts promise power, but each choice asks what kind of wisdom is worth keeping.',
+      builtInExampleStoryId: 'magicians-gifts',
+      storyProvenance: {
+        sourceWorks: [
+          {
+            title: "The Magicians' Gifts",
+            author: 'Juliana Horatia Ewing',
+            publication: 'Old-Fashioned Fairy Tales, first published 1880',
+            publicDomainBasis:
+              'Project Gutenberg eBook #15592, public domain in the USA.',
+          },
+        ],
+        adaptationNote: MAGICIANS_GIFTS_ADAPTATION_NOTE,
+        displayText:
+          'Adapted from "The Magicians\' Gifts" by Juliana Horatia Ewing, first published 1880.',
+      },
+      createdAt: 200,
+      updatedAt: 200,
+    })
+    expect(result.chapters).toHaveLength(13)
+    expect(result.chapters[0]).toMatchObject({
+      id: '00000000-0000-4000-8000-000000000002',
+      storyId: result.story.id,
+      title: 'Three Gifts at the Cradle',
+      parentChapterId: null,
+      createdAt: 200,
+      updatedAt: 200,
+    })
+    expect(result.chapters[0].content).toContain('hasty temper')
+    expect(result.chapters.at(-1)).toMatchObject({
+      id: '00000000-0000-4000-8000-000000000014',
+      storyId: result.story.id,
+      title: 'The Godfather Returns',
+      createdAt: 212,
+      updatedAt: 212,
+    })
+  })
+
+  it('creates the Magicians Gifts story with branches and multiple endings', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(200)
+    mockRandomUuids(14)
+
+    const result = await createOrReuseExampleStoryCopy('magicians-gifts')
+
+    if (result.status !== 'created') {
+      throw new Error('Expected created result.')
+    }
+
+    const intro = getChapterByTitle(result.chapters, 'Three Gifts at the Cradle')
+    const recklessPrince = getChapterByTitle(
+      result.chapters,
+      'Wishes That Cannot Turn Back',
+    )
+    const wiseWoman = getChapterByTitle(
+      result.chapters,
+      'The Narrowest Road',
+    )
+    const youngAdviser = getChapterByTitle(
+      result.chapters,
+      'The Faithful Young Adviser',
+    )
+    const glassCoffin = getChapterByTitle(result.chapters, 'The Glass Coffin')
+
+    const branchTitlesByParentId = new Map<string, string[]>()
+
+    for (const chapter of result.chapters) {
+      if (!chapter.parentChapterId) {
+        continue
+      }
+
+      branchTitlesByParentId.set(chapter.parentChapterId, [
+        ...(branchTitlesByParentId.get(chapter.parentChapterId) ?? []),
+        chapter.title,
+      ])
+    }
+
+    expect(branchTitlesByParentId.get(intro.id)).toEqual([
+      'Wishes That Cannot Turn Back',
+      'Ask for an Ordinary Blessing',
+    ])
+    expect(branchTitlesByParentId.get(recklessPrince.id)).toEqual([
+      'The Narrowest Road',
+      'Rule by Wishing',
+    ])
+    expect(branchTitlesByParentId.get(wiseWoman.id)).toEqual([
+      'The Faithful Young Adviser',
+      'Keep the Old Counsel',
+    ])
+    expect(branchTitlesByParentId.get(youngAdviser.id)).toEqual([
+      'The Hound at the Hermitage',
+      'Stay Before Worse Is Done',
+    ])
+    expect(branchTitlesByParentId.get(glassCoffin.id)).toEqual([
+      'Return to the Hermit',
+      'Lay Down the Crown',
+    ])
+
+    const parentIds = new Set(
+      result.chapters
+        .map((chapter) => chapter.parentChapterId)
+        .filter((parentChapterId): parentChapterId is string =>
+          Boolean(parentChapterId),
+        ),
+    )
+    const endingTitles = result.chapters
+      .filter((chapter) => !parentIds.has(chapter.id))
+      .map((chapter) => chapter.title)
+
+    expect(endingTitles).toEqual([
+      'Ask for an Ordinary Blessing',
+      'Rule by Wishing',
+      'Keep the Old Counsel',
+      'Stay Before Worse Is Done',
+      'Lay Down the Crown',
+      'The Godfather Returns',
     ])
   })
 

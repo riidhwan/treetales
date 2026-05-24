@@ -83,6 +83,23 @@ premise. The main path follows the Bee-Man through the domain, mountain, dragon
 rescue, and magical return; alternate branches let him reject the prophecy,
 retreat from danger, or keep his old shape after the rescue.
 
+### The Magicians' Gifts Adaptation
+
+Source review:
+
+- Source title: "The Magicians' Gifts"
+- Author: Juliana Horatia Ewing
+- Publication: _Old-Fashioned Fairy Tales_, first published 1880
+- U.S. public-domain basis: Project Gutenberg eBook #15592, public domain in
+  the USA
+- User-visible Story Provenance: `Adapted from "The Magicians' Gifts" by Juliana Horatia Ewing, first published 1880.`
+
+Adaptation note: adapted into a branching TreeTales starter from the source
+premise. The main path follows the prince from christening gifts through
+misused wishes, failed counsel, remorse, self-command, and restoration;
+alternate branches let him learn earlier from wise counsel, cling to command,
+or choose humility after harm.
+
 The foundation implementation may introduce minimal starter fixtures for the
 selected Source Works to prove catalog and service behavior. Full TreeTales
 adaptations belong in the per-story content slices.
