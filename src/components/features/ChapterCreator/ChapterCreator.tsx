@@ -49,13 +49,11 @@ export function ChapterCreator({
   function handleCreate(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
     setHasTouchedTitle(true)
-    createChapterFromForm()
-      .then((chapter) => {
-        if (chapter) {
-          onChapterCreated(storyId, chapter.id)
-        }
-      })
-      .catch(() => undefined)
+    void createChapterFromForm().then((chapter) => {
+      if (chapter) {
+        onChapterCreated(storyId, chapter.id)
+      }
+    })
   }
 
   return (

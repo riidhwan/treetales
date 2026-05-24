@@ -105,6 +105,11 @@ import type { Item } from '@/types/item'
 import { cn } from '../../lib/utils'
 ```
 
+Promise failures should be handled at the layer that can show, retry, log, or
+otherwise act on the error. Do not use empty `.catch()` callbacks such as
+`.catch(() => undefined)` in app TypeScript; if a hook or service owns expected
+failures internally, call it with `void` at event-handler boundaries instead.
+
 ## Components
 
 Functional only. Every component has a `Props` interface named exactly `Props`, placed directly above the function:
@@ -499,7 +504,7 @@ cleanup.
 
 ### Coverage
 
-`npm run test:coverage` enforces global Vitest thresholds of 95% lines, 95% statements, 95% functions, and 95% branches. Branch-heavy logic should include focused tests for meaningful paths instead of relying on the global total.
+`npm run test:coverage` enforces global Vitest thresholds of 98.5% lines, 98.5% statements, 98.5% functions, and 95% branches. Branch-heavy logic should include focused tests for meaningful paths instead of relying on the global total.
 
 Coverage excludes generated code, route files, test-only helpers in `src/test/**`, and static data files. These files are validated through schema, route/component tests, generation workflows, or by the tests that use the helpers, and counting them would make the coverage signal noisier. Do not exclude low-coverage files only to raise totals when they contain real behavior; add focused tests or document why the file is a thin runtime wrapper.
 

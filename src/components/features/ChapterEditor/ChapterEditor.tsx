@@ -39,7 +39,7 @@ export function ChapterEditor({
   } = useChapterEditor({ chapterId, services, storyId })
   function handleSave(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
-    saveChapter().catch(() => undefined)
+    void saveChapter()
   }
 
   return (
@@ -56,7 +56,7 @@ export function ChapterEditor({
         onOpenDashboard={onOpenDashboard}
         onSave={handleSave}
         onSaveShortcut={() => {
-          saveChapter().catch(() => undefined)
+          void saveChapter()
         }}
         onTitleChange={setTitle}
         parentChapter={parentChapter}
