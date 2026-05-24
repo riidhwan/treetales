@@ -98,6 +98,7 @@ _Avoid_: Miscellaneous mode, error mode
 
 - A **Saved Story** is a **Story**.
 - An **Example Story Copy** is a **Saved Story**.
+- An **Example Story Copy** comes from exactly one **Built-in Example Story**.
 - A **Story** has zero or more **Chapters**.
 - A **Story** has zero or more **Characters**.
 - A **Built-in Example Story** can become a **Saved Story**.
@@ -155,6 +156,7 @@ _Avoid_: Miscellaneous mode, error mode
 - "provenance" can imply starter-only metadata — resolved: **Story Provenance** follows an **Example Story Copy** after it becomes a **Saved Story**.
 - "provenance" can imply user-authored story content — resolved: **Story Provenance** is read-only context, not an author-editable **Story** field.
 - "citation" and "attribution" can imply a formal bibliography or legal notice in the reading flow — resolved: use **Story Provenance** for lightweight user-visible source context.
+- "editing an example copy" can imply it becomes a normal **Saved Story** — resolved: an **Example Story Copy** remains tied to its originating **Built-in Example Story** even when users change its **Story** content.
 - "reading mode" and "writing mode" can split surfaces that share the same
   document-first treatment — resolved: use **Document Mode** for both
   **Chapter** reading and **Chapter** authoring experiences.

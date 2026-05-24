@@ -89,12 +89,39 @@ describe('indexedDbStoryRepository', () => {
       secondById,
     ])
   })
+
+  it('finds an example story copy by its built-in example story id', async () => {
+    const ordinaryStory = createStory({
+      id: 'story-ordinary',
+      title: 'Ordinary',
+      description: 'No starter',
+      createdAt: 50,
+    })
+    const exampleStoryCopy = createStory({
+      id: 'story-copy',
+      title: 'Example copy',
+      description: 'From a starter',
+      builtInExampleStoryId: 'starter-bee-man',
+    })
+
+    await stories.insertStory(ordinaryStory)
+    await stories.insertStory(exampleStoryCopy)
+
+    await expect(
+      stories.findStoryByBuiltInExampleStoryId('starter-bee-man'),
+    ).resolves.toEqual(exampleStoryCopy)
+    await expect(
+      stories.findStoryByBuiltInExampleStoryId('starter-missing'),
+    ).resolves.toBeUndefined()
+  })
 })
 
 function createStory({
   id,
   title,
   description,
+  builtInExampleStoryId,
+  storyProvenance,
   createdAt = 100,
   updatedAt = createdAt,
 }: Partial<Story> & Pick<Story, 'id' | 'title' | 'description'>): Story {
@@ -102,6 +129,8 @@ function createStory({
     id,
     title,
     description,
+    builtInExampleStoryId,
+    storyProvenance,
     createdAt,
     updatedAt,
   }
