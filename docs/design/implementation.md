@@ -86,6 +86,19 @@ See `docs/architecture.md` for the full layer-first component structure.
 Moving a component into `ui/` should make it less domain-aware. Do not promote
 screen-specific UI only to make imports shorter.
 
+Feature components use the module structure defined in `docs/conventions.md`:
+PascalCase route-level feature directories, a feature-local `index.ts` public
+boundary, colocated tests, and feature-owned helpers kept inside the owning
+module. Shared feature-layer workflows use
+`src/components/features/shared/<PascalCaseModule>/` to make cross-feature
+ownership visible.
+
+When a feature has materially different visual states, keep the exported
+feature component focused on hook wiring and composition. Put loading, missing,
+error, empty, unavailable, and ready presentations into named component files
+inside the feature module. Inline conditionals are still fine for
+compact labels, attributes, and optional minor adornments.
+
 ## Current Primitives
 
 Current generic primitives include:
