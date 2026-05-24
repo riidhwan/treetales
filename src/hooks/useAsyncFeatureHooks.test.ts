@@ -57,10 +57,9 @@ describe('async feature hooks', () => {
     vi.restoreAllMocks()
   })
 
-  it('ignores stale Story Editor loads after unmounting at each await boundary', async () => {
+  it('ignores stale Story Editor loads after unmounting', async () => {
     const pendingStory = deferred<Story | undefined>()
     const storyServices = {
-      getIntroChapterByStoryId: vi.fn(() => Promise.resolve(undefined)),
       getStoryById: vi.fn(() => pendingStory.promise),
       updateStory: vi.fn(),
     }
@@ -68,38 +67,18 @@ describe('async feature hooks', () => {
       useStoryEditor({ services: storyServices, storyId: 'story-1' }),
     )
 
+    expect(storyServices.getStoryById).toHaveBeenCalledWith('story-1')
+
     firstView.unmount()
 
     await act(async () => {
       pendingStory.resolve(createStory())
       await pendingStory.promise
     })
-
-    const pendingIntroChapter = deferred<Chapter | undefined>()
-    const introServices = {
-      getIntroChapterByStoryId: vi.fn(() => pendingIntroChapter.promise),
-      getStoryById: vi.fn(() => Promise.resolve(createStory())),
-      updateStory: vi.fn(),
-    }
-    const secondView = renderHook(() =>
-      useStoryEditor({ services: introServices, storyId: 'story-1' }),
-    )
-
-    await waitFor(() => {
-      expect(introServices.getIntroChapterByStoryId).toHaveBeenCalled()
-    })
-
-    secondView.unmount()
-
-    await act(async () => {
-      pendingIntroChapter.resolve(undefined)
-      await pendingIntroChapter.promise
-    })
   })
 
   it('marks the Story Editor missing when save no longer finds the story', async () => {
     const services = {
-      getIntroChapterByStoryId: vi.fn(() => Promise.resolve(undefined)),
       getStoryById: vi.fn(() => Promise.resolve(createStory())),
       updateStory: vi.fn(() => Promise.resolve(undefined)),
     }
@@ -124,7 +103,6 @@ describe('async feature hooks', () => {
 
   it('marks the Story Editor errored when the story load fails', async () => {
     const services = {
-      getIntroChapterByStoryId: vi.fn(() => Promise.resolve(undefined)),
       getStoryById: vi.fn(() =>
         Promise.reject(new Error('Could not load story.')),
       ),
@@ -139,13 +117,11 @@ describe('async feature hooks', () => {
     })
     expect(result.current.errorMessage).toBe('Could not load story.')
     expect(result.current.story).toBeUndefined()
-    expect(result.current.introChapter).toBeUndefined()
     expect(result.current.canSave).toBe(false)
   })
 
   it('does not save Story Editor or Chapter Editor forms when their current state is invalid', async () => {
     const storyServices = {
-      getIntroChapterByStoryId: vi.fn(() => Promise.resolve(undefined)),
       getStoryById: vi.fn(() => Promise.resolve(createStory())),
       updateStory: vi.fn(),
     }

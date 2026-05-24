@@ -1,14 +1,10 @@
 import { useEffect, useState } from 'react'
 
 import { getErrorMessage } from '@/lib/errors'
-import { getIntroChapterByStoryId } from '@/services/chapterService'
 import { getStoryById, updateStory } from '@/services/storyService'
-import type { Chapter, Story, UpdateStoryInput } from '@/services/types'
+import type { Story, UpdateStoryInput } from '@/services/types'
 
 export interface StoryEditorServices {
-  readonly getIntroChapterByStoryId: (
-    storyId: string,
-  ) => Promise<Chapter | undefined>
   readonly getStoryById: (storyId: string) => Promise<Story | undefined>
   readonly updateStory: (
     storyId: string,
@@ -17,7 +13,6 @@ export interface StoryEditorServices {
 }
 
 export const DEFAULT_STORY_EDITOR_SERVICES: StoryEditorServices = {
-  getIntroChapterByStoryId,
   getStoryById,
   updateStory,
 }
@@ -33,7 +28,6 @@ export function useStoryEditor({
   services = DEFAULT_STORY_EDITOR_SERVICES,
   storyId,
 }: UseStoryEditorOptions) {
-  const [introChapter, setIntroChapter] = useState<Chapter | undefined>()
   const [story, setStory] = useState<Story | undefined>()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -67,22 +61,13 @@ export function useStoryEditor({
           return
         }
 
-        const loadedIntroChapter =
-          await services.getIntroChapterByStoryId(storyId)
-
-        if (!isCurrent) {
-          return
-        }
-
         setStory(loadedStory)
-        setIntroChapter(loadedIntroChapter)
         setTitle(loadedStory.title)
         setDescription(loadedStory.description)
         setStatus('ready')
       } catch (error) {
         if (isCurrent) {
           setStory(undefined)
-          setIntroChapter(undefined)
           setErrorMessage(getErrorMessage(error))
           setStatus('error')
         }
@@ -136,7 +121,6 @@ export function useStoryEditor({
     saveStory,
     setDescription,
     setTitle,
-    introChapter,
     status,
     story,
     successMessage,
