@@ -15,6 +15,8 @@ Do not turn a style pass into a broad component-library abstraction pass.
 Extract a primitive only when the behavior or styling is genuinely reusable and
 business-agnostic. Feature-owned Story, Chapter, Character, and Branch surfaces
 may stay close to their feature until reuse proves otherwise.
+Prefer feature-owned responsive class tuning for mode-specific desktop density
+before introducing new layout primitives.
 
 The first docs-first design-system direction is recorded in
 `docs/adr/0004-docs-first-local-design-system.md`.
