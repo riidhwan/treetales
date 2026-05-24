@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 
+import { ChapterDocumentShell } from '@/components/domain/ChapterDocumentShell'
 import { MarkdownContent } from '@/components/ui/MarkdownContent'
 import { storyReaderCopy } from '@/copy'
 import type { Chapter, Story } from '@/services/types'
@@ -24,9 +25,9 @@ export function ReaderChapterDocument({
   story,
 }: Props) {
   return (
-    <article
+    <ChapterDocumentShell
       aria-label={storyReaderCopy.document.label}
-      className="mx-auto min-h-[calc(100vh-7rem)] w-full max-w-[52rem] border-border-subtle bg-surface-paper px-4 py-6 shadow-sm sm:min-h-[calc(100vh-10rem)] sm:border sm:px-8 sm:py-8 lg:px-8"
+      as="article"
     >
       <header>
         <p className="text-sm font-semibold uppercase tracking-wide text-action-primary">
@@ -53,6 +54,6 @@ export function ReaderChapterDocument({
           onSelectChapter={onSelectNextChapter}
         />
       </footer>
-    </article>
+    </ChapterDocumentShell>
   )
 }

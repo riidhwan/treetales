@@ -114,6 +114,7 @@ Current generic primitives include:
 - `Button`
 - `ConfirmationDialog`
 - `Dialog`
+- `EmptyState`
 - `Field`
 - `IconButton`
 - `MarkdownContent`
@@ -125,12 +126,16 @@ Current generic primitives include:
 Near-term primitive candidates include:
 
 - `SegmentedControl`
-- `EmptyState`
 
-Defer generic `Surface`, `Card`, `StoryRow`, `CharacterCard`,
-`ChapterDocumentShell`, and `BranchChoiceList` until their semantics and reuse
-are clear. Surface names in `docs/design/style-guide.md` are design contracts
-first, not a requirement to create a single generic wrapper.
+Current domain components include:
+
+- `ChapterDocumentShell`
+- `ReaderAppearanceControl`
+
+Defer generic `Surface`, `Card`, `StoryRow`, `CharacterCard`, and
+`BranchChoiceList` until their semantics and reuse are clear. Surface names in
+`docs/design/style-guide.md` are design contracts first, not a requirement to
+create a single generic wrapper.
 
 ## Dev Style Guide Route
 
@@ -181,6 +186,19 @@ without overwhelming the surface.
 
 Loading, missing, empty, and unavailable states should keep the surrounding
 experience mode rather than inventing one-off visual systems.
+
+Use `EmptyState` for simple title/body/action state cards that do not own
+feature workflow logic. Feature components still choose the copy, actions,
+heading level, and whether the state is a solid System Mode card, a dashed
+bounded object, or a custom Library Mode presentation.
+
+### Chapter Documents
+
+Use `ChapterDocumentShell` for shared Document Mode paper surfaces around
+readable or editable Chapter content. Reader and authoring features own the
+document body, toolbar, Reader Appearance style, and workflow state; the shell
+owns the reusable paper width, minimum height, border, background, and base
+responsive padding.
 
 ### Dialogs
 

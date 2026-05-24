@@ -1,6 +1,6 @@
-import { ChevronLeft } from 'lucide-react'
 import { useId, useState } from 'react'
 
+import { ManagementTopBar } from '@/components/features/shared/ManagementTopBar'
 import {
   type StoryCharacterServices,
   useStoryCharacters,
@@ -52,21 +52,11 @@ export function StoryDetail({
 
   return (
     <main className="min-h-screen bg-background-app text-text-primary">
-      <header className="border-b border-border-subtle/70 bg-surface-paper/35">
-        <nav
-          aria-label={storyDetailCopy.navigation.label}
-          className="mx-auto flex min-h-16 w-full max-w-3xl items-center justify-between px-5 sm:px-8"
-        >
-          <button
-            className="inline-flex min-h-10 items-center gap-2 rounded-md text-base font-medium text-action-primary transition hover:text-action-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-            onClick={onOpenDashboard}
-            type="button"
-          >
-            <ChevronLeft aria-hidden="true" size={22} />
-            {commonCopy.actions.dashboard}
-          </button>
-        </nav>
-      </header>
+      <ManagementTopBar
+        label={storyDetailCopy.navigation.label}
+        onBack={onOpenDashboard}
+        previousLabel={commonCopy.actions.dashboard}
+      />
 
       <section className="mx-auto flex w-full max-w-3xl flex-col gap-9 px-5 py-10 sm:px-8">
         <StoryDetailHeader

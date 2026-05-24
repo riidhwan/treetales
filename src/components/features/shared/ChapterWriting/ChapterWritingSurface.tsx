@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import type { ReactNode, SyntheticEvent } from 'react'
 import { Eye, Pencil } from 'lucide-react'
 
+import { ChapterDocumentShell } from '@/components/domain/ChapterDocumentShell'
 import { ModeButton } from '@/components/features/shared/ChapterWriting/ModeButton'
 import { Button } from '@/components/ui/Button'
 import { MarkdownContent } from '@/components/ui/MarkdownContent'
@@ -108,9 +109,9 @@ export function ChapterWritingSurface({
       />
 
       <section className="mx-auto w-full max-w-5xl px-0 py-0 sm:px-6 sm:py-6 lg:py-10">
-        <section
+        <ChapterDocumentShell
           aria-label={chapterWritingCopy.surface.documentLabel}
-          className="mx-auto min-h-[calc(100vh-7rem)] w-full max-w-[52rem] border-border-subtle bg-surface-paper px-2 py-5 shadow-sm sm:min-h-[calc(100vh-10rem)] sm:border sm:px-8 sm:py-8 lg:px-8"
+          className="px-2 py-5"
         >
           <label className="block px-2 sm:px-0" style={readerDocumentStyle}>
             <span className="sr-only">{commonCopy.labels.title}</span>
@@ -158,7 +159,7 @@ export function ChapterWritingSurface({
               </label>
             )}
           </div>
-        </section>
+        </ChapterDocumentShell>
       </section>
 
       <div
