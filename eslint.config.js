@@ -52,6 +52,16 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/**/*.test.{ts,tsx}'],
+    plugins: {
+      local: localRulesPlugin,
+    },
+    rules: {
+      'local/no-empty-promise-catch': 'error',
+    },
+  },
+  {
     files: ['e2e/**/*.{ts,tsx}'],
     languageOptions: {
       globals: {

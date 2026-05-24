@@ -35,7 +35,7 @@ export function StoryEditor({
 
   function handleSave(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
-    saveStory().catch(() => undefined)
+    void saveStory()
   }
 
   return (
