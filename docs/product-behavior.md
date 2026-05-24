@@ -3,11 +3,23 @@
 ## MVP User Flows
 
 ### Story Dashboard (Home)
-- User arrives at the home page and sees a list of their stories (or an empty state).
+- User arrives at the home page and sees their Saved Stories and a separate
+  Starter Section of Built-in Example Stories.
 - The dashboard story creation action opens a form for title + description.
 - After creating a story, user is redirected to the story editor.
-- Empty state offers an example story that creates a built-in branching story in
-  this browser and opens it in the reader.
+- When there are no Saved Stories, the Starter Section is prominent so the
+  first-run library does not look empty at first glance.
+- Once Saved Stories exist, the Starter Section remains available as a secondary
+  area below the Saved Stories list.
+- Choosing a Built-in Example Story creates or reuses an editable Example Story
+  Copy in this browser and opens it in the reader.
+- Built-in example story source works should be verifiably U.S. public domain,
+  less obvious than the most famous public-domain classics, substantial enough
+  to support meaningful branches, and suitable for a first-run product
+  experience without relying on offensive stereotypes, colonial framing, dated
+  assumptions, modern translations, modern illustrations, or another
+  interactive/gamebook brand association. The initial source set should use
+  English-language public-domain source texts rather than translated works.
 - Each story appears as a fixed-height list row with title and description.
   Long titles and descriptions truncate to keep rows even.
 - Selecting a story row opens the story detail page.

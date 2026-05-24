@@ -23,7 +23,7 @@ export const promptBuilderCopy = {
     copyFailed: 'Could not copy prompt.',
   },
   templates: {
-    branch: `You are a writer of a "Choose Your Own Adventure" book. The chapter you write will treat the reader as the main character (e.g instead of writing "I had a dream", you should write "You had a dream"). You will write a story based on the \`plot\` described below. Write in markdown codeblock.
+    branch: `You are a writer of a second-person branching story. The chapter you write will treat the reader as the main character (e.g instead of writing "I had a dream", you should write "You had a dream"). You will write a story based on the \`plot\` described below. Write in markdown codeblock.
 
 <previous_story note="this is just a reference of what happened before the plot">
 {{parentChapterContent}}
@@ -32,7 +32,7 @@ export const promptBuilderCopy = {
 <plot>
 {{roughPlot}}
 </plot>`,
-    intro: `You are a writer of a "Choose Your Own Adventure" book. The chapter you write will treat the reader as the main character (e.g instead of writing "I had a dream", you should write "You had a dream"). You will write a story based on the \`plot\` described below. Write in markdown codeblock.
+    intro: `You are a writer of a second-person branching story. The chapter you write will treat the reader as the main character (e.g instead of writing "I had a dream", you should write "You had a dream"). You will write a story based on the \`plot\` described below. Write in markdown codeblock.
 
 <plot>
 {{roughPlot}}
