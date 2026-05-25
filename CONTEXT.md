@@ -44,6 +44,10 @@ _Avoid_: Child Chapter, child node, branch target
 A user's presentation preferences for **Chapter** document text.
 _Avoid_: Style, configuration
 
+**App Settings**:
+Browser-local app-level preferences and credentials that are not **Story** content or **Reader Appearance**.
+_Avoid_: Configuration, account settings, project settings
+
 **Prompt Builder**:
 An authoring aid that turns a rough **Chapter** plot and available **Chapter** context into a reusable LLM prompt.
 _Avoid_: AI writer, generate chapter
@@ -51,6 +55,10 @@ _Avoid_: AI writer, generate chapter
 **Rough Plot**:
 A scratch outline of intended **Chapter** beats that can feed the **Prompt Builder**.
 _Avoid_: Draft, chapter content
+
+**Writing Assist**:
+The app area for authoring aids that help users prepare or use external writing support.
+_Avoid_: AI settings, generation tools
 
 **Built-in Example Story**:
 A TreeTales-provided branching narrative that can become a local **Story** when the user chooses it.
@@ -117,6 +125,11 @@ _Avoid_: Miscellaneous mode, error mode
 - **Chapters** in the same **Story** cannot form cycles.
 - **Library Mode**, **Management Mode**, **Document Mode**, and **System Mode**
   are distinct TreeTales experience modes.
+- **App Settings** apply to the current browser and do not belong to a
+  **Story**, **Chapter**, **Character**, or **Reader Appearance**.
+- **App Settings** are a **System Mode** experience.
+- **Writing Assist** can have **App Settings** because writing aids apply across
+  **Stories** in the current browser.
 
 ## Example dialogue
 
@@ -134,8 +147,14 @@ _Avoid_: Miscellaneous mode, error mode
 - "child chapter" describes the technical parent-child relationship, but product language should use **Branch**.
 - "previous chapter" can imply browser or reader history — resolved: use **Parent Chapter** for structural navigation.
 - "style" and "configuration" can imply broad editor or app settings — resolved: use **Reader Appearance** for **Chapter** document text presentation preferences.
+- "configuration" can describe implementation wiring or app-level user choices
+  — resolved: use **App Settings** for user-facing app-level preferences and
+  credentials.
 - "Reader Appearance" was originally reading-only — resolved: it can also apply to chapter authoring surfaces when those surfaces present **Chapter** document text.
 - "generate prompt" can sound like direct prose generation — resolved: use **Prompt Builder** for preparing copy-paste LLM prompts, not writing chapter content inside TreeTales.
+- "AI settings" can overpromise direct generation — resolved: use
+  **Writing Assist** for the category that contains writing-related assistance
+  options.
 - "draft" can mean saved **Chapter** content or temporary scratch input — resolved: use **Rough Plot** for Prompt Builder scratch text and **Chapter** content for authored markdown.
 - "character" could mean a chapter-local appearance or a story-level entity — resolved: use **Character** for a story-level entity that can appear across many **Chapters**.
 - "story" was originally defined as user-authored even though TreeTales includes seeded example content — resolved: **Story** covers both user-authored and built-in branching narratives, and **Built-in Example Story** names TreeTales-provided seeded content.

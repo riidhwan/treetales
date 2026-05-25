@@ -48,6 +48,11 @@ export interface Character {
   updatedAt: number
 }
 
+export interface AppSetting {
+  id: string
+  value: string
+}
+
 export interface CreateStoryInput {
   title: string
   description: string

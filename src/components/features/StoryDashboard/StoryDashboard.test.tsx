@@ -147,6 +147,7 @@ describe('StoryDashboard', () => {
 
     render(
       <StoryDashboard
+        onOpenAppSettings={vi.fn()}
         onEditStory={vi.fn()}
         onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
@@ -186,6 +187,7 @@ describe('StoryDashboard', () => {
 
     render(
       <StoryDashboard
+        onOpenAppSettings={vi.fn()}
         onEditStory={vi.fn()}
         onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
@@ -204,6 +206,7 @@ describe('StoryDashboard', () => {
 
     render(
       <StoryDashboard
+        onOpenAppSettings={vi.fn()}
         onEditStory={vi.fn()}
         onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
@@ -223,6 +226,7 @@ describe('StoryDashboard', () => {
 
     render(
       <StoryDashboard
+        onOpenAppSettings={vi.fn()}
         onEditStory={vi.fn()}
         onOpenStory={onOpenStory}
         onReadStory={vi.fn()}
@@ -241,11 +245,31 @@ describe('StoryDashboard', () => {
     expect(screen.queryByRole('button', { name: /delete/i })).toBeNull()
   })
 
+  it('opens App Settings from the dashboard header', async () => {
+    const onOpenAppSettings = vi.fn()
+    const services = createServices([])
+
+    render(
+      <StoryDashboard
+        onOpenAppSettings={onOpenAppSettings}
+        onEditStory={vi.fn()}
+        onOpenStory={vi.fn()}
+        onReadStory={vi.fn()}
+        services={services}
+      />,
+    )
+
+    fireEvent.click(await screen.findByRole('button', { name: 'App Settings' }))
+
+    expect(onOpenAppSettings).toHaveBeenCalledOnce()
+  })
+
   it('keeps starter stories below saved stories when saved stories exist', async () => {
     const services = createServices([createStory({ id: 'story-7' })])
 
     render(
       <StoryDashboard
+        onOpenAppSettings={vi.fn()}
         onEditStory={vi.fn()}
         onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
@@ -267,6 +291,7 @@ describe('StoryDashboard', () => {
 
     render(
       <StoryDashboard
+        onOpenAppSettings={vi.fn()}
         onEditStory={vi.fn()}
         onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
@@ -301,6 +326,7 @@ describe('StoryDashboard', () => {
 
     render(
       <StoryDashboard
+        onOpenAppSettings={vi.fn()}
         onEditStory={vi.fn()}
         onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
@@ -332,6 +358,7 @@ describe('StoryDashboard', () => {
 
     render(
       <StoryDashboard
+        onOpenAppSettings={vi.fn()}
         onEditStory={vi.fn()}
         onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
@@ -357,6 +384,7 @@ describe('StoryDashboard', () => {
 
     render(
       <StoryDashboard
+        onOpenAppSettings={vi.fn()}
         onEditStory={onEditStory}
         onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
@@ -390,6 +418,7 @@ describe('StoryDashboard', () => {
 
     render(
       <StoryDashboard
+        onOpenAppSettings={vi.fn()}
         onEditStory={vi.fn()}
         onOpenStory={vi.fn()}
         onReadStory={onReadStory}
@@ -433,6 +462,7 @@ describe('StoryDashboard', () => {
 
     render(
       <StoryDashboard
+        onOpenAppSettings={vi.fn()}
         onEditStory={vi.fn()}
         onOpenStory={vi.fn()}
         onReadStory={onReadStory}
@@ -458,6 +488,7 @@ describe('StoryDashboard', () => {
 
     render(
       <StoryDashboard
+        onOpenAppSettings={vi.fn()}
         onEditStory={vi.fn()}
         onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
@@ -483,6 +514,7 @@ describe('StoryDashboard', () => {
 
     render(
       <StoryDashboard
+        onOpenAppSettings={vi.fn()}
         onEditStory={vi.fn()}
         onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
@@ -505,6 +537,7 @@ describe('StoryDashboard', () => {
 
     render(
       <StoryDashboard
+        onOpenAppSettings={vi.fn()}
         onEditStory={vi.fn()}
         onOpenStory={vi.fn()}
         onReadStory={vi.fn()}
@@ -534,6 +567,7 @@ describe('StoryDashboard', () => {
 
     render(
       <StoryDashboard
+        onOpenAppSettings={vi.fn()}
         onEditStory={vi.fn()}
         onOpenStory={vi.fn()}
         onReadStory={vi.fn()}

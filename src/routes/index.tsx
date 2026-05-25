@@ -15,6 +15,11 @@ function HomeRoute() {
           params: { storyId },
         })
       }
+      onOpenAppSettings={() =>
+        void navigate({
+          to: '/settings',
+        })
+      }
       onOpenStory={(storyId) =>
         void navigate({
           to: '/stories/$storyId',

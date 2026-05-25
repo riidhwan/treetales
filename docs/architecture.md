@@ -19,6 +19,15 @@ the Story and Chapter persistence model, such as in `localStorage`. They should
 not be added to Story or Chapter records unless they become authored story
 content.
 
+App Settings are browser-local app-level preferences and credentials stored
+outside Story, Chapter, Character, and Reader Appearance persistence. App
+Settings use IndexedDB so settings persistence follows the same browser-local
+repository/service boundary as authored data while still remaining separate
+from Story records. API keys entered for Writing Assist are current-browser
+settings only; they are not synced across devices and should not be exported
+with Story data. Stronger secret handling can be introduced later if TreeTales
+adds an account, backend, or dedicated secure-storage boundary.
+
 Prompt Builder is a client-only authoring aid. It uses static feature-owned
 prompt templates and browser clipboard access; it does not call an LLM, require
 network access, or persist Rough Plot text in Story or Chapter records.
@@ -359,6 +368,7 @@ The schema is owned by the repository layer:
 - **`stories`** — keyed by `id`
 - **`chapters`** — keyed by `id`
 - **`characters`** — keyed by `id`
+- **`appSettings`** — keyed by stable setting id
 - Chapter indexes on `storyId` and `parentChapterId`
 - Character index on `storyId`
 
@@ -375,6 +385,16 @@ implementation. Repository operations may accept a transaction so standalone
 operations and unit-of-work operations share the same adapter code. Standalone
 repository operations open only the object stores they need through the
 provider-internal transaction helper.
+
+App Settings records use stable setting ids instead of a single global settings
+blob. The initial Writing Assist setting stores the Gemini API key separately
+from Story, Chapter, Character, and Reader Appearance records, and clearing it
+removes that setting record.
+
+The App Settings repository may expose generic read, write, and delete
+operations by stable setting id. Product-facing code should use a narrow
+Writing Assist settings service for the Gemini API key instead of passing raw
+setting ids through hooks and components.
 
 ## Test Helpers (`src/test/`)
 

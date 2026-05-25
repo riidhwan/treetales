@@ -1,10 +1,11 @@
-import type { Character, Chapter, Story } from '@/services/types'
+import type { AppSetting, Character, Chapter, Story } from '@/services/types'
 
 export const DB_NAME = 'TreeTales'
-export const DB_VERSION = 3
+export const DB_VERSION = 4
 export const STORIES_STORE = 'stories'
 export const CHAPTERS_STORE = 'chapters'
 export const CHARACTERS_STORE = 'characters'
+export const APP_SETTINGS_STORE = 'appSettings'
 export const CHAPTER_STORY_ID_INDEX = 'storyId'
 export const CHAPTER_PARENT_ID_INDEX = 'parentChapterId'
 export const CHARACTER_STORY_ID_INDEX = 'storyId'
@@ -18,6 +19,7 @@ export interface TreeTalesSchema {
   stories: Story
   chapters: Chapter
   characters: Character
+  appSettings: AppSetting
 }
 
 export type StoreName = keyof TreeTalesSchema
@@ -66,6 +68,10 @@ export function openDb(): Promise<IDBDatabase> {
 
       if (!charactersStore.indexNames.contains(CHARACTER_STORY_ID_INDEX)) {
         charactersStore.createIndex(CHARACTER_STORY_ID_INDEX, 'storyId')
+      }
+
+      if (!db.objectStoreNames.contains(APP_SETTINGS_STORE)) {
+        db.createObjectStore(APP_SETTINGS_STORE, { keyPath: 'id' })
       }
     }
 

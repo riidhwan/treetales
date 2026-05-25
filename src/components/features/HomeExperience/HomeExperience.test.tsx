@@ -41,6 +41,7 @@ function createServices(): StoryDashboardServices {
 function renderHomeExperience() {
   return render(
     <HomeExperience
+      onOpenAppSettings={vi.fn()}
       onEditStory={vi.fn()}
       onOpenStory={vi.fn()}
       onReadStory={vi.fn()}
