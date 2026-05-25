@@ -10,6 +10,7 @@ This document lists the current application URLs and the visible controls that c
 | --- | --- | --- |
 | `/` | Home / Story Dashboard | `src/routes/index.tsx` |
 | `/__style-guide` | StyleGuidePage | `src/routes/[_]_style-guide.tsx` |
+| `/settings` | AppSettings | `src/routes/settings.tsx` |
 | `/stories/$storyId` | Story Detail | `src/routes/stories.$storyId.index.tsx` |
 | `/stories/$storyId/chapters/$chapterId/children/new` | Branch Creator | `src/routes/stories.$storyId.chapters.$chapterId.children.new.tsx` |
 | `/stories/$storyId/chapters/$chapterId/edit` | Chapter Editor | `src/routes/stories.$storyId.chapters.$chapterId.edit.tsx` |
@@ -27,12 +28,12 @@ URL: `/`
 
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
-| Install App | `MobileInstallChoice` | Calls `onInstall` |
-| Continue to Mobile Site | `MobileInstallChoice` | Calls `onContinue` |
-| Add Example Story | `StoryDashboard` | Creates or opens the example story |
-| New Story | `StoryDashboard` | Opens the story creation form |
-| `Open ${story.title}` | `StoryDashboard` | `/stories/$storyId` |
-| Create Story | `StoryDashboard` | Submits the enclosing form |
+| {mobileInstallChoiceCopy.actions.installApp} | `MobileInstallChoice` | Calls `onInstall` |
+| {mobileInstallChoiceCopy.actions.continueToMobileSite} | `MobileInstallChoice` | Calls `onContinue` |
+| {storyDashboardCopy.actions.createStory} | `NewStoryForm` | Submits the enclosing form |
+| storyDashboardCopy.actions.openStarterStory( starterStory.title, ) | `StarterSection` | Calls `onOpenStarterStory` |
+| {storyDashboardCopy.actions.newStory} | `EmptyStoryLibrary` | Calls `onOpenNewStoryForm` |
+| storyDashboardCopy.actions.openStory(story.title) | `SavedStoryList` | `/stories/$storyId` |
 
 Runtime notes:
 
@@ -49,10 +50,22 @@ URL: `/__style-guide`
 
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
-| Primary action | `StyleGuidePage` | No route-changing action detected |
-| Secondary action | `StyleGuidePage` | No route-changing action detected |
-| Delete | `StyleGuidePage` | No route-changing action detected |
-| Back to dashboard | `NotFoundPage` | `/` |
+| {styleGuideCopy.primitives.buttons.primary} | `StyleGuideContent` | No route-changing action detected |
+| {styleGuideCopy.primitives.buttons.secondary} | `StyleGuideContent` | No route-changing action detected |
+| {styleGuideCopy.primitives.buttons.delete} | `StyleGuideContent` | No route-changing action detected |
+| {notFoundCopy.action} | `NotFoundPage` | `/` |
+
+### AppSettings
+
+URL: `/settings`
+
+| Control label | Component | Destination / behaviour |
+| --- | --- | --- |
+| {appSettingsCopy.actions.backToLibrary} | `AppSettings` | `/` |
+| {appSettingsCopy.actions.replaceGeminiApiKey} | `SettingsPanelContent` | Calls `onStartReplacingGeminiApiKey` |
+| {appSettingsCopy.actions.clearGeminiApiKey} | `SettingsPanelContent` | Calls `onClearSavedGeminiApiKey` |
+| {appSettingsCopy.actions.saveGeminiApiKey} | `GeminiApiKeyForm` | Submits the enclosing form |
+| {appSettingsCopy.actions.cancelReplace} | `GeminiApiKeyForm` | Calls `onCancel` |
 
 ### Story Detail
 
@@ -60,18 +73,18 @@ URL: `/stories/$storyId`
 
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
-| Dashboard | `StoryDetail` | `/` |
-| Read | `StoryDetail` | `/stories/$storyId/read` |
-| Edit | `StoryDetail` | `/stories/$storyId/edit` |
-| Add Character | `CharacterSection` | No route-changing action detected |
-| `View ${character.name}` | `CharacterCard` | Calls `onOpen` |
-| Edit | `CharacterDialog` | Calls `onEdit` |
-| Deleting... / Delete | `CharacterDialog` | Calls `onDelete` |
-| Cancel | `CharacterDialog` | Calls `onClose` |
-| Saving... / Save | `CharacterDialog` | Calls `onSave` |
-| Add Property | `CharacterForm` | Calls `onAddProperty` |
-| Remove | `CharacterForm` | Calls `onRemoveProperty` |
-| Deleting... / Delete Story | `StoryMaintenanceSection` | Calls `onDelete` |
+| {storyDetailCopy.actions.read} | `StoryDetailHeader` | `/stories/$storyId/read` |
+| {commonCopy.actions.edit} | `StoryDetailHeader` | `/stories/$storyId/edit` |
+| {commonCopy.actions.dashboard} | `MissingStoryDetail` | `/` |
+| storyDetailCopy.actions.addCharacter | `CharacterSection` | No route-changing action detected |
+| storyDetailCopy.actions.viewCharacter(character.name) | `CharacterCard` | Calls `onOpen` |
+| {commonCopy.actions.edit} | `CharacterDialog` | Calls `onEdit` |
+| {commonCopy.actions.deleting} / {commonCopy.actions.delete} | `CharacterDialog` | Calls `onDelete` |
+| {commonCopy.actions.cancel} | `CharacterDialog` | Calls `onClose` |
+| {commonCopy.actions.saving} / {commonCopy.actions.save} | `CharacterDialog` | Calls `onSave` |
+| {storyDetailCopy.character.addProperty} | `CharacterForm` | Calls `onAddProperty` |
+| {commonCopy.actions.remove} | `CharacterForm` | Calls `onRemoveProperty` |
+| {commonCopy.actions.deleting} / {storyDetailCopy.actions.deleteStory} | `StoryMaintenanceSection` | Calls `onDelete` |
 
 Runtime notes:
 
@@ -84,10 +97,10 @@ URL: `/stories/$storyId/chapters/$chapterId/children/new`
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
 | submittingActionLabel / primaryActionLabel | `ChapterWritingSurface` | Submits the enclosing form |
-| Writing Assist | `ChapterPromptBuilderControl` | Calls `setIsMenuOpen` |
-| Copy prompt | `ChapterPromptBuilderControl` | Calls `copyPrompt` |
-| Parent Chapter | `ChapterWritingUnavailableLayout` | `/stories/$storyId/chapters/$chapterId/edit` |
-| Dashboard | `ChapterWritingUnavailableLayout` | `/` |
+| promptBuilderCopy.actions.trigger | `ChapterPromptBuilderControl` | Calls `setIsMenuOpen` |
+| {promptBuilderCopy.actions.copyPrompt} | `ChapterPromptBuilderControl` | Calls `copyPrompt` |
+| {chapterWritingCopy.actions.storyReader} / {chapterWritingCopy.actions.parentChapter} | `ChapterWritingUnavailableLayout` | Calls `onOpenPrevious` |
+| commonCopy.actions.dashboard | `ChapterWritingUnavailableLayout` | `/` |
 
 Runtime notes:
 
@@ -100,10 +113,10 @@ URL: `/stories/$storyId/chapters/$chapterId/edit`
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
 | submittingActionLabel / primaryActionLabel | `ChapterWritingSurface` | Submits the enclosing form |
-| Writing Assist | `ChapterPromptBuilderControl` | Calls `setIsMenuOpen` |
-| Copy prompt | `ChapterPromptBuilderControl` | Calls `copyPrompt` |
-| Back | `ChapterWritingUnavailableLayout` | Calls `onOpenPrevious` |
-| Dashboard | `ChapterWritingUnavailableLayout` | `/` |
+| promptBuilderCopy.actions.trigger | `ChapterPromptBuilderControl` | Calls `setIsMenuOpen` |
+| {promptBuilderCopy.actions.copyPrompt} | `ChapterPromptBuilderControl` | Calls `copyPrompt` |
+| {previousLabel} | `ChapterWritingUnavailableLayout` | Calls `onOpenPrevious` |
+| commonCopy.actions.dashboard | `ChapterWritingUnavailableLayout` | `/` |
 
 Runtime notes:
 
@@ -116,10 +129,10 @@ URL: `/stories/$storyId/chapters/new`
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
 | submittingActionLabel / primaryActionLabel | `ChapterWritingSurface` | Submits the enclosing form |
-| Writing Assist | `ChapterPromptBuilderControl` | Calls `setIsMenuOpen` |
-| Copy prompt | `ChapterPromptBuilderControl` | Calls `copyPrompt` |
-| Story Reader | `ChapterWritingUnavailableLayout` | `/stories/$storyId/read` |
-| Dashboard | `ChapterWritingUnavailableLayout` | `/` |
+| promptBuilderCopy.actions.trigger | `ChapterPromptBuilderControl` | Calls `setIsMenuOpen` |
+| {promptBuilderCopy.actions.copyPrompt} | `ChapterPromptBuilderControl` | Calls `copyPrompt` |
+| {chapterWritingCopy.actions.storyReader} / {chapterWritingCopy.actions.parentChapter} | `ChapterWritingUnavailableLayout` | `/stories/$storyId/read` |
+| commonCopy.actions.dashboard | `ChapterWritingUnavailableLayout` | `/` |
 
 Runtime notes:
 
@@ -131,8 +144,8 @@ URL: `/stories/$storyId/edit`
 
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
-| Dashboard | `StoryEditor` | `/` |
-| Saving... / Save Story | `StoryEditor` | Submits the enclosing form |
+| {commonCopy.actions.dashboard} | `StoryEditorUnavailableState` | `/` |
+| {commonCopy.actions.saving} / {storyEditorCopy.actions.saveStory} | `StoryEditorReadyState` | Submits the enclosing form |
 
 Runtime notes:
 
@@ -144,9 +157,8 @@ URL: `/stories/$storyId/read`
 
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
-| Add Intro Chapter | `ReaderContent` | `/stories/$storyId/chapters/new` |
-| Story Details | `ReaderContent` | `/stories/$storyId` |
-| Add Branch | `NextChapterControls` | `/stories/$storyId/chapters/$chapterId/children/new` |
+| {storyReaderCopy.actions.addIntroChapter} | `ReaderUnavailableChapterState` | `/stories/$storyId/chapters/new` |
+| {storyReaderCopy.actions.addBranch} | `NextChapterControls` | `/stories/$storyId/chapters/$chapterId/children/new` |
 
 Runtime notes:
 
@@ -161,7 +173,7 @@ URL: unknown paths
 
 | Control label | Component | Destination / behaviour |
 | --- | --- | --- |
-| Back to dashboard | `NotFoundPage` | `/` |
+| {notFoundCopy.action} | `NotFoundPage` | `/` |
 
 ## Static Analysis Limits
 

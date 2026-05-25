@@ -1,4 +1,5 @@
 import type {
+  AppSetting,
   Character,
   Chapter,
   Story,
@@ -65,6 +66,12 @@ export interface CharacterRepository {
   ) => Promise<Character | undefined>
   readonly deleteCharacter: (id: string) => Promise<boolean>
   readonly deleteCharactersByStoryId: (storyId: string) => Promise<void>
+}
+
+export interface AppSettingsRepository {
+  readonly findSettingById: (id: string) => Promise<AppSetting | undefined>
+  readonly putSetting: (setting: AppSetting) => Promise<void>
+  readonly deleteSetting: (id: string) => Promise<boolean>
 }
 
 export interface RepositoryUnitOfWorkContext {

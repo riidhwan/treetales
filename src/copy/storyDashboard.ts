@@ -3,6 +3,7 @@ export const storyDashboardCopy = {
     beginNewStory: 'Begin a new story',
     createStory: 'Create Story',
     newStory: 'New Story',
+    openAppSettings: 'App Settings',
     openStarterStory: (starterTitle: string) => `Start ${starterTitle}`,
     openStory: (storyTitle: string) => `Open ${storyTitle}`,
   },

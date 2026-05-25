@@ -6,6 +6,7 @@ import {
   CHAPTER_STORY_ID_INDEX,
   CHARACTERS_STORE,
   CHARACTER_STORY_ID_INDEX,
+  APP_SETTINGS_STORE,
   DB_NAME,
   DB_VERSION,
   STORIES_STORE,
@@ -39,6 +40,7 @@ describe('openDb', () => {
     expect(db.objectStoreNames.contains(STORIES_STORE)).toBe(true)
     expect(db.objectStoreNames.contains(CHAPTERS_STORE)).toBe(true)
     expect(db.objectStoreNames.contains(CHARACTERS_STORE)).toBe(true)
+    expect(db.objectStoreNames.contains(APP_SETTINGS_STORE)).toBe(true)
 
     const transaction = db.transaction(CHAPTERS_STORE, 'readonly')
     const chaptersStore = transaction.objectStore(CHAPTERS_STORE)
@@ -103,6 +105,17 @@ describe('openDb', () => {
 
     expect(characterStoryIdIndex.keyPath).toBe('storyId')
     await expect(transactionDone(characterTransaction)).resolves.toBeUndefined()
+
+    db.close()
+  })
+
+  it('adds the App Settings store during upgrades', async () => {
+    const versionThreeDb = await openVersionThreeDbWithoutAppSettings()
+    versionThreeDb.close()
+
+    const db = await openDb()
+
+    expect(db.objectStoreNames.contains(APP_SETTINGS_STORE)).toBe(true)
 
     db.close()
   })
@@ -292,6 +305,38 @@ function openVersionTwoDbWithCharacters(): Promise<IDBDatabase> {
       reject(
         request.error ??
           new Error('Failed to open version two test database.'),
+      )
+    }
+  })
+}
+
+function openVersionThreeDbWithoutAppSettings(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 3)
+
+    request.onupgradeneeded = () => {
+      const db = request.result
+      db.createObjectStore(STORIES_STORE, { keyPath: 'id' })
+      const chaptersStore = db.createObjectStore(CHAPTERS_STORE, {
+        keyPath: 'id',
+      })
+      const charactersStore = db.createObjectStore(CHARACTERS_STORE, {
+        keyPath: 'id',
+      })
+
+      chaptersStore.createIndex(CHAPTER_STORY_ID_INDEX, 'storyId')
+      chaptersStore.createIndex(CHAPTER_PARENT_ID_INDEX, 'parentChapterId')
+      charactersStore.createIndex(CHARACTER_STORY_ID_INDEX, 'storyId')
+    }
+
+    request.onsuccess = () => {
+      resolve(request.result)
+    }
+
+    request.onerror = () => {
+      reject(
+        request.error ??
+          new Error('Failed to open version three test database.'),
       )
     }
   })

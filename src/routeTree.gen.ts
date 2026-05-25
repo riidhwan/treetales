@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as _styleGuideRouteImport } from './routes/[_]_style-guide'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StoriesStoryIdRouteImport } from './routes/stories.$storyId'
@@ -19,6 +20,11 @@ import { Route as StoriesStoryIdChaptersNewRouteImport } from './routes/stories.
 import { Route as StoriesStoryIdChaptersChapterIdEditRouteImport } from './routes/stories.$storyId.chapters.$chapterId.edit'
 import { Route as StoriesStoryIdChaptersChapterIdChildrenNewRouteImport } from './routes/stories.$storyId.chapters.$chapterId.children.new'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const _styleGuideRoute = _styleGuideRouteImport.update({
   id: '/__style-guide',
   path: '/__style-guide',
@@ -71,6 +77,7 @@ const StoriesStoryIdChaptersChapterIdChildrenNewRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/__style-guide': typeof _styleGuideRoute
+  '/settings': typeof SettingsRoute
   '/stories/$storyId': typeof StoriesStoryIdRouteWithChildren
   '/stories/$storyId/edit': typeof StoriesStoryIdEditRoute
   '/stories/$storyId/read': typeof StoriesStoryIdReadRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/__style-guide': typeof _styleGuideRoute
+  '/settings': typeof SettingsRoute
   '/stories/$storyId/edit': typeof StoriesStoryIdEditRoute
   '/stories/$storyId/read': typeof StoriesStoryIdReadRoute
   '/stories/$storyId': typeof StoriesStoryIdIndexRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/__style-guide': typeof _styleGuideRoute
+  '/settings': typeof SettingsRoute
   '/stories/$storyId': typeof StoriesStoryIdRouteWithChildren
   '/stories/$storyId/edit': typeof StoriesStoryIdEditRoute
   '/stories/$storyId/read': typeof StoriesStoryIdReadRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/__style-guide'
+    | '/settings'
     | '/stories/$storyId'
     | '/stories/$storyId/edit'
     | '/stories/$storyId/read'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/__style-guide'
+    | '/settings'
     | '/stories/$storyId/edit'
     | '/stories/$storyId/read'
     | '/stories/$storyId'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/__style-guide'
+    | '/settings'
     | '/stories/$storyId'
     | '/stories/$storyId/edit'
     | '/stories/$storyId/read'
@@ -139,11 +151,19 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   _styleGuideRoute: typeof _styleGuideRoute
+  SettingsRoute: typeof SettingsRoute
   StoriesStoryIdRoute: typeof StoriesStoryIdRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/__style-guide': {
       id: '/__style-guide'
       path: '/__style-guide'
@@ -237,6 +257,7 @@ const StoriesStoryIdRouteWithChildren = StoriesStoryIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   _styleGuideRoute: _styleGuideRoute,
+  SettingsRoute: SettingsRoute,
   StoriesStoryIdRoute: StoriesStoryIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport

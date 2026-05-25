@@ -1,8 +1,11 @@
+import { Settings } from 'lucide-react'
+
 import {
   type StoryDashboardServices,
   useStoryDashboard,
 } from '@/hooks/useStoryDashboard'
 import { Alert } from '@/components/ui/Alert'
+import { IconButton } from '@/components/ui/IconButton'
 import { appCopy, storyDashboardCopy } from '@/copy'
 
 import {
@@ -15,6 +18,7 @@ import { NewStoryForm } from './StoryDashboard/NewStoryForm'
 
 interface Props {
   readonly onEditStory: (storyId: string) => void
+  readonly onOpenAppSettings: () => void
   readonly onOpenStory: (storyId: string) => void
   readonly onReadStory: (storyId: string) => void
   readonly services?: StoryDashboardServices
@@ -22,6 +26,7 @@ interface Props {
 
 export function StoryDashboard({
   onEditStory,
+  onOpenAppSettings,
   onOpenStory,
   onReadStory,
   services,
@@ -51,19 +56,28 @@ export function StoryDashboard({
   return (
     <main className="min-h-screen bg-background-app text-text-primary">
       <header>
-        <div className="mx-auto flex min-h-20 w-full max-w-4xl items-center gap-3 px-5 sm:min-h-24 sm:px-8 lg:px-10">
-          <img
-            alt=""
-            aria-hidden="true"
-            className="size-11 rounded-xl shadow-md sm:size-12"
-            src="/logo192.png"
-          />
-          <p
-            className="text-2xl font-bold text-action-primary"
-            style={{ fontFamily: DASHBOARD_DISPLAY_FONT }}
+        <div className="mx-auto flex min-h-20 w-full max-w-4xl items-center justify-between gap-3 px-5 sm:min-h-24 sm:px-8 lg:px-10">
+          <div className="flex min-w-0 items-center gap-3">
+            <img
+              alt=""
+              aria-hidden="true"
+              className="size-11 rounded-xl shadow-md sm:size-12"
+              src="/logo192.png"
+            />
+            <p
+              className="truncate text-2xl font-bold text-action-primary"
+              style={{ fontFamily: DASHBOARD_DISPLAY_FONT }}
+            >
+              {appCopy.brand}
+            </p>
+          </div>
+          <IconButton
+            label={storyDashboardCopy.actions.openAppSettings}
+            onClick={onOpenAppSettings}
+            variant="ghost"
           >
-            {appCopy.brand}
-          </p>
+            <Settings aria-hidden="true" size={21} />
+          </IconButton>
         </div>
       </header>
 

@@ -10,6 +10,7 @@ interface Props {
   readonly onContinueToMobileSite: () => void
   readonly onEditStory: (storyId: string) => void
   readonly onInstallApp: () => Promise<unknown>
+  readonly onOpenAppSettings: () => void
   readonly onOpenStory: (storyId: string) => void
   readonly onReadStory: (storyId: string) => void
   readonly services?: StoryDashboardServices
@@ -23,6 +24,7 @@ export function HomeExperienceContent({
   onContinueToMobileSite,
   onEditStory,
   onInstallApp,
+  onOpenAppSettings,
   onOpenStory,
   onReadStory,
   services,
@@ -46,6 +48,7 @@ export function HomeExperienceContent({
   return (
     <StoryDashboard
       onEditStory={onEditStory}
+      onOpenAppSettings={onOpenAppSettings}
       onOpenStory={onOpenStory}
       onReadStory={onReadStory}
       services={services}

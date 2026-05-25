@@ -212,6 +212,52 @@
 - The app shell and static assets are cached by a service worker for basic
   repeat-load resilience. Offline data sync across devices is not supported.
 
+### App Settings
+- App Settings provide browser-local app-level preferences and credentials that
+  are not Story content.
+- App Settings live at `/settings` and use the visible title "App Settings".
+- App Settings do not expose category-specific deep links in the initial
+  Writing Assist-only settings slice.
+- App Settings use System Mode because they are app-level utility state rather
+  than Library, Story management, or Chapter document work.
+- App Settings provide an explicit navigation action back to the Library Mode
+  dashboard at `/`.
+- App Settings are primarily opened from Library Mode because they apply to the
+  app in the current browser rather than to a specific Story or Chapter.
+- The initial App Settings entry point is the Library Mode dashboard; disabled
+  future Writing Assist actions do not link to App Settings until direct LLM
+  writing is implemented.
+- App Settings are grouped by category so future app-level options can be added
+  without flattening unrelated concerns into one form.
+- The initial App Settings category is Writing Assist.
+- The App Settings page shows a category list and a detail panel. The initial
+  page shows only the Writing Assist category, but the layout should make room
+  for future categories without showing placeholder categories.
+- Writing Assist settings let the user enter, save, replace, and clear a Gemini
+  API key for future LLM writing flows.
+- When a Gemini API key is already saved, TreeTales indicates that a key exists
+  without showing or revealing the saved key value.
+- Replacing a saved Gemini API key starts from a blank input; TreeTales does not
+  load the saved key value back into the form for display or editing.
+- Clearing a saved Gemini API key does not ask for confirmation; the user can
+  enter and save the key again if needed.
+- Saving a Gemini API key requires a non-empty trimmed value but does not apply
+  provider-specific format validation.
+- Replacing a saved Gemini API key can be cancelled before saving, returning to
+  the saved-key state.
+- Saving, replacing, or clearing the Gemini API key shows short success
+  feedback.
+- Saving the Gemini API key stores it only in the current browser. TreeTales
+  does not sync it, export it with Stories, or attach it to any Story, Chapter,
+  or Character.
+- TreeTales does not validate the Gemini API key with a Gemini network request
+  in the initial settings flow.
+- The initial App Settings slice only stores the Writing Assist Gemini API key
+  and does not enable direct LLM writing.
+- The settings surface should briefly communicate that browser-local API keys
+  are visible to someone with access to the browser profile, and that stronger
+  secret handling is outside the initial scope.
+
 ### Not Found
 - Unknown app paths render a TreeTales-styled not-found state instead of the
   router's generic fallback.

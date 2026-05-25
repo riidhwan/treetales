@@ -1,3 +1,4 @@
+export { appSettingsCopy } from './appSettings'
 export { appCopy } from './app'
 export { chapterWritingCopy } from './chapterWriting'
 export { commonCopy } from './common'

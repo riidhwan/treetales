@@ -40,8 +40,10 @@ Chapter Document typography.
 
 **System Mode**:
 The utility experience for app-level states such as unavailable paths,
-installation choices, confirmations, failures, loading, and non-workflow empty
-states. It should be direct, quiet, and unambiguous.
+installation choices, App Settings, confirmations, failures, loading, and
+non-workflow empty states. It should be direct, quiet, and unambiguous.
+App Settings should use a category list with a focused detail panel rather than
+tabs or placeholder future categories.
 
 ## Visual Foundations
 

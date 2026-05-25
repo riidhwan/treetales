@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
 
-type ButtonVariant = 'danger' | 'primary' | 'secondary'
+type ButtonVariant = 'danger' | 'ghost' | 'primary' | 'secondary'
 type ButtonSize = 'md' | 'sm'
 
 const BASE_CLASSES =
@@ -11,6 +11,7 @@ const BASE_CLASSES =
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   danger:
     'border border-action-destructive/30 bg-state-destructive-soft/40 text-action-destructive hover:bg-state-destructive-soft',
+  ghost: 'text-text-muted hover:bg-highlight-soft/50 hover:text-text-primary',
   primary:
     'border border-action-primary-hover bg-action-primary text-surface-paper shadow-sm hover:bg-action-primary-hover disabled:border-border-subtle disabled:bg-border-subtle disabled:text-text-muted',
   secondary:
