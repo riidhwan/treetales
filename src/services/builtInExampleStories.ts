@@ -19,18 +19,19 @@ export type CreateOrReuseExampleStoryCopyResult =
       readonly status: 'not-found'
     }
 
-interface BuiltInExampleStoryDefinition extends BuiltInExampleStorySummary {
-  readonly chapters: readonly BuiltInExampleChapterDefinition[]
+export interface BuiltInExampleStoryCatalogDefinition
+  extends BuiltInExampleStorySummary {
+  readonly chapters: readonly BuiltInExampleStoryCatalogChapterDefinition[]
 }
 
-interface BuiltInExampleChapterDefinition {
+export interface BuiltInExampleStoryCatalogChapterDefinition {
   readonly templateId: string
   readonly title: string
   readonly content: string
   readonly parentTemplateId: string | null
 }
 
-const BUILT_IN_EXAMPLE_STORIES: readonly BuiltInExampleStoryDefinition[] = [
+const BUILT_IN_EXAMPLE_STORIES: readonly BuiltInExampleStoryCatalogDefinition[] = [
   {
     id: 'bee-man-of-orn',
     title: 'The Bee-Man of Orn',
@@ -492,7 +493,32 @@ They never lose the gifts. The Princess learns to want without wounding, Martin 
   },
 ] as const
 
+validateBuiltInExampleStoryCatalog(BUILT_IN_EXAMPLE_STORIES)
+
 const repositoryUnitOfWork = createIndexedDbRepositoryUnitOfWork()
+
+export function validateBuiltInExampleStoryCatalog(
+  storyDefinitions: readonly BuiltInExampleStoryCatalogDefinition[],
+): void {
+  for (const storyDefinition of storyDefinitions) {
+    const templateIds = new Set(
+      storyDefinition.chapters.map((chapterDefinition) => {
+        return chapterDefinition.templateId
+      }),
+    )
+
+    for (const chapterDefinition of storyDefinition.chapters) {
+      if (
+        chapterDefinition.parentTemplateId !== null &&
+        !templateIds.has(chapterDefinition.parentTemplateId)
+      ) {
+        throw new Error(
+          `Built-in Example Story "${storyDefinition.id}" references unknown parent template "${chapterDefinition.parentTemplateId}".`,
+        )
+      }
+    }
+  }
+}
 
 export function listBuiltInExampleStories(): BuiltInExampleStorySummary[] {
   return BUILT_IN_EXAMPLE_STORIES.map((starter) => ({
@@ -562,7 +588,7 @@ export async function createOrReuseExampleStoryCopy(
 }
 
 function createExampleChapters(
-  chapterDefinitions: readonly BuiltInExampleChapterDefinition[],
+  chapterDefinitions: readonly BuiltInExampleStoryCatalogChapterDefinition[],
   storyId: string,
   createdAt: number,
 ): Chapter[] {
@@ -574,14 +600,14 @@ function createExampleChapters(
   )
 
   return chapterDefinitions.map((chapterDefinition, index) => {
-    const id = chapterIdsByTemplateId.get(chapterDefinition.templateId)
+    const id = chapterIdsByTemplateId.get(
+      chapterDefinition.templateId,
+    ) as string
     const parentChapterId = chapterDefinition.parentTemplateId
-      ? chapterIdsByTemplateId.get(chapterDefinition.parentTemplateId)
+      ? (chapterIdsByTemplateId.get(
+          chapterDefinition.parentTemplateId,
+        ) as string)
       : null
-
-    if (!id || parentChapterId === undefined) {
-      throw new Error('Built-in Example Story chapter definition is invalid.')
-    }
 
     return {
       id,

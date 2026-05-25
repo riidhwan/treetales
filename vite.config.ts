@@ -39,9 +39,9 @@ const config = defineConfig(({ mode }) => {
         ],
         thresholds: {
           branches: 98.5,
-          functions: 98.5,
-          lines: 98.5,
-          statements: 98.5,
+          functions: 99,
+          lines: 99.5,
+          statements: 99.5,
         },
       },
       environment: 'jsdom',

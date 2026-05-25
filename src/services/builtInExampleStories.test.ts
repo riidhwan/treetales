@@ -8,11 +8,13 @@ import {
 } from 'vitest'
 
 import {
+  type BuiltInExampleStoryCatalogDefinition,
   createOrReuseExampleStoryCopy,
   listBuiltInExampleStories,
+  validateBuiltInExampleStoryCatalog,
 } from '@/services/builtInExampleStories'
 import { deleteStory, getStories, getStoryById } from '@/services/storyService'
-import type { Chapter } from '@/services/types'
+import type { Chapter, StoryProvenance } from '@/services/types'
 import { deleteTestDatabase, installFakeIndexedDb } from '@/test/indexedDb'
 
 const BEE_MAN_ADAPTATION_NOTE =
@@ -23,6 +25,46 @@ const MAGICIANS_GIFTS_ADAPTATION_NOTE =
 
 const WONDERFUL_TOYMAKER_ADAPTATION_NOTE =
   "Adapted into a branching TreeTales starter from the source premise. The main path follows Princess Petulant, Martin, the pine dwarfs, the conversation country, the rescue, and the Toymaker's two tops; alternate branches let the Princess practice patience, Martin become trapped by talk, or the children stay longer with the Toymaker."
+
+const VALIDATION_TEST_PROVENANCE: StoryProvenance = {
+  sourceWorks: [
+    {
+      title: 'Validation Fixture',
+      author: 'TreeTales',
+      publication: 'Test fixture',
+      publicDomainBasis: 'Authored for tests.',
+    },
+  ],
+  adaptationNote: 'Test fixture.',
+  displayText: 'Validation fixture.',
+}
+
+function createValidationCatalog(
+  parentTemplateId: string | null,
+): BuiltInExampleStoryCatalogDefinition[] {
+  return [
+    {
+      id: 'validation-fixture',
+      title: 'Validation Fixture',
+      description: 'A small catalog fixture for validation tests.',
+      storyProvenance: VALIDATION_TEST_PROVENANCE,
+      chapters: [
+        {
+          templateId: 'intro',
+          title: 'Intro',
+          content: 'The first chapter.',
+          parentTemplateId: null,
+        },
+        {
+          templateId: 'branch',
+          title: 'Branch',
+          content: 'A branch chapter.',
+          parentTemplateId,
+        },
+      ],
+    },
+  ]
+}
 
 function createMockUuid(index: number): ReturnType<Crypto['randomUUID']> {
   return `00000000-0000-4000-8000-${(index + 1).toString().padStart(12, '0')}`
@@ -145,6 +187,18 @@ describe('builtInExampleStories', () => {
     ).resolves.toEqual({
       status: 'not-found',
     })
+  })
+
+  it('validates authored catalog parent template references', () => {
+    expect(() => {
+      validateBuiltInExampleStoryCatalog(createValidationCatalog('intro'))
+    }).not.toThrow()
+
+    expect(() => {
+      validateBuiltInExampleStoryCatalog(createValidationCatalog('missing'))
+    }).toThrow(
+      'Built-in Example Story "validation-fixture" references unknown parent template "missing".',
+    )
   })
 
   it('creates an editable example story copy with generated local ids and provenance', async () => {

@@ -259,6 +259,8 @@ be treated as absent optional fields rather than rewritten into explicit null
 values by an IndexedDB migration.
 Starter chapter definitions may use stable catalog-local template ids so copy
 creation can map parent relationships onto generated local Chapter ids.
+The Built-in Example Story catalog validates those parent template references at
+module load, so authored catalog errors fail before copy creation starts.
 Character service writes trim Character names and property key/value text, and
 drop custom properties with blank keys. Creating, updating, or deleting a
 Character refreshes the owning Story's `updatedAt`. Deleting a story deletes all
