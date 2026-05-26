@@ -21,3 +21,14 @@ references
 .dev.vars*
 !.dev.vars.example
 !.env.example
+
+# Android release signing material and generated build outputs.
+android-twa/android-keystore
+android-twa/*.keystore
+android-twa/*.jks
+android-twa/app-release-signed.apk
+android-twa/app-release-signed.apk.idsig
+android-twa/app-release-bundle.aab
+android-twa/app-release-unsigned-aligned.apk
+android-twa/app/build/
+android-twa/.gradle/
