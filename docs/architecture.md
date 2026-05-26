@@ -10,6 +10,11 @@ served from stale PWA storage. The service worker caches the app shell and
 static assets only; story persistence remains browser-local, with no cross-device
 offline sync.
 
+Android packaging uses a Trusted Web Activity around the production PWA at
+`https://treetales.ramdhani.me/`. The packaging decision is recorded in
+`docs/adr/0007-android-packaging-with-trusted-web-activity.md`, and operational
+setup lives in `docs/android-packaging.md`.
+
 Bundled reader fonts are static app assets. Third-party font notices and license
 references must be kept with the bundled assets or in project documentation when
 fonts are added, removed, or updated.
