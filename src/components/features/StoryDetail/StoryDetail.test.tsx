@@ -119,6 +119,7 @@ function renderDetail({
   characterServices = createCharacterServices([]),
   onDeleted = vi.fn(),
   onEditStory = vi.fn(),
+  onOpenCharacter = vi.fn(),
   onOpenDashboard = vi.fn(),
   onReadStory = vi.fn(),
   services = createServices(),
@@ -126,6 +127,7 @@ function renderDetail({
   readonly characterServices?: ReturnType<typeof createCharacterServices>
   readonly onDeleted?: () => void
   readonly onEditStory?: (storyId: string) => void
+  readonly onOpenCharacter?: (storyId: string, characterId: string) => void
   readonly onOpenDashboard?: () => void
   readonly onReadStory?: (storyId: string) => void
   readonly services?: ReturnType<typeof createServices>
@@ -135,6 +137,7 @@ function renderDetail({
       characterServices={characterServices}
       onDeleted={onDeleted}
       onEditStory={onEditStory}
+      onOpenCharacter={onOpenCharacter}
       onOpenDashboard={onOpenDashboard}
       onReadStory={onReadStory}
       services={services}
@@ -251,34 +254,15 @@ describe('StoryDetail', () => {
     expect(screen.queryByText(/\+\d+ more/)).toBeNull()
   })
 
-  it('opens character details with full plain-text values', async () => {
+  it('opens the selected character detail page from a character card', async () => {
     const characterServices = createCharacterServices([createCharacter()])
+    const onOpenCharacter = vi.fn()
 
-    renderDetail({ characterServices })
-
-    fireEvent.click(await screen.findByRole('button', { name: 'View Mira' }))
-
-    const dialog = screen.getByRole('dialog', { name: 'Mira' })
-
-    expect(dialog).toBeTruthy()
-    expect(
-      within(dialog).getByText(/A long history\s+with line breaks/),
-    ).toBeTruthy()
-    expect(within(dialog).getByText('relationship')).toBeTruthy()
-  })
-
-  it('shows a no-properties fallback in character details', async () => {
-    const characterServices = createCharacterServices([
-      createCharacter({ properties: [] }),
-    ])
-
-    renderDetail({ characterServices })
+    renderDetail({ characterServices, onOpenCharacter })
 
     fireEvent.click(await screen.findByRole('button', { name: 'View Mira' }))
 
-    const dialog = screen.getByRole('dialog', { name: 'Mira' })
-
-    expect(within(dialog).getByText('No custom properties yet.')).toBeTruthy()
+    expect(onOpenCharacter).toHaveBeenCalledWith('story-1', 'character-1')
   })
 
   it('creates a character from the story detail dialog', async () => {
@@ -338,123 +322,6 @@ describe('StoryDetail', () => {
     expect((await within(dialog).findByRole('alert')).textContent).toBe(
       'Could not create character.',
     )
-  })
-
-  it('confirms before discarding unsaved character edits', async () => {
-    const characterServices = createCharacterServices([createCharacter()])
-
-    renderDetail({ characterServices })
-
-    fireEvent.click(await screen.findByRole('button', { name: 'View Mira' }))
-    let dialog = screen.getByRole('dialog', { name: 'Mira' })
-    fireEvent.click(within(dialog).getByRole('button', { name: /^edit$/i }))
-    dialog = screen.getByRole('dialog', { name: 'Edit Mira' })
-    fireEvent.change(within(dialog).getByLabelText('Name'), {
-      target: { value: 'Mira Changed' },
-    })
-    fireEvent.click(within(dialog).getByRole('button', { name: /cancel/i }))
-
-    let confirmation = await screen.findByRole('dialog', {
-      name: 'Discard Character Changes?',
-    })
-    expect(confirmation.textContent).toContain(
-      'Discard unsaved character changes?',
-    )
-    fireEvent.click(within(confirmation).getByRole('button', { name: /cancel/i }))
-
-    expect(screen.getByRole('dialog', { name: 'Edit Mira' })).toBeTruthy()
-
-    fireEvent.click(
-      within(screen.getByRole('dialog', { name: 'Edit Mira' })).getByRole(
-        'button',
-        { name: /cancel/i },
-      ),
-    )
-    confirmation = await screen.findByRole('dialog', {
-      name: 'Discard Character Changes?',
-    })
-    fireEvent.click(
-      within(confirmation).getByRole('button', { name: /discard changes/i }),
-    )
-
-    expect(screen.queryByRole('dialog', { name: 'Edit Mira' })).toBeNull()
-  })
-
-  it('edits and deletes a character from the detail dialog', async () => {
-    const characterServices = createCharacterServices([createCharacter()])
-
-    renderDetail({ characterServices })
-
-    fireEvent.click(await screen.findByRole('button', { name: 'View Mira' }))
-    let dialog = screen.getByRole('dialog', { name: 'Mira' })
-    fireEvent.click(within(dialog).getByRole('button', { name: /^edit$/i }))
-    dialog = screen.getByRole('dialog', { name: 'Edit Mira' })
-    fireEvent.change(within(dialog).getByLabelText('Name'), {
-      target: { value: 'Mira Changed' },
-    })
-    fireEvent.click(within(dialog).getByRole('button', { name: /^save$/i }))
-
-    await waitFor(() => {
-      expect(characterServices.updateCharacter).toHaveBeenCalledWith(
-        'character-1',
-        expect.objectContaining({ name: 'Mira Changed' }),
-      )
-    })
-
-    dialog = await screen.findByRole('dialog', { name: 'Mira Changed' })
-    fireEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }))
-    const confirmation = await screen.findByRole('dialog', {
-      name: 'Delete Character?',
-    })
-    expect(confirmation.textContent).toContain(
-      'Delete "Mira Changed"? This cannot be undone.',
-    )
-    fireEvent.click(
-      within(confirmation).getByRole('button', { name: /delete character/i }),
-    )
-
-    await waitFor(() => {
-      expect(characterServices.deleteCharacter).toHaveBeenCalledWith(
-        'character-1',
-      )
-    })
-  })
-
-  it('reorders and removes character properties in the edit dialog', async () => {
-    const characterServices = createCharacterServices([createCharacter()])
-
-    renderDetail({ characterServices })
-
-    fireEvent.click(await screen.findByRole('button', { name: 'View Mira' }))
-    let dialog = screen.getByRole('dialog', { name: 'Mira' })
-    fireEvent.click(within(dialog).getByRole('button', { name: /^edit$/i }))
-    dialog = screen.getByRole('dialog', { name: 'Edit Mira' })
-
-    fireEvent.change(within(dialog).getByLabelText('Gender'), {
-      target: { value: 'male' },
-    })
-    fireEvent.click(
-      within(dialog).getByRole('button', { name: /move age down/i }),
-    )
-    fireEvent.click(
-      within(dialog).getByRole('button', { name: /move appearance up/i }),
-    )
-    fireEvent.click(within(dialog).getAllByRole('button', { name: /remove/i })[0])
-    fireEvent.click(within(dialog).getByRole('button', { name: /^save$/i }))
-
-    await waitFor(() => {
-      expect(characterServices.updateCharacter).toHaveBeenCalledWith(
-        'character-1',
-        expect.objectContaining({
-          gender: 'male',
-          properties: [
-            { key: 'appearance', value: 'Silver hair' },
-            { key: 'age', value: '32' },
-            { key: 'relationship', value: 'Sister of Rowan' },
-          ],
-        }),
-      )
-    })
   })
 
   it('opens the story editor from an empty description affordance', async () => {
@@ -622,6 +489,7 @@ describe('StoryDetail', () => {
         characterTitleId="characters-title"
         isDeleting={false}
         onEditStory={vi.fn()}
+        onOpenCharacter={vi.fn()}
         onOpenDashboard={vi.fn()}
         onOpenDeleteDialog={vi.fn()}
         status="ready"

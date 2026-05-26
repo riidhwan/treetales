@@ -6,7 +6,7 @@ import { formatGender } from './characterDisplay'
 
 interface Props {
   readonly character: Character
-  readonly onOpen: (character: Character) => void
+  readonly onOpen: (characterId: string) => void
 }
 
 export function CharacterCard({ character, onOpen }: Props) {
@@ -14,7 +14,7 @@ export function CharacterCard({ character, onOpen }: Props) {
     <button
       aria-label={storyDetailCopy.actions.viewCharacter(character.name)}
       className="flex min-h-36 flex-col items-stretch justify-start overflow-hidden rounded-2xl border border-border-subtle bg-surface-paper/60 p-4 text-left transition hover:border-focus-ring hover:bg-highlight-soft/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring sm:h-44"
-      onClick={() => onOpen(character)}
+      onClick={() => onOpen(character.id)}
       type="button"
     >
       <span className="flex items-start justify-between gap-3">

@@ -19,6 +19,7 @@ interface Props {
   readonly characterServices?: StoryCharacterServices
   readonly onDeleted: () => void
   readonly onEditStory: (storyId: string) => void
+  readonly onOpenCharacter: (storyId: string, characterId: string) => void
   readonly onOpenDashboard: () => void
   readonly onReadStory: (storyId: string) => void
   readonly services?: StoryDetailServices
@@ -29,6 +30,7 @@ export function StoryDetail({
   characterServices,
   onDeleted,
   onEditStory,
+  onOpenCharacter,
   onOpenDashboard,
   onReadStory,
   services,
@@ -71,6 +73,7 @@ export function StoryDetail({
           errorMessage={errorMessage}
           isDeleting={isDeleting}
           onEditStory={onEditStory}
+          onOpenCharacter={onOpenCharacter}
           onOpenDashboard={onOpenDashboard}
           onOpenDeleteDialog={() => setIsStoryDeleteDialogOpen(true)}
           status={status}

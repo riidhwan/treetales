@@ -56,6 +56,11 @@ export const storyDetailCopy = {
       value: '32',
     },
   },
+  characterDetail: {
+    backToStory: 'Story Detail',
+    loading: 'Loading character...',
+    navigationLabel: 'Character detail navigation',
+  },
   deleteDialog: {
     message: (storyTitle: string) =>
       `Delete "${storyTitle}"? This cannot be undone.`,

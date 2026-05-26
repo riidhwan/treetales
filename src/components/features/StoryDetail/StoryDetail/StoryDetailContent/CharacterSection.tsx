@@ -13,10 +13,15 @@ type CharacterController = ReturnType<typeof useStoryCharacters>
 
 interface Props {
   readonly characterDialog: CharacterController
+  readonly onOpenCharacter: (characterId: string) => void
   readonly titleId: string
 }
 
-export function CharacterSection({ characterDialog, titleId }: Props) {
+export function CharacterSection({
+  characterDialog,
+  onOpenCharacter,
+  titleId,
+}: Props) {
   const confirmationTitleId = `${titleId}-confirmation`
 
   return (
@@ -46,7 +51,10 @@ export function CharacterSection({ characterDialog, titleId }: Props) {
           </Alert>
         ) : null}
 
-        <CharacterListContent characterDialog={characterDialog} />
+        <CharacterListContent
+          characterDialog={characterDialog}
+          onOpenCharacter={onOpenCharacter}
+        />
       </section>
 
       <CharacterDialogSlot
