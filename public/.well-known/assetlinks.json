@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "me.ramdhani.treetales",
+            "sha256_cert_fingerprints": [
+                "94:AE:D9:CC:10:09:B8:32:87:0C:55:A8:9D:E2:DC:96:FD:80:C6:95:F5:50:2C:81:1A:55:22:C8:1A:1A:FB:E1"
+            ]
+        }
+    }
+]
