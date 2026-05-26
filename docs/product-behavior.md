@@ -38,14 +38,53 @@
   and preview the first three custom properties with long keys and values
   truncated. When more than three custom properties exist, the card shows a
   remaining-count indicator.
-- Selecting a Character card opens a read-only detail dialog with the full
-  plain-text custom property values.
+- Selecting a Character card opens a dedicated Character detail page with the
+  full plain-text custom property values.
 - Story detail lets users create, edit, and delete Characters from dialogs.
   Create and edit require a non-empty name, support gender selection, and let
   users add, remove, and reorder custom properties.
+- The Character detail page lets users add multiple Character Illustrations to
+  a Character. Character Illustrations are images associated with the Character
+  and are not treated as thumbnails, avatars, portraits, or character-only
+  crops.
+- Story detail remains the overview and Character creation entry point. Editing
+  and deleting an existing Character belong on the dedicated Character detail
+  page once that page exists.
+- Each Character Illustration can have an optional short label so users can
+  distinguish related images for the same Character.
+- Character Illustrations have a user-controlled order. Newly added
+  illustrations append after existing illustrations, and users can reorder them
+  on the Character detail page.
+- The MVP lets users edit a Character Illustration label, reorder Character
+  Illustrations, and delete Character Illustrations. It does not include image
+  editing, cropping, rotation, annotation, replacement, or post-upload quality
+  conversion.
+- Character Illustration import defaults to normalized quality so large source
+  images are resized or re-encoded before local storage. Users can choose an
+  original-quality option when they need to preserve the uploaded image as-is.
+  The original-quality option is a per-import choice and is not remembered as a
+  persistent preference.
+  Normalized imports strip source image metadata such as camera and location
+  metadata.
+  Original quality preserves the exact uploaded file bytes; TreeTales does not
+  resize, re-encode, or strip metadata in that mode.
+- Character Illustration import accepts JPEG, PNG, and WebP images in the MVP.
+- Character Illustration import validates image size before storage. Images
+  that exceed the current normalized or original-quality limits are rejected
+  with a clear message before TreeTales writes illustration metadata or image
+  files.
+- Normalized Character Illustration imports resize the longest edge to 2048 px,
+  encode around 0.85 quality, and reject the import if the normalized result is
+  still over 2 MB.
+- Original-quality Character Illustration imports reject files over 15 MB.
+- Character Illustrations are viewed and managed from the Character detail page
+  in the MVP. They are not shown in Story Reader.
 - Leaving a Character create or edit dialog with unsaved changes asks for
   confirmation before discarding the draft.
 - Character delete asks for confirmation before removing the Character.
+- Deleting a Character also removes that Character's Character Illustrations.
+- Deleting a Story also removes all Character Illustrations that belong to
+  Characters in that Story.
 
 ### Story Reader
 - User opens a story from story detail or the example-story empty state and
@@ -153,6 +192,8 @@
 - If copying the generated prompt fails, Prompt Builder shows the generated
   prompt so the author can copy it manually.
 - Write with LLM is visible but disabled; direct LLM writing is a future feature.
+- Character Illustrations are not included in Prompt Builder context in the MVP.
+  Prompt Builder remains a text-only writing aid.
 - Chapter creation uses draft-oriented unavailable and failure states before a
   chapter exists, while the toolbar commit action keeps Save/Saving language
   consistent with chapter editing.
