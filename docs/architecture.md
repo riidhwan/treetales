@@ -166,6 +166,12 @@ specific:
 Hooks depend on the service layer through small service interfaces with default
 implementations. Tests can pass fake services without touching IndexedDB.
 
+Character detail should be a route-backed Management Mode page rather than
+modal-only content before Character Illustrations are added. The page owns the
+expanded Character presentation and provides the stable surface where multiple
+Character Illustrations can be managed without implying card thumbnails or
+avatar-style identity images.
+
 Async feature hook statuses should keep `ready` reserved for a successfully
 resolved expected load path. Expected absence uses explicit missing statuses,
 such as `missing-story` or `missing-chapter`. Unrecoverable load exceptions use
@@ -228,6 +234,31 @@ rendered.
 Character properties are stored as an ordered array on the Character record.
 They have no identity or lifecycle outside their Character. Character property
 keys and values are plain text, not markdown.
+
+Character Illustrations are modeled separately from Characters because one
+Character can have multiple associated images and those images may include
+scene or reference context beyond the Character alone. Character Illustration
+metadata, including an optional short label and user-controlled order, belongs
+in IndexedDB with the rest of the browser-local authored data; large image bytes
+should be stored as origin-private file content rather than embedded in the
+Character record. The service/repository boundary should own metadata and file
+cleanup together so UI code does not call browser storage APIs directly.
+
+Character Illustration import defaults to normalized quality for quota-friendly
+local storage. Users can opt into original quality when preserving the uploaded
+image exactly is more important than storage use. Original quality stores the
+uploaded file bytes without resizing, re-encoding, or metadata stripping.
+Normalized imports should re-encode the image and strip source metadata such as
+camera and location metadata. The MVP import boundary accepts JPEG, PNG, and
+WebP images. Import limits should be named tuneable constants and validated
+before metadata or image files are written so failed imports do not leave
+partial records behind. Initial MVP limits are a 2048 px longest edge, about
+0.85 encoding quality, and a 2 MB post-normalization cap for normalized imports;
+original-quality imports reject files over 15 MB.
+Character deletion and Story deletion must clean up both Character Illustration
+metadata and stored image files. Future Story export/import should treat
+Character Illustration metadata and image files as one bundle rather than
+exporting only JSON metadata.
 
 ## Services Layer (`src/services/`)
 

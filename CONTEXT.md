@@ -20,6 +20,10 @@ _Avoid_: Sex, pronouns, free-form gender
 An ordered key/value detail on a **Character**, such as age, appearance, or description.
 _Avoid_: Attribute, field, metadata
 
+**Character Illustration**:
+An image associated with a **Character**.
+_Avoid_: Thumbnail, avatar, portrait
+
 **Chapter**:
 A single authored passage within a **Story**.
 _Avoid_: Node, page, scene
@@ -116,7 +120,9 @@ _Avoid_: Miscellaneous mode, error mode
 - A **Starter Section** contains zero or more **Built-in Example Stories**.
 - A **Character** belongs to exactly one **Story**.
 - A **Character** has zero or more **Character Properties**.
+- A **Character** has zero or more **Character Illustrations**.
 - A **Character Property** belongs to exactly one **Character**.
+- A **Character Illustration** belongs to exactly one **Character**.
 - A **Chapter** belongs to exactly one **Story**.
 - A **Chapter Document** presents exactly one **Chapter**.
 - A **Story** has zero or one **Intro Chapter**.
@@ -138,6 +144,9 @@ _Avoid_: Miscellaneous mode, error mode
 >
 > **Dev:** "If the same **Character** appears across several **Branches**, should we create one per **Chapter**?"
 > **Domain expert:** "No. A **Character** belongs to the **Story**, even if they appear in many **Chapters**."
+>
+> **Dev:** "Should a **Character Illustration** be cropped to show only the **Character**?"
+> **Domain expert:** "No. A **Character Illustration** can include surrounding visual context."
 
 ## Flagged ambiguities
 
@@ -157,6 +166,7 @@ _Avoid_: Miscellaneous mode, error mode
   options.
 - "draft" can mean saved **Chapter** content or temporary scratch input — resolved: use **Rough Plot** for Prompt Builder scratch text and **Chapter** content for authored markdown.
 - "character" could mean a chapter-local appearance or a story-level entity — resolved: use **Character** for a story-level entity that can appear across many **Chapters**.
+- "illustration" can imply a small profile image — resolved: use **Character Illustration** for any image associated with a **Character**, without assuming it is a thumbnail, avatar, portrait, or character-only crop.
 - "story" was originally defined as user-authored even though TreeTales includes seeded example content — resolved: **Story** covers both user-authored and built-in branching narratives, and **Built-in Example Story** names TreeTales-provided seeded content.
 - "free to copy" can imply verbatim reuse — resolved: TreeTales should describe **Built-in Example Stories** as adapted from **Source Works** unless the app intentionally preserves copied source text.
 - "licensed work" is broader than TreeTales needs for built-in examples — resolved: **Source Work** means U.S. public-domain material, not Creative Commons material.
