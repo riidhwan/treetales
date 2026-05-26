@@ -1,7 +1,8 @@
 import { useId } from 'react'
 
 import { ManagementTopBar } from '@/components/features/shared/ManagementTopBar'
-import { storyDetailCopy } from '@/copy'
+import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
+import { commonCopy, storyDetailCopy } from '@/copy'
 import {
   type CharacterDetailServices,
   useCharacterDetail,
@@ -23,8 +24,10 @@ export function CharacterDetail({
   storyId,
 }: Props) {
   const titleId = useId()
+  const confirmationTitleId = useId()
   const characterDetail = useCharacterDetail({
     characterId,
+    onDeleted: () => onBackToStory(storyId),
     services,
     storyId,
   })
@@ -43,6 +46,38 @@ export function CharacterDetail({
           titleId={titleId}
         />
       </section>
+
+      {characterDetail.confirmationState.mode === 'delete-character' &&
+      characterDetail.character ? (
+        <ConfirmationDialog
+          confirmLabel={
+            characterDetail.isDeleting
+              ? commonCopy.actions.deleting
+              : storyDetailCopy.actions.deleteCharacter
+          }
+          isConfirming={characterDetail.isDeleting}
+          message={storyDetailCopy.character.deleteDialog.message(
+            characterDetail.character.name,
+          )}
+          onCancel={characterDetail.cancelConfirmation}
+          onConfirm={() => void characterDetail.confirmDeleteCharacter()}
+          title={storyDetailCopy.character.deleteDialog.title}
+          titleId={confirmationTitleId}
+          variant="danger"
+        />
+      ) : null}
+
+      {characterDetail.confirmationState.mode === 'discard-changes' ? (
+        <ConfirmationDialog
+          confirmLabel={storyDetailCopy.actions.discardChanges}
+          message={storyDetailCopy.character.discardDialog.message}
+          onCancel={characterDetail.cancelConfirmation}
+          onConfirm={characterDetail.confirmDiscardChanges}
+          title={storyDetailCopy.character.discardDialog.title}
+          titleId={confirmationTitleId}
+          variant="danger"
+        />
+      ) : null}
     </main>
   )
 }

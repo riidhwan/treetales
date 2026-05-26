@@ -5,7 +5,7 @@ import {
   type CharacterDetailServices,
   useCharacterDetail,
 } from '@/hooks/useCharacterDetail'
-import type { Character, Story } from '@/services/types'
+import type { Character, Story, UpdateCharacterInput } from '@/services/types'
 
 function createStory(overrides: Partial<Story> = {}): Story {
   return {
@@ -37,10 +37,32 @@ function createServices(options: {
 } = {}): CharacterDetailServices {
   const character = 'character' in options ? options.character : createCharacter()
   const story = 'story' in options ? options.story : createStory()
+  let currentCharacter = character
 
   return {
-    getCharacterById: vi.fn(() => Promise.resolve(character)),
+    deleteCharacter: vi.fn((id: string) => {
+      if (!currentCharacter || currentCharacter.id !== id) {
+        return Promise.resolve(false)
+      }
+
+      currentCharacter = undefined
+      return Promise.resolve(true)
+    }),
+    getCharacterById: vi.fn(() => Promise.resolve(currentCharacter)),
     getStoryById: vi.fn(() => Promise.resolve(story)),
+    updateCharacter: vi.fn((id: string, input: UpdateCharacterInput) => {
+      if (!currentCharacter || currentCharacter.id !== id) {
+        return Promise.resolve(undefined)
+      }
+
+      currentCharacter = {
+        ...currentCharacter,
+        ...input,
+        updatedAt: 200,
+      }
+
+      return Promise.resolve(currentCharacter)
+    }),
   }
 }
 
@@ -59,7 +81,7 @@ describe('useCharacterDetail', () => {
     vi.restoreAllMocks()
   })
 
-  it('loads character detail and ignores stale story loads after unmounting', async () => {
+  it('loads a character and ignores stale loads after unmounting', async () => {
     const pendingStory = deferred<Story | undefined>()
     const services = {
       ...createServices(),
@@ -68,6 +90,7 @@ describe('useCharacterDetail', () => {
     const { result, unmount } = renderHook(() =>
       useCharacterDetail({
         characterId: 'character-1',
+        onDeleted: vi.fn(),
         services,
         storyId: 'story-1',
       }),
@@ -91,6 +114,7 @@ describe('useCharacterDetail', () => {
     const { unmount } = renderHook(() =>
       useCharacterDetail({
         characterId: 'character-1',
+        onDeleted: vi.fn(),
         services,
         storyId: 'story-1',
       }),
@@ -116,6 +140,7 @@ describe('useCharacterDetail', () => {
       ({ services }) =>
         useCharacterDetail({
           characterId: 'character-1',
+          onDeleted: vi.fn(),
           services,
           storyId: 'story-1',
         }),
@@ -136,5 +161,139 @@ describe('useCharacterDetail', () => {
     await waitFor(() => {
       expect(result.current.status).toBe('missing-character')
     })
+  })
+
+  it('keeps no-op guards inert when no character is ready', async () => {
+    const services = createServices({ character: undefined })
+    const onDeleted = vi.fn()
+    const { result } = renderHook(() =>
+      useCharacterDetail({
+        characterId: 'character-1',
+        onDeleted,
+        services,
+        storyId: 'story-1',
+      }),
+    )
+
+    await waitFor(() => {
+      expect(result.current.status).toBe('missing-character')
+    })
+
+    act(() => {
+      result.current.beginEdit()
+      result.current.confirmDiscardChanges()
+      result.current.requestDeleteCharacter()
+    })
+    await act(async () => {
+      await result.current.saveCharacter()
+      await result.current.confirmDeleteCharacter()
+    })
+
+    expect(services.updateCharacter).not.toHaveBeenCalled()
+    expect(services.deleteCharacter).not.toHaveBeenCalled()
+    expect(onDeleted).not.toHaveBeenCalled()
+  })
+
+  it('cancels unchanged edits without confirmation and ignores invalid moves', async () => {
+    const services = createServices()
+    const { result } = renderHook(() =>
+      useCharacterDetail({
+        characterId: 'character-1',
+        onDeleted: vi.fn(),
+        services,
+        storyId: 'story-1',
+      }),
+    )
+
+    await waitFor(() => {
+      expect(result.current.status).toBe('ready')
+    })
+
+    act(() => {
+      result.current.beginEdit()
+      result.current.moveProperty('missing-property', 1)
+      result.current.requestCancelEdit()
+    })
+
+    expect(result.current.isEditing).toBe(false)
+    expect(result.current.confirmationState.mode).toBe('closed')
+  })
+
+  it('handles update and delete failures', async () => {
+    const services = {
+      ...createServices(),
+      deleteCharacter: vi.fn(() => Promise.reject(new Error('Delete failed.'))),
+      updateCharacter: vi.fn(() => Promise.reject(new Error('Update failed.'))),
+    }
+    const { result } = renderHook(() =>
+      useCharacterDetail({
+        characterId: 'character-1',
+        onDeleted: vi.fn(),
+        services,
+        storyId: 'story-1',
+      }),
+    )
+
+    await waitFor(() => {
+      expect(result.current.status).toBe('ready')
+    })
+
+    act(() => {
+      result.current.beginEdit()
+      result.current.setName('Changed')
+    })
+    await act(async () => {
+      await result.current.saveCharacter()
+    })
+
+    expect(result.current.errorMessage).toBe('Update failed.')
+
+    act(() => {
+      result.current.requestDeleteCharacter()
+    })
+    await act(async () => {
+      await result.current.confirmDeleteCharacter()
+    })
+
+    expect(result.current.errorMessage).toBe('Delete failed.')
+  })
+
+  it('shows missing character when update or delete cannot find the character', async () => {
+    const services = {
+      ...createServices(),
+      deleteCharacter: vi.fn(() => Promise.resolve(false)),
+      updateCharacter: vi.fn(() => Promise.resolve(undefined)),
+    }
+    const { result } = renderHook(() =>
+      useCharacterDetail({
+        characterId: 'character-1',
+        onDeleted: vi.fn(),
+        services,
+        storyId: 'story-1',
+      }),
+    )
+
+    await waitFor(() => {
+      expect(result.current.status).toBe('ready')
+    })
+
+    act(() => {
+      result.current.beginEdit()
+      result.current.setName('Changed')
+    })
+    await act(async () => {
+      await result.current.saveCharacter()
+    })
+
+    expect(result.current.status).toBe('missing-character')
+
+    act(() => {
+      result.current.requestDeleteCharacter()
+    })
+    await act(async () => {
+      await result.current.confirmDeleteCharacter()
+    })
+
+    expect(result.current.confirmationState.mode).toBe('closed')
   })
 })

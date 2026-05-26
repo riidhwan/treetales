@@ -324,6 +324,68 @@ describe('StoryDetail', () => {
     )
   })
 
+  it('confirms before discarding unsaved character creation', async () => {
+    renderDetail()
+
+    await screen.findByText('Characters')
+    fireEvent.click(screen.getByRole('button', { name: /add character/i }))
+    fireEvent.change(screen.getByLabelText('Name'), {
+      target: { value: 'Mira' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /cancel/i }))
+
+    const confirmation = await screen.findByRole('dialog', {
+      name: 'Discard Character Changes?',
+    })
+    expect(confirmation.textContent).toContain(
+      'Discard unsaved character changes?',
+    )
+    fireEvent.click(
+      within(confirmation).getByRole('button', { name: /discard changes/i }),
+    )
+
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('supports character view dialog edit and delete actions', async () => {
+    const characterServices = createCharacterServices([])
+    const pendingDelete = deferred<boolean>()
+    vi.mocked(characterServices.deleteCharacter).mockReturnValueOnce(
+      pendingDelete.promise,
+    )
+
+    renderDetail({ characterServices })
+
+    await screen.findByText('Characters')
+    fireEvent.click(screen.getByRole('button', { name: /add character/i }))
+    fireEvent.change(screen.getByLabelText('Name'), {
+      target: { value: 'Mira' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+    const dialog = await screen.findByRole('dialog', { name: 'Mira' })
+
+    fireEvent.click(within(dialog).getByRole('button', { name: /^edit$/i }))
+    expect(screen.getByRole('dialog', { name: 'Edit Mira' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+    const updatedDialog = await screen.findByRole('dialog', { name: 'Mira' })
+    fireEvent.click(within(updatedDialog).getByRole('button', { name: /delete/i }))
+    const confirmation = await screen.findByRole('dialog', {
+      name: 'Delete Character?',
+    })
+    fireEvent.click(
+      within(confirmation).getByRole('button', { name: /delete character/i }),
+    )
+    expect(within(confirmation).getByRole('button', { name: /deleting/i }))
+      .toBeTruthy()
+
+    pendingDelete.resolve(true)
+    await waitFor(() => {
+      expect(characterServices.deleteCharacter).toHaveBeenCalledWith(
+        'character-created',
+      )
+    })
+  }, 10_000)
+
   it('opens the story editor from an empty description affordance', async () => {
     const onEditStory = vi.fn()
     const services = createServices({

@@ -58,6 +58,8 @@ export const storyDetailCopy = {
   },
   characterDetail: {
     backToStory: 'Story Detail',
+    deleteWarning:
+      'Deleting this Character permanently removes it from this Story. This cannot be undone.',
     loading: 'Loading character...',
     navigationLabel: 'Character detail navigation',
   },
