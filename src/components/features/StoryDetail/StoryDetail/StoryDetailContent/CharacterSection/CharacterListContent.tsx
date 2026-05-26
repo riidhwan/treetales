@@ -9,9 +9,13 @@ type CharacterController = ReturnType<typeof useStoryCharacters>
 
 interface Props {
   readonly characterDialog: CharacterController
+  readonly onOpenCharacter: (characterId: string) => void
 }
 
-export function CharacterListContent({ characterDialog }: Props) {
+export function CharacterListContent({
+  characterDialog,
+  onOpenCharacter,
+}: Props) {
   if (characterDialog.isLoading) {
     return <Alert className="mt-4">{storyDetailCopy.character.loading}</Alert>
   }
@@ -36,7 +40,7 @@ export function CharacterListContent({ characterDialog }: Props) {
         <CharacterCard
           character={character}
           key={character.id}
-          onOpen={characterDialog.openViewDialog}
+          onOpen={onOpenCharacter}
         />
       ))}
     </div>

@@ -16,6 +16,7 @@ import { Route as StoriesStoryIdRouteImport } from './routes/stories.$storyId'
 import { Route as StoriesStoryIdIndexRouteImport } from './routes/stories.$storyId.index'
 import { Route as StoriesStoryIdReadRouteImport } from './routes/stories.$storyId.read'
 import { Route as StoriesStoryIdEditRouteImport } from './routes/stories.$storyId.edit'
+import { Route as StoriesStoryIdCharactersCharacterIdRouteImport } from './routes/stories.$storyId.characters.$characterId'
 import { Route as StoriesStoryIdChaptersNewRouteImport } from './routes/stories.$storyId.chapters.new'
 import { Route as StoriesStoryIdChaptersChapterIdEditRouteImport } from './routes/stories.$storyId.chapters.$chapterId.edit'
 import { Route as StoriesStoryIdChaptersChapterIdChildrenNewRouteImport } from './routes/stories.$storyId.chapters.$chapterId.children.new'
@@ -55,6 +56,12 @@ const StoriesStoryIdEditRoute = StoriesStoryIdEditRouteImport.update({
   path: '/edit',
   getParentRoute: () => StoriesStoryIdRoute,
 } as any)
+const StoriesStoryIdCharactersCharacterIdRoute =
+  StoriesStoryIdCharactersCharacterIdRouteImport.update({
+    id: '/characters/$characterId',
+    path: '/characters/$characterId',
+    getParentRoute: () => StoriesStoryIdRoute,
+  } as any)
 const StoriesStoryIdChaptersNewRoute =
   StoriesStoryIdChaptersNewRouteImport.update({
     id: '/chapters/new',
@@ -83,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/stories/$storyId/read': typeof StoriesStoryIdReadRoute
   '/stories/$storyId/': typeof StoriesStoryIdIndexRoute
   '/stories/$storyId/chapters/new': typeof StoriesStoryIdChaptersNewRoute
+  '/stories/$storyId/characters/$characterId': typeof StoriesStoryIdCharactersCharacterIdRoute
   '/stories/$storyId/chapters/$chapterId/edit': typeof StoriesStoryIdChaptersChapterIdEditRoute
   '/stories/$storyId/chapters/$chapterId/children/new': typeof StoriesStoryIdChaptersChapterIdChildrenNewRoute
 }
@@ -94,6 +102,7 @@ export interface FileRoutesByTo {
   '/stories/$storyId/read': typeof StoriesStoryIdReadRoute
   '/stories/$storyId': typeof StoriesStoryIdIndexRoute
   '/stories/$storyId/chapters/new': typeof StoriesStoryIdChaptersNewRoute
+  '/stories/$storyId/characters/$characterId': typeof StoriesStoryIdCharactersCharacterIdRoute
   '/stories/$storyId/chapters/$chapterId/edit': typeof StoriesStoryIdChaptersChapterIdEditRoute
   '/stories/$storyId/chapters/$chapterId/children/new': typeof StoriesStoryIdChaptersChapterIdChildrenNewRoute
 }
@@ -107,6 +116,7 @@ export interface FileRoutesById {
   '/stories/$storyId/read': typeof StoriesStoryIdReadRoute
   '/stories/$storyId/': typeof StoriesStoryIdIndexRoute
   '/stories/$storyId/chapters/new': typeof StoriesStoryIdChaptersNewRoute
+  '/stories/$storyId/characters/$characterId': typeof StoriesStoryIdCharactersCharacterIdRoute
   '/stories/$storyId/chapters/$chapterId/edit': typeof StoriesStoryIdChaptersChapterIdEditRoute
   '/stories/$storyId/chapters/$chapterId/children/new': typeof StoriesStoryIdChaptersChapterIdChildrenNewRoute
 }
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/stories/$storyId/read'
     | '/stories/$storyId/'
     | '/stories/$storyId/chapters/new'
+    | '/stories/$storyId/characters/$characterId'
     | '/stories/$storyId/chapters/$chapterId/edit'
     | '/stories/$storyId/chapters/$chapterId/children/new'
   fileRoutesByTo: FileRoutesByTo
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '/stories/$storyId/read'
     | '/stories/$storyId'
     | '/stories/$storyId/chapters/new'
+    | '/stories/$storyId/characters/$characterId'
     | '/stories/$storyId/chapters/$chapterId/edit'
     | '/stories/$storyId/chapters/$chapterId/children/new'
   id:
@@ -144,6 +156,7 @@ export interface FileRouteTypes {
     | '/stories/$storyId/read'
     | '/stories/$storyId/'
     | '/stories/$storyId/chapters/new'
+    | '/stories/$storyId/characters/$characterId'
     | '/stories/$storyId/chapters/$chapterId/edit'
     | '/stories/$storyId/chapters/$chapterId/children/new'
   fileRoutesById: FileRoutesById
@@ -206,6 +219,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoriesStoryIdEditRouteImport
       parentRoute: typeof StoriesStoryIdRoute
     }
+    '/stories/$storyId/characters/$characterId': {
+      id: '/stories/$storyId/characters/$characterId'
+      path: '/characters/$characterId'
+      fullPath: '/stories/$storyId/characters/$characterId'
+      preLoaderRoute: typeof StoriesStoryIdCharactersCharacterIdRouteImport
+      parentRoute: typeof StoriesStoryIdRoute
+    }
     '/stories/$storyId/chapters/new': {
       id: '/stories/$storyId/chapters/new'
       path: '/chapters/new'
@@ -235,6 +255,7 @@ interface StoriesStoryIdRouteChildren {
   StoriesStoryIdReadRoute: typeof StoriesStoryIdReadRoute
   StoriesStoryIdIndexRoute: typeof StoriesStoryIdIndexRoute
   StoriesStoryIdChaptersNewRoute: typeof StoriesStoryIdChaptersNewRoute
+  StoriesStoryIdCharactersCharacterIdRoute: typeof StoriesStoryIdCharactersCharacterIdRoute
   StoriesStoryIdChaptersChapterIdEditRoute: typeof StoriesStoryIdChaptersChapterIdEditRoute
   StoriesStoryIdChaptersChapterIdChildrenNewRoute: typeof StoriesStoryIdChaptersChapterIdChildrenNewRoute
 }
@@ -244,6 +265,8 @@ const StoriesStoryIdRouteChildren: StoriesStoryIdRouteChildren = {
   StoriesStoryIdReadRoute: StoriesStoryIdReadRoute,
   StoriesStoryIdIndexRoute: StoriesStoryIdIndexRoute,
   StoriesStoryIdChaptersNewRoute: StoriesStoryIdChaptersNewRoute,
+  StoriesStoryIdCharactersCharacterIdRoute:
+    StoriesStoryIdCharactersCharacterIdRoute,
   StoriesStoryIdChaptersChapterIdEditRoute:
     StoriesStoryIdChaptersChapterIdEditRoute,
   StoriesStoryIdChaptersChapterIdChildrenNewRoute:

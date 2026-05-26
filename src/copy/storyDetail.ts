@@ -56,6 +56,13 @@ export const storyDetailCopy = {
       value: '32',
     },
   },
+  characterDetail: {
+    backToStory: 'Story Detail',
+    deleteWarning:
+      'Deleting this Character permanently removes it from this Story. This cannot be undone.',
+    loading: 'Loading character...',
+    navigationLabel: 'Character detail navigation',
+  },
   deleteDialog: {
     message: (storyTitle: string) =>
       `Delete "${storyTitle}"? This cannot be undone.`,
