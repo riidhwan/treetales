@@ -1,6 +1,7 @@
 import { createIndexedDbStoryRepository } from '@/repositories/indexedDb/storyRepository'
 import { createIndexedDbRepositoryUnitOfWork } from '@/repositories/indexedDb/unitOfWork'
 import type { StoryRepository } from '@/repositories/types'
+import { deleteIllustrationFiles } from '@/services/characterIllustrationService'
 import type { CreateStoryInput, Story, UpdateStoryInput } from '@/services/types'
 
 const repositoryUnitOfWork = createIndexedDbRepositoryUnitOfWork()
@@ -47,25 +48,38 @@ export async function updateStory(
 
 export async function deleteStory(id: string): Promise<boolean> {
   const unlinkedChildrenUpdatedAt = Date.now()
+  const deletedIllustrations = await repositoryUnitOfWork.run(
+    async ({ stories, chapters, characters, characterIllustrations }) => {
+      const story = await stories.findStoryById(id)
+      if (!story) {
+        return undefined
+      }
 
-  return repositoryUnitOfWork.run(async ({ stories, chapters, characters }) => {
-    const story = await stories.findStoryById(id)
-    if (!story) {
-      return false
-    }
+      const storyChapters = await chapters.findChaptersByStoryId(id)
 
-    const storyChapters = await chapters.findChaptersByStoryId(id)
+      for (const chapter of storyChapters) {
+        await chapters.deleteChapter(chapter.id, {
+          unlinkedChildrenUpdatedAt,
+        })
+      }
 
-    for (const chapter of storyChapters) {
-      await chapters.deleteChapter(chapter.id, {
-        unlinkedChildrenUpdatedAt,
-      })
-    }
+      const illustrations =
+        await characterIllustrations.deleteCharacterIllustrationsByStoryId(id)
 
-    await characters.deleteCharactersByStoryId(id)
+      await characters.deleteCharactersByStoryId(id)
+      await stories.deleteStory(id)
 
-    return stories.deleteStory(id)
-  })
+      return illustrations
+    },
+  )
+
+  if (!deletedIllustrations) {
+    return false
+  }
+
+  await deleteIllustrationFiles(deletedIllustrations)
+
+  return true
 }
 
 function getStoryRepository(): StoryRepository {

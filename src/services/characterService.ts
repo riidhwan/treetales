@@ -1,5 +1,6 @@
 import { createIndexedDbCharacterRepository } from '@/repositories/indexedDb/characterRepository'
 import { createIndexedDbRepositoryUnitOfWork } from '@/repositories/indexedDb/unitOfWork'
+import { deleteIllustrationFiles } from '@/services/characterIllustrationService'
 import type {
   CharacterRepository,
   UpdateCharacterRepositoryInput,
@@ -75,19 +76,30 @@ export async function updateCharacter(
 
 export async function deleteCharacter(id: string): Promise<boolean> {
   const now = Date.now()
+  const deletedIllustrations = await repositoryUnitOfWork.run(
+    async ({ characters, characterIllustrations, stories }) => {
+      const character = await characters.findCharacterById(id)
 
-  return repositoryUnitOfWork.run(async ({ characters, stories }) => {
-    const character = await characters.findCharacterById(id)
+      if (!character) {
+        return undefined
+      }
 
-    if (!character) {
-      return false
-    }
+      const illustrations =
+        await characterIllustrations.deleteCharacterIllustrationsByCharacterId(id)
+      await characters.deleteCharacter(id)
+      await stories.updateStory(character.storyId, { updatedAt: now })
 
-    await characters.deleteCharacter(id)
-    await stories.updateStory(character.storyId, { updatedAt: now })
+      return illustrations
+    },
+  )
 
-    return true
-  })
+  if (!deletedIllustrations) {
+    return false
+  }
+
+  await deleteIllustrationFiles(deletedIllustrations)
+
+  return true
 }
 
 function getCharacterRepository(): CharacterRepository {

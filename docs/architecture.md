@@ -279,6 +279,7 @@ imports are migrated to the correctly named service modules.
 | `chapterService.ts` | Active Chapter service API |
 | `chapterDb.ts` | Temporary compatibility re-export for existing Chapter imports |
 | `characterService.ts` | Active Character service API |
+| `characterIllustrationService.ts` | Active Character Illustration metadata and image import service API |
 | `builtInExampleStories.ts` | Lists Built-in Example Story starters and creates or reuses Example Story Copies |
 | `exampleStory.ts` | Legacy single-example Story creation/reuse retained outside the dashboard while remaining compatibility tests exist |
 | `types.ts` | Shared service data shapes and create/update input contracts |
@@ -299,9 +300,19 @@ The Built-in Example Story catalog validates those parent template references at
 module load, so authored catalog errors fail before copy creation starts.
 Character service writes trim Character names and property key/value text, and
 drop custom properties with blank keys. Creating, updating, or deleting a
-Character refreshes the owning Story's `updatedAt`. Deleting a story deletes all
-chapters and characters for that story. Deleting a chapter clears that chapter id
-from the `parentChapterId` of direct branches in the same story.
+Character refreshes the owning Story's `updatedAt`. Deleting a Character also
+deletes its Character Illustration metadata and image files. Deleting a story
+deletes all chapters, characters, Character Illustration metadata, and Character
+Illustration image files for that story. Deleting a chapter clears that chapter
+id from the `parentChapterId` of direct branches in the same story.
+
+Character Illustration service writes trim optional labels, assigns appended
+user-controlled order, validates JPEG/PNG/WebP imports, and coordinates metadata
+and file writes so failed imports do not leave partial metadata or image files.
+Normalized imports resize the longest edge to 2048 px, re-encode around 0.85
+quality, strip source metadata through canvas re-encoding, and reject processed
+files over 2 MB. Original-quality imports preserve the uploaded file bytes and
+reject files over 15 MB.
 
 The Built-in Example Story service exposes starter summaries separately from
 copy creation. Starter summaries let Library Mode render the Starter Section
@@ -415,17 +426,18 @@ The schema is owned by the repository layer:
 - Character index on `storyId`
 - Character Illustration indexes on `storyId` and `characterId`
 
-Deleting a story explicitly deletes its chapters and characters through the
-service unit-of-work boundary. Deleting a chapter clears direct children's parent
-chapter reference instead of deleting descendants. Deleting a Character removes
-its embedded custom properties with it. Chapter write validation rejects missing
-stories, missing parents, parents from other stories, self-parenting, multiple
-intro chapters for one story, and cycles before committing a mutating chapter
+Deleting a story explicitly deletes its chapters, characters, and Character
+Illustration metadata through the service unit-of-work boundary, then deletes
+the related image files from origin-private file storage after the metadata
+transaction succeeds. Deleting a chapter clears direct children's parent chapter
+reference instead of deleting descendants. Deleting a Character removes its
+embedded custom properties, Character Illustration metadata, and Character
+Illustration image files. Chapter write validation rejects missing stories,
+missing parents, parents from other stories, self-parenting, multiple intro
+chapters for one story, and cycles before committing a mutating chapter
 operation. Character writes reject missing stories before committing. Character
 Illustration metadata writes reject missing stories, missing characters, and
-story/character mismatches before committing. Character Illustration repository
-operations can delete metadata by Character or Story so a later service slice can
-coordinate lifecycle cleanup with origin-private image file deletion.
+story/character mismatches before committing.
 
 Schema setup and forward upgrades live with the IndexedDB repository
 implementation. Repository operations may accept a transaction so standalone
