@@ -1,9 +1,11 @@
 import type {
   AppSetting,
   Character,
+  CharacterIllustration,
   Chapter,
   Story,
   UpdateCharacterInput,
+  UpdateCharacterIllustrationInput,
   UpdateChapterInput,
   UpdateStoryInput,
 } from '@/services/types'
@@ -68,6 +70,43 @@ export interface CharacterRepository {
   readonly deleteCharactersByStoryId: (storyId: string) => Promise<void>
 }
 
+export interface UpdateCharacterIllustrationRepositoryInput
+  extends UpdateCharacterIllustrationInput {
+  readonly updatedAt: number
+}
+
+export interface CharacterIllustrationRepository {
+  readonly insertCharacterIllustration: (
+    illustration: CharacterIllustration,
+  ) => Promise<void>
+  readonly findCharacterIllustrationById: (
+    id: string,
+  ) => Promise<CharacterIllustration | undefined>
+  readonly findCharacterIllustrationsByCharacterId: (
+    characterId: string,
+  ) => Promise<CharacterIllustration[]>
+  readonly findCharacterIllustrationsByStoryId: (
+    storyId: string,
+  ) => Promise<CharacterIllustration[]>
+  readonly updateCharacterIllustration: (
+    id: string,
+    input: UpdateCharacterIllustrationRepositoryInput,
+  ) => Promise<CharacterIllustration | undefined>
+  readonly deleteCharacterIllustration: (id: string) => Promise<boolean>
+  readonly deleteCharacterIllustrationsByCharacterId: (
+    characterId: string,
+  ) => Promise<CharacterIllustration[]>
+  readonly deleteCharacterIllustrationsByStoryId: (
+    storyId: string,
+  ) => Promise<CharacterIllustration[]>
+}
+
+export interface CharacterIllustrationFileStorage {
+  readonly writeFile: (fileId: string, blob: Blob) => Promise<void>
+  readonly readFile: (fileId: string) => Promise<Blob | undefined>
+  readonly deleteFile: (fileId: string) => Promise<void>
+}
+
 export interface AppSettingsRepository {
   readonly findSettingById: (id: string) => Promise<AppSetting | undefined>
   readonly putSetting: (setting: AppSetting) => Promise<void>
@@ -78,6 +117,7 @@ export interface RepositoryUnitOfWorkContext {
   readonly stories: StoryRepository
   readonly chapters: ChapterRepository
   readonly characters: CharacterRepository
+  readonly characterIllustrations: CharacterIllustrationRepository
 }
 
 export interface RepositoryUnitOfWork {

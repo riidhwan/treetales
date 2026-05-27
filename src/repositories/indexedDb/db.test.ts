@@ -4,6 +4,9 @@ import {
   CHAPTERS_STORE,
   CHAPTER_PARENT_ID_INDEX,
   CHAPTER_STORY_ID_INDEX,
+  CHARACTER_ILLUSTRATIONS_STORE,
+  CHARACTER_ILLUSTRATION_CHARACTER_ID_INDEX,
+  CHARACTER_ILLUSTRATION_STORY_ID_INDEX,
   CHARACTERS_STORE,
   CHARACTER_STORY_ID_INDEX,
   APP_SETTINGS_STORE,
@@ -40,6 +43,9 @@ describe('openDb', () => {
     expect(db.objectStoreNames.contains(STORIES_STORE)).toBe(true)
     expect(db.objectStoreNames.contains(CHAPTERS_STORE)).toBe(true)
     expect(db.objectStoreNames.contains(CHARACTERS_STORE)).toBe(true)
+    expect(db.objectStoreNames.contains(CHARACTER_ILLUSTRATIONS_STORE)).toBe(
+      true,
+    )
     expect(db.objectStoreNames.contains(APP_SETTINGS_STORE)).toBe(true)
 
     const transaction = db.transaction(CHAPTERS_STORE, 'readonly')
@@ -59,6 +65,25 @@ describe('openDb', () => {
 
     expect(characterStoryIdIndex.keyPath).toBe('storyId')
     expect(characterStoryIdIndex.multiEntry).toBe(false)
+
+    const illustrationTransaction = db.transaction(
+      CHARACTER_ILLUSTRATIONS_STORE,
+      'readonly',
+    )
+    const illustrationsStore = illustrationTransaction.objectStore(
+      CHARACTER_ILLUSTRATIONS_STORE,
+    )
+    const illustrationStoryIdIndex = illustrationsStore.index(
+      CHARACTER_ILLUSTRATION_STORY_ID_INDEX,
+    )
+    const illustrationCharacterIdIndex = illustrationsStore.index(
+      CHARACTER_ILLUSTRATION_CHARACTER_ID_INDEX,
+    )
+
+    expect(illustrationStoryIdIndex.keyPath).toBe('storyId')
+    expect(illustrationStoryIdIndex.multiEntry).toBe(false)
+    expect(illustrationCharacterIdIndex.keyPath).toBe('characterId')
+    expect(illustrationCharacterIdIndex.multiEntry).toBe(false)
 
     db.close()
   })
@@ -116,6 +141,28 @@ describe('openDb', () => {
     const db = await openDb()
 
     expect(db.objectStoreNames.contains(APP_SETTINGS_STORE)).toBe(true)
+
+    db.close()
+  })
+
+  it('keeps existing Character Illustration store and indexes during upgrades', async () => {
+    const versionFourDb = await openVersionFourDbWithCharacterIllustrations()
+    versionFourDb.close()
+
+    const db = await openDb()
+    const transaction = db.transaction(
+      CHARACTER_ILLUSTRATIONS_STORE,
+      'readonly',
+    )
+    const store = transaction.objectStore(CHARACTER_ILLUSTRATIONS_STORE)
+
+    expect(store.index(CHARACTER_ILLUSTRATION_STORY_ID_INDEX).keyPath).toBe(
+      'storyId',
+    )
+    expect(store.index(CHARACTER_ILLUSTRATION_CHARACTER_ID_INDEX).keyPath).toBe(
+      'characterId',
+    )
+    await expect(transactionDone(transaction)).resolves.toBeUndefined()
 
     db.close()
   })
@@ -337,6 +384,53 @@ function openVersionThreeDbWithoutAppSettings(): Promise<IDBDatabase> {
       reject(
         request.error ??
           new Error('Failed to open version three test database.'),
+      )
+    }
+  })
+}
+
+function openVersionFourDbWithCharacterIllustrations(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 4)
+
+    request.onupgradeneeded = () => {
+      const db = request.result
+      db.createObjectStore(STORIES_STORE, { keyPath: 'id' })
+      const chaptersStore = db.createObjectStore(CHAPTERS_STORE, {
+        keyPath: 'id',
+      })
+      const charactersStore = db.createObjectStore(CHARACTERS_STORE, {
+        keyPath: 'id',
+      })
+      const illustrationsStore = db.createObjectStore(
+        CHARACTER_ILLUSTRATIONS_STORE,
+        {
+          keyPath: 'id',
+        },
+      )
+      db.createObjectStore(APP_SETTINGS_STORE, { keyPath: 'id' })
+
+      chaptersStore.createIndex(CHAPTER_STORY_ID_INDEX, 'storyId')
+      chaptersStore.createIndex(CHAPTER_PARENT_ID_INDEX, 'parentChapterId')
+      charactersStore.createIndex(CHARACTER_STORY_ID_INDEX, 'storyId')
+      illustrationsStore.createIndex(
+        CHARACTER_ILLUSTRATION_STORY_ID_INDEX,
+        'storyId',
+      )
+      illustrationsStore.createIndex(
+        CHARACTER_ILLUSTRATION_CHARACTER_ID_INDEX,
+        'characterId',
+      )
+    }
+
+    request.onsuccess = () => {
+      resolve(request.result)
+    }
+
+    request.onerror = () => {
+      reject(
+        request.error ??
+          new Error('Failed to open version four test database.'),
       )
     }
   })

@@ -372,7 +372,9 @@ Current storage-specific repository files include:
 | `indexedDb/storyRepository.ts` | Active IndexedDB Story persistence adapter |
 | `indexedDb/chapterRepository.ts` | Active IndexedDB Chapter persistence adapter with graph validation |
 | `indexedDb/characterRepository.ts` | Active IndexedDB Character persistence adapter |
+| `indexedDb/characterIllustrationRepository.ts` | Active IndexedDB Character Illustration metadata persistence adapter |
 | `indexedDb/unitOfWork.ts` | Active IndexedDB unit-of-work boundary for multi-repository writes |
+| `opfs/characterIllustrationFileStorage.ts` | Origin-private file storage adapter for Character Illustration image bytes |
 
 Cross-record persistence effects should stay explicit at the service boundary.
 For example, Story deletion may coordinate a Story repository with a Chapter
@@ -384,7 +386,8 @@ unit-of-work boundary so related writes commit or fail together. The active
 IndexedDB path exposes that boundary through
 `createIndexedDbRepositoryUnitOfWork()`, which uses the provider-internal
 transaction helper to open one readwrite transaction and pass transaction-scoped
-story, chapter, and character repositories to the service operation.
+story, chapter, character, and Character Illustration repositories to the
+service operation.
 
 Cross-repository service operations such as `deleteStory` should use the
 unit-of-work boundary rather than opening storage transactions directly. Do not
@@ -406,9 +409,11 @@ The schema is owned by the repository layer:
 - **`stories`** — keyed by `id`
 - **`chapters`** — keyed by `id`
 - **`characters`** — keyed by `id`
+- **`characterIllustrations`** — keyed by `id`
 - **`appSettings`** — keyed by stable setting id
 - Chapter indexes on `storyId` and `parentChapterId`
 - Character index on `storyId`
+- Character Illustration indexes on `storyId` and `characterId`
 
 Deleting a story explicitly deletes its chapters and characters through the
 service unit-of-work boundary. Deleting a chapter clears direct children's parent
@@ -416,7 +421,11 @@ chapter reference instead of deleting descendants. Deleting a Character removes
 its embedded custom properties with it. Chapter write validation rejects missing
 stories, missing parents, parents from other stories, self-parenting, multiple
 intro chapters for one story, and cycles before committing a mutating chapter
-operation. Character writes reject missing stories before committing.
+operation. Character writes reject missing stories before committing. Character
+Illustration metadata writes reject missing stories, missing characters, and
+story/character mismatches before committing. Character Illustration repository
+operations can delete metadata by Character or Story so a later service slice can
+coordinate lifecycle cleanup with origin-private image file deletion.
 
 Schema setup and forward upgrades live with the IndexedDB repository
 implementation. Repository operations may accept a transaction so standalone
