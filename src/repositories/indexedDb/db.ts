@@ -1,14 +1,23 @@
-import type { AppSetting, Character, Chapter, Story } from '@/services/types'
+import type {
+  AppSetting,
+  Character,
+  CharacterIllustration,
+  Chapter,
+  Story,
+} from '@/services/types'
 
 export const DB_NAME = 'TreeTales'
-export const DB_VERSION = 4
+export const DB_VERSION = 5
 export const STORIES_STORE = 'stories'
 export const CHAPTERS_STORE = 'chapters'
 export const CHARACTERS_STORE = 'characters'
+export const CHARACTER_ILLUSTRATIONS_STORE = 'characterIllustrations'
 export const APP_SETTINGS_STORE = 'appSettings'
 export const CHAPTER_STORY_ID_INDEX = 'storyId'
 export const CHAPTER_PARENT_ID_INDEX = 'parentChapterId'
 export const CHARACTER_STORY_ID_INDEX = 'storyId'
+export const CHARACTER_ILLUSTRATION_STORY_ID_INDEX = 'storyId'
+export const CHARACTER_ILLUSTRATION_CHARACTER_ID_INDEX = 'characterId'
 
 interface LegacyChapter extends Omit<Chapter, 'parentChapterId'> {
   parentChapterId?: string | null
@@ -19,6 +28,7 @@ export interface TreeTalesSchema {
   stories: Story
   chapters: Chapter
   characters: Character
+  characterIllustrations: CharacterIllustration
   appSettings: AppSetting
 }
 
@@ -72,6 +82,36 @@ export function openDb(): Promise<IDBDatabase> {
 
       if (!db.objectStoreNames.contains(APP_SETTINGS_STORE)) {
         db.createObjectStore(APP_SETTINGS_STORE, { keyPath: 'id' })
+      }
+
+      const characterIllustrationsStore = db.objectStoreNames.contains(
+        CHARACTER_ILLUSTRATIONS_STORE,
+      )
+        ? upgradeTransaction.objectStore(CHARACTER_ILLUSTRATIONS_STORE)
+        : db.createObjectStore(CHARACTER_ILLUSTRATIONS_STORE, {
+            keyPath: 'id',
+          })
+
+      if (
+        !characterIllustrationsStore.indexNames.contains(
+          CHARACTER_ILLUSTRATION_STORY_ID_INDEX,
+        )
+      ) {
+        characterIllustrationsStore.createIndex(
+          CHARACTER_ILLUSTRATION_STORY_ID_INDEX,
+          'storyId',
+        )
+      }
+
+      if (
+        !characterIllustrationsStore.indexNames.contains(
+          CHARACTER_ILLUSTRATION_CHARACTER_ID_INDEX,
+        )
+      ) {
+        characterIllustrationsStore.createIndex(
+          CHARACTER_ILLUSTRATION_CHARACTER_ID_INDEX,
+          'characterId',
+        )
       }
     }
 

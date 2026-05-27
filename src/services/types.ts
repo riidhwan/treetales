@@ -48,6 +48,24 @@ export interface Character {
   updatedAt: number
 }
 
+export type CharacterIllustrationImportMode = 'normalized' | 'original'
+
+export interface CharacterIllustration {
+  id: string
+  storyId: string
+  characterId: string
+  fileId: string
+  label: string
+  order: number
+  mimeType: string
+  sizeBytes: number
+  width: number
+  height: number
+  importMode: CharacterIllustrationImportMode
+  createdAt: number
+  updatedAt: number
+}
+
 export interface AppSetting {
   id: string
   value: string
@@ -87,4 +105,9 @@ export interface UpdateCharacterInput {
   name?: string
   gender?: CharacterGender
   properties?: CharacterProperty[]
+}
+
+export interface UpdateCharacterIllustrationInput {
+  label?: string
+  order?: number
 }

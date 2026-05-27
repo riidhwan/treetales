@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createIndexedDbCharacterRepository } from '@/repositories/indexedDb/characterRepository'
 import { createIndexedDbChapterRepository } from '@/repositories/indexedDb/chapterRepository'
 import {
+  CHARACTER_ILLUSTRATIONS_STORE,
   CHARACTERS_STORE,
   CHAPTERS_STORE,
   STORIES_STORE,
@@ -100,7 +101,12 @@ describe('indexedDbRepositoryUnitOfWork', () => {
 
     try {
       const transaction = db.transaction(
-        [STORIES_STORE, CHAPTERS_STORE, CHARACTERS_STORE],
+        [
+          STORIES_STORE,
+          CHAPTERS_STORE,
+          CHARACTERS_STORE,
+          CHARACTER_ILLUSTRATIONS_STORE,
+        ],
         'readonly',
       )
       const done = transactionDone(transaction)

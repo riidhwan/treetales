@@ -3,10 +3,12 @@ import type {
   RepositoryUnitOfWorkContext,
 } from '@/repositories/types'
 import {
+  CHARACTER_ILLUSTRATIONS_STORE,
   CHARACTERS_STORE,
   CHAPTERS_STORE,
   STORIES_STORE,
 } from '@/repositories/indexedDb/db'
+import { createIndexedDbCharacterIllustrationRepository } from '@/repositories/indexedDb/characterIllustrationRepository'
 import { createIndexedDbCharacterRepository } from '@/repositories/indexedDb/characterRepository'
 import { createIndexedDbChapterRepository } from '@/repositories/indexedDb/chapterRepository'
 import { createIndexedDbStoryRepository } from '@/repositories/indexedDb/storyRepository'
@@ -23,13 +25,21 @@ async function run<T>(
 ): Promise<T> {
   return withIndexedDbTransaction(
     {},
-    [STORIES_STORE, CHAPTERS_STORE, CHARACTERS_STORE],
+    [
+      STORIES_STORE,
+      CHAPTERS_STORE,
+      CHARACTERS_STORE,
+      CHARACTER_ILLUSTRATIONS_STORE,
+    ],
     'readwrite',
     (transaction) =>
       operation({
         stories: createIndexedDbStoryRepository({ transaction }),
         chapters: createIndexedDbChapterRepository({ transaction }),
         characters: createIndexedDbCharacterRepository({ transaction }),
+        characterIllustrations: createIndexedDbCharacterIllustrationRepository({
+          transaction,
+        }),
       }),
   )
 }
