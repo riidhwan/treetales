@@ -107,6 +107,13 @@ export interface UpdateCharacterInput {
   properties?: CharacterProperty[]
 }
 
+export interface ImportCharacterIllustrationInput {
+  characterId: string
+  file: File
+  label?: string
+  importMode?: CharacterIllustrationImportMode
+}
+
 export interface UpdateCharacterIllustrationInput {
   label?: string
   order?: number
