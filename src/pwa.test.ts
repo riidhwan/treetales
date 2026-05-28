@@ -133,4 +133,24 @@ describe('registerAppServiceWorker', () => {
     })
     expect(serviceWorker.getRegistrations).not.toHaveBeenCalled()
   })
+
+  it('logs registration failures in production mode', async () => {
+    vi.stubEnv('DEV', false)
+    const registrationError = new Error('registration failed')
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined)
+    const serviceWorker = installServiceWorkerMock([])
+    serviceWorker.register.mockRejectedValueOnce(registrationError)
+    const { registerAppServiceWorker } = await importPwaModule()
+
+    registerAppServiceWorker()
+
+    await vi.waitFor(() => {
+      expect(consoleError).toHaveBeenCalledWith(
+        'TreeTales service worker registration failed',
+        registrationError,
+      )
+    })
+  })
 })
