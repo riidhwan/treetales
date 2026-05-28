@@ -1,12 +1,16 @@
 export const storyDetailCopy = {
   actions: {
     addCharacter: 'Add Character',
+    addIllustration: 'Add Character Illustration',
     deleteCharacter: 'Delete Character',
+    deleteIllustration: 'Delete Character Illustration',
     deleteStory: 'Delete Story',
     discardChanges: 'Discard Changes',
+    importIllustration: 'Import Illustration',
     read: 'Read',
     saveStory: 'Save Story',
     savingCharacter: 'Saving character...',
+    uploadingIllustration: 'Importing...',
     untitledStory: 'Untitled story',
     viewCharacter: (characterName: string) => `View ${characterName}`,
   },
@@ -60,6 +64,33 @@ export const storyDetailCopy = {
     backToStory: 'Story Detail',
     deleteWarning:
       'Deleting this Character permanently removes it from this Story. This cannot be undone.',
+    illustrations: {
+      deleteDialog: {
+        message:
+          'Delete this Character Illustration? This removes the stored image from this browser.',
+        title: 'Delete Character Illustration?',
+      },
+      empty: 'No Character Illustrations yet.',
+      fileHelp: 'JPEG, PNG, or WebP. Normalized import is recommended.',
+      fileLabel: 'Image file',
+      filePlaceholder: 'Choose an image',
+      heading: 'Character Illustrations',
+      label: 'Label',
+      labelPlaceholder: 'Scene reference',
+      loading: 'Loading Character Illustrations...',
+      modeLabel: 'Preserve original quality',
+      moveDown: (label: string) =>
+        `Move ${label || 'Character Illustration'} down`,
+      moveUp: (label: string) =>
+        `Move ${label || 'Character Illustration'} up`,
+      normalizedNote:
+        'Normalized imports resize large images and strip source metadata.',
+      originalNote:
+        'Original quality stores the uploaded file exactly as-is.',
+      saveLabel: (label: string) =>
+        `Save label for ${label || 'Character Illustration'}`,
+      unnamed: 'Unlabelled Character Illustration',
+    },
     loading: 'Loading character...',
     navigationLabel: 'Character detail navigation',
   },

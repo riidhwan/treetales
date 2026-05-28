@@ -6,15 +6,23 @@ import {
   within,
   waitFor,
 } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { CharacterDetail } from '@/components/features/CharacterDetail'
 import { CharacterDetailContent } from '@/components/features/CharacterDetail/CharacterDetail/CharacterDetailContent'
+import { CharacterIllustrationSection } from '@/components/features/CharacterDetail/CharacterDetail/CharacterIllustrationSection'
 import type {
   CharacterDetailServices,
   useCharacterDetail,
 } from '@/hooks/useCharacterDetail'
-import type { Character, Story, UpdateCharacterInput } from '@/services/types'
+import type {
+  Character,
+  CharacterIllustration,
+  ImportCharacterIllustrationInput,
+  Story,
+  UpdateCharacterIllustrationInput,
+  UpdateCharacterInput,
+} from '@/services/types'
 
 function createStory(overrides: Partial<Story> = {}): Story {
   return {
@@ -45,13 +53,37 @@ function createCharacter(overrides: Partial<Character> = {}): Character {
   }
 }
 
+function createIllustration(
+  overrides: Partial<CharacterIllustration> = {},
+): CharacterIllustration {
+  return {
+    id: 'illustration-1',
+    storyId: 'story-1',
+    characterId: 'character-1',
+    fileId: 'file-1',
+    label: 'Bridge reference',
+    order: 0,
+    mimeType: 'image/png',
+    sizeBytes: 1200,
+    width: 800,
+    height: 600,
+    importMode: 'normalized',
+    createdAt: 100,
+    updatedAt: 100,
+    ...overrides,
+  }
+}
+
 function createServices(options: {
   readonly character?: Character
+  readonly illustrations?: CharacterIllustration[]
   readonly story?: Story
 } = {}): CharacterDetailServices {
   const character = 'character' in options ? options.character : createCharacter()
+  const illustrations = options.illustrations ?? []
   const story = 'story' in options ? options.story : createStory()
   let currentCharacter = character
+  let currentIllustrations = [...illustrations]
 
   return {
     deleteCharacter: vi.fn((id: string) => {
@@ -62,8 +94,38 @@ function createServices(options: {
       currentCharacter = undefined
       return Promise.resolve(true)
     }),
+    deleteCharacterIllustration: vi.fn((id: string) => {
+      const illustration = currentIllustrations.find((item) => item.id === id)
+
+      if (!illustration) {
+        return Promise.resolve(false)
+      }
+
+      currentIllustrations = currentIllustrations.filter((item) => item.id !== id)
+      return Promise.resolve(true)
+    }),
     getCharacterById: vi.fn(() => Promise.resolve(currentCharacter)),
+    getCharacterIllustrationFile: vi.fn(() =>
+      Promise.resolve(new Blob(['image'], { type: 'image/png' })),
+    ),
+    getCharacterIllustrationsByCharacterId: vi.fn(() =>
+      Promise.resolve([...currentIllustrations]),
+    ),
     getStoryById: vi.fn(() => Promise.resolve(story)),
+    importCharacterIllustration: vi.fn(
+      (input: ImportCharacterIllustrationInput) => {
+        const illustration = createIllustration({
+          id: `illustration-${currentIllustrations.length + 1}`,
+          fileId: `file-${currentIllustrations.length + 1}`,
+          label: input.label?.trim() ?? '',
+          importMode: input.importMode ?? 'normalized',
+          order: currentIllustrations.length,
+        })
+        currentIllustrations = [...currentIllustrations, illustration]
+
+        return Promise.resolve(illustration)
+      },
+    ),
     updateCharacter: vi.fn((id: string, input: UpdateCharacterInput) => {
       if (!currentCharacter || currentCharacter.id !== id) {
         return Promise.resolve(undefined)
@@ -77,6 +139,26 @@ function createServices(options: {
 
       return Promise.resolve(currentCharacter)
     }),
+    updateCharacterIllustration: vi.fn(
+      (id: string, input: UpdateCharacterIllustrationInput) => {
+        const illustration = currentIllustrations.find((item) => item.id === id)
+
+        if (!illustration) {
+          return Promise.resolve(undefined)
+        }
+
+        const updatedIllustration = {
+          ...illustration,
+          ...input,
+          updatedAt: 200,
+        }
+        currentIllustrations = currentIllustrations
+          .map((item) => (item.id === id ? updatedIllustration : item))
+          .sort((first, second) => first.order - second.order)
+
+        return Promise.resolve(updatedIllustration)
+      },
+    ),
   }
 }
 
@@ -97,9 +179,74 @@ function renderCharacterDetail({
   )
 }
 
+function createCharacterDetailView(
+  overrides: Partial<ReturnType<typeof useCharacterDetail>> = {},
+): ReturnType<typeof useCharacterDetail> {
+  const illustration = createIllustration({
+    id: 'illustration-1',
+    label: '',
+    sizeBytes: 2 * 1024 * 1024,
+  })
+
+  return {
+    activeIllustrationActionId: undefined,
+    addProperty: vi.fn(),
+    beginEdit: vi.fn(),
+    cancelConfirmation: vi.fn(),
+    canImportIllustration: true,
+    character: createCharacter(),
+    confirmDeleteCharacter: vi.fn(),
+    confirmDeleteIllustration: vi.fn(),
+    confirmDiscardChanges: vi.fn(),
+    confirmationState: { mode: 'closed' },
+    draft: { gender: 'female', name: 'Mira', properties: [] },
+    errorMessage: undefined,
+    hasUnsavedChanges: false,
+    illustrationErrorMessage: undefined,
+    illustrationFile: undefined,
+    illustrationImportLabel: '',
+    illustrationImportMode: 'normalized',
+    illustrationImportResetKey: 0,
+    illustrationLabelDrafts: {},
+    illustrations: [{ illustration, imageUrl: undefined }],
+    importIllustration: vi.fn(),
+    isDeleting: false,
+    isEditing: false,
+    isImportingIllustration: false,
+    isLoadingIllustrations: false,
+    isSaving: false,
+    moveIllustration: vi.fn(),
+    moveProperty: vi.fn(),
+    removeProperty: vi.fn(),
+    requestCancelEdit: vi.fn(),
+    requestDeleteCharacter: vi.fn(),
+    requestDeleteIllustration: vi.fn(),
+    saveCharacter: vi.fn(),
+    saveIllustrationLabel: vi.fn(),
+    setGender: vi.fn(),
+    setIllustrationFile: vi.fn(),
+    setIllustrationImportLabel: vi.fn(),
+    setIllustrationImportMode: vi.fn(),
+    setIllustrationLabelDraft: vi.fn(),
+    setName: vi.fn(),
+    status: 'ready',
+    story: createStory(),
+    updateProperty: vi.fn(),
+    ...overrides,
+  }
+}
+
 describe('CharacterDetail', () => {
+  beforeEach(() => {
+    vi.stubGlobal('URL', {
+      createObjectURL: vi.fn(() => 'blob:illustration'),
+      revokeObjectURL: vi.fn(),
+    })
+  })
+
   afterEach(() => {
     cleanup()
+    vi.unstubAllGlobals()
     vi.restoreAllMocks()
   })
 
@@ -178,6 +325,8 @@ describe('CharacterDetail', () => {
           {
             beginEdit: vi.fn(),
             character: createCharacter(),
+            illustrationLabelDrafts: {},
+            illustrations: [],
             isEditing: false,
             status: 'ready',
             story: undefined,
@@ -187,6 +336,60 @@ describe('CharacterDetail', () => {
       />,
     )
     expect(screen.getByText('Story')).toBeTruthy()
+  })
+
+  it('shows Character Illustration loading, error, fallback, and busy states', () => {
+    const setIllustrationImportMode = vi.fn()
+    const fallbackIllustration = createIllustration({
+      id: 'illustration-1',
+      label: '',
+      sizeBytes: 2 * 1024 * 1024,
+    })
+    const imageIllustration = createIllustration({
+      id: 'illustration-2',
+      label: '',
+      order: 1,
+    })
+
+    render(
+      <CharacterIllustrationSection
+        characterDetail={createCharacterDetailView({
+          activeIllustrationActionId: 'illustration-1',
+          canImportIllustration: false,
+          illustrationErrorMessage: 'Illustration update failed.',
+          illustrationImportMode: 'original',
+          illustrationLabelDrafts: { 'illustration-1': '' },
+          illustrations: [
+            { illustration: fallbackIllustration, imageUrl: undefined },
+            { illustration: imageIllustration, imageUrl: 'blob:illustration' },
+          ],
+          isImportingIllustration: true,
+          isLoadingIllustrations: true,
+          setIllustrationImportMode,
+        })}
+      />,
+    )
+
+    expect(screen.getByText('Illustration update failed.')).toBeTruthy()
+    expect(screen.getByText('Loading Character Illustrations...')).toBeTruthy()
+    expect(
+      screen.getAllByText('Unlabelled Character Illustration').length,
+    ).toBeGreaterThan(0)
+    expect(screen.getByText('800 x 600 - 2.0 MB - normalized')).toBeTruthy()
+    expect(
+      screen.getByRole('button', { name: /importing/i }).hasAttribute('disabled'),
+    ).toBe(true)
+    expect(
+      screen
+        .getAllByRole('button', {
+          name: /save label for character illustration/i,
+        })[0]
+        .hasAttribute('disabled'),
+    ).toBe(true)
+
+    fireEvent.click(screen.getByLabelText(/preserve original quality/i))
+
+    expect(setIllustrationImportMode).toHaveBeenCalledWith('normalized')
   })
 
   it('shows missing states for absent story and absent character', async () => {
@@ -354,4 +557,113 @@ describe('CharacterDetail', () => {
     })
     expect(onBackToStory).toHaveBeenCalledWith('story-1')
   })
+
+  it(
+    'imports, labels, reorders, and deletes Character Illustrations',
+    async () => {
+      const services = createServices({
+      illustrations: [
+        createIllustration({ id: 'illustration-1', label: 'Bridge', order: 0 }),
+        createIllustration({
+          id: 'illustration-2',
+          fileId: 'file-2',
+          label: 'Lantern',
+          order: 1,
+        }),
+        createIllustration({
+          id: 'illustration-3',
+          fileId: 'file-3',
+          importMode: 'original',
+          label: 'River',
+          order: 2,
+          sizeBytes: 2 * 1024 * 1024,
+        }),
+      ],
+    })
+
+    renderCharacterDetail({ services })
+
+    expect(
+      await screen.findByRole('heading', { name: 'Character Illustrations' }),
+    ).toBeTruthy()
+    expect(screen.getByDisplayValue('Bridge')).toBeTruthy()
+    expect(screen.getAllByText('800 x 600 - 1 KB - normalized')).toHaveLength(2)
+    expect(screen.getByText('800 x 600 - 2.0 MB - original quality'))
+      .toBeTruthy()
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /move lantern up/i }),
+    )
+
+    await waitFor(() => {
+      expect(services.updateCharacterIllustration).toHaveBeenCalledWith(
+        'illustration-2',
+        { order: -1 },
+      )
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /move bridge down/i }),
+    )
+
+    await waitFor(() => {
+      expect(services.updateCharacterIllustration).toHaveBeenCalledWith(
+        'illustration-1',
+        { order: 3 },
+      )
+    })
+
+    fireEvent.change(screen.getByDisplayValue('Lantern'), {
+      target: { value: 'Lantern study' },
+    })
+    fireEvent.click(
+      screen.getByRole('button', { name: /save label for lantern/i }),
+    )
+
+    await waitFor(() => {
+      expect(services.updateCharacterIllustration).toHaveBeenCalledWith(
+        'illustration-2',
+        { label: 'Lantern study' },
+      )
+    })
+
+    const file = new File(['image'], 'mira.webp', { type: 'image/webp' })
+    fireEvent.change(screen.getByLabelText(/image file/i), {
+      target: { files: [file] },
+    })
+    fireEvent.change(screen.getAllByPlaceholderText('Scene reference')[0], {
+      target: { value: 'River' },
+    })
+    fireEvent.click(screen.getByLabelText(/preserve original quality/i))
+    fireEvent.click(
+      screen.getByRole('button', { name: /import illustration/i }),
+    )
+
+    await waitFor(() => {
+      expect(services.importCharacterIllustration).toHaveBeenCalledWith({
+        characterId: 'character-1',
+        file,
+        importMode: 'original',
+        label: 'River',
+      })
+    })
+
+    fireEvent.click(screen.getAllByRole('button', { name: /^delete$/i })[0])
+    const confirmation = await screen.findByRole('dialog', {
+      name: 'Delete Character Illustration?',
+    })
+    fireEvent.click(
+      within(confirmation).getByRole('button', {
+        name: /delete character illustration/i,
+      }),
+    )
+
+    await waitFor(() => {
+      expect(services.deleteCharacterIllustration).toHaveBeenCalledWith(
+        'illustration-2',
+      )
+    })
+    },
+    10_000,
+  )
 })
