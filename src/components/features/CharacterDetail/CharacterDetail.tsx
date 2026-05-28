@@ -78,6 +78,21 @@ export function CharacterDetail({
           variant="danger"
         />
       ) : null}
+
+      {characterDetail.confirmationState.mode === 'delete-illustration' ? (
+        <ConfirmationDialog
+          confirmLabel={storyDetailCopy.actions.deleteIllustration}
+          isConfirming={Boolean(characterDetail.activeIllustrationActionId)}
+          message={
+            storyDetailCopy.characterDetail.illustrations.deleteDialog.message
+          }
+          onCancel={characterDetail.cancelConfirmation}
+          onConfirm={() => void characterDetail.confirmDeleteIllustration()}
+          title={storyDetailCopy.characterDetail.illustrations.deleteDialog.title}
+          titleId={confirmationTitleId}
+          variant="danger"
+        />
+      ) : null}
     </main>
   )
 }

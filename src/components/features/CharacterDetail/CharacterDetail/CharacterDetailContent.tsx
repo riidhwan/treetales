@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/Button'
 import { commonCopy, storyDetailCopy } from '@/copy'
 import type { useCharacterDetail } from '@/hooks/useCharacterDetail'
 
+import { CharacterIllustrationSection } from './CharacterIllustrationSection'
+
 interface Props {
   readonly characterDetail: ReturnType<typeof useCharacterDetail>
   readonly titleId: string
@@ -152,6 +154,8 @@ export function CharacterDetailContent({
           <CharacterDetails character={character} />
         )}
       </section>
+
+      <CharacterIllustrationSection characterDetail={characterDetail} />
     </>
   )
 }
