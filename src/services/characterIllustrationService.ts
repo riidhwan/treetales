@@ -42,6 +42,13 @@ export interface CharacterIllustrationServiceDependencies {
   readonly repositoryUnitOfWork: RepositoryUnitOfWork
 }
 
+interface DecodedIllustrationImage {
+  readonly height: number
+  readonly source: CanvasImageSource
+  readonly width: number
+  close: () => void
+}
+
 const repositoryUnitOfWork = createIndexedDbRepositoryUnitOfWork()
 const fileStorage = createOpfsCharacterIllustrationFileStorage()
 
@@ -228,10 +235,10 @@ async function processOriginalFile(file: File): Promise<ProcessedIllustrationFil
 async function processNormalizedFile(
   file: File,
 ): Promise<ProcessedIllustrationFile> {
-  const bitmap = await createImageBitmap(file)
+  const image = await decodeIllustrationImage(file)
 
   try {
-    const { width, height } = getNormalizedDimensions(bitmap.width, bitmap.height)
+    const { width, height } = getNormalizedDimensions(image.width, image.height)
     const canvas = document.createElement('canvas')
     canvas.width = width
     canvas.height = height
@@ -241,7 +248,7 @@ async function processNormalizedFile(
       throw new Error('Character Illustration normalization is unavailable.')
     }
 
-    context.drawImage(bitmap, 0, 0, width, height)
+    context.drawImage(image.source, 0, 0, width, height)
 
     const blob = await canvasToBlob(
       canvas,
@@ -263,23 +270,90 @@ async function processNormalizedFile(
       width,
     }
   } finally {
-    bitmap.close()
+    image.close()
   }
 }
 
 async function readImageDimensions(
   file: File,
 ): Promise<Pick<ProcessedIllustrationFile, 'height' | 'width'>> {
-  const bitmap = await createImageBitmap(file)
+  const image = await decodeIllustrationImage(file)
 
   try {
     return {
-      height: bitmap.height,
-      width: bitmap.width,
+      height: image.height,
+      width: image.width,
     }
   } finally {
-    bitmap.close()
+    image.close()
   }
+}
+
+async function decodeIllustrationImage(file: File): Promise<DecodedIllustrationImage> {
+  try {
+    const bitmap = await createImageBitmap(file)
+
+    return {
+      height: bitmap.height,
+      source: bitmap,
+      width: bitmap.width,
+      close: () => {
+        bitmap.close()
+      },
+    }
+  } catch {
+    return decodeIllustrationImageElement(file)
+  }
+}
+
+async function decodeIllustrationImageElement(
+  file: File,
+): Promise<DecodedIllustrationImage> {
+  const objectUrl = URL.createObjectURL(file)
+  const image = new Image()
+
+  try {
+    await decodeImageElementFromObjectUrl(image, objectUrl)
+
+    const width = image.naturalWidth || image.width
+    const height = image.naturalHeight || image.height
+
+    if (width <= 0 || height <= 0) {
+      throw new Error('Character Illustration image could not be decoded.')
+    }
+
+    return {
+      height,
+      source: image,
+      width,
+      close: () => {
+        URL.revokeObjectURL(objectUrl)
+      },
+    }
+  } catch {
+    URL.revokeObjectURL(objectUrl)
+    throw new Error('Character Illustration image could not be decoded.')
+  }
+}
+
+function decodeImageElementFromObjectUrl(
+  image: HTMLImageElement,
+  objectUrl: string,
+): Promise<void> {
+  if (typeof image.decode === 'function') {
+    image.src = objectUrl
+    return image.decode()
+  }
+
+  return new Promise((resolve, reject) => {
+    image.onload = () => {
+      resolve()
+    }
+    image.onerror = () => {
+      reject(new Error('Character Illustration image could not be decoded.'))
+    }
+    image.src = objectUrl
+  })
 }
 
 function canvasToBlob(
