@@ -299,6 +299,82 @@ describe('processCharacterIllustrationFile', () => {
     })
   })
 
+  it('normalizes imports with an image element when bitmap decoding fails', async () => {
+    stubImageBitmapFailure()
+    const urlMocks = stubImageElement({ width: 1200, height: 900 })
+    stubCanvas(createImageBlob(1000, 'image/png'))
+
+    await expect(
+      processCharacterIllustrationFile(
+        createFile('source.png', 'image/png', 100),
+        'normalized',
+      ),
+    ).resolves.toMatchObject({
+      height: 900,
+      mimeType: 'image/png',
+      sizeBytes: 1000,
+      width: 1200,
+    })
+
+    expect(urlMocks.createObjectURL).toHaveBeenCalledOnce()
+    expect(urlMocks.revokeObjectURL).toHaveBeenCalledWith('blob:source')
+  })
+
+  it('rejects undecodable accepted image files with a service-owned message', async () => {
+    stubImageBitmapFailure()
+    const urlMocks = stubImageElementFailure()
+
+    await expect(
+      processCharacterIllustrationFile(
+        createFile('source.png', 'image/png', 100),
+        'normalized',
+      ),
+    ).rejects.toThrow('Character Illustration image could not be decoded.')
+    expect(urlMocks.revokeObjectURL).toHaveBeenCalledWith('blob:source')
+  })
+
+  it('normalizes imports with image element load events when decode is unavailable', async () => {
+    stubImageBitmapFailure()
+    stubLoadingImageElement({ width: 900, height: 600 })
+    stubCanvas(createImageBlob(1000, 'image/png'))
+
+    await expect(
+      processCharacterIllustrationFile(
+        createFile('source.png', 'image/png', 100),
+        'normalized',
+      ),
+    ).resolves.toMatchObject({
+      height: 600,
+      width: 900,
+    })
+  })
+
+  it('rejects image element load failures when decode is unavailable', async () => {
+    stubImageBitmapFailure()
+    const urlMocks = stubErroredLoadingImageElement()
+
+    await expect(
+      processCharacterIllustrationFile(
+        createFile('source.png', 'image/png', 100),
+        'normalized',
+      ),
+    ).rejects.toThrow('Character Illustration image could not be decoded.')
+    expect(urlMocks.revokeObjectURL).toHaveBeenCalledWith('blob:source')
+  })
+
+  it('rejects decoded images with missing dimensions', async () => {
+    stubImageBitmapFailure()
+    const urlMocks = stubImageElement({ width: 0, height: 0 })
+
+    await expect(
+      processCharacterIllustrationFile(
+        createFile('source.png', 'image/png', 100),
+        'normalized',
+      ),
+    ).rejects.toThrow('Character Illustration image could not be decoded.')
+    expect(urlMocks.revokeObjectURL).toHaveBeenCalledWith('blob:source')
+  })
+
   it('keeps normalized dimensions when the image is already within limits', async () => {
     stubImageBitmap({ width: 800, height: 600 })
     stubCanvas(createImageBlob(1000, ''))
@@ -417,6 +493,137 @@ function stubImageBitmap({
     }),
     ),
   )
+}
+
+function stubImageBitmapFailure(): void {
+  vi.stubGlobal(
+    'createImageBitmap',
+    vi.fn(() =>
+      Promise.reject(new DOMException('The source image could not be decoded.')),
+    ),
+  )
+}
+
+function stubImageElement({
+  width,
+  height,
+}: {
+  readonly width: number
+  readonly height: number
+}): {
+  readonly createObjectURL: ReturnType<typeof vi.fn>
+  readonly revokeObjectURL: ReturnType<typeof vi.fn>
+} {
+  const createObjectURL = vi.fn(() => 'blob:source')
+  const revokeObjectURL = vi.fn()
+
+  vi.stubGlobal('URL', {
+    createObjectURL,
+    revokeObjectURL,
+  })
+  vi.stubGlobal(
+    'Image',
+    class StubImage {
+      height = height
+      width = width
+      src = ''
+
+      decode() {
+        return Promise.resolve()
+      }
+    },
+  )
+
+  return { createObjectURL, revokeObjectURL }
+}
+
+function stubLoadingImageElement({
+  width,
+  height,
+}: {
+  readonly width: number
+  readonly height: number
+}): {
+  readonly createObjectURL: ReturnType<typeof vi.fn>
+  readonly revokeObjectURL: ReturnType<typeof vi.fn>
+} {
+  const createObjectURL = vi.fn(() => 'blob:source')
+  const revokeObjectURL = vi.fn()
+
+  vi.stubGlobal('URL', {
+    createObjectURL,
+    revokeObjectURL,
+  })
+  vi.stubGlobal(
+    'Image',
+    class StubImage {
+      height = height
+      onerror: (() => void) | null = null
+      onload: (() => void) | null = null
+      width = width
+
+      set src(_src: string) {
+        this.onload?.()
+      }
+    },
+  )
+
+  return { createObjectURL, revokeObjectURL }
+}
+
+function stubErroredLoadingImageElement(): {
+  readonly createObjectURL: ReturnType<typeof vi.fn>
+  readonly revokeObjectURL: ReturnType<typeof vi.fn>
+} {
+  const createObjectURL = vi.fn(() => 'blob:source')
+  const revokeObjectURL = vi.fn()
+
+  vi.stubGlobal('URL', {
+    createObjectURL,
+    revokeObjectURL,
+  })
+  vi.stubGlobal(
+    'Image',
+    class StubImage {
+      height = 0
+      onerror: (() => void) | null = null
+      onload: (() => void) | null = null
+      width = 0
+
+      set src(_src: string) {
+        this.onerror?.()
+      }
+    },
+  )
+
+  return { createObjectURL, revokeObjectURL }
+}
+
+function stubImageElementFailure(): {
+  readonly createObjectURL: ReturnType<typeof vi.fn>
+  readonly revokeObjectURL: ReturnType<typeof vi.fn>
+} {
+  const createObjectURL = vi.fn(() => 'blob:source')
+  const revokeObjectURL = vi.fn()
+
+  vi.stubGlobal('URL', {
+    createObjectURL,
+    revokeObjectURL,
+  })
+  vi.stubGlobal(
+    'Image',
+    class StubImage {
+      height = 0
+      width = 0
+      src = ''
+
+      decode() {
+        return Promise.reject(new Error('Image decode failed.'))
+      }
+    },
+  )
+
+  return { createObjectURL, revokeObjectURL }
 }
 
 function stubCanvas(blob: Blob | null): void {
