@@ -191,6 +191,7 @@ function createCharacterDetailView(
     illustrationImportLabel: '',
     illustrationImportMode: 'normalized',
     illustrationImportResetKey: 0,
+    illustrationPreviewUrl: undefined,
     illustrationLabelDrafts: {},
     illustrations: [{ illustration, imageUrl: undefined }],
     importIllustration: vi.fn(),
@@ -201,6 +202,7 @@ function createCharacterDetailView(
     requestDeleteCharacter: vi.fn(),
     requestDeleteIllustration: vi.fn(),
     saveIllustrationLabel: vi.fn(),
+    cancelIllustrationImport: vi.fn(),
     setIllustrationFile: vi.fn(),
     setIllustrationImportLabel: vi.fn(),
     setIllustrationImportMode: vi.fn(),
@@ -321,8 +323,64 @@ describe('CharacterDetail', () => {
     expect(screen.getByText('Story')).toBeTruthy()
   })
 
+  it('opens the Character Illustration picker from the heading action', () => {
+    const clickInput = vi
+      .spyOn(HTMLInputElement.prototype, 'click')
+      .mockImplementation(() => undefined)
+
+    render(
+      <CharacterIllustrationSection
+        characterDetail={createCharacterDetailView({ illustrations: [] })}
+      />,
+    )
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /add character illustration/i }),
+    )
+
+    expect(clickInput).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows import errors outside the dialog only when no import is pending', () => {
+    render(
+      <CharacterIllustrationSection
+        characterDetail={createCharacterDetailView({
+          illustrationErrorMessage: 'Import failed.',
+          illustrations: [],
+        })}
+      />,
+    )
+
+    expect(screen.getByRole('alert').textContent).toBe('Import failed.')
+  })
+
+  it('shows pending import fallback preview and toggles original quality off', () => {
+    const setIllustrationImportMode = vi.fn()
+
+    render(
+      <CharacterIllustrationSection
+        characterDetail={createCharacterDetailView({
+          illustrationFile: new File(['image'], 'mira.png', {
+            type: 'image/png',
+          }),
+          illustrationImportMode: 'original',
+          illustrationPreviewUrl: undefined,
+          illustrations: [],
+          setIllustrationImportMode,
+        })}
+      />,
+    )
+
+    expect(screen.getByText('Selected illustration preview')).toBeTruthy()
+
+    fireEvent.click(screen.getByLabelText(/use normalized quality/i))
+
+    expect(setIllustrationImportMode).toHaveBeenCalledWith('normalized')
+  })
+
   it('shows Character Illustration loading, error, fallback, and busy states', () => {
     const setIllustrationImportMode = vi.fn()
+    const cancelIllustrationImport = vi.fn()
     const fallbackIllustration = createIllustration({
       id: 'illustration-1',
       label: '',
@@ -338,10 +396,15 @@ describe('CharacterDetail', () => {
       <CharacterIllustrationSection
         characterDetail={createCharacterDetailView({
           activeIllustrationActionId: 'illustration-1',
+          cancelIllustrationImport,
           canImportIllustration: false,
           illustrationErrorMessage: 'Illustration update failed.',
+          illustrationFile: new File(['image'], 'mira.png', {
+            type: 'image/png',
+          }),
           illustrationImportMode: 'original',
           illustrationLabelDrafts: { 'illustration-1': '' },
+          illustrationPreviewUrl: 'blob:pending-illustration',
           illustrations: [
             { illustration: fallbackIllustration, imageUrl: undefined },
             { illustration: imageIllustration, imageUrl: 'blob:illustration' },
@@ -355,6 +418,8 @@ describe('CharacterDetail', () => {
 
     expect(screen.getByText('Illustration update failed.')).toBeTruthy()
     expect(screen.getByText('Loading Character Illustrations...')).toBeTruthy()
+    const dialog = screen.getByRole('dialog', { name: 'Add Illustration' })
+    expect(dialog).toBeTruthy()
     expect(
       screen.getAllByText('Unlabelled Character Illustration').length,
     ).toBeGreaterThan(0)
@@ -362,6 +427,11 @@ describe('CharacterDetail', () => {
     expect(
       screen.getByRole('button', { name: /importing/i }).hasAttribute('disabled'),
     ).toBe(true)
+    const cancelButtons = within(dialog).getAllByRole('button', {
+      name: /^cancel$/i,
+    })
+    expect(cancelButtons.every((button) => button.hasAttribute('disabled')))
+      .toBe(true)
     expect(
       screen
         .getAllByRole('button', {
@@ -370,9 +440,11 @@ describe('CharacterDetail', () => {
         .hasAttribute('disabled'),
     ).toBe(true)
 
-    fireEvent.click(screen.getByLabelText(/preserve original quality/i))
+    fireEvent.click(screen.getByLabelText(/use normalized quality/i))
+    fireEvent.click(cancelButtons[1])
 
-    expect(setIllustrationImportMode).toHaveBeenCalledWith('normalized')
+    expect(setIllustrationImportMode).not.toHaveBeenCalled()
+    expect(cancelIllustrationImport).not.toHaveBeenCalled()
   })
 
   it('shows missing states for absent story and absent character', async () => {
@@ -511,12 +583,17 @@ describe('CharacterDetail', () => {
     fireEvent.change(screen.getByLabelText(/image file/i), {
       target: { files: [file] },
     })
-    fireEvent.change(screen.getAllByPlaceholderText('Scene reference')[0], {
+    const importDialog = await screen.findByRole('dialog', {
+      name: 'Add Illustration',
+    })
+    expect(within(importDialog).getByAltText('Selected illustration preview'))
+      .toBeTruthy()
+    fireEvent.change(within(importDialog).getByPlaceholderText('Scene reference'), {
       target: { value: 'River' },
     })
-    fireEvent.click(screen.getByLabelText(/preserve original quality/i))
+    fireEvent.click(within(importDialog).getByLabelText(/use original quality/i))
     fireEvent.click(
-      screen.getByRole('button', { name: /import illustration/i }),
+      within(importDialog).getByRole('button', { name: /^save$/i }),
     )
 
     await waitFor(() => {

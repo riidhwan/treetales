@@ -6,15 +6,18 @@ import {
   Trash2,
   Upload,
 } from 'lucide-react'
+import { useRef } from 'react'
 
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
+import { Dialog } from '@/components/ui/Dialog'
 import { Field } from '@/components/ui/Field'
 import { IconButton } from '@/components/ui/IconButton'
 import { TextInput } from '@/components/ui/TextInput'
 import { CHARACTER_ILLUSTRATION_ACCEPTED_MIME_TYPES } from '@/config'
 import { commonCopy, storyDetailCopy } from '@/copy'
 import type { useCharacterDetail } from '@/hooks/useCharacterDetail'
+import { cn } from '@/lib/utils'
 import type { CharacterIllustration } from '@/services/types'
 
 interface Props {
@@ -23,10 +26,11 @@ interface Props {
 
 export function CharacterIllustrationSection({ characterDetail }: Props) {
   const copy = storyDetailCopy.characterDetail.illustrations
+  const importInputRef = useRef<HTMLInputElement>(null)
 
   return (
     <section className="grid gap-5" aria-labelledby="character-illustrations">
-      <div className="flex flex-col gap-2 border-b border-border-subtle pb-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex items-center justify-between gap-3 border-b border-border-subtle pb-4">
         <div>
           <h2
             className="text-xl font-semibold text-text-primary"
@@ -34,97 +38,30 @@ export function CharacterIllustrationSection({ characterDetail }: Props) {
           >
             {copy.heading}
           </h2>
-          <p className="mt-1 text-sm leading-6 text-text-muted">
-            {copy.normalizedNote}
-          </p>
         </div>
+        <IconButton
+          disabled={characterDetail.isImportingIllustration}
+          label={storyDetailCopy.actions.addIllustration}
+          onClick={() => importInputRef.current!.click()}
+          variant="ghost"
+        >
+          <ImagePlus aria-hidden="true" size={18} />
+        </IconButton>
+        <input
+          aria-label={copy.fileLabel}
+          accept={CHARACTER_ILLUSTRATION_ACCEPTED_MIME_TYPES.join(',')}
+          className="sr-only"
+          key={characterDetail.illustrationImportResetKey}
+          onChange={(event) =>
+            characterDetail.setIllustrationFile(event.target.files?.[0])
+          }
+          ref={importInputRef}
+          type="file"
+        />
       </div>
 
-      <form
-        className="grid gap-4 rounded-md border border-border-subtle bg-surface-paper/60 p-4 shadow-sm sm:p-5"
-        onSubmit={(event) => {
-          event.preventDefault()
-          void characterDetail.importIllustration()
-        }}
-      >
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
-          <div className="grid gap-2 text-sm font-medium text-text-primary">
-            <span>{copy.fileLabel}</span>
-            <label className="flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-md border border-border-subtle bg-surface-paper px-3 text-base text-text-primary outline-none transition hover:border-focus-ring hover:bg-highlight-soft/40 focus-within:border-action-primary focus-within:ring-2 focus-within:ring-highlight-soft">
-              <span className="min-w-0 truncate">
-                {characterDetail.illustrationFile?.name ?? copy.filePlaceholder}
-              </span>
-              <ImagePlus
-                aria-hidden="true"
-                className="shrink-0 text-text-muted"
-                size={18}
-              />
-              <input
-                aria-label={copy.fileLabel}
-                accept={CHARACTER_ILLUSTRATION_ACCEPTED_MIME_TYPES.join(',')}
-                className="sr-only"
-                key={characterDetail.illustrationImportResetKey}
-                onChange={(event) =>
-                  characterDetail.setIllustrationFile(event.target.files?.[0])
-                }
-                type="file"
-              />
-            </label>
-            <span className="text-sm font-normal leading-5 text-text-muted">
-              {copy.fileHelp}
-            </span>
-          </div>
-
-          <Field label={copy.label}>
-            <TextInput
-              onChange={(event) =>
-                characterDetail.setIllustrationImportLabel(event.target.value)
-              }
-              placeholder={copy.labelPlaceholder}
-              value={characterDetail.illustrationImportLabel}
-            />
-          </Field>
-        </div>
-
-        <div className="flex flex-col gap-4 border-t border-border-subtle pt-4 lg:flex-row lg:items-center lg:justify-between">
-          <label className="flex items-start gap-3 text-sm text-text-muted">
-            <input
-              checked={characterDetail.illustrationImportMode === 'original'}
-              className="mt-1 size-4 accent-action-primary"
-              onChange={(event) =>
-                characterDetail.setIllustrationImportMode(
-                  event.target.checked ? 'original' : 'normalized',
-                )
-              }
-              type="checkbox"
-            />
-            <span>
-              <span className="block font-medium text-text-primary">
-                {copy.modeLabel}
-              </span>
-              <span className="block leading-5">{copy.originalNote}</span>
-            </span>
-          </label>
-
-          <Button
-            className="w-full lg:w-auto"
-            disabled={!characterDetail.canImportIllustration}
-            type="submit"
-            variant="primary"
-          >
-            {characterDetail.isImportingIllustration ? (
-              <Upload aria-hidden="true" size={18} />
-            ) : (
-              <ImagePlus aria-hidden="true" size={18} />
-            )}
-            {characterDetail.isImportingIllustration
-              ? storyDetailCopy.actions.uploadingIllustration
-              : storyDetailCopy.actions.importIllustration}
-          </Button>
-        </div>
-      </form>
-
-      {characterDetail.illustrationErrorMessage ? (
+      {characterDetail.illustrationErrorMessage &&
+      !characterDetail.illustrationFile ? (
         <Alert role="alert" variant="error">
           {characterDetail.illustrationErrorMessage}
         </Alert>
@@ -259,7 +196,112 @@ export function CharacterIllustrationSection({ characterDetail }: Props) {
           ))}
         </div>
       )}
+
+      {characterDetail.illustrationFile ? (
+        <CharacterIllustrationImportDialog characterDetail={characterDetail} />
+      ) : null}
     </section>
+  )
+}
+
+function CharacterIllustrationImportDialog({ characterDetail }: Props) {
+  const copy = storyDetailCopy.characterDetail.illustrations
+  const isOriginalQuality = characterDetail.illustrationImportMode === 'original'
+
+  return (
+    <Dialog
+      closeDisabled={characterDetail.isImportingIllustration}
+      closeLabel={commonCopy.actions.cancel}
+      footer={
+        <>
+          <Button
+            disabled={characterDetail.isImportingIllustration}
+            onClick={characterDetail.cancelIllustrationImport}
+            variant="secondary"
+          >
+            {commonCopy.actions.cancel}
+          </Button>
+          <Button
+            disabled={!characterDetail.canImportIllustration}
+            onClick={() => void characterDetail.importIllustration()}
+            variant="primary"
+          >
+            {characterDetail.isImportingIllustration ? (
+              <Upload aria-hidden="true" size={18} />
+            ) : (
+              <Save aria-hidden="true" size={18} />
+            )}
+            {characterDetail.isImportingIllustration
+              ? storyDetailCopy.actions.uploadingIllustration
+              : commonCopy.actions.save}
+          </Button>
+        </>
+      }
+      onClose={characterDetail.cancelIllustrationImport}
+      title={copy.addTitle}
+      titleId="character-illustration-import-title"
+      width="md"
+    >
+      <div className="grid gap-4">
+        <div className="relative overflow-hidden rounded-md border border-border-subtle bg-surface-paper-deep">
+          {characterDetail.illustrationPreviewUrl ? (
+            <img
+              alt={copy.previewAlt}
+              className="aspect-[4/3] w-full object-contain"
+              src={characterDetail.illustrationPreviewUrl}
+            />
+          ) : (
+            <div className="grid aspect-[4/3] place-items-center text-sm text-text-muted">
+              {copy.previewAlt}
+            </div>
+          )}
+          <div className="absolute right-2 top-2">
+            <IconButton
+              className={cn(
+                'bg-surface-paper/80 backdrop-blur-sm',
+                isOriginalQuality &&
+                  'bg-highlight-soft text-text-primary ring-1 ring-focus-ring',
+              )}
+              disabled={characterDetail.isImportingIllustration}
+              label={
+                isOriginalQuality
+                  ? copy.useNormalizedQuality
+                  : copy.useOriginalQuality
+              }
+              onClick={() =>
+                characterDetail.setIllustrationImportMode(
+                  isOriginalQuality ? 'normalized' : 'original',
+                )
+              }
+              size="sm"
+              variant="ghost"
+            >
+              <span aria-hidden="true" className="text-xs font-bold">
+                HD
+              </span>
+            </IconButton>
+          </div>
+        </div>
+
+        {characterDetail.illustrationErrorMessage ? (
+          <Alert role="alert" variant="error">
+            {characterDetail.illustrationErrorMessage}
+          </Alert>
+        ) : null}
+
+        <Field label={copy.label}>
+          <TextInput
+            autoFocus
+            disabled={characterDetail.isImportingIllustration}
+            onChange={(event) =>
+              characterDetail.setIllustrationImportLabel(event.target.value)
+            }
+            placeholder={copy.labelPlaceholder}
+            value={characterDetail.illustrationImportLabel}
+          />
+        </Field>
+      </div>
+    </Dialog>
   )
 }
 

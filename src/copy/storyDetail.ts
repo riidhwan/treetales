@@ -64,6 +64,7 @@ export const storyDetailCopy = {
     deleteWarning:
       'Deleting this Character permanently removes it from this Story. This cannot be undone.',
     illustrations: {
+      addTitle: 'Add Illustration',
       deleteDialog: {
         message:
           'Delete this Character Illustration? This removes the stored image from this browser.',
@@ -82,12 +83,13 @@ export const storyDetailCopy = {
         `Move ${label || 'Character Illustration'} down`,
       moveUp: (label: string) =>
         `Move ${label || 'Character Illustration'} up`,
-      normalizedNote:
-        'Normalized imports resize large images and strip source metadata.',
       originalNote:
         'Original quality stores the uploaded file exactly as-is.',
+      previewAlt: 'Selected illustration preview',
       saveLabel: (label: string) =>
         `Save label for ${label || 'Character Illustration'}`,
+      useNormalizedQuality: 'Use normalized quality',
+      useOriginalQuality: 'Use original quality',
       unnamed: 'Unlabelled Character Illustration',
     },
     loading: 'Loading character...',

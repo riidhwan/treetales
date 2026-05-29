@@ -48,6 +48,27 @@ describe('Dialog', () => {
     expect(screen.getByRole('button', { name: 'Save' })).toBeTruthy()
   })
 
+  it('can disable its close action', () => {
+    const onClose = vi.fn()
+
+    render(
+      <Dialog
+        closeDisabled
+        onClose={onClose}
+        title="Import image"
+        titleId="import-title"
+      >
+        <p>Importing</p>
+      </Dialog>,
+    )
+
+    const closeButton = screen.getByRole('button', { name: 'Close dialog' })
+
+    expect(closeButton.hasAttribute('disabled')).toBe(true)
+    fireEvent.click(closeButton)
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
   it('renders outside the local component container', () => {
     render(
       <div data-testid="local-container">
