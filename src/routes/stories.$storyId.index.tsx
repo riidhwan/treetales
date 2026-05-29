@@ -23,6 +23,12 @@ function StoryDetailRoute() {
           params: { storyId: selectedStoryId },
         })
       }
+      onAddCharacter={(selectedStoryId) =>
+        void navigate({
+          to: '/stories/$storyId/characters/new',
+          params: { storyId: selectedStoryId },
+        })
+      }
       onOpenCharacter={(selectedStoryId, selectedCharacterId) =>
         void navigate({
           to: '/stories/$storyId/characters/$characterId',

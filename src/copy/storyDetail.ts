@@ -94,6 +94,11 @@ export const storyDetailCopy = {
     loading: 'Loading character...',
     navigationLabel: 'Character detail navigation',
   },
+  characterCreator: {
+    loading: 'Loading story...',
+    navigationLabel: 'Character creation navigation',
+    title: 'Add Character',
+  },
   deleteDialog: {
     message: (storyTitle: string) =>
       `Delete "${storyTitle}"? This cannot be undone.`,

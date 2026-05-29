@@ -13,12 +13,14 @@ type CharacterController = ReturnType<typeof useStoryCharacters>
 
 interface Props {
   readonly characterDialog: CharacterController
+  readonly onAddCharacter: () => void
   readonly onOpenCharacter: (characterId: string) => void
   readonly titleId: string
 }
 
 export function CharacterSection({
   characterDialog,
+  onAddCharacter,
   onOpenCharacter,
   titleId,
 }: Props) {
@@ -36,7 +38,7 @@ export function CharacterSection({
           <Button
             aria-label={storyDetailCopy.actions.addCharacter}
             className="rounded-full px-4"
-            onClick={characterDialog.openCreateDialog}
+            onClick={onAddCharacter}
             variant="primary"
           >
             <Plus aria-hidden="true" size={16} />
