@@ -215,6 +215,9 @@ content, remains feature-owned.
 assistive technology can rely on the same labelled surface. Keep the dialog
 title specific to the user task; use the optional eyebrow only for compact
 context such as `Character`.
+Dialogs with non-abortable commit work may disable the close button during the
+pending operation; the owning feature should still make the busy state visible
+in the dialog footer action.
 
 Use `ConfirmationDialog` for repeated in-app confirmation flows that need a
 TreeTales surface instead of browser-native prompts. Feature components and

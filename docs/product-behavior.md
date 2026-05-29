@@ -61,6 +61,20 @@
   and are not treated as thumbnails, avatars, portraits, or character-only
   crops.
 - Character Illustrations can be added only after the Character has been saved.
+- Character Illustration import starts from a compact add-image icon in the
+  Character Illustrations section. Choosing an image opens a focused add
+  illustration dialog with a contained preview, optional label field,
+  per-import original-quality icon toggle, Save, and Cancel.
+- Cancelling the add illustration dialog, using its close control, or pressing
+  Escape discards the pending image, label, and quality choice without
+  confirmation. Cancelling the native image picker leaves the Character detail
+  page unchanged.
+- Saving a pending Character Illustration imports it, closes the dialog, resets
+  the next import to normalized quality with an empty label, and appends the new
+  Character Illustration after existing Character Illustrations.
+- If Character Illustration import fails, the add illustration dialog stays open
+  with the selected image, label, and quality choice intact so the user can
+  retry or cancel.
 - Editing and deleting an existing Character belong on the dedicated Character
   detail page.
 - Each Character Illustration can have an optional short label so users can

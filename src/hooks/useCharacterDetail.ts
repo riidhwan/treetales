@@ -98,6 +98,9 @@ export function useCharacterDetail({
     useState('')
   const [illustrationImportMode, setIllustrationImportModeState] =
     useState<CharacterIllustrationImportMode>('normalized')
+  const [illustrationPreviewUrl, setIllustrationPreviewUrl] = useState<
+    string | undefined
+  >()
   const [illustrationErrorMessage, setIllustrationErrorMessage] = useState<
     string | undefined
   >()
@@ -111,6 +114,7 @@ export function useCharacterDetail({
   const [confirmationState, setConfirmationState] =
     useState<CharacterDetailConfirmationState>({ mode: 'closed' })
   const illustrationObjectUrlsRef = useRef<string[]>([])
+  const illustrationPreviewUrlRef = useRef<string | undefined>(undefined)
 
   const canImportIllustration = useMemo(
     () => Boolean(character && illustrationFile) && !isImportingIllustration,
@@ -128,6 +132,7 @@ export function useCharacterDetail({
       setIllustrations([])
       setIllustrationLabelDrafts({})
       setIllustrationErrorMessage(undefined)
+      clearIllustrationImportDraft()
       setConfirmationState({ mode: 'closed' })
       revokeIllustrationObjectUrls()
 
@@ -187,6 +192,7 @@ export function useCharacterDetail({
 
     return () => {
       isCurrent = false
+      revokeIllustrationPreviewObjectUrl()
       revokeIllustrationObjectUrls()
     }
   }, [characterId, services, storyId])
@@ -196,7 +202,15 @@ export function useCharacterDetail({
   }
 
   function setIllustrationFile(file: File | undefined) {
+    revokeIllustrationPreviewObjectUrl()
     setIllustrationFileState(file)
+    setIllustrationPreviewUrl(undefined)
+
+    if (file) {
+      const previewUrl = URL.createObjectURL(file)
+      illustrationPreviewUrlRef.current = previewUrl
+      setIllustrationPreviewUrl(previewUrl)
+    }
   }
 
   function setIllustrationImportLabel(label: string) {
@@ -214,6 +228,14 @@ export function useCharacterDetail({
     }))
   }
 
+  function cancelIllustrationImport() {
+    if (isImportingIllustration) {
+      return
+    }
+
+    clearIllustrationImportDraft()
+  }
+
   async function importIllustration() {
     if (!character || !illustrationFile || isImportingIllustration) {
       return
@@ -229,10 +251,7 @@ export function useCharacterDetail({
         importMode: illustrationImportMode,
         label: illustrationImportLabel,
       })
-      setIllustrationFileState(undefined)
-      setIllustrationImportLabelState('')
-      setIllustrationImportModeState('normalized')
-      setIllustrationImportResetKey((currentKey) => currentKey + 1)
+      clearIllustrationImportDraft()
       await refreshIllustrations(character.id)
     } catch (error) {
       setIllustrationErrorMessage(getErrorMessage(error))
@@ -328,6 +347,7 @@ export function useCharacterDetail({
 
   return {
     cancelConfirmation,
+    cancelIllustrationImport,
     canImportIllustration,
     character,
     confirmDeleteCharacter,
@@ -340,6 +360,7 @@ export function useCharacterDetail({
     illustrationImportLabel,
     illustrationImportMode,
     illustrationImportResetKey,
+    illustrationPreviewUrl,
     illustrationLabelDrafts,
     illustrations,
     isDeleting,
@@ -413,6 +434,23 @@ export function useCharacterDetail({
       URL.revokeObjectURL(objectUrl)
     })
     illustrationObjectUrlsRef.current = []
+  }
+
+  function clearIllustrationImportDraft() {
+    revokeIllustrationPreviewObjectUrl()
+    setIllustrationPreviewUrl(undefined)
+    setIllustrationFileState(undefined)
+    setIllustrationImportLabelState('')
+    setIllustrationImportModeState('normalized')
+    setIllustrationImportResetKey((currentKey) => currentKey + 1)
+  }
+
+  function revokeIllustrationPreviewObjectUrl() {
+    if (illustrationPreviewUrlRef.current) {
+      URL.revokeObjectURL(illustrationPreviewUrlRef.current)
+    }
+
+    illustrationPreviewUrlRef.current = undefined
   }
 }
 

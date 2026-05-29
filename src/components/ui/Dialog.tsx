@@ -26,6 +26,7 @@ interface Props {
   readonly bodyClassName?: string
   readonly children: ReactNode
   readonly className?: string
+  readonly closeDisabled?: boolean
   readonly closeLabel?: string
   readonly eyebrow?: string
   readonly footer?: ReactNode
@@ -42,6 +43,7 @@ export function Dialog({
   bodyClassName,
   children,
   className,
+  closeDisabled = false,
   closeLabel = uiCopy.dialog.closeLabel,
   eyebrow,
   footer,
@@ -148,7 +150,12 @@ export function Dialog({
               {title}
             </h2>
           </div>
-          <IconButton label={closeLabel} onClick={onClose} size="sm">
+          <IconButton
+            disabled={closeDisabled}
+            label={closeLabel}
+            onClick={onClose}
+            size="sm"
+          >
             <X aria-hidden="true" size={16} />
           </IconButton>
         </header>

@@ -448,11 +448,15 @@ describe('useCharacterDetail', () => {
     act(() => {
       result.current.setIllustrationFile(file)
     })
+    expect(result.current.illustrationFile).toBe(file)
+    expect(result.current.illustrationPreviewUrl).toBe('blob:illustration')
     await act(async () => {
       await result.current.importIllustration()
     })
 
     expect(result.current.illustrationErrorMessage).toBe('Import failed.')
+    expect(result.current.illustrationFile).toBe(file)
+    expect(result.current.illustrationPreviewUrl).toBe('blob:illustration')
 
     act(() => {
       result.current.requestDeleteIllustration('illustration-1')
@@ -462,6 +466,83 @@ describe('useCharacterDetail', () => {
     })
 
     expect(result.current.illustrationErrorMessage).toBe('Delete image failed.')
+  })
+
+  it('clears pending Character Illustration imports when cancelled', async () => {
+    const services = createServices()
+    const { result } = renderHook(() =>
+      useCharacterDetail({
+        characterId: 'character-1',
+        onDeleted: vi.fn(),
+        services,
+        storyId: 'story-1',
+      }),
+    )
+
+    await waitFor(() => {
+      expect(result.current.status).toBe('ready')
+    })
+
+    const file = new File(['image'], 'mira.png', { type: 'image/png' })
+    act(() => {
+      result.current.setIllustrationFile(file)
+      result.current.setIllustrationImportLabel('Draft')
+      result.current.setIllustrationImportMode('original')
+    })
+
+    expect(result.current.illustrationPreviewUrl).toBe('blob:illustration')
+
+    act(() => {
+      result.current.cancelIllustrationImport()
+    })
+
+    expect(result.current.illustrationFile).toBeUndefined()
+    expect(result.current.illustrationImportLabel).toBe('')
+    expect(result.current.illustrationImportMode).toBe('normalized')
+    expect(result.current.illustrationPreviewUrl).toBeUndefined()
+    expect(revokeObjectUrlMock).toHaveBeenCalledWith('blob:illustration')
+  })
+
+  it('keeps pending Character Illustration imports while saving', async () => {
+    const pendingImport = deferred<CharacterIllustration>()
+    const services = {
+      ...createServices(),
+      importCharacterIllustration: vi.fn(() => pendingImport.promise),
+    }
+    const { result } = renderHook(() =>
+      useCharacterDetail({
+        characterId: 'character-1',
+        onDeleted: vi.fn(),
+        services,
+        storyId: 'story-1',
+      }),
+    )
+
+    await waitFor(() => {
+      expect(result.current.status).toBe('ready')
+    })
+
+    const file = new File(['image'], 'mira.png', { type: 'image/png' })
+    act(() => {
+      result.current.setIllustrationFile(file)
+    })
+
+    let importPromise!: Promise<void>
+    act(() => {
+      importPromise = result.current.importIllustration()
+    })
+
+    act(() => {
+      result.current.cancelIllustrationImport()
+    })
+
+    expect(result.current.isImportingIllustration).toBe(true)
+    expect(result.current.illustrationFile).toBe(file)
+
+    await act(async () => {
+      pendingImport.resolve(createIllustration())
+      await importPromise
+    })
   })
 
   it('reports missing Character Illustrations during label updates and delete no-ops', async () => {
@@ -603,8 +684,11 @@ describe('useCharacterDetail', () => {
       importMode: 'original',
       label: 'Imported',
     })
+    expect(result.current.illustrationFile).toBeUndefined()
     expect(result.current.illustrationImportLabel).toBe('')
     expect(result.current.illustrationImportMode).toBe('normalized')
+    expect(result.current.illustrationPreviewUrl).toBeUndefined()
+    expect(revokeObjectUrlMock).toHaveBeenCalledWith('blob:illustration')
 
     act(() => {
       result.current.requestDeleteIllustration('illustration-2')
