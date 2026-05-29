@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import {
+  createCharacterDraftFromCharacter,
+  createCharacterUpdateInput,
+  useCharacterForm,
+} from '@/hooks/useCharacterForm'
 import { getErrorMessage } from '@/lib/errors'
 import {
   deleteCharacter,
@@ -16,27 +21,15 @@ import {
 import { getStoryById } from '@/services/storyService'
 import type {
   Character,
-  CharacterGender,
   CharacterIllustration,
   CharacterIllustrationImportMode,
-  CharacterProperty,
   ImportCharacterIllustrationInput,
   Story,
   UpdateCharacterInput,
   UpdateCharacterIllustrationInput,
 } from '@/services/types'
 
-interface CharacterPropertyDraft {
-  readonly id: string
-  readonly key: string
-  readonly value: string
-}
-
-export interface CharacterFormDraft {
-  readonly gender: CharacterGender
-  readonly name: string
-  readonly properties: CharacterPropertyDraft[]
-}
+export type { CharacterFormDraft } from '@/hooks/useCharacterForm'
 
 export interface CharacterIllustrationView {
   readonly illustration: CharacterIllustration
@@ -137,16 +130,8 @@ export function useCharacterDetail({
   >()
   const [confirmationState, setConfirmationState] =
     useState<CharacterDetailConfirmationState>({ mode: 'closed' })
-  const [draft, setDraft] = useState<CharacterFormDraft>(createEmptyDraft())
-  const [savedDraft, setSavedDraft] = useState<CharacterFormDraft>(
-    createEmptyDraft(),
-  )
   const illustrationObjectUrlsRef = useRef<string[]>([])
-
-  const hasUnsavedChanges = useMemo(
-    () => isEditing && serializeDraft(draft) !== serializeDraft(savedDraft),
-    [draft, isEditing, savedDraft],
-  )
+  const characterForm = useCharacterForm({ isActive: isEditing })
 
   const canImportIllustration = useMemo(
     () => Boolean(character && illustrationFile) && !isImportingIllustration,
@@ -192,7 +177,7 @@ export function useCharacterDetail({
           return
         }
 
-        const nextDraft = createDraftFromCharacter(loadedCharacter)
+        const nextDraft = createCharacterDraftFromCharacter(loadedCharacter)
         const loadedIllustrations = await loadIllustrationViews(
           services,
           loadedCharacter.id,
@@ -212,8 +197,7 @@ export function useCharacterDetail({
         setIllustrationLabelDrafts(
           createIllustrationLabelDrafts(loadedIllustrations.views),
         )
-        setDraft(nextDraft)
-        setSavedDraft(nextDraft)
+        characterForm.resetDraft(nextDraft)
         setStatus('ready')
       } catch (error) {
         if (isCurrent) {
@@ -236,15 +220,14 @@ export function useCharacterDetail({
       return
     }
 
-    const nextDraft = createDraftFromCharacter(character)
-    setDraft(nextDraft)
-    setSavedDraft(nextDraft)
+    const nextDraft = createCharacterDraftFromCharacter(character)
+    characterForm.resetDraft(nextDraft)
     setErrorMessage(undefined)
     setIsEditing(true)
   }
 
   function requestCancelEdit() {
-    if (hasUnsavedChanges) {
+    if (characterForm.hasUnsavedChanges) {
       setConfirmationState({ mode: 'discard-changes' })
       return
     }
@@ -254,9 +237,8 @@ export function useCharacterDetail({
 
   function cancelEditWithoutConfirmation() {
     if (character) {
-      const nextDraft = createDraftFromCharacter(character)
-      setDraft(nextDraft)
-      setSavedDraft(nextDraft)
+      const nextDraft = createCharacterDraftFromCharacter(character)
+      characterForm.resetDraft(nextDraft)
     }
 
     setConfirmationState({ mode: 'closed' })
@@ -269,14 +251,6 @@ export function useCharacterDetail({
 
   function confirmDiscardChanges() {
     cancelEditWithoutConfirmation()
-  }
-
-  function setName(name: string) {
-    setDraft((currentDraft) => ({ ...currentDraft, name }))
-  }
-
-  function setGender(gender: CharacterGender) {
-    setDraft((currentDraft) => ({ ...currentDraft, gender }))
   }
 
   function setIllustrationFile(file: File | undefined) {
@@ -298,65 +272,8 @@ export function useCharacterDetail({
     }))
   }
 
-  function addProperty() {
-    setDraft((currentDraft) => ({
-      ...currentDraft,
-      properties: [
-        ...currentDraft.properties,
-        createPropertyDraft({ key: '', value: '' }),
-      ],
-    }))
-  }
-
-  function updateProperty(
-    propertyId: string,
-    input: Partial<Pick<CharacterPropertyDraft, 'key' | 'value'>>,
-  ) {
-    setDraft((currentDraft) => ({
-      ...currentDraft,
-      properties: currentDraft.properties.map((property) =>
-        property.id === propertyId ? { ...property, ...input } : property,
-      ),
-    }))
-  }
-
-  function removeProperty(propertyId: string) {
-    setDraft((currentDraft) => ({
-      ...currentDraft,
-      properties: currentDraft.properties.filter(
-        (property) => property.id !== propertyId,
-      ),
-    }))
-  }
-
-  function moveProperty(propertyId: string, direction: -1 | 1) {
-    setDraft((currentDraft) => {
-      const currentIndex = currentDraft.properties.findIndex(
-        (property) => property.id === propertyId,
-      )
-      const nextIndex = currentIndex + direction
-
-      if (
-        currentIndex < 0 ||
-        nextIndex < 0 ||
-        nextIndex >= currentDraft.properties.length
-      ) {
-        return currentDraft
-      }
-
-      const nextProperties = [...currentDraft.properties]
-      const [property] = nextProperties.splice(currentIndex, 1)
-      nextProperties.splice(nextIndex, 0, property)
-
-      return {
-        ...currentDraft,
-        properties: nextProperties,
-      }
-    })
-  }
-
   async function saveCharacter() {
-    if (!isEditing || !character || !canSaveDraft(draft)) {
+    if (!isEditing || !character || !characterForm.canSave) {
       return
     }
 
@@ -366,7 +283,7 @@ export function useCharacterDetail({
     try {
       const updatedCharacter = await services.updateCharacter(
         character.id,
-        createCharacterInput(draft),
+        createCharacterUpdateInput(characterForm.draft),
       )
 
       if (!updatedCharacter || updatedCharacter.storyId !== storyId) {
@@ -374,10 +291,9 @@ export function useCharacterDetail({
         return
       }
 
-      const nextDraft = createDraftFromCharacter(updatedCharacter)
+      const nextDraft = createCharacterDraftFromCharacter(updatedCharacter)
       setCharacter(updatedCharacter)
-      setDraft(nextDraft)
-      setSavedDraft(nextDraft)
+      characterForm.resetDraft(nextDraft)
       setIsEditing(false)
       setStatus('ready')
     } catch (error) {
@@ -500,7 +416,7 @@ export function useCharacterDetail({
   }
 
   return {
-    addProperty,
+    addProperty: characterForm.addProperty,
     beginEdit,
     cancelConfirmation,
     canImportIllustration,
@@ -509,9 +425,9 @@ export function useCharacterDetail({
     confirmDeleteIllustration,
     confirmDiscardChanges,
     confirmationState,
-    draft,
+    draft: characterForm.draft,
     errorMessage,
-    hasUnsavedChanges,
+    hasUnsavedChanges: characterForm.hasUnsavedChanges,
     activeIllustrationActionId,
     illustrationErrorMessage,
     illustrationFile,
@@ -527,22 +443,22 @@ export function useCharacterDetail({
     isSaving,
     importIllustration,
     moveIllustration,
-    moveProperty,
-    removeProperty,
+    moveProperty: characterForm.moveProperty,
+    removeProperty: characterForm.removeProperty,
     requestCancelEdit,
     requestDeleteCharacter,
     requestDeleteIllustration,
     saveCharacter,
     saveIllustrationLabel,
-    setGender,
+    setGender: characterForm.setGender,
     setIllustrationFile,
     setIllustrationImportLabel,
     setIllustrationImportMode,
     setIllustrationLabelDraft,
-    setName,
+    setName: characterForm.setName,
     status,
     story,
-    updateProperty,
+    updateProperty: characterForm.updateProperty,
   }
 
   async function updateIllustration(
@@ -661,68 +577,4 @@ function createMovedIllustrationOrder(
 
   const nextOrder = illustrations[targetIndex + 1].illustration.order
   return (targetOrder + nextOrder) / 2
-}
-
-function createEmptyDraft(): CharacterFormDraft {
-  return {
-    gender: 'female',
-    name: '',
-    properties: [],
-  }
-}
-
-function createDraftFromCharacter(character: Character): CharacterFormDraft {
-  return {
-    gender: character.gender,
-    name: character.name,
-    properties: character.properties.map((property) =>
-      createPropertyDraft(property),
-    ),
-  }
-}
-
-function createPropertyDraft(
-  property: CharacterProperty,
-): CharacterPropertyDraft {
-  return {
-    id: crypto.randomUUID(),
-    key: property.key,
-    value: property.value,
-  }
-}
-
-function createCharacterInput(
-  draft: CharacterFormDraft,
-): UpdateCharacterInput {
-  return {
-    name: draft.name.trim(),
-    gender: draft.gender,
-    properties: normalizeDraftProperties(draft.properties),
-  }
-}
-
-function normalizeDraftProperties(
-  properties: readonly CharacterPropertyDraft[],
-): CharacterProperty[] {
-  return properties
-    .map((property) => ({
-      key: property.key.trim(),
-      value: property.value.trim(),
-    }))
-    .filter((property) => property.key.length > 0)
-}
-
-function canSaveDraft(draft: CharacterFormDraft): boolean {
-  return draft.name.trim().length > 0
-}
-
-function serializeDraft(draft: CharacterFormDraft): string {
-  return JSON.stringify({
-    gender: draft.gender,
-    name: draft.name,
-    properties: draft.properties.map((property) => ({
-      key: property.key,
-      value: property.value,
-    })),
-  })
 }

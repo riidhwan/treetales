@@ -1,12 +1,12 @@
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react'
 
-import type { CharacterFormDraft } from '@/hooks/useStoryCharacters'
 import { Button } from '@/components/ui/Button'
 import { Field } from '@/components/ui/Field'
 import { IconButton } from '@/components/ui/IconButton'
 import { TextArea } from '@/components/ui/TextArea'
 import { TextInput } from '@/components/ui/TextInput'
 import { commonCopy, storyDetailCopy } from '@/copy'
+import type { CharacterFormDraft } from '@/hooks/useCharacterForm'
 import type { CharacterGender } from '@/services/types'
 
 interface Props {

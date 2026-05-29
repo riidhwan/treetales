@@ -1,17 +1,17 @@
 import { Edit3, Save, Trash2 } from 'lucide-react'
 
-import type {
-  CharacterDialogState,
-  CharacterFormDraft,
-} from '@/hooks/useStoryCharacters'
+import { CharacterForm } from '@/components/features/shared/CharacterForm'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
 import { commonCopy, storyDetailCopy } from '@/copy'
+import type {
+  CharacterDialogState,
+  CharacterFormDraft,
+} from '@/hooks/useStoryCharacters'
 import type { Character, CharacterGender } from '@/services/types'
 
 import { CharacterDetails } from './CharacterDetails'
-import { CharacterForm } from './CharacterForm'
 import { getCharacterDialogTitle } from './characterDisplay'
 
 interface Props {

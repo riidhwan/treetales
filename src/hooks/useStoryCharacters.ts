@@ -1,6 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { storyDetailCopy } from '@/copy'
+import {
+  createCharacterCreateInput,
+  createCharacterDraftFromCharacter,
+  createEmptyCharacterDraft,
+  useCharacterForm,
+} from '@/hooks/useCharacterForm'
 import { getErrorMessage } from '@/lib/errors'
 import {
   createCharacter,
@@ -10,23 +16,11 @@ import {
 } from '@/services/characterService'
 import type {
   Character,
-  CharacterGender,
-  CharacterProperty,
   CreateCharacterInput,
   UpdateCharacterInput,
 } from '@/services/types'
 
-interface CharacterPropertyDraft {
-  readonly id: string
-  readonly key: string
-  readonly value: string
-}
-
-export interface CharacterFormDraft {
-  readonly gender: CharacterGender
-  readonly name: string
-  readonly properties: CharacterPropertyDraft[]
-}
+export type { CharacterFormDraft } from '@/hooks/useCharacterForm'
 
 export type CharacterDialogState =
   | { readonly mode: 'closed' }
@@ -79,17 +73,10 @@ export function useStoryCharacters({
     useState<CharacterConfirmationState>({
       mode: 'closed',
     })
-  const [draft, setDraft] = useState<CharacterFormDraft>(createEmptyDraft())
-  const [savedDraft, setSavedDraft] = useState<CharacterFormDraft>(
-    createEmptyDraft(),
-  )
 
   const isEditing =
     dialogState.mode === 'create' || dialogState.mode === 'edit'
-  const hasUnsavedChanges = useMemo(
-    () => isEditing && serializeDraft(draft) !== serializeDraft(savedDraft),
-    [draft, isEditing, savedDraft],
-  )
+  const characterForm = useCharacterForm({ isActive: isEditing })
 
   useEffect(() => {
     if (!enabled) {
@@ -131,9 +118,8 @@ export function useStoryCharacters({
   }, [enabled, services, storyId])
 
   function openCreateDialog() {
-    const nextDraft = createEmptyDraft()
-    setDraft(nextDraft)
-    setSavedDraft(nextDraft)
+    const nextDraft = createEmptyCharacterDraft()
+    characterForm.resetDraft(nextDraft)
     setErrorMessage(undefined)
     setDialogState({ mode: 'create' })
   }
@@ -144,15 +130,14 @@ export function useStoryCharacters({
   }
 
   function openEditDialog(character: Character) {
-    const nextDraft = createDraftFromCharacter(character)
-    setDraft(nextDraft)
-    setSavedDraft(nextDraft)
+    const nextDraft = createCharacterDraftFromCharacter(character)
+    characterForm.resetDraft(nextDraft)
     setErrorMessage(undefined)
     setDialogState({ character, mode: 'edit' })
   }
 
   function requestCloseDialog() {
-    if (hasUnsavedChanges) {
+    if (characterForm.hasUnsavedChanges) {
       setConfirmationState({ mode: 'discard-changes' })
       return
     }
@@ -173,73 +158,8 @@ export function useStoryCharacters({
     closeDialogWithoutConfirmation()
   }
 
-  function setName(name: string) {
-    setDraft((currentDraft) => ({ ...currentDraft, name }))
-  }
-
-  function setGender(gender: CharacterGender) {
-    setDraft((currentDraft) => ({ ...currentDraft, gender }))
-  }
-
-  function addProperty() {
-    setDraft((currentDraft) => ({
-      ...currentDraft,
-      properties: [
-        ...currentDraft.properties,
-        createPropertyDraft({ key: '', value: '' }),
-      ],
-    }))
-  }
-
-  function updateProperty(
-    propertyId: string,
-    input: Partial<Pick<CharacterPropertyDraft, 'key' | 'value'>>,
-  ) {
-    setDraft((currentDraft) => ({
-      ...currentDraft,
-      properties: currentDraft.properties.map((property) =>
-        property.id === propertyId ? { ...property, ...input } : property,
-      ),
-    }))
-  }
-
-  function removeProperty(propertyId: string) {
-    setDraft((currentDraft) => ({
-      ...currentDraft,
-      properties: currentDraft.properties.filter(
-        (property) => property.id !== propertyId,
-      ),
-    }))
-  }
-
-  function moveProperty(propertyId: string, direction: -1 | 1) {
-    setDraft((currentDraft) => {
-      const currentIndex = currentDraft.properties.findIndex(
-        (property) => property.id === propertyId,
-      )
-      const nextIndex = currentIndex + direction
-
-      if (
-        currentIndex < 0 ||
-        nextIndex < 0 ||
-        nextIndex >= currentDraft.properties.length
-      ) {
-        return currentDraft
-      }
-
-      const nextProperties = [...currentDraft.properties]
-      const [property] = nextProperties.splice(currentIndex, 1)
-      nextProperties.splice(nextIndex, 0, property)
-
-      return {
-        ...currentDraft,
-        properties: nextProperties,
-      }
-    })
-  }
-
   async function saveCharacter() {
-    if (!isEditing || !canSaveDraft(draft)) {
+    if (!isEditing || !characterForm.canSave) {
       return
     }
 
@@ -247,7 +167,7 @@ export function useStoryCharacters({
     setErrorMessage(undefined)
 
     try {
-      const input = createCharacterInput(storyId, draft)
+      const input = createCharacterCreateInput(storyId, characterForm.draft)
 
       if (dialogState.mode === 'create') {
         const createdCharacter = await services.createCharacter(input)
@@ -330,95 +250,29 @@ export function useStoryCharacters({
   }
 
   return {
-    addProperty,
+    addProperty: characterForm.addProperty,
     cancelConfirmation,
     characters,
     confirmDeleteSelectedCharacter,
     confirmDiscardChanges,
     confirmationState,
     dialogState,
-    draft,
+    draft: characterForm.draft,
     errorMessage,
-    hasUnsavedChanges,
+    hasUnsavedChanges: characterForm.hasUnsavedChanges,
     isDeleting,
     isLoading,
     isSaving,
-    moveProperty,
+    moveProperty: characterForm.moveProperty,
     openCreateDialog,
     openEditDialog,
     openViewDialog,
     requestDeleteSelectedCharacter,
-    removeProperty,
+    removeProperty: characterForm.removeProperty,
     requestCloseDialog,
     saveCharacter,
-    setGender,
-    setName,
-    updateProperty,
+    setGender: characterForm.setGender,
+    setName: characterForm.setName,
+    updateProperty: characterForm.updateProperty,
   }
-}
-
-function createEmptyDraft(): CharacterFormDraft {
-  return {
-    gender: 'female',
-    name: '',
-    properties: [],
-  }
-}
-
-function createDraftFromCharacter(character: Character): CharacterFormDraft {
-  return {
-    gender: character.gender,
-    name: character.name,
-    properties: character.properties.map((property) =>
-      createPropertyDraft(property),
-    ),
-  }
-}
-
-function createPropertyDraft(
-  property: CharacterProperty,
-): CharacterPropertyDraft {
-  return {
-    id: crypto.randomUUID(),
-    key: property.key,
-    value: property.value,
-  }
-}
-
-function createCharacterInput(
-  storyId: string,
-  draft: CharacterFormDraft,
-): CreateCharacterInput {
-  return {
-    storyId,
-    name: draft.name.trim(),
-    gender: draft.gender,
-    properties: normalizeDraftProperties(draft.properties),
-  }
-}
-
-function normalizeDraftProperties(
-  properties: readonly CharacterPropertyDraft[],
-): CharacterProperty[] {
-  return properties
-    .map((property) => ({
-      key: property.key.trim(),
-      value: property.value.trim(),
-    }))
-    .filter((property) => property.key.length > 0)
-}
-
-function canSaveDraft(draft: CharacterFormDraft): boolean {
-  return draft.name.trim().length > 0
-}
-
-function serializeDraft(draft: CharacterFormDraft): string {
-  return JSON.stringify({
-    gender: draft.gender,
-    name: draft.name,
-    properties: draft.properties.map((property) => ({
-      key: property.key,
-      value: property.value,
-    })),
-  })
 }
