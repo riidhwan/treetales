@@ -38,7 +38,7 @@ const config = defineConfig(({ mode }) => {
           'src/test/**',
         ],
         thresholds: {
-          branches: 98.5,
+          branches: 99,
           functions: 99,
           lines: 99.5,
           statements: 99.5,
