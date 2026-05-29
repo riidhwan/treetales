@@ -11,7 +11,6 @@ import { StorySummary } from './StoryDetailContent/StorySummary'
 
 interface Props {
   readonly characterDialog: ReturnType<typeof useStoryCharacters>
-  readonly characterTitleId: string
   readonly errorMessage?: string
   readonly isDeleting: boolean
   readonly onAddCharacter: (storyId: string) => void
@@ -25,7 +24,6 @@ interface Props {
 
 export function StoryDetailContent({
   characterDialog,
-  characterTitleId,
   errorMessage,
   isDeleting,
   onAddCharacter,
@@ -70,7 +68,6 @@ export function StoryDetailContent({
         characterDialog={characterDialog}
         onAddCharacter={() => onAddCharacter(story.id)}
         onOpenCharacter={(characterId) => onOpenCharacter(story.id, characterId)}
-        titleId={characterTitleId}
       />
 
       <StoryMaintenanceSection

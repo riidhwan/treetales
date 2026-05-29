@@ -16,9 +16,7 @@ import type {
 } from '@/hooks/useStoryCharacters'
 import type {
   Character,
-  CreateCharacterInput,
   Story,
-  UpdateCharacterInput,
 } from '@/services/types'
 
 function createStory(overrides: Partial<Story> = {}): Story {
@@ -73,45 +71,8 @@ function createServices(options?: CreateServicesOptions) {
 function createCharacterServices(
   characters: Character[] = [createCharacter()],
 ): StoryCharacterServices {
-  let currentCharacters = characters
-
   return {
-    createCharacter: vi.fn((input: CreateCharacterInput) => {
-      const character = createCharacter({
-        id: 'character-created',
-        ...input,
-      })
-      currentCharacters = [...currentCharacters, character]
-      return Promise.resolve(character)
-    }),
-    deleteCharacter: vi.fn((id: string) => {
-      const exists = currentCharacters.some((character) => character.id === id)
-      currentCharacters = currentCharacters.filter(
-        (character) => character.id !== id,
-      )
-      return Promise.resolve(exists)
-    }),
-    getCharactersByStoryId: vi.fn(() => Promise.resolve(currentCharacters)),
-    updateCharacter: vi.fn((id: string, input: UpdateCharacterInput) => {
-      const character = currentCharacters.find(
-        (currentCharacter) => currentCharacter.id === id,
-      )
-
-      if (!character) {
-        return Promise.resolve(undefined)
-      }
-
-      const updatedCharacter = {
-        ...character,
-        ...input,
-        updatedAt: 200,
-      }
-      currentCharacters = currentCharacters.map((currentCharacter) =>
-        currentCharacter.id === id ? updatedCharacter : currentCharacter,
-      )
-
-      return Promise.resolve(updatedCharacter)
-    }),
+    getCharactersByStoryId: vi.fn(() => Promise.resolve(characters)),
   }
 }
 
@@ -279,6 +240,17 @@ describe('StoryDetail', () => {
     expect(onAddCharacter).toHaveBeenCalledWith('story-1')
   })
 
+  it('keeps Character management dialogs out of Story detail', async () => {
+    const characterServices = createCharacterServices([createCharacter()])
+
+    renderDetail({ characterServices })
+
+    fireEvent.click(await screen.findByRole('button', { name: 'View Mira' }))
+
+    expect(screen.queryByRole('dialog', { name: 'Mira' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Delete Character' })).toBeNull()
+  })
+
   it('opens the story editor from an empty description affordance', async () => {
     const onEditStory = vi.fn()
     const services = createServices({
@@ -441,7 +413,6 @@ describe('StoryDetail', () => {
     const view = render(
       <StoryDetailContent
         characterDialog={{} as ReturnType<typeof useStoryCharacters>}
-        characterTitleId="characters-title"
         isDeleting={false}
         onAddCharacter={vi.fn()}
         onEditStory={vi.fn()}
