@@ -18,6 +18,7 @@ import { StoryDetailHeader } from './StoryDetail/StoryDetailHeader'
 interface Props {
   readonly characterServices?: StoryCharacterServices
   readonly onDeleted: () => void
+  readonly onAddCharacter: (storyId: string) => void
   readonly onEditStory: (storyId: string) => void
   readonly onOpenCharacter: (storyId: string, characterId: string) => void
   readonly onOpenDashboard: () => void
@@ -29,6 +30,7 @@ interface Props {
 export function StoryDetail({
   characterServices,
   onDeleted,
+  onAddCharacter,
   onEditStory,
   onOpenCharacter,
   onOpenDashboard,
@@ -73,6 +75,7 @@ export function StoryDetail({
           errorMessage={errorMessage}
           isDeleting={isDeleting}
           onEditStory={onEditStory}
+          onAddCharacter={onAddCharacter}
           onOpenCharacter={onOpenCharacter}
           onOpenDashboard={onOpenDashboard}
           onOpenDeleteDialog={() => setIsStoryDeleteDialogOpen(true)}

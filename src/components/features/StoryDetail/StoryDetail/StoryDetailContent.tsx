@@ -14,6 +14,7 @@ interface Props {
   readonly characterTitleId: string
   readonly errorMessage?: string
   readonly isDeleting: boolean
+  readonly onAddCharacter: (storyId: string) => void
   readonly onEditStory: (storyId: string) => void
   readonly onOpenCharacter: (storyId: string, characterId: string) => void
   readonly onOpenDashboard: () => void
@@ -27,6 +28,7 @@ export function StoryDetailContent({
   characterTitleId,
   errorMessage,
   isDeleting,
+  onAddCharacter,
   onEditStory,
   onOpenCharacter,
   onOpenDashboard,
@@ -66,6 +68,7 @@ export function StoryDetailContent({
 
       <CharacterSection
         characterDialog={characterDialog}
+        onAddCharacter={() => onAddCharacter(story.id)}
         onOpenCharacter={(characterId) => onOpenCharacter(story.id, characterId)}
         titleId={characterTitleId}
       />

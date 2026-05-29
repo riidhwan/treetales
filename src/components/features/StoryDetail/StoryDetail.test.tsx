@@ -118,6 +118,7 @@ function createCharacterServices(
 function renderDetail({
   characterServices = createCharacterServices([]),
   onDeleted = vi.fn(),
+  onAddCharacter = vi.fn(),
   onEditStory = vi.fn(),
   onOpenCharacter = vi.fn(),
   onOpenDashboard = vi.fn(),
@@ -126,6 +127,7 @@ function renderDetail({
 }: {
   readonly characterServices?: ReturnType<typeof createCharacterServices>
   readonly onDeleted?: () => void
+  readonly onAddCharacter?: (storyId: string) => void
   readonly onEditStory?: (storyId: string) => void
   readonly onOpenCharacter?: (storyId: string, characterId: string) => void
   readonly onOpenDashboard?: () => void
@@ -136,6 +138,7 @@ function renderDetail({
     <StoryDetail
       characterServices={characterServices}
       onDeleted={onDeleted}
+      onAddCharacter={onAddCharacter}
       onEditStory={onEditStory}
       onOpenCharacter={onOpenCharacter}
       onOpenDashboard={onOpenDashboard}
@@ -265,126 +268,16 @@ describe('StoryDetail', () => {
     expect(onOpenCharacter).toHaveBeenCalledWith('story-1', 'character-1')
   })
 
-  it('creates a character from the story detail dialog', async () => {
-    const characterServices = createCharacterServices([])
+  it('opens the Character creation page from Add Character', async () => {
+    const onAddCharacter = vi.fn()
 
-    renderDetail({ characterServices })
+    renderDetail({ onAddCharacter })
 
     await screen.findByText('Characters')
     fireEvent.click(screen.getByRole('button', { name: /add character/i }))
-    fireEvent.change(screen.getByLabelText('Name'), {
-      target: { value: ' Mira ' },
-    })
-    fireEvent.click(screen.getByRole('button', { name: /add property/i }))
-    fireEvent.change(screen.getByLabelText('Key'), {
-      target: { value: ' age ' },
-    })
-    fireEvent.change(screen.getByLabelText('Value'), {
-      target: { value: ' 32 ' },
-    })
-    const characterForm = screen.getByLabelText('Name').closest('form')
 
-    if (!characterForm) {
-      throw new Error('Character form was not found.')
-    }
-
-    fireEvent.submit(characterForm)
-
-    await waitFor(() => {
-      expect(characterServices.createCharacter).toHaveBeenCalledWith({
-        storyId: 'story-1',
-        name: 'Mira',
-        gender: 'female',
-        properties: [{ key: 'age', value: '32' }],
-      })
-    })
-    expect(await screen.findByRole('dialog', { name: 'Mira' })).toBeTruthy()
+    expect(onAddCharacter).toHaveBeenCalledWith('story-1')
   })
-
-  it('shows character creation failures inside the open dialog', async () => {
-    const characterServices = {
-      ...createCharacterServices([]),
-      createCharacter: vi.fn(() =>
-        Promise.reject(new Error('Could not create character.')),
-      ),
-    }
-
-    renderDetail({ characterServices })
-
-    await screen.findByText('Characters')
-    fireEvent.click(screen.getByRole('button', { name: /add character/i }))
-    const dialog = screen.getByRole('dialog', { name: 'Add Character' })
-    fireEvent.change(within(dialog).getByLabelText('Name'), {
-      target: { value: 'Mira' },
-    })
-    fireEvent.click(within(dialog).getByRole('button', { name: /^save$/i }))
-
-    expect((await within(dialog).findByRole('alert')).textContent).toBe(
-      'Could not create character.',
-    )
-  })
-
-  it('confirms before discarding unsaved character creation', async () => {
-    renderDetail()
-
-    await screen.findByText('Characters')
-    fireEvent.click(screen.getByRole('button', { name: /add character/i }))
-    fireEvent.change(screen.getByLabelText('Name'), {
-      target: { value: 'Mira' },
-    })
-    fireEvent.click(screen.getByRole('button', { name: /cancel/i }))
-
-    const confirmation = await screen.findByRole('dialog', {
-      name: 'Discard Character Changes?',
-    })
-    expect(confirmation.textContent).toContain(
-      'Discard unsaved character changes?',
-    )
-    fireEvent.click(
-      within(confirmation).getByRole('button', { name: /discard changes/i }),
-    )
-
-    expect(screen.queryByRole('dialog')).toBeNull()
-  })
-
-  it('supports character view dialog edit and delete actions', async () => {
-    const characterServices = createCharacterServices([])
-    const pendingDelete = deferred<boolean>()
-    vi.mocked(characterServices.deleteCharacter).mockReturnValueOnce(
-      pendingDelete.promise,
-    )
-
-    renderDetail({ characterServices })
-
-    await screen.findByText('Characters')
-    fireEvent.click(screen.getByRole('button', { name: /add character/i }))
-    fireEvent.change(screen.getByLabelText('Name'), {
-      target: { value: 'Mira' },
-    })
-    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
-    const dialog = await screen.findByRole('dialog', { name: 'Mira' })
-
-    fireEvent.click(within(dialog).getByRole('button', { name: /^edit$/i }))
-    expect(screen.getByRole('dialog', { name: 'Edit Mira' })).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
-    const updatedDialog = await screen.findByRole('dialog', { name: 'Mira' })
-    fireEvent.click(within(updatedDialog).getByRole('button', { name: /delete/i }))
-    const confirmation = await screen.findByRole('dialog', {
-      name: 'Delete Character?',
-    })
-    fireEvent.click(
-      within(confirmation).getByRole('button', { name: /delete character/i }),
-    )
-    expect(within(confirmation).getByRole('button', { name: /deleting/i }))
-      .toBeTruthy()
-
-    pendingDelete.resolve(true)
-    await waitFor(() => {
-      expect(characterServices.deleteCharacter).toHaveBeenCalledWith(
-        'character-created',
-      )
-    })
-  }, 10_000)
 
   it('opens the story editor from an empty description affordance', async () => {
     const onEditStory = vi.fn()
@@ -550,6 +443,7 @@ describe('StoryDetail', () => {
         characterDialog={{} as ReturnType<typeof useStoryCharacters>}
         characterTitleId="characters-title"
         isDeleting={false}
+        onAddCharacter={vi.fn()}
         onEditStory={vi.fn()}
         onOpenCharacter={vi.fn()}
         onOpenDashboard={vi.fn()}
