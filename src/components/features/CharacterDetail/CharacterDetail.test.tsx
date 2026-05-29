@@ -21,7 +21,6 @@ import type {
   ImportCharacterIllustrationInput,
   Story,
   UpdateCharacterIllustrationInput,
-  UpdateCharacterInput,
 } from '@/services/types'
 
 function createStory(overrides: Partial<Story> = {}): Story {
@@ -126,19 +125,6 @@ function createServices(options: {
         return Promise.resolve(illustration)
       },
     ),
-    updateCharacter: vi.fn((id: string, input: UpdateCharacterInput) => {
-      if (!currentCharacter || currentCharacter.id !== id) {
-        return Promise.resolve(undefined)
-      }
-
-      currentCharacter = {
-        ...currentCharacter,
-        ...input,
-        updatedAt: 200,
-      }
-
-      return Promise.resolve(currentCharacter)
-    }),
     updateCharacterIllustration: vi.fn(
       (id: string, input: UpdateCharacterIllustrationInput) => {
         const illustration = currentIllustrations.find((item) => item.id === id)
@@ -164,15 +150,18 @@ function createServices(options: {
 
 function renderCharacterDetail({
   onBackToStory = vi.fn(),
+  onEditCharacter = vi.fn(),
   services = createServices(),
 }: {
   readonly onBackToStory?: (storyId: string) => void
+  readonly onEditCharacter?: (storyId: string, characterId: string) => void
   readonly services?: CharacterDetailServices
 } = {}) {
   return render(
     <CharacterDetail
       characterId="character-1"
       onBackToStory={onBackToStory}
+      onEditCharacter={onEditCharacter}
       services={services}
       storyId="story-1"
     />,
@@ -190,18 +179,13 @@ function createCharacterDetailView(
 
   return {
     activeIllustrationActionId: undefined,
-    addProperty: vi.fn(),
-    beginEdit: vi.fn(),
     cancelConfirmation: vi.fn(),
     canImportIllustration: true,
     character: createCharacter(),
     confirmDeleteCharacter: vi.fn(),
     confirmDeleteIllustration: vi.fn(),
-    confirmDiscardChanges: vi.fn(),
     confirmationState: { mode: 'closed' },
-    draft: { gender: 'female', name: 'Mira', properties: [] },
     errorMessage: undefined,
-    hasUnsavedChanges: false,
     illustrationErrorMessage: undefined,
     illustrationFile: undefined,
     illustrationImportLabel: '',
@@ -211,27 +195,18 @@ function createCharacterDetailView(
     illustrations: [{ illustration, imageUrl: undefined }],
     importIllustration: vi.fn(),
     isDeleting: false,
-    isEditing: false,
     isImportingIllustration: false,
     isLoadingIllustrations: false,
-    isSaving: false,
     moveIllustration: vi.fn(),
-    moveProperty: vi.fn(),
-    removeProperty: vi.fn(),
-    requestCancelEdit: vi.fn(),
     requestDeleteCharacter: vi.fn(),
     requestDeleteIllustration: vi.fn(),
-    saveCharacter: vi.fn(),
     saveIllustrationLabel: vi.fn(),
-    setGender: vi.fn(),
     setIllustrationFile: vi.fn(),
     setIllustrationImportLabel: vi.fn(),
     setIllustrationImportMode: vi.fn(),
     setIllustrationLabelDraft: vi.fn(),
-    setName: vi.fn(),
     status: 'ready',
     story: createStory(),
-    updateProperty: vi.fn(),
     ...overrides,
   }
 }
@@ -253,21 +228,24 @@ describe('CharacterDetail', () => {
   it('loads the story and character for a direct URL view', async () => {
     const services = createServices()
     const onBackToStory = vi.fn()
+    const onEditCharacter = vi.fn()
 
-    renderCharacterDetail({ onBackToStory, services })
+    renderCharacterDetail({ onBackToStory, onEditCharacter, services })
 
     expect(await screen.findByRole('heading', { name: 'Mira' })).toBeTruthy()
     expect(screen.getByText('The Old Road')).toBeTruthy()
     expect(screen.getByText(/A long history\s+with line breaks/)).toBeTruthy()
     expect(screen.getByText('relationship')).toBeTruthy()
     expect(screen.queryByText('Custom properties')).toBeNull()
-    expect(
-      within(
-        screen.getByRole('navigation', { name: 'Character detail navigation' }),
-      ).getByRole('button', { name: /^edit$/i }),
-    ).toBeTruthy()
+    const editButton = within(
+      screen.getByRole('navigation', { name: 'Character detail navigation' }),
+    ).getByRole('button', { name: /^edit$/i })
+    expect(editButton).toBeTruthy()
     expect(services.getStoryById).toHaveBeenCalledWith('story-1')
     expect(services.getCharacterById).toHaveBeenCalledWith('character-1')
+
+    fireEvent.click(editButton)
+    expect(onEditCharacter).toHaveBeenCalledWith('story-1', 'character-1')
 
     fireEvent.click(screen.getByRole('button', { name: 'Story Detail' }))
 
@@ -282,6 +260,7 @@ describe('CharacterDetail', () => {
       <CharacterDetail
         characterId="character-1"
         onBackToStory={vi.fn()}
+        onEditCharacter={vi.fn()}
         services={services}
         storyId="story-1"
       />,
@@ -299,6 +278,7 @@ describe('CharacterDetail', () => {
       <CharacterDetail
         characterId="character-1"
         onBackToStory={vi.fn()}
+        onEditCharacter={vi.fn()}
         services={failingServices}
         storyId="story-1"
       />,
@@ -328,11 +308,9 @@ describe('CharacterDetail', () => {
       <CharacterDetailContent
         characterDetail={
           {
-            beginEdit: vi.fn(),
             character: createCharacter(),
             illustrationLabelDrafts: {},
             illustrations: [],
-            isEditing: false,
             status: 'ready',
             story: undefined,
           } as unknown as ReturnType<typeof useCharacterDetail>
@@ -403,6 +381,7 @@ describe('CharacterDetail', () => {
       <CharacterDetail
         characterId="character-1"
         onBackToStory={vi.fn()}
+        onEditCharacter={vi.fn()}
         services={missingStoryServices}
         storyId="story-1"
       />,
@@ -419,117 +398,13 @@ describe('CharacterDetail', () => {
       <CharacterDetail
         characterId="character-1"
         onBackToStory={vi.fn()}
+        onEditCharacter={vi.fn()}
         services={missingCharacterServices}
         storyId="story-1"
       />,
     )
 
     expect(await screen.findByText('Character could not be found.')).toBeTruthy()
-  })
-
-  it(
-    'edits character fields and preserves ordered property behavior',
-    async () => {
-      const services = createServices()
-
-      renderCharacterDetail({ services })
-
-      await screen.findByRole('heading', { name: 'Mira' })
-      fireEvent.click(screen.getByRole('button', { name: /^edit$/i }))
-      fireEvent.change(screen.getByLabelText('Name'), {
-        target: { value: 'Mira Changed' },
-      })
-      fireEvent.change(screen.getByLabelText('Gender'), {
-        target: { value: 'male' },
-      })
-      fireEvent.click(screen.getByRole('button', { name: /add property/i }))
-      const keys = screen.getAllByLabelText('Key')
-      const values = screen.getAllByLabelText('Value')
-      fireEvent.change(keys[keys.length - 1], {
-        target: { value: ' empty value ' },
-      })
-      fireEvent.change(values[values.length - 1], {
-        target: { value: ' trimmed ' },
-      })
-      fireEvent.click(screen.getByRole('button', { name: /move age down/i }))
-      fireEvent.click(
-        screen.getByRole('button', { name: /move appearance up/i }),
-      )
-      fireEvent.click(screen.getAllByRole('button', { name: /remove/i })[0])
-      const characterForm = screen.getByLabelText('Name').closest('form')
-
-      if (!characterForm) {
-        throw new Error('Character form was not found.')
-      }
-
-      fireEvent.submit(characterForm)
-
-      await waitFor(() => {
-        expect(services.updateCharacter).toHaveBeenCalledWith(
-          'character-1',
-          expect.objectContaining({
-            gender: 'male',
-            name: 'Mira Changed',
-            properties: [
-              { key: 'appearance', value: 'Silver hair' },
-              { key: 'age', value: '32' },
-              { key: 'relationship', value: 'Sister of Rowan' },
-              { key: 'empty value', value: 'trimmed' },
-            ],
-          }),
-        )
-      })
-      expect(await screen.findByRole('heading', { name: 'Mira Changed' }))
-        .toBeTruthy()
-    },
-    10_000,
-  )
-
-  it('saves edits from the top bar save action', async () => {
-    const services = createServices()
-
-    renderCharacterDetail({ services })
-
-    await screen.findByRole('heading', { name: 'Mira' })
-    const navigation = screen.getByRole('navigation', {
-      name: 'Character detail navigation',
-    })
-    fireEvent.click(within(navigation).getByRole('button', { name: /^edit$/i }))
-    fireEvent.change(screen.getByLabelText('Name'), {
-      target: { value: 'Header Save' },
-    })
-    fireEvent.click(within(navigation).getByRole('button', { name: /^save$/i }))
-
-    await waitFor(() => {
-      expect(services.updateCharacter).toHaveBeenCalledWith(
-        'character-1',
-        expect.objectContaining({ name: 'Header Save' }),
-      )
-    })
-  })
-
-  it('confirms before discarding unsaved character edits', async () => {
-    renderCharacterDetail()
-
-    await screen.findByRole('heading', { name: 'Mira' })
-    fireEvent.click(screen.getByRole('button', { name: /^edit$/i }))
-    fireEvent.change(screen.getByLabelText('Name'), {
-      target: { value: 'Mira Changed' },
-    })
-    fireEvent.click(screen.getByRole('button', { name: /cancel/i }))
-
-    const confirmation = await screen.findByRole('dialog', {
-      name: 'Discard Character Changes?',
-    })
-    expect(confirmation.textContent).toContain(
-      'Discard unsaved character changes?',
-    )
-    fireEvent.click(
-      within(confirmation).getByRole('button', { name: /discard changes/i }),
-    )
-
-    expect(screen.queryByLabelText('Name')).toBeNull()
-    expect(screen.getByRole('heading', { name: 'Mira' })).toBeTruthy()
   })
 
   it('confirms deletion and returns to the owning story detail page', async () => {
@@ -539,9 +414,6 @@ describe('CharacterDetail', () => {
     renderCharacterDetail({ onBackToStory, services })
 
     await screen.findByRole('heading', { name: 'Mira' })
-    expect(screen.queryByRole('button', { name: /delete character/i })).toBeNull()
-
-    fireEvent.click(screen.getByRole('button', { name: /^edit$/i }))
     expect(screen.getByText('Danger Zone')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: /delete character/i }))
     const confirmation = await screen.findByRole('dialog', {

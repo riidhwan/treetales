@@ -1,8 +1,7 @@
 import { useId, type ReactNode } from 'react'
-import { Edit3, Save } from 'lucide-react'
+import { Edit3 } from 'lucide-react'
 
 import { ManagementTopBar } from '@/components/features/shared/ManagementTopBar'
-import { Button } from '@/components/ui/Button'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 import { IconButton } from '@/components/ui/IconButton'
 import { commonCopy, storyDetailCopy } from '@/copy'
@@ -16,6 +15,7 @@ import { CharacterDetailContent } from './CharacterDetail/CharacterDetailContent
 interface Props {
   readonly characterId: string
   readonly onBackToStory: (storyId: string) => void
+  readonly onEditCharacter: (storyId: string, characterId: string) => void
   readonly services?: CharacterDetailServices
   readonly storyId: string
 }
@@ -23,6 +23,7 @@ interface Props {
 export function CharacterDetail({
   characterId,
   onBackToStory,
+  onEditCharacter,
   services,
   storyId,
 }: Props) {
@@ -38,7 +39,11 @@ export function CharacterDetail({
   return (
     <main className="min-h-screen bg-background-app text-text-primary">
       <ManagementTopBar
-        actions={renderCharacterDetailTopBarActions(characterDetail)}
+        actions={renderCharacterDetailTopBarActions({
+          characterDetail,
+          onEditCharacter,
+          storyId,
+        })}
         label={storyDetailCopy.characterDetail.navigationLabel}
         onBack={() => onBackToStory(storyId)}
         previousLabel={storyDetailCopy.characterDetail.backToStory}
@@ -71,18 +76,6 @@ export function CharacterDetail({
         />
       ) : null}
 
-      {characterDetail.confirmationState.mode === 'discard-changes' ? (
-        <ConfirmationDialog
-          confirmLabel={storyDetailCopy.actions.discardChanges}
-          message={storyDetailCopy.character.discardDialog.message}
-          onCancel={characterDetail.cancelConfirmation}
-          onConfirm={characterDetail.confirmDiscardChanges}
-          title={storyDetailCopy.character.discardDialog.title}
-          titleId={confirmationTitleId}
-          variant="danger"
-        />
-      ) : null}
-
       {characterDetail.confirmationState.mode === 'delete-illustration' ? (
         <ConfirmationDialog
           confirmLabel={storyDetailCopy.actions.deleteIllustration}
@@ -101,43 +94,28 @@ export function CharacterDetail({
   )
 }
 
-function renderCharacterDetailTopBarActions(
-  characterDetail: ReturnType<typeof useCharacterDetail>,
-): ReactNode {
+function renderCharacterDetailTopBarActions({
+  characterDetail,
+  onEditCharacter,
+  storyId,
+}: {
+  readonly characterDetail: ReturnType<typeof useCharacterDetail>
+  readonly onEditCharacter: (storyId: string, characterId: string) => void
+  readonly storyId: string
+}): ReactNode {
   if (characterDetail.status !== 'ready' || !characterDetail.character) {
     return null
   }
 
-  if (!characterDetail.isEditing) {
-    return (
-      <IconButton
-        label={commonCopy.actions.edit}
-        onClick={characterDetail.beginEdit}
-        variant="ghost"
-      >
-        <Edit3 aria-hidden="true" size={18} />
-      </IconButton>
-    )
-  }
+  const { character } = characterDetail
 
   return (
-    <>
-      <Button onClick={characterDetail.requestCancelEdit}>
-        {commonCopy.actions.cancel}
-      </Button>
-      <Button
-        disabled={
-          characterDetail.draft.name.trim().length === 0 ||
-          characterDetail.isSaving
-        }
-        onClick={() => void characterDetail.saveCharacter()}
-        variant="primary"
-      >
-        <Save aria-hidden="true" size={18} />
-        {characterDetail.isSaving
-          ? commonCopy.actions.saving
-          : commonCopy.actions.save}
-      </Button>
-    </>
+    <IconButton
+      label={commonCopy.actions.edit}
+      onClick={() => onEditCharacter(storyId, character.id)}
+      variant="ghost"
+    >
+      <Edit3 aria-hidden="true" size={18} />
+    </IconButton>
   )
 }

@@ -11,7 +11,6 @@ import type {
   ImportCharacterIllustrationInput,
   Story,
   UpdateCharacterIllustrationInput,
-  UpdateCharacterInput,
 } from '@/services/types'
 
 let createObjectUrlMock: ReturnType<typeof vi.fn>
@@ -114,19 +113,6 @@ function createServices(options: {
         return Promise.resolve(illustration)
       },
     ),
-    updateCharacter: vi.fn((id: string, input: UpdateCharacterInput) => {
-      if (!currentCharacter || currentCharacter.id !== id) {
-        return Promise.resolve(undefined)
-      }
-
-      currentCharacter = {
-        ...currentCharacter,
-        ...input,
-        updatedAt: 200,
-      }
-
-      return Promise.resolve(currentCharacter)
-    }),
     updateCharacterIllustration: vi.fn(
       (id: string, input: UpdateCharacterIllustrationInput) => {
         const illustration = currentIllustrations.find((item) => item.id === id)
@@ -350,12 +336,9 @@ describe('useCharacterDetail', () => {
     })
 
     act(() => {
-      result.current.beginEdit()
-      result.current.confirmDiscardChanges()
       result.current.requestDeleteCharacter()
     })
     await act(async () => {
-      await result.current.saveCharacter()
       await result.current.confirmDeleteCharacter()
       result.current.setIllustrationFile(new File(['image'], 'mira.png'))
       await result.current.importIllustration()
@@ -364,43 +347,16 @@ describe('useCharacterDetail', () => {
       await result.current.moveIllustration('missing-illustration', 1)
     })
 
-    expect(services.updateCharacter).not.toHaveBeenCalled()
     expect(services.deleteCharacter).not.toHaveBeenCalled()
     expect(services.importCharacterIllustration).not.toHaveBeenCalled()
     expect(services.updateCharacterIllustration).not.toHaveBeenCalled()
     expect(onDeleted).not.toHaveBeenCalled()
   })
 
-  it('cancels unchanged edits without confirmation and ignores invalid moves', async () => {
-    const services = createServices()
-    const { result } = renderHook(() =>
-      useCharacterDetail({
-        characterId: 'character-1',
-        onDeleted: vi.fn(),
-        services,
-        storyId: 'story-1',
-      }),
-    )
-
-    await waitFor(() => {
-      expect(result.current.status).toBe('ready')
-    })
-
-    act(() => {
-      result.current.beginEdit()
-      result.current.moveProperty('missing-property', 1)
-      result.current.requestCancelEdit()
-    })
-
-    expect(result.current.isEditing).toBe(false)
-    expect(result.current.confirmationState.mode).toBe('closed')
-  })
-
-  it('handles update and delete failures', async () => {
+  it('handles delete failures', async () => {
     const services = {
       ...createServices(),
       deleteCharacter: vi.fn(() => Promise.reject(new Error('Delete failed.'))),
-      updateCharacter: vi.fn(() => Promise.reject(new Error('Update failed.'))),
     }
     const { result } = renderHook(() =>
       useCharacterDetail({
@@ -414,16 +370,6 @@ describe('useCharacterDetail', () => {
     await waitFor(() => {
       expect(result.current.status).toBe('ready')
     })
-
-    act(() => {
-      result.current.beginEdit()
-      result.current.setName('Changed')
-    })
-    await act(async () => {
-      await result.current.saveCharacter()
-    })
-
-    expect(result.current.errorMessage).toBe('Update failed.')
 
     act(() => {
       result.current.requestDeleteCharacter()
@@ -435,11 +381,10 @@ describe('useCharacterDetail', () => {
     expect(result.current.errorMessage).toBe('Delete failed.')
   })
 
-  it('shows missing character when update or delete cannot find the character', async () => {
+  it('shows missing character when delete cannot find the character', async () => {
     const services = {
       ...createServices(),
       deleteCharacter: vi.fn(() => Promise.resolve(false)),
-      updateCharacter: vi.fn(() => Promise.resolve(undefined)),
     }
     const { result } = renderHook(() =>
       useCharacterDetail({
@@ -453,16 +398,6 @@ describe('useCharacterDetail', () => {
     await waitFor(() => {
       expect(result.current.status).toBe('ready')
     })
-
-    act(() => {
-      result.current.beginEdit()
-      result.current.setName('Changed')
-    })
-    await act(async () => {
-      await result.current.saveCharacter()
-    })
-
-    expect(result.current.status).toBe('missing-character')
 
     act(() => {
       result.current.requestDeleteCharacter()
