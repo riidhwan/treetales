@@ -9,6 +9,9 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { CharacterCreator } from '@/components/features/CharacterCreator'
+import { CharacterCreatorContent } from '@/components/features/CharacterCreator/CharacterCreatorContent'
+import { createEmptyCharacterDraft } from '@/hooks/useCharacterForm'
+import type { useCharacterCreator } from '@/hooks/useCharacterCreator'
 import type { Character, CreateCharacterInput, Story } from '@/services/types'
 import type { CharacterCreatorServices } from '@/hooks/useCharacterCreator'
 
@@ -68,6 +71,28 @@ function renderCharacterCreator({
   )
 }
 
+function createReadyCharacterCreator(
+  overrides: Partial<ReturnType<typeof useCharacterCreator>> = {},
+): ReturnType<typeof useCharacterCreator> {
+  return {
+    addProperty: vi.fn(),
+    canSave: false,
+    draft: createEmptyCharacterDraft(),
+    errorMessage: undefined,
+    hasUnsavedChanges: false,
+    isSaving: false,
+    moveProperty: vi.fn(),
+    removeProperty: vi.fn(),
+    saveCharacter: vi.fn(),
+    setGender: vi.fn(),
+    setName: vi.fn(),
+    status: 'ready',
+    story: createStory(),
+    updateProperty: vi.fn(),
+    ...overrides,
+  }
+}
+
 describe('CharacterCreator', () => {
   afterEach(() => {
     cleanup()
@@ -82,6 +107,18 @@ describe('CharacterCreator', () => {
     expect(screen.getByText('The Old Road')).toBeTruthy()
     expect(screen.getByLabelText('Name')).toBeTruthy()
     expect(screen.getByLabelText('Gender')).toBeTruthy()
+  })
+
+  it('uses generic story context when the ready state has no story title', () => {
+    render(
+      <CharacterCreatorContent
+        characterCreator={createReadyCharacterCreator({ story: undefined })}
+        titleId="character-creator-title"
+      />,
+    )
+
+    expect(screen.getByText('Story')).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Add Character' })).toBeTruthy()
   })
 
   it('shows missing story state', async () => {

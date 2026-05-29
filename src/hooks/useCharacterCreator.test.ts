@@ -44,6 +44,17 @@ function createServices(options: {
   }
 }
 
+function deferred<TValue>() {
+  let resolve!: (value: TValue) => void
+  let reject!: (reason: unknown) => void
+  const promise = new Promise<TValue>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise
+    reject = rejectPromise
+  })
+
+  return { promise, reject, resolve }
+}
+
 describe('useCharacterCreator', () => {
   afterEach(() => {
     cleanup()
@@ -99,6 +110,50 @@ describe('useCharacterCreator', () => {
       expect(result.current.status).toBe('error')
     })
     expect(result.current.errorMessage).toBe('Could not load.')
+  })
+
+  it('ignores stale story loads after cleanup', async () => {
+    const pendingStory = deferred<Story | undefined>()
+    const services = {
+      ...createServices(),
+      getStoryById: vi.fn(() => pendingStory.promise),
+    }
+    const { unmount } = renderHook(() =>
+      useCharacterCreator({
+        onCreated: vi.fn(),
+        services,
+        storyId: 'story-1',
+      }),
+    )
+
+    unmount()
+
+    await act(async () => {
+      pendingStory.resolve(createStory())
+      await pendingStory.promise
+    })
+
+    expect(services.getStoryById).toHaveBeenCalledWith('story-1')
+  })
+
+  it('ignores stale story load failures after cleanup', async () => {
+    const pendingStory = deferred<Story | undefined>()
+    const services = {
+      ...createServices(),
+      getStoryById: vi.fn(() => pendingStory.promise),
+    }
+    const { unmount } = renderHook(() =>
+      useCharacterCreator({
+        onCreated: vi.fn(),
+        services,
+        storyId: 'story-1',
+      }),
+    )
+
+    unmount()
+
+    pendingStory.reject(new Error('Late failure.'))
+    await expect(pendingStory.promise).rejects.toThrow('Late failure.')
   })
 
   it('does not save before the draft is valid', async () => {
