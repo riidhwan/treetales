@@ -40,16 +40,29 @@
   remaining-count indicator.
 - Selecting a Character card opens a dedicated Character detail page with the
   full plain-text custom property values.
-- Story detail lets users create, edit, and delete Characters from dialogs.
-  Create and edit require a non-empty name, support gender selection, and let
-  users add, remove, and reorder custom properties.
+- Story detail remains the overview of Story-level Characters. Its Add
+  Character action opens a dedicated Character creation page rather than a
+  dialog.
+- Story detail does not provide Character create, edit, view, or delete
+  dialogs. Character actions from Story detail navigate to route-backed
+  Character pages.
+- Character creation and Character editing use route-backed full-page
+  Management Mode forms with the same field experience. The forms require a
+  non-empty name, support gender selection, and let users add, remove, and
+  reorder custom properties.
+- After Character creation, TreeTales opens the new Character detail page.
+- Editing an existing Character opens a dedicated Character edit page from the
+  Character detail page. Saving or cancelling returns to Character detail, with
+  confirmation before discarding unsaved changes.
+- Cancelling Character creation returns to Story detail, with confirmation
+  before discarding unsaved changes.
 - The Character detail page lets users add multiple Character Illustrations to
   a Character. Character Illustrations are images associated with the Character
   and are not treated as thumbnails, avatars, portraits, or character-only
   crops.
-- Story detail remains the overview and Character creation entry point. Editing
-  and deleting an existing Character belong on the dedicated Character detail
-  page once that page exists.
+- Character Illustrations can be added only after the Character has been saved.
+- Editing and deleting an existing Character belong on the dedicated Character
+  detail page.
 - Each Character Illustration can have an optional short label so users can
   distinguish related images for the same Character.
 - Character Illustrations have a user-controlled order. Newly added
@@ -79,8 +92,9 @@
 - Original-quality Character Illustration imports reject files over 15 MB.
 - Character Illustrations are viewed and managed from the Character detail page
   in the MVP. They are not shown in Story Reader.
-- Leaving a Character create or edit dialog with unsaved changes asks for
-  confirmation before discarding the draft.
+- Leaving a Character create or edit page with unsaved changes asks for
+  confirmation before discarding the draft. Browser refresh or close also warns
+  while unsaved Character form changes exist.
 - Character delete asks for confirmation before removing the Character.
 - Deleting a Character also removes that Character's Character Illustrations.
 - Deleting a Story also removes all Character Illustrations that belong to
