@@ -1,16 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import {
-  createCharacterDraftFromCharacter,
-  createCharacterUpdateInput,
-  useCharacterForm,
-} from '@/hooks/useCharacterForm'
 import { getErrorMessage } from '@/lib/errors'
-import {
-  deleteCharacter,
-  getCharacterById,
-  updateCharacter,
-} from '@/services/characterService'
+import { deleteCharacter, getCharacterById } from '@/services/characterService'
 import {
   deleteCharacterIllustration,
   getCharacterIllustrationFile,
@@ -25,11 +16,8 @@ import type {
   CharacterIllustrationImportMode,
   ImportCharacterIllustrationInput,
   Story,
-  UpdateCharacterInput,
   UpdateCharacterIllustrationInput,
 } from '@/services/types'
-
-export type { CharacterFormDraft } from '@/hooks/useCharacterForm'
 
 export interface CharacterIllustrationView {
   readonly illustration: CharacterIllustration
@@ -47,7 +35,6 @@ type CharacterDetailConfirmationState =
   | { readonly mode: 'closed' }
   | { readonly mode: 'delete-character' }
   | { readonly illustrationId: string; readonly mode: 'delete-illustration' }
-  | { readonly mode: 'discard-changes' }
 
 export interface CharacterDetailServices {
   readonly deleteCharacter: (id: string) => Promise<boolean>
@@ -63,10 +50,6 @@ export interface CharacterDetailServices {
   readonly importCharacterIllustration: (
     input: ImportCharacterIllustrationInput,
   ) => Promise<CharacterIllustration>
-  readonly updateCharacter: (
-    id: string,
-    input: UpdateCharacterInput,
-  ) => Promise<Character | undefined>
   readonly updateCharacterIllustration: (
     id: string,
     input: UpdateCharacterIllustrationInput,
@@ -81,7 +64,6 @@ export const DEFAULT_CHARACTER_DETAIL_SERVICES: CharacterDetailServices = {
   getCharacterIllustrationsByCharacterId,
   getStoryById,
   importCharacterIllustration,
-  updateCharacter,
   updateCharacterIllustration,
 }
 
@@ -102,8 +84,6 @@ export function useCharacterDetail({
   const [story, setStory] = useState<Story | undefined>()
   const [character, setCharacter] = useState<Character | undefined>()
   const [errorMessage, setErrorMessage] = useState<string | undefined>()
-  const [isEditing, setIsEditing] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [illustrations, setIllustrations] = useState<CharacterIllustrationView[]>(
     [],
@@ -131,7 +111,6 @@ export function useCharacterDetail({
   const [confirmationState, setConfirmationState] =
     useState<CharacterDetailConfirmationState>({ mode: 'closed' })
   const illustrationObjectUrlsRef = useRef<string[]>([])
-  const characterForm = useCharacterForm({ isActive: isEditing })
 
   const canImportIllustration = useMemo(
     () => Boolean(character && illustrationFile) && !isImportingIllustration,
@@ -149,7 +128,6 @@ export function useCharacterDetail({
       setIllustrations([])
       setIllustrationLabelDrafts({})
       setIllustrationErrorMessage(undefined)
-      setIsEditing(false)
       setConfirmationState({ mode: 'closed' })
       revokeIllustrationObjectUrls()
 
@@ -177,7 +155,6 @@ export function useCharacterDetail({
           return
         }
 
-        const nextDraft = createCharacterDraftFromCharacter(loadedCharacter)
         const loadedIllustrations = await loadIllustrationViews(
           services,
           loadedCharacter.id,
@@ -197,7 +174,6 @@ export function useCharacterDetail({
         setIllustrationLabelDrafts(
           createIllustrationLabelDrafts(loadedIllustrations.views),
         )
-        characterForm.resetDraft(nextDraft)
         setStatus('ready')
       } catch (error) {
         if (isCurrent) {
@@ -215,42 +191,8 @@ export function useCharacterDetail({
     }
   }, [characterId, services, storyId])
 
-  function beginEdit() {
-    if (!character) {
-      return
-    }
-
-    const nextDraft = createCharacterDraftFromCharacter(character)
-    characterForm.resetDraft(nextDraft)
-    setErrorMessage(undefined)
-    setIsEditing(true)
-  }
-
-  function requestCancelEdit() {
-    if (characterForm.hasUnsavedChanges) {
-      setConfirmationState({ mode: 'discard-changes' })
-      return
-    }
-
-    cancelEditWithoutConfirmation()
-  }
-
-  function cancelEditWithoutConfirmation() {
-    if (character) {
-      const nextDraft = createCharacterDraftFromCharacter(character)
-      characterForm.resetDraft(nextDraft)
-    }
-
-    setConfirmationState({ mode: 'closed' })
-    setIsEditing(false)
-  }
-
   function cancelConfirmation() {
     setConfirmationState({ mode: 'closed' })
-  }
-
-  function confirmDiscardChanges() {
-    cancelEditWithoutConfirmation()
   }
 
   function setIllustrationFile(file: File | undefined) {
@@ -270,37 +212,6 @@ export function useCharacterDetail({
       ...currentDrafts,
       [illustrationId]: label,
     }))
-  }
-
-  async function saveCharacter() {
-    if (!isEditing || !character || !characterForm.canSave) {
-      return
-    }
-
-    setIsSaving(true)
-    setErrorMessage(undefined)
-
-    try {
-      const updatedCharacter = await services.updateCharacter(
-        character.id,
-        createCharacterUpdateInput(characterForm.draft),
-      )
-
-      if (!updatedCharacter || updatedCharacter.storyId !== storyId) {
-        setStatus('missing-character')
-        return
-      }
-
-      const nextDraft = createCharacterDraftFromCharacter(updatedCharacter)
-      setCharacter(updatedCharacter)
-      characterForm.resetDraft(nextDraft)
-      setIsEditing(false)
-      setStatus('ready')
-    } catch (error) {
-      setErrorMessage(getErrorMessage(error))
-    } finally {
-      setIsSaving(false)
-    }
   }
 
   async function importIllustration() {
@@ -416,18 +327,13 @@ export function useCharacterDetail({
   }
 
   return {
-    addProperty: characterForm.addProperty,
-    beginEdit,
     cancelConfirmation,
     canImportIllustration,
     character,
     confirmDeleteCharacter,
     confirmDeleteIllustration,
-    confirmDiscardChanges,
     confirmationState,
-    draft: characterForm.draft,
     errorMessage,
-    hasUnsavedChanges: characterForm.hasUnsavedChanges,
     activeIllustrationActionId,
     illustrationErrorMessage,
     illustrationFile,
@@ -437,28 +343,19 @@ export function useCharacterDetail({
     illustrationLabelDrafts,
     illustrations,
     isDeleting,
-    isEditing,
     isImportingIllustration,
     isLoadingIllustrations,
-    isSaving,
     importIllustration,
     moveIllustration,
-    moveProperty: characterForm.moveProperty,
-    removeProperty: characterForm.removeProperty,
-    requestCancelEdit,
     requestDeleteCharacter,
     requestDeleteIllustration,
-    saveCharacter,
     saveIllustrationLabel,
-    setGender: characterForm.setGender,
     setIllustrationFile,
     setIllustrationImportLabel,
     setIllustrationImportMode,
     setIllustrationLabelDraft,
-    setName: characterForm.setName,
     status,
     story,
-    updateProperty: characterForm.updateProperty,
   }
 
   async function updateIllustration(

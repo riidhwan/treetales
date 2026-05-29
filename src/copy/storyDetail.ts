@@ -94,6 +94,13 @@ export const storyDetailCopy = {
     loading: 'Loading character...',
     navigationLabel: 'Character detail navigation',
   },
+  characterEditor: {
+    backToCharacter: 'Character Detail',
+    loading: 'Loading character...',
+    navigationLabel: 'Character editing navigation',
+    title: (characterName: string) =>
+      characterName ? `Edit ${characterName}` : 'Edit Character',
+  },
   characterCreator: {
     loading: 'Loading story...',
     navigationLabel: 'Character creation navigation',

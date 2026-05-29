@@ -19,6 +19,15 @@ function CharacterDetailRoute() {
           params: { storyId: selectedStoryId },
         })
       }
+      onEditCharacter={(selectedStoryId, selectedCharacterId) =>
+        void navigate({
+          to: '/stories/$storyId/characters/$characterId/edit',
+          params: {
+            characterId: selectedCharacterId,
+            storyId: selectedStoryId,
+          },
+        })
+      }
       storyId={storyId}
     />
   )
