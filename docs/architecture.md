@@ -166,9 +166,12 @@ specific:
 Hooks depend on the service layer through small service interfaces with default
 implementations. Tests can pass fake services without touching IndexedDB.
 
-Character detail should be a route-backed Management Mode page rather than
-modal-only content before Character Illustrations are added. The page owns the
-expanded Character presentation and provides the stable surface where multiple
+Character creation, Character editing, and Character detail should be
+route-backed Management Mode pages rather than modal-only content. Story detail
+owns the Character overview and route entry points only. Character creation and
+editing share the full-page Character form experience for name, gender, and
+ordered Character Properties. Character detail owns read-only Character
+presentation, Character deletion, and the stable surface where multiple
 Character Illustrations can be managed without implying card thumbnails or
 avatar-style identity images.
 
