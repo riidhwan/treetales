@@ -1,7 +1,7 @@
 import { Trash2 } from 'lucide-react'
 
 import { CharacterDetails } from '@/components/features/StoryDetail/StoryDetail/StoryDetailContent/CharacterSection/CharacterDetails'
-import { CharacterForm } from '@/components/features/StoryDetail/StoryDetail/StoryDetailContent/CharacterSection/CharacterForm'
+import { CharacterForm } from '@/components/features/shared/CharacterForm'
 import { MANAGEMENT_DISPLAY_FONT } from '@/components/features/StoryDetail/StoryDetail/constants'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'

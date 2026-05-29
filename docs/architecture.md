@@ -162,6 +162,8 @@ specific:
 | `useChapterEditor.ts` | Loads one chapter and saves chapter fields |
 | `useChapterCreator.ts` | Loads story or parent chapter context and creates intro chapters or branches from title + content |
 | `useStoryReader.ts` | Loads reader data, resolves the Intro Chapter when no Chapter is selected, tracks the selected chapter, and exposes navigation options |
+| `useCharacterForm.ts` | Owns shared Character form draft state, validation, dirty tracking, and service-input normalization for Character creation and editing workflows |
+| `useCharacterDetail.ts` | Loads Character detail, edits the Character, deletes it, and manages Character Illustration import, label, order, and deletion state |
 
 Hooks depend on the service layer through small service interfaces with default
 implementations. Tests can pass fake services without touching IndexedDB.
