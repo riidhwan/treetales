@@ -69,7 +69,29 @@ Use both relationships when both are true.
 
 ## Current GitHub CLI / API Playbook
 
-As of GitHub CLI 2.83.2, `gh issue` does not provide first-class sub-issue or dependency subcommands. Use `gh api` with the REST issue endpoints.
+As of GitHub CLI 2.83.2, `gh issue` does not provide first-class sub-issue or dependency subcommands. Prefer the scripts in `scripts/` for native relationship work so command approvals can stay narrow and task-shaped. Use raw `gh api` only when a script does not cover the required operation, and keep the raw commands below as reference for script behavior and fallback handling.
+
+Run script paths relative to this skill directory:
+
+```sh
+.agents/skills/github-issues/scripts/issue-id.sh ISSUE_NUMBER
+.agents/skills/github-issues/scripts/list-subissues.sh PARENT_ISSUE_NUMBER
+.agents/skills/github-issues/scripts/get-parent.sh CHILD_ISSUE_NUMBER
+.agents/skills/github-issues/scripts/add-subissue.sh [--replace-parent] PARENT_ISSUE_NUMBER CHILD_ISSUE_NUMBER
+.agents/skills/github-issues/scripts/remove-subissue.sh PARENT_ISSUE_NUMBER CHILD_ISSUE_NUMBER
+.agents/skills/github-issues/scripts/reorder-subissue.sh PARENT_ISSUE_NUMBER CHILD_ISSUE_NUMBER --after|--before SIBLING_ISSUE_NUMBER
+.agents/skills/github-issues/scripts/list-blocked-by.sh ISSUE_NUMBER
+.agents/skills/github-issues/scripts/list-blocking.sh ISSUE_NUMBER
+.agents/skills/github-issues/scripts/add-blocked-by.sh ISSUE_NUMBER BLOCKING_ISSUE_NUMBER
+.agents/skills/github-issues/scripts/remove-blocked-by.sh ISSUE_NUMBER BLOCKING_ISSUE_NUMBER
+```
+
+Script rules:
+
+- Scripts validate issue-number arguments and resolve REST integer IDs internally when needed.
+- Mutation scripts verify the resulting relationship by reading the relevant relationship endpoints.
+- `get-parent.sh` prints `null` when GitHub returns `404`, which means the issue has no native parent.
+- Keep read-only scripts (`issue-id.sh`, `list-*`, `get-parent.sh`) separate from mutation scripts for approval purposes.
 
 Important identifiers:
 
