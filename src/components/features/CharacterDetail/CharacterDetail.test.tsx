@@ -261,6 +261,11 @@ describe('CharacterDetail', () => {
     expect(screen.getByText(/A long history\s+with line breaks/)).toBeTruthy()
     expect(screen.getByText('relationship')).toBeTruthy()
     expect(screen.queryByText('Custom properties')).toBeNull()
+    expect(
+      within(
+        screen.getByRole('navigation', { name: 'Character detail navigation' }),
+      ).getByRole('button', { name: /^edit$/i }),
+    ).toBeTruthy()
     expect(services.getStoryById).toHaveBeenCalledWith('story-1')
     expect(services.getCharacterById).toHaveBeenCalledWith('character-1')
 
@@ -480,17 +485,20 @@ describe('CharacterDetail', () => {
     10_000,
   )
 
-  it('saves edits from the header save action', async () => {
+  it('saves edits from the top bar save action', async () => {
     const services = createServices()
 
     renderCharacterDetail({ services })
 
     await screen.findByRole('heading', { name: 'Mira' })
-    fireEvent.click(screen.getByRole('button', { name: /^edit$/i }))
+    const navigation = screen.getByRole('navigation', {
+      name: 'Character detail navigation',
+    })
+    fireEvent.click(within(navigation).getByRole('button', { name: /^edit$/i }))
     fireEvent.change(screen.getByLabelText('Name'), {
       target: { value: 'Header Save' },
     })
-    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+    fireEvent.click(within(navigation).getByRole('button', { name: /^save$/i }))
 
     await waitFor(() => {
       expect(services.updateCharacter).toHaveBeenCalledWith(

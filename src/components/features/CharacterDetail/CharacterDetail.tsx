@@ -1,7 +1,10 @@
-import { useId } from 'react'
+import { useId, type ReactNode } from 'react'
+import { Edit3, Save } from 'lucide-react'
 
 import { ManagementTopBar } from '@/components/features/shared/ManagementTopBar'
+import { Button } from '@/components/ui/Button'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
+import { IconButton } from '@/components/ui/IconButton'
 import { commonCopy, storyDetailCopy } from '@/copy'
 import {
   type CharacterDetailServices,
@@ -35,6 +38,7 @@ export function CharacterDetail({
   return (
     <main className="min-h-screen bg-background-app text-text-primary">
       <ManagementTopBar
+        actions={renderCharacterDetailTopBarActions(characterDetail)}
         label={storyDetailCopy.characterDetail.navigationLabel}
         onBack={() => onBackToStory(storyId)}
         previousLabel={storyDetailCopy.characterDetail.backToStory}
@@ -94,5 +98,46 @@ export function CharacterDetail({
         />
       ) : null}
     </main>
+  )
+}
+
+function renderCharacterDetailTopBarActions(
+  characterDetail: ReturnType<typeof useCharacterDetail>,
+): ReactNode {
+  if (characterDetail.status !== 'ready' || !characterDetail.character) {
+    return null
+  }
+
+  if (!characterDetail.isEditing) {
+    return (
+      <IconButton
+        label={commonCopy.actions.edit}
+        onClick={characterDetail.beginEdit}
+        variant="ghost"
+      >
+        <Edit3 aria-hidden="true" size={18} />
+      </IconButton>
+    )
+  }
+
+  return (
+    <>
+      <Button onClick={characterDetail.requestCancelEdit}>
+        {commonCopy.actions.cancel}
+      </Button>
+      <Button
+        disabled={
+          characterDetail.draft.name.trim().length === 0 ||
+          characterDetail.isSaving
+        }
+        onClick={() => void characterDetail.saveCharacter()}
+        variant="primary"
+      >
+        <Save aria-hidden="true" size={18} />
+        {characterDetail.isSaving
+          ? commonCopy.actions.saving
+          : commonCopy.actions.save}
+      </Button>
+    </>
   )
 }

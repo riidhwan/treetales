@@ -1,8 +1,10 @@
 import { ChevronLeft } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
 
 interface Props {
+  readonly actions?: ReactNode
   readonly label: string
   readonly maxWidthClassName?: string
   readonly onBack: () => void
@@ -10,6 +12,7 @@ interface Props {
 }
 
 export function ManagementTopBar({
+  actions,
   label,
   maxWidthClassName = 'max-w-3xl',
   onBack,
@@ -32,6 +35,7 @@ export function ManagementTopBar({
           <ChevronLeft aria-hidden="true" size={22} />
           {previousLabel}
         </button>
+        {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
       </nav>
     </header>
   )
