@@ -1,4 +1,4 @@
-import { Edit3, Save, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 
 import { CharacterDetails } from '@/components/features/StoryDetail/StoryDetail/StoryDetailContent/CharacterSection/CharacterDetails'
 import { CharacterForm } from '@/components/features/StoryDetail/StoryDetail/StoryDetailContent/CharacterSection/CharacterForm'
@@ -63,7 +63,7 @@ export function CharacterDetailContent({
         <p className="text-sm font-semibold text-action-primary">
           {story?.title ?? commonCopy.actions.story}
         </p>
-        <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="mt-2">
           <div className="min-w-0">
             <h1
               className="truncate text-4xl font-bold leading-tight text-text-primary"
@@ -72,33 +72,6 @@ export function CharacterDetailContent({
             >
               {character.name}
             </h1>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {characterDetail.isEditing ? (
-              <>
-                <Button onClick={characterDetail.requestCancelEdit}>
-                  {commonCopy.actions.cancel}
-                </Button>
-                <Button
-                  disabled={
-                    characterDetail.draft.name.trim().length === 0 ||
-                    characterDetail.isSaving
-                  }
-                  onClick={() => void characterDetail.saveCharacter()}
-                  variant="primary"
-                >
-                  <Save aria-hidden="true" size={18} />
-                  {characterDetail.isSaving
-                    ? commonCopy.actions.saving
-                    : commonCopy.actions.save}
-                </Button>
-              </>
-            ) : (
-              <Button onClick={characterDetail.beginEdit}>
-                <Edit3 aria-hidden="true" size={18} />
-                {commonCopy.actions.edit}
-              </Button>
-            )}
           </div>
         </div>
       </header>
