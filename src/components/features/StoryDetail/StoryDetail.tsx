@@ -45,7 +45,6 @@ export function StoryDetail({
     status,
     story,
   } = useStoryDetail({ onDeleted, services, storyId })
-  const characterTitleId = useId()
   const storyDeleteTitleId = useId()
   const [isStoryDeleteDialogOpen, setIsStoryDeleteDialogOpen] = useState(false)
   const characterDialog = useStoryCharacters({
@@ -71,7 +70,6 @@ export function StoryDetail({
 
         <StoryDetailContent
           characterDialog={characterDialog}
-          characterTitleId={characterTitleId}
           errorMessage={errorMessage}
           isDeleting={isDeleting}
           onEditStory={onEditStory}

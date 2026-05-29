@@ -16,7 +16,6 @@ export const storyDetailCopy = {
   },
   character: {
     addProperty: 'Add Property',
-    closeDialog: 'Close character dialog',
     customProperties: 'Custom properties',
     deleteDialog: {
       message: (characterName: string) =>

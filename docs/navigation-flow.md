@@ -15,6 +15,9 @@ This document lists the current application URLs and the visible controls that c
 | `/stories/$storyId/chapters/$chapterId/children/new` | Branch Creator | `src/routes/stories.$storyId.chapters.$chapterId.children.new.tsx` |
 | `/stories/$storyId/chapters/$chapterId/edit` | Chapter Editor | `src/routes/stories.$storyId.chapters.$chapterId.edit.tsx` |
 | `/stories/$storyId/chapters/new` | Intro Chapter Creator | `src/routes/stories.$storyId.chapters.new.tsx` |
+| `/stories/$storyId/characters/$characterId` | CharacterDetail | `src/routes/stories.$storyId.characters.$characterId.tsx` |
+| `/stories/$storyId/characters/$characterId_/edit` | CharacterEditor | `src/routes/stories.$storyId.characters.$characterId_.edit.tsx` |
+| `/stories/$storyId/characters/new` | CharacterCreator | `src/routes/stories.$storyId.characters.new.tsx` |
 | `/stories/$storyId/edit` | Story Editor | `src/routes/stories.$storyId.edit.tsx` |
 | `/stories/$storyId/read` | Story Reader | `src/routes/stories.$storyId.read.tsx` |
 
@@ -76,14 +79,8 @@ URL: `/stories/$storyId`
 | {storyDetailCopy.actions.read} | `StoryDetailHeader` | `/stories/$storyId/read` |
 | {commonCopy.actions.edit} | `StoryDetailHeader` | `/stories/$storyId/edit` |
 | {commonCopy.actions.dashboard} | `MissingStoryDetail` | `/` |
-| storyDetailCopy.actions.addCharacter | `CharacterSection` | No route-changing action detected |
-| storyDetailCopy.actions.viewCharacter(character.name) | `CharacterCard` | Calls `onOpen` |
-| {commonCopy.actions.edit} | `CharacterDialog` | Calls `onEdit` |
-| {commonCopy.actions.deleting} / {commonCopy.actions.delete} | `CharacterDialog` | Calls `onDelete` |
-| {commonCopy.actions.cancel} | `CharacterDialog` | Calls `onClose` |
-| {commonCopy.actions.saving} / {commonCopy.actions.save} | `CharacterDialog` | Calls `onSave` |
-| {storyDetailCopy.character.addProperty} | `CharacterForm` | Calls `onAddProperty` |
-| {commonCopy.actions.remove} | `CharacterForm` | Calls `onRemoveProperty` |
+| storyDetailCopy.actions.addCharacter | `CharacterSection` | `/stories/$storyId/characters/new` |
+| storyDetailCopy.actions.viewCharacter(character.name) | `CharacterCard` | `/stories/$storyId/characters/$characterId` |
 | {commonCopy.actions.deleting} / {storyDetailCopy.actions.deleteStory} | `StoryMaintenanceSection` | Calls `onDelete` |
 
 Runtime notes:
@@ -137,6 +134,38 @@ URL: `/stories/$storyId/chapters/new`
 Runtime notes:
 
 - `Create Chapter` creates the Intro Chapter and then opens `/stories/$storyId/read?chapterId=<new chapter id>`.
+
+### CharacterDetail
+
+URL: `/stories/$storyId/characters/$characterId`
+
+| Control label | Component | Destination / behaviour |
+| --- | --- | --- |
+| {commonCopy.actions.deleting} / {storyDetailCopy.actions.deleteCharacter} | `CharacterDetailContent` | No route-changing action detected |
+| {storyDetailCopy.actions.uploadingIllustration} / {storyDetailCopy.actions.importIllustration} | `CharacterIllustrationSection` | Submits the enclosing form |
+| {commonCopy.actions.delete} | `CharacterIllustrationSection` | Calls `requestDeleteIllustration` |
+
+### CharacterEditor
+
+URL: `/stories/$storyId/characters/$characterId_/edit`
+
+| Control label | Component | Destination / behaviour |
+| --- | --- | --- |
+| {commonCopy.actions.cancel} | `CharacterEditor` | `/stories/$storyId/characters/$characterId` |
+| {commonCopy.actions.saving} / {commonCopy.actions.save} | `CharacterEditor` | Calls `saveCharacter` |
+| {storyDetailCopy.character.addProperty} | `CharacterForm` | Calls `onAddProperty` |
+| {commonCopy.actions.remove} | `CharacterForm` | Calls `onRemoveProperty` |
+
+### CharacterCreator
+
+URL: `/stories/$storyId/characters/new`
+
+| Control label | Component | Destination / behaviour |
+| --- | --- | --- |
+| {commonCopy.actions.cancel} | `CharacterCreator` | `/stories/$storyId` |
+| {commonCopy.actions.saving} / {commonCopy.actions.save} | `CharacterCreator` | Calls `saveCharacter` |
+| {storyDetailCopy.character.addProperty} | `CharacterForm` | Calls `onAddProperty` |
+| {commonCopy.actions.remove} | `CharacterForm` | Calls `onRemoveProperty` |
 
 ### Story Editor
 
