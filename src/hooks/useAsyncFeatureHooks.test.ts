@@ -6,7 +6,10 @@ import { useChapterEditor } from '@/hooks/useChapterEditor'
 import { useStoryDashboard } from '@/hooks/useStoryDashboard'
 import { useStoryDetail } from '@/hooks/useStoryDetail'
 import { useStoryEditor } from '@/hooks/useStoryEditor'
-import { useStoryReader } from '@/hooks/useStoryReader'
+import {
+  createStoryReaderPathWithNextChapter,
+  useStoryReader,
+} from '@/hooks/useStoryReader'
 import type {
   Chapter,
   Story,
@@ -453,6 +456,24 @@ describe('async feature hooks', () => {
       pendingParentChapter.resolve(createChapter({ id: 'chapter-parent' }))
       await pendingParentChapter.promise
     })
+
+    const pendingFailure = deferred<Story | undefined>()
+    const failureServices = {
+      createChapter: vi.fn(),
+      getChapterById: vi.fn(),
+      getIntroChapterByStoryId: vi.fn(),
+      getStoryById: vi.fn(() => pendingFailure.promise),
+    }
+    const failureView = renderHook(() =>
+      useChapterCreator({ services: failureServices, storyId: 'story-1' }),
+    )
+
+    failureView.unmount()
+
+    await act(async () => {
+      pendingFailure.reject(new Error('stale failure'))
+      await pendingFailure.promise.catch(() => undefined)
+    })
   })
 
   it('returns undefined from Chapter Creator when the draft cannot be created', async () => {
@@ -523,6 +544,27 @@ describe('async feature hooks', () => {
     await act(async () => {
       pendingChapter.resolve(createChapter())
       await pendingChapter.promise
+    })
+
+    const pendingFailure = deferred<Story | undefined>()
+    const failureServices = {
+      getChapterById: vi.fn(),
+      getStoryById: vi.fn(() => pendingFailure.promise),
+      updateChapter: vi.fn(),
+    }
+    const failureView = renderHook(() =>
+      useChapterEditor({
+        chapterId: 'chapter-1',
+        services: failureServices,
+        storyId: 'story-1',
+      }),
+    )
+
+    failureView.unmount()
+
+    await act(async () => {
+      pendingFailure.reject(new Error('stale failure'))
+      await pendingFailure.promise.catch(() => undefined)
     })
 
     const parentServices = {
@@ -747,6 +789,28 @@ describe('async feature hooks', () => {
       await pendingNextChapters.promise
     })
 
+    const pendingFailure = deferred<Story | undefined>()
+    const failureServices = {
+      getChaptersByStoryId: vi.fn(),
+      getIntroChapterByStoryId: vi.fn(),
+      getNextChapters: vi.fn(),
+      getStoryById: vi.fn(() => pendingFailure.promise),
+    }
+    const failureView = renderHook(() =>
+      useStoryReader({
+        onSelectChapter: vi.fn(),
+        services: failureServices,
+        storyId: 'story-1',
+      }),
+    )
+
+    failureView.unmount()
+
+    await act(async () => {
+      pendingFailure.reject(new Error('stale failure'))
+      await pendingFailure.promise.catch(() => undefined)
+    })
+
     const sameStoryNext = createChapter({
       id: 'chapter-next',
       parentChapterId: 'chapter-1',
@@ -870,6 +934,29 @@ describe('async feature hooks', () => {
 
     expect(onSelectChapter).toHaveBeenCalledTimes(2)
     expect(onSelectChapter).toHaveBeenLastCalledWith('chapter-next')
+  })
+
+  it('anchors Story Reader next selection to the current chapter when the path has not caught up', () => {
+    const currentChapter = createChapter({ id: 'chapter-current' })
+    const nextChapter = createChapter({
+      id: 'chapter-next',
+      parentChapterId: currentChapter.id,
+    })
+
+    expect(
+      createStoryReaderPathWithNextChapter({
+        currentChapter,
+        currentPath: [],
+        nextChapter,
+      }),
+    ).toEqual([currentChapter, nextChapter])
+    expect(
+      createStoryReaderPathWithNextChapter({
+        currentChapter,
+        currentPath: [currentChapter, nextChapter],
+        nextChapter,
+      }),
+    ).toEqual([currentChapter, nextChapter])
   })
 
   it('keeps an existing Story Reader path when reselecting an earlier chapter', async () => {

@@ -596,7 +596,7 @@ cleanup.
 
 ### Coverage
 
-`npm run test:coverage` enforces global Vitest thresholds of 99.5% lines, 99.5% statements, 99% functions, and 98.5% branches. Branch-heavy logic should include focused tests for meaningful paths instead of relying on the global total.
+`npm run test:coverage` enforces global Vitest thresholds of 99.5% lines, 99.5% statements, 99.5% functions, and 99.5% branches. Branch-heavy logic should include focused tests for meaningful paths instead of relying on the global total.
 
 Coverage excludes generated code, route files, test-only helpers in `src/test/**`, and static data files. These files are validated through schema, route/component tests, generation workflows, or by the tests that use the helpers, and counting them would make the coverage signal noisier. Do not exclude low-coverage files only to raise totals when they contain real behavior; add focused tests or document why the file is a thin runtime wrapper.
 

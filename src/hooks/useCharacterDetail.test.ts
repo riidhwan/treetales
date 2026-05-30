@@ -503,6 +503,29 @@ describe('useCharacterDetail', () => {
     expect(revokeObjectUrlMock).toHaveBeenCalledWith('blob:illustration')
   })
 
+  it('clears a selected Character Illustration file without creating a preview', async () => {
+    const services = createServices()
+    const { result } = renderHook(() =>
+      useCharacterDetail({
+        characterId: 'character-1',
+        onDeleted: vi.fn(),
+        services,
+        storyId: 'story-1',
+      }),
+    )
+
+    await waitFor(() => {
+      expect(result.current.status).toBe('ready')
+    })
+
+    act(() => {
+      result.current.setIllustrationFile(undefined)
+    })
+
+    expect(result.current.illustrationFile).toBeUndefined()
+    expect(result.current.illustrationPreviewUrl).toBeUndefined()
+  })
+
   it('keeps pending Character Illustration imports while saving', async () => {
     const pendingImport = deferred<CharacterIllustration>()
     const services = {

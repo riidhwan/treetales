@@ -191,21 +191,11 @@ export function useStoryReader({
 
   function selectNextChapter(nextChapter: Chapter) {
     setVisitedChapters((currentPath) => {
-      const pathWithCurrent =
-        currentChapter &&
-        currentPath.every(
-          (visitedChapter) => visitedChapter.id !== currentChapter.id,
-        )
-          ? [currentChapter]
-          : currentPath
-
-      if (
-        pathWithCurrent[pathWithCurrent.length - 1]?.id === nextChapter.id
-      ) {
-        return pathWithCurrent
-      }
-
-      return [...pathWithCurrent, nextChapter]
+      return createStoryReaderPathWithNextChapter({
+        currentChapter,
+        currentPath,
+        nextChapter,
+      })
     })
     onSelectChapter(nextChapter.id)
   }
@@ -235,4 +225,30 @@ export function useStoryReader({
     selectNextChapter,
     selectParentChapter,
   }
+}
+
+interface CreateStoryReaderPathWithNextChapterOptions {
+  readonly currentChapter?: Chapter
+  readonly currentPath: Chapter[]
+  readonly nextChapter: Chapter
+}
+
+export function createStoryReaderPathWithNextChapter({
+  currentChapter,
+  currentPath,
+  nextChapter,
+}: CreateStoryReaderPathWithNextChapterOptions): Chapter[] {
+  const pathWithCurrent =
+    currentChapter &&
+    currentPath.every(
+      (visitedChapter) => visitedChapter.id !== currentChapter.id,
+    )
+      ? [currentChapter]
+      : currentPath
+
+  if (pathWithCurrent[pathWithCurrent.length - 1]?.id === nextChapter.id) {
+    return pathWithCurrent
+  }
+
+  return [...pathWithCurrent, nextChapter]
 }
