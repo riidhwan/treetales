@@ -48,4 +48,25 @@ describe('ChapterPromptBuilderControl', () => {
       'Start on the road at dawn.',
     )
   })
+
+  it('closes the prompt builder dialog', () => {
+    render(
+      <ChapterPromptBuilderControl
+        chapterTitle="First Light"
+        draftContent=""
+        templateKind="intro"
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Writing Assist' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Prompt Builder' }))
+
+    expect(screen.getByRole('dialog', { name: 'Prompt Builder' })).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close Prompt Builder' }))
+
+    expect(
+      screen.queryByRole('dialog', { name: 'Prompt Builder' }),
+    ).toBeNull()
+  })
 })
