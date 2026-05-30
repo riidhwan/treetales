@@ -323,6 +323,19 @@ describe('CharacterDetail', () => {
     expect(screen.getByText('Story')).toBeTruthy()
   })
 
+  it('shows inline ready-state character detail errors', () => {
+    render(
+      <CharacterDetailContent
+        characterDetail={createCharacterDetailView({
+          errorMessage: 'Delete failed.',
+        })}
+        titleId="character-title"
+      />,
+    )
+
+    expect(screen.getByRole('alert').textContent).toBe('Delete failed.')
+  })
+
   it('opens the Character Illustration picker from the heading action', () => {
     const clickInput = vi
       .spyOn(HTMLInputElement.prototype, 'click')

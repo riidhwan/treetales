@@ -38,10 +38,7 @@ export function useReaderAppearance(): ReaderAppearanceControls {
   )
 
   const selectedFontFamily = useMemo(
-    () =>
-      READER_FONT_OPTIONS.find(
-        (fontOption) => fontOption.id === readerAppearance.fontId,
-      )?.cssFamily ?? READER_FONT_OPTIONS[0].cssFamily,
+    () => getReaderFontFamily(readerAppearance.fontId),
     [readerAppearance.fontId],
   )
 
@@ -162,6 +159,13 @@ function parseReaderFontId(value: unknown): ReaderFontId | undefined {
   return READER_FONT_OPTIONS.some((fontOption) => fontOption.id === value)
     ? (value as ReaderFontId)
     : undefined
+}
+
+export function getReaderFontFamily(fontId: string): string {
+  return (
+    READER_FONT_OPTIONS.find((fontOption) => fontOption.id === fontId)
+      ?.cssFamily ?? READER_FONT_OPTIONS[0].cssFamily
+  )
 }
 
 function parseFontSize(value: unknown): number | undefined {

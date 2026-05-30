@@ -6,7 +6,10 @@ import {
   MAX_READER_FONT_SIZE_PT,
   MIN_READER_FONT_SIZE_PT,
 } from '@/config'
-import { useReaderAppearance } from '@/hooks/useReaderAppearance'
+import {
+  getReaderFontFamily,
+  useReaderAppearance,
+} from '@/hooks/useReaderAppearance'
 
 describe('useReaderAppearance', () => {
   afterEach(() => {
@@ -157,5 +160,9 @@ describe('useReaderAppearance', () => {
       fontId: 'cartisse',
       fontSizePt: 15,
     })
+  })
+
+  it('falls back to the default font family for an unknown font id', () => {
+    expect(getReaderFontFamily('missing-font')).toBe('Readerly')
   })
 })
