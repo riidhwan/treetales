@@ -699,7 +699,57 @@ describe('story reader route', () => {
 
 ### E2E Tests
 
-Live in `e2e/`, run with `npm run test:e2e`. Use Playwright + Chromium only. Keep E2E tests focused on user-observable browser behavior that cannot be proven as clearly or cheaply with unit/component tests.
+Live in `e2e/`, run with `npm run test:e2e`. Use `playwright-bdd`
+feature files and step definitions on top of Playwright + Chromium only. Keep
+E2E tests focused on user-observable browser behavior that cannot be proven as
+clearly or cheaply with unit/component tests.
+
+`npm run test:e2e` is the single public E2E command. It generates BDD-backed
+Playwright tests before running Playwright, so contributors do not need a
+separate BDD command for routine verification. Commit feature files, step
+definitions, and small support helpers; do not commit generated Playwright
+specs.
+
+Recommended BDD layout:
+
+```text
+e2e/
+├── features/
+│   ├── document-mode.feature
+│   └── system-mode.feature
+├── steps/
+│   ├── document-mode.steps.ts
+│   └── system-mode.steps.ts
+└── support/
+    └── app.ts
+```
+
+Organize feature files by TreeTales experience mode rather than by the current
+test implementation file. Keep step definitions local to the owning experience
+mode at first. Add shared helpers under `e2e/support/` only after setup repeats
+across modes.
+
+Feature files should use the glossary in `CONTEXT.md`, such as Story, Chapter,
+Chapter Document, Reader Appearance, Library Mode, Document Mode, Management
+Mode, and System Mode. They may use precise UX contract terms when those terms
+are the clearest acceptance criteria, such as "inner scroll container" or
+"inside the viewport". Keep selectors, route regexes, `localStorage` keys, CSS
+property names, generated URL parsing, and browser event internals inside step
+definitions or support helpers.
+
+Good feature-step language:
+
+```gherkin
+Then the Chapter Document has no inner scroll container
+And typing near the bottom keeps my writing position stable
+```
+
+Avoid feature-step language that exposes implementation details directly:
+
+```gherkin
+Then section "Chapter document" has CSS overflow-y "hidden"
+And window.scrollY stays unchanged
+```
 
 For browser-controlled platform UI such as PWA installation, keep assertions
 indirect and app-owned: assert TreeTales captures and calls
@@ -733,6 +783,9 @@ Best practices:
 - Scope screenshot assertions to the smallest meaningful element or region.
 - Keep visual tolerances explicit and small when asserting geometry.
 - Reuse helpers only after the same setup appears in multiple specs.
+- Keep Gherkin scenarios focused on one acceptance or regression invariant.
+- Put browser setup, selectors, storage details, and low-level assertions in
+  step definitions rather than in feature text.
 
 Avoid:
 
@@ -743,6 +796,8 @@ Avoid:
 - Snapshot or screenshot updates without reviewing the rendered diff.
 - Full-page screenshots when a component or region screenshot would protect the invariant better.
 - Adding browser projects beyond Chromium unless the task explicitly expands browser support.
+- Building a broad global step catalog before multiple feature files need the
+  same phrase or helper.
 
 Standard setup:
 
