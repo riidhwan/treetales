@@ -10,6 +10,7 @@ export default tseslint.config(
     ignores: [
       'coverage/**',
       'dist/**',
+      '.features-gen/**',
       'node_modules/**',
       'src/routeTree.gen.ts',
     ],

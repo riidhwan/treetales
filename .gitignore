@@ -6,6 +6,7 @@ coverage
 playwright-report
 reports
 test-results
+**/.features-gen/**/*.spec.*
 *.local
 .env
 .nitro
