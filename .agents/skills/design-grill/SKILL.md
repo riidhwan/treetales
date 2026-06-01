@@ -9,8 +9,16 @@ Use this skill when work involves UI/UX, visual design, product surface
 language, interaction patterns, design implementation rules, responsive
 behavior, content voice, or style-guide evolution.
 
-The goal is not to make every UI task slower. The goal is to prevent unstated
-design assumptions from becoming product rules by accident.
+The goal is to prevent unstated design assumptions from becoming product
+rules by accident. When a design plan is still forming, relentlessly interview
+the user until the plan is explicit enough that later implementation work
+does not proceed by mere assumption.
+
+This skill is an interview and design-contract gate first. Loading this skill
+does not imply permission to edit product UI, docs, or tests. Implementation
+may start only after the user has explicitly accepted the compact
+implementation contract produced by this workflow, or after the user has
+explicitly said to implement a previously settled contract.
 
 ## Core Workflow
 
@@ -34,18 +42,33 @@ design assumptions from becoming product rules by accident.
    implementation document. Use
    [IMPLEMENTATION-FORMAT.md](./IMPLEMENTATION-FORMAT.md) when creating it from
    scratch.
-6. For UI work covered by the owned style guide, use the guide as the basis and
-   proceed.
-7. For UI work not covered by the owned style guide, interview the user before
+6. Build an evidence map before interviewing:
+   - Answer every question that can be answered by repository instructions,
+     design docs, product docs, architecture docs, existing routes/components,
+     tests, or current UI implementation.
+   - Cite the local source of each answered point in your working notes or
+     response when it affects the recommendation.
+   - Do not ask the user to decide facts the codebase or docs already settle.
+7. For UI work covered by the owned style guide, still interview before
+   implementation. Use the guide to answer settled facts and to form
+   recommendations, then ask the user to confirm the remaining judgment calls.
+8. For UI work not covered by the owned style guide, interview the user before
    inventing a new reusable visual or interaction rule.
-8. After each settled reusable design decision, update
+9. After each settled reusable design decision, update
    `docs/design/style-guide.md` immediately. Do not batch style-guide updates.
-9. After each settled implementation contract for tokens, primitives, component
+10. After each settled implementation contract for tokens, primitives, component
    boundaries, or verification, update `docs/design/implementation.md`
    immediately.
-10. Offer a design decision record only when the decision crosses the threshold
+11. Offer a design decision record only when the decision crosses the threshold
    below. Use [DESIGN-DECISION-FORMAT.md](./DESIGN-DECISION-FORMAT.md).
-11. After completing an implementation that used this skill, summarize the
+12. Before implementation, restate the agreed plan as a compact implementation
+    contract only after the full one-topic-at-a-time interview is complete:
+    owned workflow, surface hierarchy, visual treatment, interaction states,
+    responsive behavior, copy/content rules, reusable components or primitives,
+    docs to update, and verification. Mark every item as sourced from docs/code
+    or explicitly user-approved. Ask the user to approve this contract before
+    editing product files.
+13. After completing an implementation that used this skill, summarize the
     design impact in the final response. Include which existing components or
     primitives were used, whether any new component or generic primitive was
     created, which surface/pattern rules were applied, and whether any design
@@ -54,7 +77,76 @@ design assumptions from becoming product rules by accident.
 ## Asking Rules
 
 Ask one question at a time and wait for the answer before continuing. Every
-question must include your recommended answer and the reasoning for it.
+question must include your recommended answer and the reasoning for it. The
+recommended answer should be concrete enough that the user can accept it as the
+decision, not just a vague direction.
+
+The interview must be a real sequential interview, not a bundled plan approval.
+Do not present a multi-bullet list of intended changes and ask the user to
+approve all of it. Do not compress unresolved topics into a single "approve
+this contract?" question. The contract approval question happens only after the
+user has answered each implementation-relevant topic below, or after a topic has
+been explicitly marked not applicable with evidence.
+
+Each interview question must use
+[INTERVIEW-QUESTION-FORMAT.md](./INTERVIEW-QUESTION-FORMAT.md).
+
+After the user answers, briefly record the decision for that topic and ask the
+next unresolved topic question. If the user's answer changes the direction,
+adapt later questions to that answer instead of returning to the original plan.
+If the user says "agree", "approved", or similar, treat that as approval only
+for the current question unless the user explicitly says to approve the whole
+remaining interview.
+
+Do not implement while interviewing. Reading files, searching code, and
+inspecting current behavior are allowed because they improve the interview.
+Editing application code, design docs, tests, generated files, screenshots, or
+visual assets is not allowed until the user approves the final implementation
+contract. If the user asks for a design-grill pass and an implementation in the
+same message, run the interview first and stop at the approval question.
+
+Before asking any question:
+
+- Search or read the relevant docs and code if they can plausibly answer it.
+- Convert discovered facts into recommendations rather than asking the user to
+  restate them.
+- Ask only for unresolved judgment calls, trade-offs, missing product intent,
+  or deliberate exceptions.
+- If the docs/code conflict, describe the conflict, recommend which authority
+  should win, and ask for confirmation.
+
+Keep interviewing until the plan covers all implementation-relevant aspects.
+Do not stop after the first answer if later implementation would still require
+guessing. When several aspects are tightly coupled, one question may cover them
+only if it names those aspects explicitly, explains why they are coupled, and
+the user's answer can settle all of them without ambiguity.
+
+The interview must resolve, or explicitly mark as not applicable:
+
+- target user workflow and success criteria
+- primary object, task, or information hierarchy
+- route/page/region ownership and navigation implications
+- reusable pattern versus one-off treatment
+- visual surface, density, spacing, radius, elevation, and border treatment
+- typography roles and content hierarchy
+- semantic color and status treatment
+- iconography and control conventions
+- input, hover, focus, active, selected, disabled, loading, empty, error,
+  success, destructive, and permission-denied states
+- responsive behavior across mobile, tablet, desktop, and unusually narrow or
+  wide containers
+- accessibility expectations beyond defaults, including keyboard flow, focus
+  visibility, labels, contrast, and reduced-motion behavior when relevant
+- content voice, labels, helper text, and destructive/irreversible copy
+- data dependencies, latency expectations, optimistic behavior, and failure
+  recovery when they affect the UI
+- component or primitive reuse, extension, or creation
+- documentation updates and verification steps
+
+When an answer closes several related concerns, summarize the resolved items
+and continue with the next unresolved concern as a new question. Do not jump
+from that summary straight to the final implementation contract while any item
+in the interview checklist remains unresolved.
 
 When the user asks broadly how to handle styling, layout, UI treatment, or
 interaction design, include the concrete recommended treatment by default. Do
@@ -63,7 +155,8 @@ responsive behavior, and notable states. Keep the answer scoped to the current
 decision and avoid recording route-specific implementation details in design
 docs unless they establish a reusable rule.
 
-Ask before proceeding when the work introduces or changes:
+Ask before proceeding with the design contract when the work introduces or
+changes:
 
 - a visual pattern not covered by `docs/design/style-guide.md`
 - an interaction pattern, workflow structure, or navigation behavior
@@ -73,7 +166,9 @@ Ask before proceeding when the work introduces or changes:
 - a deliberate exception to the style guide
 - a recommendation to replace an existing guide rule with a better approach
 
-Proceed without asking when the work is:
+After the interview gate is complete and the compact contract is approved, the
+agent may proceed without asking additional design questions when the remaining
+work is:
 
 - direct application of an existing documented rule
 - a bug fix restoring documented behavior
@@ -81,6 +176,11 @@ Proceed without asking when the work is:
 
 If a question can be answered by reading docs or code, read first and ask only
 for the unresolved design choice.
+
+Never let implementation begin with placeholders such as "use the usual
+layout," "standard states," "make it consistent," or "handle mobile normally"
+unless those terms are backed by specific local docs/code references or have
+just been defined in the interview.
 
 ## Challenge Behavior
 
