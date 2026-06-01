@@ -37,7 +37,7 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.36.3",
+    "@cloudflare/vite-plugin": "^1.39.1",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/typography": "^0.5.16",
@@ -59,7 +59,11 @@
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.0",
     "vitest": "^4.1.5",
-    "wrangler": "^4.90.0"
+    "wrangler": "^4.96.0"
+  },
+  "overrides": {
+    "uuid": "11.1.1",
+    "ws": "8.20.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
