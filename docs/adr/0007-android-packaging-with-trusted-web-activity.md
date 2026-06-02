@@ -1,5 +1,7 @@
 # Android packaging with Trusted Web Activity
 
+Status: superseded by ADR-0010
+
 TreeTales packages its Android app as a Bubblewrap-generated Trusted Web
 Activity around the production PWA at `https://treetales.ramdhani.me/`. We
 choose this over Capacitor, PWABuilder-only generation, or a custom Android

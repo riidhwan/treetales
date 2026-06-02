@@ -1,17 +1,29 @@
 # Android Packaging
 
-TreeTales packages Android releases as a Trusted Web Activity (TWA) around the
-production PWA at `https://treetales.ramdhani.me/`. The Android package id is
-`me.ramdhani.treetales`, and the launcher label is `TreeTales`.
+TreeTales is migrating Android releases from a Trusted Web Activity (TWA) to a
+bundled Capacitor app. The Android package id remains
+`me.ramdhani.treetales`, and the launcher label remains `TreeTales`.
 
-The TWA packaging decision is recorded in
-`docs/adr/0007-android-packaging-with-trusted-web-activity.md`.
+The Capacitor migration decision is recorded in
+`docs/adr/0010-android-packaging-with-bundled-capacitor.md`. The first
+Capacitor milestone is a compatibility shell only: bundle the existing web app,
+keep the browser PWA deployment alive, and defer native gallery picking and
+native file storage migration to later slices.
+
+The migration should replace `android-twa/` rather than keep parallel TWA and
+Capacitor Android projects. TreeTales should have one Android package source of
+truth for `me.ramdhani.treetales` at a time.
+
+The packaging migration parent is tracked in GitHub issue #247. Native gallery
+picking (#249) and native app-private Character Illustration file storage (#250)
+are standalone follow-up issues; they are not required for the packaging
+migration parent to close.
 
 ## Ownership
 
 - `public/manifest.json` owns web and PWA install metadata.
-- `android-twa/twa-manifest.json` owns Android wrapper metadata after the
-  generated project is added.
+- The Capacitor Android project owns native Android wrapper metadata once the
+  migration replaces `android-twa/`.
 - Shared app name, icon, and theme color must be kept aligned manually until a
   manifest generation step exists.
 - Android release signing keys never belong in git.
@@ -57,40 +69,11 @@ base64 -w 0 /tmp/treetales-release.keystore
 Set the secrets through the GitHub repository settings UI. Do not paste the
 base64 keystore value into an issue, pull request, commit, or chat transcript.
 
-## Digital Asset Links
-
-Extract the release-key SHA-256 fingerprint from the same keystore used for CI
-signing:
-
-```sh
-keytool -list -v \
-  -keystore /tmp/treetales-release.keystore \
-  -alias treetales-release
-```
-
-The fingerprint must be published from:
-
-```text
-https://treetales.ramdhani.me/.well-known/assetlinks.json
-```
-
-The follow-up Android package slice adds
-`public/.well-known/assetlinks.json` with the real release-key fingerprint. Its
-entry must bind the production origin to package `me.ramdhani.treetales`.
-
-If a signed APK opens with visible browser Custom Tab UI instead of the
-full-screen TWA surface, first check that:
-
-- the deployed `assetlinks.json` contains the release-key SHA-256 fingerprint,
-- the package name is exactly `me.ramdhani.treetales`,
-- the APK was signed with the matching release keystore, and
-- the app opens `https://treetales.ramdhani.me/`.
-
 ## Workflow behavior
 
 The first Android workflow is manual only. It should run through
-`workflow_dispatch`, read committed Android version metadata from the generated
-project, and upload both signed artifacts:
+`workflow_dispatch`, read committed Android version metadata from the Capacitor
+Android project, and upload both signed artifacts:
 
 - signed APK for direct install and smoke testing,
 - signed AAB for future Google Play upload.
@@ -104,9 +87,9 @@ npm run test:coverage
 npm run build
 ```
 
-It should build Android artifacts from the committed generated Gradle project
-where possible. Bubblewrap should be pinned for project generation and updates;
-CI should not install a floating latest Bubblewrap version.
+It should build Android artifacts from the committed Capacitor Android project
+where possible. Capacitor and native plugin versions should be pinned by
+package and lock files; CI should not install floating latest native tooling.
 
 Google Play publishing is out of scope for the first Android workflow.
 
@@ -116,14 +99,20 @@ Before treating a built artifact as releasable:
 
 1. Install the signed APK on an Android device or emulator.
 2. Launch `TreeTales`.
-3. Confirm it opens `https://treetales.ramdhani.me/` in full-screen TWA UI, not
-   visible Custom Tab browser UI.
-4. Confirm the install-choice prompt does not appear inside the APK.
+3. Confirm it opens from packaged app assets without requiring
+   `https://treetales.ramdhani.me/`.
+4. Confirm the mobile PWA install choice does not appear inside the APK.
 5. Confirm the dashboard loads.
-6. Create a Story, add an Intro Chapter, relaunch the app, and confirm the
-   browser-local data persists.
-7. Turn network off, relaunch, and confirm the cached shell can load well
-   enough to reach the app's offline-resilient surface.
+6. Create a Story.
+7. Add an Intro Chapter.
+8. Add a Character.
+9. Import a Character Illustration using the existing web picker.
+10. Relaunch the app and confirm the Story, Chapter, Character, and Character
+    Illustration persist in Android app-local data.
+11. Turn network off, relaunch, and confirm the packaged app shell can still
+    open.
+12. Run normal browser web verification separately so the PWA path is not
+    regressed.
 
 TreeTales does not support cross-device offline sync. The Android package should
-not imply data sync beyond the existing browser-local persistence model.
+not imply data sync beyond the app-local persistence model.
