@@ -10,10 +10,12 @@ served from stale PWA storage. The service worker caches the app shell and
 static assets only; story persistence remains browser-local, with no cross-device
 offline sync.
 
-Android packaging uses a Trusted Web Activity around the production PWA at
-`https://treetales.ramdhani.me/`. The packaging decision is recorded in
-`docs/adr/0007-android-packaging-with-trusted-web-activity.md`, and operational
-setup lives in `docs/android-packaging.md`.
+Android packaging is migrating from a Trusted Web Activity to a bundled
+Capacitor app. The web/PWA deployment remains a separate browser runtime, while
+the Android package should load packaged web assets and introduce native
+capabilities only through explicit platform adapters. The migration decision is
+recorded in `docs/adr/0010-android-packaging-with-bundled-capacitor.md`, and
+operational setup lives in `docs/android-packaging.md`.
 
 Bundled reader fonts are static app assets. Third-party font notices and license
 references must be kept with the bundled assets or in project documentation when
@@ -84,6 +86,26 @@ Section still belong in `src/copy/`.
 Starter catalog definitions are bundled code, so strict TypeScript types and
 focused service tests are the validation boundary. Add runtime validation only
 if starters become external or user-provided data.
+
+## Platform Capabilities
+
+Platform Capabilities is the boundary for runtime-specific behavior that differs
+between the browser/PWA runtime and the bundled Capacitor Android runtime. It
+should identify the active runtime, expose whether PWA-only behavior applies,
+and provide platform service adapters without exposing Capacitor APIs to routes
+or feature components.
+
+The compatibility-shell milestone should use Platform Capabilities to decide
+whether TreeTales should show the mobile PWA install choice and whether it
+should register the service worker. Future native gallery picking and
+app-private file storage should plug into this boundary through narrow
+interfaces, while Story, Chapter, Character, and Character Illustration domain
+logic stays in the existing service and repository layers.
+
+In the bundled Capacitor Android runtime, TreeTales should skip the mobile PWA
+install choice entirely and should not register the service worker. Those
+behaviors are browser/PWA concerns; the Android package already provides the
+installed app shell from bundled assets.
 
 ## `src/config.ts` — Tuneable Constants
 
